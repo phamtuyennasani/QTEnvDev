@@ -1,7 +1,7 @@
 import { setupMcpIpc } from '@/util/MCP'
 import IPC from '@/util/IPC'
 import { MessageError, MessageSuccess, MessageWarning } from '@/util/Element'
-import { FlyEnvHelperSetup } from '@/components/FlyEnvHelper/setup'
+import { QTEnvDevHelperSetup } from '@/components/QTEnvDevHelper/setup'
 import HelperStore from '@/store/helper'
 import { nativeTheme } from '@/util/NodeFn'
 import { isEqual } from 'lodash-es'
@@ -85,7 +85,7 @@ class GlobalIPCOn {
       MessageError(message)
     })
 
-    IPC.on('APP-FlyEnv-Helper-Notice').then((key: string, res: any) => {
+    IPC.on('APP-QTEnvDev-Helper-Notice').then((key: string, res: any) => {
       // 用户取消不应立刻触发第二个安装提示；UAC、未选择、管理员模式不显示 Helper 修复通知。
       if (res?.reason === 'elevation_uac_cancelled' || res?.reason === 'elevation_cancelled') return
       if (
@@ -103,16 +103,16 @@ class GlobalIPCOn {
         if (
           res?.status === 'installFaild' &&
           this.inited &&
-          !FlyEnvHelperSetup.show &&
-          !FlyEnvHelperSetup.loading &&
+          !QTEnvDevHelperSetup.show &&
+          !QTEnvDevHelperSetup.loading &&
           !HelperStore.isInstallResultPending()
         ) {
           MessageError(res?.msg)
           HelperStore.showInstallFailDialog(res?.reason, res?.stderr || res?.msg)
         } else if (
           (!res?.status || res.status === 'needInstall') &&
-          !FlyEnvHelperSetup.show &&
-          !FlyEnvHelperSetup.loading &&
+          !QTEnvDevHelperSetup.show &&
+          !QTEnvDevHelperSetup.loading &&
           !HelperStore.isInstallResultPending() &&
           HelperStore.shouldShowNeedInstallDialog(res?.reason)
         ) {

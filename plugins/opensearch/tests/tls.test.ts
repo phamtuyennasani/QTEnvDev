@@ -20,7 +20,7 @@ ca.publicKey = keys.publicKey
 ca.serialNumber = '01'
 ca.validity.notBefore = new Date(Date.now() - 60_000)
 ca.validity.notAfter = new Date(Date.now() + 86_400_000)
-ca.setSubject([{ name: 'commonName', value: 'FlyEnv test CA' }])
+ca.setSubject([{ name: 'commonName', value: 'QTEnvDev test CA' }])
 ca.setIssuer(ca.subject.attributes)
 ca.setExtensions([
   { name: 'basicConstraints', cA: true },
@@ -55,7 +55,7 @@ test('reuses a CA to issue distinct node/admin identities with PKCS8, SAN and tr
 test('keeps unrelated config and existing identities, replaces only TLS keys and enables security', () => {
   const original =
     '# my cluster\ncluster.name: custom\nplugins.security.disabled: true\nplugins.security.nodes_dn:\n  - "CN=existing-node"\nplugins.security.authcz.admin_dn: ["CN=existing-admin"]\nplugins.security.ssl.http.pemcert_filepath: "old.pem"\n# retained comment\nhttp.port: 19200\n'
-  const updated = localTLSConfig(original, 'flyenv-tls/test', 'CN=new-node', 'CN=new-admin')
+  const updated = localTLSConfig(original, 'qtenvdev-tls/test', 'CN=new-node', 'CN=new-admin')
   const config = YAML.parse(updated)
   assert.equal(config['cluster.name'], 'custom')
   assert.equal(config['http.port'], 19200)
@@ -65,7 +65,7 @@ test('keeps unrelated config and existing identities, replaces only TLS keys and
     'CN=existing-admin',
     'CN=new-admin'
   ])
-  assert.equal(config['plugins.security.ssl.http.pemcert_filepath'], 'flyenv-tls/test/node.pem')
+  assert.equal(config['plugins.security.ssl.http.pemcert_filepath'], 'qtenvdev-tls/test/node.pem')
   assert.equal(config['plugins.security.allow_default_init_securityindex'], undefined)
   assert.match(updated, /# retained comment/)
   assert.equal((updated.match(/^plugins.security.ssl.http.pemcert_filepath:/gm) ?? []).length, 1)
@@ -77,7 +77,7 @@ test('keeps unrelated config and existing identities, replaces only TLS keys and
 })
 
 test('configuration snapshots, duplicate guard, backup, failure/retry and CA private key preservation', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'FlyEnv OpenSearch TLS '))
+  const root = await mkdtemp(join(tmpdir(), 'QTEnvDev OpenSearch TLS '))
   try {
     const conf = join(root, 'config')
     await mkdir(conf)
@@ -120,7 +120,7 @@ test('configuration snapshots, duplicate guard, backup, failure/retry and CA pri
     assert.equal(await readFile(file, 'utf8'), successful)
     await configureLocalTLS(root, input)
   } finally {
-    assert.ok(root.startsWith(join(tmpdir(), 'FlyEnv OpenSearch TLS ')))
+    assert.ok(root.startsWith(join(tmpdir(), 'QTEnvDev OpenSearch TLS ')))
     await rm(root, { recursive: true, force: true })
   }
 })

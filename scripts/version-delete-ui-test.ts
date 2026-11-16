@@ -8,7 +8,7 @@ import { compileScript, compileStyle, parse } from '@vue/compiler-sfc'
 import electron from 'electron'
 
 const root = resolve(import.meta.dirname, '..')
-const temporary = await mkdtemp(join(tmpdir(), 'flyenv-version-delete-ui-'))
+const temporary = await mkdtemp(join(tmpdir(), 'qtenvdev-version-delete-ui-'))
 try {
   const { descriptor } = parse(
     await readFile(join(root, 'src/render/components/ServiceManager/delDialog.vue'), 'utf8')
@@ -44,7 +44,7 @@ fixture.mount = async (managed = true, locale = 'en') => {
   fixture.deleted = []
   fixture.done = 0
   app = createApp(Dialog, {
-    item: { typeFlag: 'php', version: '8.3', path: 'C:\\\\FlyEnv\\\\app\\\\php-8.3', bin: 'C:\\\\FlyEnv\\\\app\\\\php-8.3\\\\php-cgi.exe' },
+    item: { typeFlag: 'php', version: '8.3', path: 'C:\\\\QTEnvDev\\\\app\\\\php-8.3', bin: 'C:\\\\QTEnvDev\\\\app\\\\php-8.3\\\\php-cgi.exe' },
     onDone: () => { fixture.done++ }
   }).use(ElementPlus)
   app.mount('#app')
@@ -139,7 +139,7 @@ window.fixtureReady = true`,
           'warning must explain actual directory deletion'
         )
         ensure(
-          dialogs()[1].textContent.includes('C:\\FlyEnv\\app\\php-8.3'),
+          dialogs()[1].textContent.includes('C:\\QTEnvDev\\app\\php-8.3'),
           'actual target path must be shown'
         )
         ensure(confirmButton().disabled, 'empty confirmation must be disabled')
@@ -179,7 +179,7 @@ window.fixtureReady = true`,
       await new Promise(resolve => setTimeout(resolve, 450))
       return { checks, deleted: fixture.deleted.length }
     })()`
-  const screenshot = join(tmpdir(), 'flyenv-version-delete-confirmation.png')
+  const screenshot = join(tmpdir(), 'qtenvdev-version-delete-confirmation.png')
   await writeFile(
     join(temporary, 'main.cjs'),
     `const { app, BrowserWindow } = require('electron')

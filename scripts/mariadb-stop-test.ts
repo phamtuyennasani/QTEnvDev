@@ -17,7 +17,7 @@ if (process.platform !== 'win32') {
   process.exit(0)
 }
 
-const root = await mkdtemp(join(tmpdir(), "FlyEnv MariaDB 测试 ' & [path] "))
+const root = await mkdtemp(join(tmpdir(), "QTEnvDev MariaDB 测试 ' & [path] "))
 const previousServer = global.Server
 const previousPidPath = mariadb.pidPath
 const runtime = mariadb as unknown as {
@@ -124,10 +124,10 @@ try {
   console.log(`MariaDB Windows stop regression: ${count + 2} cases passed`)
 
   // Opt in with a local MariaDB binary; initialize and stop only this temporary instance.
-  if (process.env.FLYENV_MARIADB_TEST_BIN) {
+  if (process.env.QTENVDEV_MARIADB_TEST_BIN) {
     runtime.stopWindowsServiceProcessesAfterNativeShutdown = originalStop
     const exec = promisify(execFile)
-    const bin = resolve(process.env.FLYENV_MARIADB_TEST_BIN)
+    const bin = resolve(process.env.QTENVDEV_MARIADB_TEST_BIN)
     const dataDir = join(root, 'isolated data')
     const listener = createServer()
     await new Promise<void>((done, fail) => {

@@ -6,18 +6,18 @@ import { updateShellProfiles } from './shellProfiles'
 
 export function initAllowDir(json: string) {
   return new ForkPromise(async (resolve) => {
-    const jsonFile = join(dirname(global.Server.AppDir!), 'bin/.flyenv.dir')
+    const jsonFile = join(dirname(global.Server.AppDir!), 'bin/.qtenvdev.dir')
     await mkdirp(dirname(jsonFile))
     await writeFile(jsonFile, json)
     resolve(true)
   })
 }
 
-export function initFlyEnvSH() {
+export function initQTEnvDevSH() {
   return new ForkPromise(async (resolve) => {
-    const shfile = join(global.Server.BaseDir!, 'shell/flyenv.sh')
+    const shfile = join(global.Server.BaseDir!, 'shell/qtenvdev.sh')
     await mkdirp(dirname(shfile))
-    await writeFile(shfile, await readFile(join(global.Server.Static!, 'sh/fly-env.sh'), 'utf8'))
+    await writeFile(shfile, await readFile(join(global.Server.Static!, 'sh/qt-env-dev.sh'), 'utf8'))
     const quoted = shfile
       .replace(/\\/g, '\\\\')
       .replace(/"/g, '\\"')
@@ -30,7 +30,7 @@ export function initFlyEnvSH() {
       (content) => {
         // Replace the legacy install-directory integration with the user-owned file.
         content = content.replace(
-          /^(?!\s*#)\s*source\s*"[^"\n]*\/(?:resources|Resources)\/helper\/flyenv\.sh".*$/gm,
+          /^(?!\s*#)\s*source\s*"[^"\n]*\/(?:resources|Resources)\/helper\/qtenvdev\.sh".*$/gm,
           ''
         )
         if (!content.split('\n').includes(source)) content = content.trim() + `\n${source}`

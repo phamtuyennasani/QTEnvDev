@@ -1,4 +1,4 @@
-# FlyEnv 模块深度分析任务 (Final v3 - 功能域驱动版)
+# QTEnvDev 模块深度分析任务 (Final v3 - 功能域驱动版)
 
 > **系统提示词**: 请严格遵循 `docs/deepwiki/SYSTEM_PROMPT_FINAL.md` (Final v3 - 功能域驱动版) 中的全部规范
 >
@@ -10,7 +10,7 @@
 
 在开始分析前，请确认已完整阅读并理解：
 1. `docs/deepwiki/SYSTEM_PROMPT_FINAL.md` - 系统提示词（核心准则）
-2. `AGENTS.md` - FlyEnv 项目架构指南
+2. `AGENTS.md` - QTEnvDev 项目架构指南
 
 ---
 

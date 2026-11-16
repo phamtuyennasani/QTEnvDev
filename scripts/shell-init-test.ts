@@ -23,16 +23,16 @@ const compiled =
     )
     .join('\n')
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
-    .replace(/\bexport\s+/g, '') + '\nthis.initFlyEnvSH = initFlyEnvSH;'
+    .replace(/\bexport\s+/g, '') + '\nthis.initQTEnvDevSH = initQTEnvDevSH;'
 
 async function fixture(macOS: boolean) {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-shell-init-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-shell-init-'))
   const home = join(root, 'home')
   const staticDir = join(root, 'static')
   const baseDir = join(root, 'base')
   await mkdir(home, { recursive: true })
   await mkdir(join(staticDir, 'sh'), { recursive: true })
-  await writeFile(join(staticDir, 'sh/fly-env.sh'), '# test loader\n')
+  await writeFile(join(staticDir, 'sh/qt-env-dev.sh'), '# test loader\n')
   const context = createContext({
     global: {
       Server: {
@@ -57,10 +57,10 @@ async function fixture(macOS: boolean) {
     ForkPromise
   })
   runInContext(compiled, context)
-  return { root, home, init: () => context.initFlyEnvSH() }
+  return { root, home, init: () => context.initQTEnvDevSH() }
 }
 
-const sourceLine = /source "[^"]+shell\/flyenv\.sh"/
+const sourceLine = /source "[^"]+shell\/qtenvdev\.sh"/
 const sourceLines = new RegExp(sourceLine, 'g')
 
 {

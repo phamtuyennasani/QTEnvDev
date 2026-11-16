@@ -14,10 +14,10 @@ test('only exact exterior program defines isolate failures; other shaders retain
       () => outer++,
       () => shared++
     )
-  dispatch('#version 300 es\n#define FLYENV_OUTER_ARC_LAYER 1\nvoid main() {}')
+  dispatch('#version 300 es\n#define QTENVDEV_OUTER_ARC_LAYER 1\nvoid main() {}')
   assert.deepEqual([outer, shared], [1, 0])
-  dispatch('#define FLYENV_OUTER_ARC_LAYER_OTHER 1')
-  dispatch('// FLYENV_OUTER_ARC_LAYER')
+  dispatch('#define QTENVDEV_OUTER_ARC_LAYER_OTHER 1')
+  dispatch('// QTENVDEV_OUTER_ARC_LAYER')
   dispatch(null)
   assert.deepEqual([outer, shared], [1, 3])
 })
@@ -27,7 +27,7 @@ test('circuit-field compilation errors disable their own decorative owner', () =
     outer = 0,
     shared = 0
   routeShaderFailure(
-    { getShaderSource: () => '#define FLYENV_CIRCUIT_FIELD_LAYER 1\nvoid main() {}' },
+    { getShaderSource: () => '#define QTENVDEV_CIRCUIT_FIELD_LAYER 1\nvoid main() {}' },
     {},
     {},
     () => outer++,

@@ -7,7 +7,7 @@
     "en": "Manage llama.cpp local inference runtimes and GGUF models.",
     "zh": "管理 llama.cpp 本地推理运行时和 GGUF 模型。"
   },
-  "author": "FlyEnv",
+  "author": "QTEnvDev",
   "module": {
     "typeFlag": "llama-cpp",
     "moduleType": "ai",

@@ -9,7 +9,7 @@
 
 **Architecture:** `plugins/mysql-cluster` 持有所有实例领域状态与 Fork 运行清单，renderer 本地 singleton 通过 `reactiveBind` 暴露，复用 `ModuleInstalledItem` 生命周期。安装候选和下载继续属于内置 mysql 模块；插件 Fork 通过精确配置身份管理多进程，直接使用 mysql2 配置和检查复制。
 
-**Tech Stack:** TypeScript、Vue 3、Element Plus、FlyEnv 插件 API v1、mysql2、Node child_process、node:test/tsx、现有 Vite/esbuild 插件打包器。
+**Tech Stack:** TypeScript、Vue 3、Element Plus、QTEnvDev 插件 API v1、mysql2、Node child_process、node:test/tsx、现有 Vite/esbuild 插件打包器。
 
 **Spec:** [已确认设计](../specs/2026-10-20-mysql-cluster-design.md)
 
@@ -20,7 +20,7 @@
 - 独立实例选择宿主已安装版本；一键复制面向 MySQL 8.0 与 8.4，同组使用完全相同的安装版本，实际能力检查决定能否启用。
 - 主从默认一主一从；GR 默认三节点单主，首版节点数允许 3、5、7、9，固定 XCom。
 - 一键创建仅针对插件新建空节点；无已有数据迁移、混合版本、远程主机、半同步、多主 GR、普通主从自动选主或 Router/Shell 下载管理。
-- 插件领域数据使用 `StorageGetAsync`/`StorageSetAsync`，key 为 `flyenv-plugin-mysql-cluster-v1`；无新增 Pinia、无 `config.setup` 或其他共享配置领域数据。
+- 插件领域数据使用 `StorageGetAsync`/`StorageSetAsync`，key 为 `qtenvdev-plugin-mysql-cluster-v1`；无新增 Pinia、无 `config.setup` 或其他共享配置领域数据。
 - 模块本地 singleton + `reactiveBind`；启停复用公共 ModuleInstalledItem + startExtParam/stopExtParam；插件属性不进入公共服务类型。
 - 长操作必须有 owner、不可变请求、进度、声明的终态、重入锁、通知和清理；code 200 是非终态。
 - Fork 持有真实进程/端口/PID/SQL 状态；停止按完整 defaults-file 身份，不能仅匹配共用 mysqld。
@@ -187,7 +187,7 @@
 **Files:** Create `README.md`、`tests/native.test.ts`（由明确环境变量启用，默认 skip）；Update plugin registry only through normal builder；update plan completion evidence。
 
 **Consumes:** 完整插件及临时隔离 MySQL 可执行程序。
-**Produces:** `dist/plugins/mysql-cluster/mysql-cluster-0.1.0.flyenv-plugin`、相同构建生成的 registry SHA-256，以及真实通过/未验收平台说明。
+**Produces:** `dist/plugins/mysql-cluster/mysql-cluster-0.1.0.qtenvdev-plugin`、相同构建生成的 registry SHA-256，以及真实通过/未验收平台说明。
 
 - [ ] Read failure-boundaries skill again for review；逐项检查新增 throw/reject/return、批量停止/清理、未知结果和附加动作；检查 spec 每节都有实现/证据。
 - [ ] Run all focused tests: `node --import tsx --test plugins/mysql-cluster/tests/*.test.ts`。

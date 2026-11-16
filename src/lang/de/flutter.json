@@ -18,7 +18,7 @@
   "sourcePath": "System-PATH",
   "sourceDefault": "Standard SDK Standort",
   "sourceCustom": "Konfigurierter benutzerdefinierter Pfad",
-  "sourceFlyenv": "FlyEnv verwaltetes SDK",
+  "sourceQTEnvDev": "QTEnvDev verwaltetes SDK",
   "sourceUnknown": "Unbekannt",
   "createProjectTitle": "Flutter Projekt erstellen",
   "create": "Anlegen",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Ein Flutter-Modul, um in eine vorhandene Android/iOS-App einzubetten.",
   "templateSkeletonDesc": "Eine Liste/Detail-Flutter-Anwendung mit Material 3 und Navigation 2.0.",
   "androidSdkNotDetected": "Android SDK nicht erkannt",
-  "androidSdkInstallHint": "FlyEnv installiert das Android SDK nicht automatisch. Installieren Sie das SDK mit Android Studio oder den offiziellen Android-Befehlszeilenwerkzeugen.",
+  "androidSdkInstallHint": "QTEnvDev installiert das Android SDK nicht automatisch. Installieren Sie das SDK mit Android Studio oder den offiziellen Android-Befehlszeilenwerkzeugen.",
   "installAndroidStudio": "Android Studio installieren",
   "androidCommandLineTools": "Android-Befehlszeilenwerkzeuge",
-  "androidSdkAfterInstall": "Kehren Sie nach der SDK-Installation zu FlyEnv zurück, klicken Sie auf Aktualisieren (Refresh) und richten Sie die Umgebung anschließend mit Auto-fix ein."
+  "androidSdkAfterInstall": "Kehren Sie nach der SDK-Installation zu QTEnvDev zurück, klicken Sie auf Aktualisieren (Refresh) und richten Sie die Umgebung anschließend mit Auto-fix ein."
 }

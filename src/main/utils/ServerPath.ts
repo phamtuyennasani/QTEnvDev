@@ -26,7 +26,7 @@ export const setServerDirectoryPermissionDeniedHandler = (
 /**
  * 创建基础目录
  */
-const recoverFlyEnvDataDirectory = (
+const recoverQTEnvDevDataDirectory = (
   dataDirectory: string
 ): Promise<DirectoryPermissionRecoveryResult> => {
   const pending = dataDirectoryRecoveryByRoot.get(dataDirectory)
@@ -34,7 +34,7 @@ const recoverFlyEnvDataDirectory = (
     return pending
   }
 
-  const recovery = Helper.send<boolean>('tools', 'ensureFlyEnvDataDirectory', dataDirectory)
+  const recovery = Helper.send<boolean>('tools', 'ensureQTEnvDevDataDirectory', dataDirectory)
     .then((recovered) => (recovered === true ? 'recovered' : 'failed'))
     .catch((error) => {
       console.warn('[ServerPath] Helper data-directory recovery failed', {
@@ -83,7 +83,7 @@ const ensureBaseDirectories = (dataDirectory: string) => {
   return createBaseDirectories(dirs, {
     createDirectory: mkdirp,
     isWindows,
-    recoverPermissionDenied: () => recoverFlyEnvDataDirectory(dataDirectory),
+    recoverPermissionDenied: () => recoverQTEnvDevDataDirectory(dataDirectory),
     onPermissionDenied: (reason) => onServerDirectoryPermissionDenied?.(reason)
   })
 }

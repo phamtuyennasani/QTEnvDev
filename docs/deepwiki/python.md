@@ -9,7 +9,7 @@
 
 ## Overview
 
-Python 模块为 FlyEnv 提供 Python 语言环境管理能力，支持多版本 Python 的安装、版本切换以及基于主流 Web 框架的项目创建。该模块采用语言模块架构，不同于传统服务模块，Python 主要作为项目运行环境而非常驻服务。
+Python 模块为 QTEnvDev 提供 Python 语言环境管理能力，支持多版本 Python 的安装、版本切换以及基于主流 Web 框架的项目创建。该模块采用语言模块架构，不同于传统服务模块，Python 主要作为项目运行环境而非常驻服务。
 
 相关文档链接:
 - [Node.js](nodejs.md) - 类似的编程语言模块实现
@@ -380,10 +380,10 @@ Sources: src/fork/module/Base/index.ts34-43 src/render/components/LanguageProjec
 
 ### Project Configuration File
 
-Python 项目配置存储在项目目录下的 `.flyenv` 文件中：
+Python 项目配置存储在项目目录下的 `.qtenvdev` 文件中：
 
 ```powershell
-# .flyenv 示例 (PowerShell 格式)
+# .qtenvdev 示例 (PowerShell 格式)
 $env:PATH = "/path/to/python/bin:$env:PATH"
 $env:FLASK_ENV = "development"
 ```
@@ -392,7 +392,7 @@ $env:FLASK_ENV = "development"
 ```typescript
 const showConfig = (item: ProjectItem) => {
   AsyncComponentShow(ConfigVM, {
-    file: join(item.path, '.flyenv'),
+    file: join(item.path, '.qtenvdev'),
     fileExt: 'ps1',
     typeFlag: 'python'
   })
@@ -408,7 +408,7 @@ const showConfig = (item: ProjectItem) => {
 
 **Windows**:
 - 用户自定义目录 (通过 `setup?.python?.dirs`)
-- FlyEnv AppDir: `{AppDir}/python-{version}/python.exe`
+- QTEnvDev AppDir: `{AppDir}/python-{version}/python.exe`
 
 **Linux**:
 - 系统标准路径
@@ -442,7 +442,7 @@ Sources: src/render/components/LanguageProjects/index.vue424-435 src/fork/module
 | 版本切换 | Dropdown with installed versions |
 | 在 IDE 中打开 | PyCharm, VSCode, PhpStorm, WebStorm |
 | 终端打开 | Terminal (macOS) / PowerShell (Windows) |
-| 配置编辑 | `.flyenv` 文件编辑 |
+| 配置编辑 | `.qtenvdev` 文件编辑 |
 | 日志查看 | 项目日志输出 |
 
 ### Framework Selection UI
@@ -559,8 +559,8 @@ Sources: src/fork/module/Python/index.ts135-137
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| Python 命令未找到 | PATH 未正确设置 | 检查 `.flyenv` 中 PATH 配置 |
-| pip 安装失败 | Windows 权限问题 | 以管理员身份运行 FlyEnv |
+| Python 命令未找到 | PATH 未正确设置 | 检查 `.qtenvdev` 中 PATH 配置 |
+| pip 安装失败 | Windows 权限问题 | 以管理员身份运行 QTEnvDev |
 | 项目启动失败 | 端口占用 | 检查 projectPort 是否冲突 |
 | 版本检测失败 | 非标准安装路径 | 在 Setup 中添加自定义目录 |
 

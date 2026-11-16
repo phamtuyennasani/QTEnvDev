@@ -25,8 +25,8 @@ test('real mounted model editor keeps draft and service model separate and persi
   }))
   const state: any = {
     data: new Map<string, any>([
-      ['flyenv-llama-cpp-models', files],
-      ['flyenv-llama-cpp-settings', { selectedModel: files[3] }]
+      ['qtenvdev-llama-cpp-models', files],
+      ['qtenvdev-llama-cpp-settings', { selectedModel: files[3] }]
     ]),
     errors: [],
     off: [],
@@ -146,9 +146,9 @@ test('real mounted model editor keeps draft and service model separate and persi
     assert.ok(setService)
     await setService.props.onClick()
     await flush()
-    assert.equal(state.data.get('flyenv-llama-cpp-settings-v2').selectedModelKey, keyA)
+    assert.equal(state.data.get('qtenvdev-llama-cpp-settings-v2').selectedModelKey, keyA)
     assert.ok(
-      state.data.get('flyenv-llama-cpp-settings-v2').modelProfiles[
+      state.data.get('qtenvdev-llama-cpp-settings-v2').modelProfiles[
         '["test/models","main","missing.gguf"]'
       ]
     )
@@ -195,7 +195,7 @@ test('real mounted model editor keeps draft and service model separate and persi
     await save.props.onClick()
     await flush()
     assert.equal(
-      state.data.get('flyenv-llama-cpp-settings-v2').modelProfiles[keyB].base.contextSize,
+      state.data.get('qtenvdev-llama-cpp-settings-v2').modelProfiles[keyB].base.contextSize,
       8192
     )
     state.scanResult = { models: [{ ...files[1], mtimeMs: 2 }], skipped: [] }
@@ -210,7 +210,7 @@ test('real mounted model editor keeps draft and service model separate and persi
     await save.props.onClick()
     await flush()
     assert.equal(
-      state.data.get('flyenv-llama-cpp-settings-v2').modelProfiles[keyB].fingerprint.mtimeMs,
+      state.data.get('qtenvdev-llama-cpp-settings-v2').modelProfiles[keyB].fingerprint.mtimeMs,
       2
     )
     assert.deepEqual(state.errors, [])

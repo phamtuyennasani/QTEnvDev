@@ -2,7 +2,7 @@
 
 ## 目标
 
-制作一个独立静态页面，先验证 `docs/task/flyenv-ai-mem-star-map.md` 的视觉方向、真实 WebGL 效果和基础交互，再决定正式实现。预览不修改 AI Memory 插件、真实记忆数据、MCP 工具或持久化格式。
+制作一个独立静态页面，先验证 `docs/task/qtenvdev-ai-mem-star-map.md` 的视觉方向、真实 WebGL 效果和基础交互，再决定正式实现。预览不修改 AI Memory 插件、真实记忆数据、MCP 工具或持久化格式。
 
 ## 交付形式
 

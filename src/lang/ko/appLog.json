@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "데이터 폴더 초기화에 성공했습니다. 데이터 폴더 경로: {dir}",
   "initDBDataDirFail": "데이터 폴더 초기화에 실패했습니다. 원인: {error}",
   "newProjectFail": "새 프로젝트 생성에 실패했습니다",
-  "processListFail": "프로세스 목록을 가져오지 못했습니다. FlyEnv Helper를 설치하세요"
+  "processListFail": "프로세스 목록을 가져오지 못했습니다. QTEnvDev Helper를 설치하세요"
 }

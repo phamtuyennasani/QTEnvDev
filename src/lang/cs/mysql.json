@@ -17,7 +17,7 @@
   "passwordFormatError": "Heslo databáze nesmí obsahovat čínské nebo speciální znaky",
   "savePassword": "Aktualizovat heslo",
   "resetPasswordTips": "Tato operace změní heslo root uživatele databáze",
-  "savePasswordTips": "Pouze aktualizace hesla uloženého ve FlyEnv, nemění heslo root uživatele databáze. Toto heslo se používá hlavně k bezpečnému zastavení instancí {app}.",
+  "savePasswordTips": "Pouze aktualizace hesla uloženého ve QTEnvDev, nemění heslo root uživatele databáze. Toto heslo se používá hlavně k bezpečnému zastavení instancí {app}.",
   "resetPasswordConfirm": "Tato operace změní heslo root uživatele databáze, chcete pokračovat?",
   "mysqlNeedRunTips": "Nejprve spusťte {app}",
   "databaseName": "Název databáze",

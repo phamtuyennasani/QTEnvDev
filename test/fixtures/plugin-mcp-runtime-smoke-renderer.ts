@@ -3,17 +3,17 @@ const pending = new Map<string, (...args: any[]) => void>()
 const ipc = {
   sendSensitive(command: string, ...args: any[]) {
     const key = crypto.randomUUID()
-    ;(window as any).FlyEnvNodeAPI.send(command, key, ...args)
+    ;(window as any).QTEnvDevNodeAPI.send(command, key, ...args)
     return { key, then: (callback: (...args: any[]) => void) => pending.set(key, callback) }
   },
   off(key: string) {
     pending.delete(key)
   }
 }
-;(window as any).FlyEnvNodeAPI.receive((_command: string, key: string, response: any) =>
+;(window as any).QTEnvDevNodeAPI.receive((_command: string, key: string, response: any) =>
   pending.get(key)?.(key, response)
 )
-;(globalThis as any).__FLYENV_PLUGIN_HOST__ = { vue: Vue, ipc }
+;(globalThis as any).__QTENVDEV_PLUGIN_HOST__ = { vue: Vue, ipc }
 ;(window as any).fixtureIPC = (command: string, ...args: any[]) =>
   new Promise((resolve) => {
     ipc.sendSensitive(command, ...args).then((key, response) => {

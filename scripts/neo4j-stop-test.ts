@@ -14,7 +14,7 @@ if (process.platform === 'win32') {
   process.exit(0)
 }
 
-const root = await mkdtemp(join(tmpdir(), 'flyenv-neo4j-stop-'))
+const root = await mkdtemp(join(tmpdir(), 'qtenvdev-neo4j-stop-'))
 const previousServer = global.Server
 const previousPidPath = neo4j.pidPath
 const originalNow = Date.now

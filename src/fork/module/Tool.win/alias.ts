@@ -68,14 +68,14 @@ export function setAlias(
       }
 
       // 系统环境变量写入必须保留拒绝/取消终态；否则会生成 alias 但向用户误报已生效。
-      await Helper.send('tools', 'setSystemEnv', 'FLYENV_ALIAS', aliasDir)
+      await Helper.send('tools', 'setSystemEnv', 'QTENVDEV_ALIAS', aliasDir)
       environmentWritten = true
       // 单变量实际写入成功后立即清缓存，覆盖 UAC 与 Helper；通用 RPC/通知不清理。
-      // 必须在后续 addPath 的环境读取前登记失效，否则 %FLYENV_ALIAS% 可能展开为旧值。
+      // 必须在后续 addPath 的环境读取前登记失效，否则 %QTENVDEV_ALIAS% 可能展开为旧值。
       // 不等待回执、不主动 sync；后续取数沿用 EnvSync 内部屏障，清理失败不重放写入。
       void timeOperation('path.invalidate-env', () => EnvSync.clean()).catch(() => {})
 
-      await addPath('%FLYENV_ALIAS%')
+      await addPath('%QTENVDEV_ALIAS%')
 
       const res = await cleanAlias(alias)
 

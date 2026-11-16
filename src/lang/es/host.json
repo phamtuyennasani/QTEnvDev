@@ -67,7 +67,7 @@
   "samePortTips": "Ya existe un sitio con el mismo dominio y puerto de escucha. Utiliza un puerto diferente para añadir otro sitio con el mismo dominio.",
   "composerVersion": "Versión de Composer",
   "useSysVersion": "Versiones configuradas usando variables de entorno",
-  "sslTips": "<p>La función automática de certificados SSL requiere añadir un certificado llamado FlyEnv-Root-CA al llavero y configurarlo para que siempre confíe</p>\n<p>Normalmente, esta función se completará automáticamente. </p>\n<p>Si la función presenta algún problema, también puedes copiar y ejecutar comandos en el terminal. </p>\n<p>También puedes hacer doble clic para añadir el certificado en la carpeta abierta y establecer manualmente la confianza en la app de llaveros</p>",
+  "sslTips": "<p>La función automática de certificados SSL requiere añadir un certificado llamado QTEnvDev-Root-CA al llavero y configurarlo para que siempre confíe</p>\n<p>Normalmente, esta función se completará automáticamente. </p>\n<p>Si la función presenta algún problema, también puedes copiar y ejecutar comandos en el terminal. </p>\n<p>También puedes hacer doble clic para añadir el certificado en la carpeta abierta y establecer manualmente la confianza en la app de llaveros</p>",
   "copyCommand": "Copiar Comando",
   "showFile": "Mostrar Archivo",
   "sticky": "Fijar",

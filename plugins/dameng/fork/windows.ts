@@ -7,7 +7,7 @@ import { gzipSync } from 'node:zlib'
 const ps = (value: string) => `'${value.replaceAll("'", "''")}'`
 const argument = (value: string) =>
   `"${value.replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/, '$1$1')}"`
-const proofName = '.flyenv-windows-global.json'
+const proofName = '.qtenvdev-windows-global.json'
 
 function assertPath(value: string) {
   if (
@@ -28,7 +28,7 @@ export function assertWindowsIdentity(installDir: string, iniFile: string, servi
   if (installDir.length <= 3 || win32.basename(iniFile).toLowerCase() !== 'dm.ini') {
     throw new Error('Invalid DM installation or instance configuration path')
   }
-  if (!/^DmServiceFLYENV[A-Z0-9]+$/.test(serviceName))
+  if (!/^DmServiceQTENVDEV[A-Z0-9]+$/.test(serviceName))
     throw new Error('Invalid owned DM service name')
 }
 
@@ -98,12 +98,12 @@ function Test-DmEmptyInstallDirectory($Directory) {
   return ($item.PSIsContainer -and @(Get-ChildItem -LiteralPath $Directory -Force).Count -eq 0)
 }
 function Stop-DmOwnedService($Name) {
-  if (!('FlyEnvDamengServiceStop' -as [type])) {
+  if (!('QTEnvDevDamengServiceStop' -as [type])) {
     Add-Type -TypeDefinition @'
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-public static class FlyEnvDamengServiceStop {
+public static class QTEnvDevDamengServiceStop {
   [StructLayout(LayoutKind.Sequential)] struct ServiceStatus {
     public uint Type, State, Accepted, ExitCode, SpecificExitCode, CheckPoint, WaitHint;
   }
@@ -130,7 +130,7 @@ public static class FlyEnvDamengServiceStop {
 }
 '@
   }
-  [FlyEnvDamengServiceStop]::Stop($Name)
+  [QTEnvDevDamengServiceStop]::Stop($Name)
 }
 function Get-DmGlobalPaths { @((Join-Path $env:SystemRoot 'System32\dm_svc.conf'),(Join-Path $env:SystemRoot 'SysWOW64\dm_svc.conf')) | Select-Object -Unique }
 function Get-DmServices {
@@ -390,7 +390,7 @@ export function windowsServiceBody(
     action === 'status'
       ? ''
       : action === 'start'
-        ? `if (!$current) { throw 'DM service is not registered' }; if ($current.State -ne 'Stopped') { throw 'DM service is already running outside FlyEnv' }; $service=Get-Service -Name $name; $service.Start(); $startAccepted=$true; $service.WaitForStatus('Running',[TimeSpan]::FromSeconds(60))`
+        ? `if (!$current) { throw 'DM service is not registered' }; if ($current.State -ne 'Stopped') { throw 'DM service is already running outside QTEnvDev' }; $service=Get-Service -Name $name; $service.Start(); $startAccepted=$true; $service.WaitForStatus('Running',[TimeSpan]::FromSeconds(60))`
         : `if (!$current) { throw 'Owned DM service disappeared' }; if ($current.State -ne 'Stopped') { if ([int64]$current.ProcessId -ne ${ownedPid}) { throw 'DM service PID changed; external service left untouched' }; Stop-DmOwnedService $name; $stopAccepted=$true; $service=Get-Service -Name $name; $service.WaitForStatus('Stopped',[TimeSpan]::FromSeconds(60)) }`
   const operation = `${bind}; ${control}; $current=Get-OwnedDmService $root $ini $name; if (!$current) { $result.state='Missing'; $result.pid='' } else { $result.state=[string]$current.State; $result.pid=if ([int64]$current.ProcessId -gt 0) { [string]$current.ProcessId } else { '' } }`
   // Keep control refusal known; after accepted control, failed observation is uncertain.
@@ -405,7 +405,7 @@ $result.attempted=$false
 $root=${ps(installDir)}; $uninstaller=Join-Path $root 'uninstall.exe'; Assert-DmPath $uninstaller; $proof=Assert-DmGlobalProof $root; Assert-DmRegistrationOwnership $root
 $services=Get-DmServices
 foreach ($service in $services) {
-  if ($service.Name -cmatch '^DmServiceFLYENV[A-Z0-9]+$') {
+  if ($service.Name -cmatch '^DmServiceQTENVDEV[A-Z0-9]+$') {
     $instance=@($proof.instances | Where-Object { $_.name -ceq $service.Name })
     if ($instance.Count -ne 1) { throw 'DM service is missing its exact owned instance proof' }
     $null=Get-OwnedDmService $root ([string]$instance[0].ini) $service.Name
@@ -482,7 +482,7 @@ async function execute(body: string, elevated: boolean): Promise<WindowsResult> 
     'v1.0',
     'powershell.exe'
   )
-  const directory = await mkdtemp(join(tmpdir(), 'flyenv-dameng-'))
+  const directory = await mkdtemp(join(tmpdir(), 'qtenvdev-dameng-'))
   const resultFile = join(directory, 'result.json')
   let unknown = false
   try {

@@ -123,7 +123,7 @@ test('does not adopt another process with the same config or a reused launcher P
 })
 
 test('old startup logs cannot make a new JVM ready; new bytes can', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'FlyEnv OpenSearch logs '))
+  const root = await mkdtemp(join(tmpdir(), 'QTEnvDev OpenSearch logs '))
   try {
     const file = join(root, 'startup.log')
     await writeFile(file, ready)
@@ -134,7 +134,7 @@ test('old startup logs cannot make a new JVM ready; new bytes can', async () => 
     await appendFile(file, ready)
     assert.equal(hasOpenSearchStarted(await readLogs()), true)
   } finally {
-    assert.ok(root.startsWith(join(tmpdir(), 'FlyEnv OpenSearch logs ')))
+    assert.ok(root.startsWith(join(tmpdir(), 'QTEnvDev OpenSearch logs ')))
     await rm(root, { recursive: true, force: true })
   }
 })
@@ -174,11 +174,11 @@ test('snapshot errors and readiness timeout remain failures', async () => {
 test(
   'real OpenSearch rejects missing SSL and reports success only after a healthy startup',
   {
-    skip: process.platform !== 'win32' || !process.env.FLYENV_OPENSEARCH_TEST_ROOT,
+    skip: process.platform !== 'win32' || !process.env.QTENVDEV_OPENSEARCH_TEST_ROOT,
     timeout: 240_000
   },
   async () => {
-    const root = await mkdtemp(join(tmpdir(), 'FlyEnv OpenSearch startup '))
+    const root = await mkdtemp(join(tmpdir(), 'QTEnvDev OpenSearch startup '))
     const previousServer = global.Server
     const previousCwd = process.cwd()
     const { default: module } = await import('../fork/OpenSearch')
@@ -194,7 +194,7 @@ test(
       typeFlag: 'opensearch'
     } as any
     try {
-      const source = process.env.FLYENV_OPENSEARCH_TEST_ROOT!
+      const source = process.env.QTENVDEV_OPENSEARCH_TEST_ROOT!
       await mkdir(install)
       for (const dir of ['agent', 'bin', 'jdk', 'lib', 'modules', 'plugins']) {
         await symlink(join(source, dir), join(install, dir), 'junction')
@@ -219,8 +219,8 @@ test(
       )
       const config =
         [
-          'cluster.name: flyenv_startup_test',
-          'node.name: flyenv_startup_test',
+          'cluster.name: qtenvdev_startup_test',
+          'node.name: qtenvdev_startup_test',
           'network.host: 127.0.0.1',
           `http.port: ${ports[0]}`,
           `transport.port: ${ports[1]}`,
@@ -239,7 +239,7 @@ test(
         )
       )
       module.init()
-      if (!process.env.FLYENV_OPENSEARCH_TEST_TLS_ONLY) {
+      if (!process.env.QTENVDEV_OPENSEARCH_TEST_TLS_ONLY) {
         const failedEvents: any[] = []
         await assert.rejects(
           Promise.resolve(module.startService(version).on((event) => failedEvents.push(event))),
@@ -279,9 +279,9 @@ test(
         )
         console.log('OpenSearch real ready/quit: actual JVM and HTTP API verified')
       }
-      if (process.env.FLYENV_OPENSEARCH_TEST_CA) {
-        const caCert = process.env.FLYENV_OPENSEARCH_TEST_CA
-        const caKey = process.env.FLYENV_OPENSEARCH_TEST_CA_KEY!
+      if (process.env.QTENVDEV_OPENSEARCH_TEST_CA) {
+        const caCert = process.env.QTENVDEV_OPENSEARCH_TEST_CA
+        const caKey = process.env.QTENVDEV_OPENSEARCH_TEST_CA_KEY!
         const originalKey = await readFile(caKey)
         const configured: any = await module.configureLocalTLS(version, { caCert, caKey })
         assert.ok((await readFile(caKey)).equals(originalKey), 'Original CA key was modified')
@@ -332,7 +332,7 @@ test(
           false
         )
         console.log(
-          `OpenSearch real FlyEnv CA TLS: verified HTTPS/admin certificate, status ${response.status}, quit stopped JVM`
+          `OpenSearch real QTEnvDev CA TLS: verified HTTPS/admin certificate, status ${response.status}, quit stopped JVM`
         )
       }
     } finally {
@@ -342,7 +342,7 @@ test(
       module.pidPath = previousPidPath
       EnvSync.AppEnv = previousEnv
       global.Server = previousServer
-      assert.ok(root.startsWith(join(tmpdir(), 'FlyEnv OpenSearch startup ')))
+      assert.ok(root.startsWith(join(tmpdir(), 'QTEnvDev OpenSearch startup ')))
       await rm(root, { recursive: true, force: true })
     }
   }

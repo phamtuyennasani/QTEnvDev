@@ -53,7 +53,7 @@ test('configures replica from verified source with the correct version dialect',
       }
     }
     await api.configureReplicaChannel(session, version, 13306, {
-      user: 'flyenv_repl_g',
+      user: 'qtenvdev_repl_g',
       password: 'p\'"$`'
     })
     const change = commands.find((c) => /CHANGE /.test(c.sql))!

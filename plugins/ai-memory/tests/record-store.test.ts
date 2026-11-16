@@ -22,7 +22,7 @@ const draft = (request_id = randomUUID()): MemoryInputs['store'] => ({
   source: { kind: 'user_statement', agent: 'fixture', description: 'Constructed acceptance sample' }
 })
 async function fixture(atomic: Pick<AtomicFile, 'replace'> = new AtomicFile()) {
-  const root = await realpath(await mkdtemp(join(tmpdir(), 'flyenv-record-')))
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'qtenvdev-record-')))
   const scope: ResolvedScope = Object.freeze({ key: 'global', directory: join(root, 'global') })
   const coordinator = new ScopeCoordinator()
   const store = new RecordStore(EXPERIMENT_BUDGETS, atomic)

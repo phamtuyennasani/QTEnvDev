@@ -240,7 +240,7 @@ Expected: zero failures. Only the explicit Windows file-symlink privilege and Un
 - Modify: `plugins/ai-memory/README.md:3`
 
 **Interfaces:**
-- Consumes: FlyEnv platform names `macOS`/`Windows` and architecture `x64`.
+- Consumes: QTEnvDev platform names `macOS`/`Windows` and architecture `x64`.
 - Produces: a plugin accepted by the production `PluginManager` compatibility check on x64.
 
 - [ ] **Step 1: Update declarations and user-facing text**

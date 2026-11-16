@@ -36,7 +36,7 @@ test(
       /osascript failed/
     )
     assert.equal(calls, 1)
-    await assert.rejects(openTerminal({ path: '/missing/flyenv/path', command: 'pwd' }, launch))
+    await assert.rejects(openTerminal({ path: '/missing/qtenvdev/path', command: 'pwd' }, launch))
     assert.equal(calls, 1)
   }
 )

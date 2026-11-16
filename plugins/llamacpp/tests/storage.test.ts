@@ -51,8 +51,8 @@ test('missing V2 key migrates legacy settings through the real host storage read
     selectedModel: file
   }
   const data = new Map<string, unknown>([
-    ['flyenv-llama-cpp-models', { data: [file] }],
-    ['flyenv-llama-cpp-settings', { data: legacy }]
+    ['qtenvdev-llama-cpp-models', { data: [file] }],
+    ['qtenvdev-llama-cpp-settings', { data: legacy }]
   ])
   const { controller } = await loadController(data)
   await controller.init()
@@ -60,7 +60,7 @@ test('missing V2 key migrates legacy settings through the real host storage read
   assert.equal(controller.settings.initialBase.contextSize, 4096)
   assert.equal(controller.selectedModel.localPath, file.localPath)
   assert.equal((data.get(SETTINGS_KEY) as any).data.schemaVersion, 2)
-  assert.deepEqual((data.get('flyenv-llama-cpp-settings') as any).data, legacy)
+  assert.deepEqual((data.get('qtenvdev-llama-cpp-settings') as any).data, legacy)
 })
 
 test('models root getter is safe when reactiveBind reads it before initialization', async () => {
@@ -94,7 +94,7 @@ test('initial scan loads models from the configured folder into the persistent c
     modelProfiles: {}
   }
   const data = new Map<string, unknown>([
-    ['flyenv-llama-cpp-models', { data: [] }],
+    ['qtenvdev-llama-cpp-models', { data: [] }],
     [SETTINGS_KEY, { data: settings }]
   ])
   const { controller, boundary } = await loadController(data)
@@ -102,7 +102,7 @@ test('initial scan loads models from the configured folder into the persistent c
   await controller.init()
   assert.equal(controller.localModels[0]?.localPath, model.localPath)
   assert.equal(controller.localModels[0]?.managedRoot, model.managedRoot)
-  assert.equal((data.get('flyenv-llama-cpp-models') as any).data[0].localPath, model.localPath)
+  assert.equal((data.get('qtenvdev-llama-cpp-models') as any).data[0].localPath, model.localPath)
 })
 
 test('fresh installation with no catalogue or settings initializes and reuses persisted V2', async () => {
@@ -136,7 +136,7 @@ test('expired records use defaults but real storage failures propagate without w
 test('invalid existing V2 remains an error and its stored value is retained', async () => {
   const saved = { data: { schemaVersion: 2, revision: 0 } }
   const data = new Map<string, unknown>([
-    ['flyenv-llama-cpp-models', { data: [] }],
+    ['qtenvdev-llama-cpp-models', { data: [] }],
     [SETTINGS_KEY, saved]
   ])
   const { controller } = await loadController(data)
@@ -145,8 +145,8 @@ test('invalid existing V2 remains an error and its stored value is retained', as
 })
 
 test('V2 and legacy read failures are not mistaken for absent settings', async () => {
-  for (const key of [SETTINGS_KEY, 'flyenv-llama-cpp-settings']) {
-    const data = new Map<string, unknown>([['flyenv-llama-cpp-models', { data: [] }]])
+  for (const key of [SETTINGS_KEY, 'qtenvdev-llama-cpp-settings']) {
+    const data = new Map<string, unknown>([['qtenvdev-llama-cpp-models', { data: [] }]])
     const { controller } = await loadController(data, key)
     await assert.rejects(controller.init(), /storage unavailable/)
     assert.equal(data.has(SETTINGS_KEY), false)

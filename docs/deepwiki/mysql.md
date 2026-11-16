@@ -9,7 +9,7 @@
 
 ## Overview
 
-MySQL 模块是 FlyEnv 中用于管理 MySQL 数据库服务的核心组件，支持多版本管理、多实例运行（Group 模式）、数据库管理和备份功能。模块提供了完整的数据库生命周期管理，包括安装、配置、启动/停止、用户管理和数据备份。
+MySQL 模块是 QTEnvDev 中用于管理 MySQL 数据库服务的核心组件，支持多版本管理、多实例运行（Group 模式）、数据库管理和备份功能。模块提供了完整的数据库生命周期管理，包括安装、配置、启动/停止、用户管理和数据备份。
 
 相关文档链接:
 - [MariaDB](mariadb.md) - 同源分支，共享大部分实现
@@ -410,9 +410,9 @@ Sources: src/render/components/Mysql/Module.ts:1-15
 |---------|-------|---------|-------|-------|
 | 启动方式 | serviceStartExec | serviceStartExecCMD | serviceStartExec | Windows 使用 CMD 包装 |
 | 停止信号 | SIGTERM (-TERM) | taskkill /f /t | SIGTERM (-TERM) | MySQL 使用 SIGTERM |
-| PID 文件 | /tmp/mysql.sock | FlyEnv-Data/pid/ | /tmp/mysql.sock | Windows 使用命名管道 |
+| PID 文件 | /tmp/mysql.sock | QTEnvDev-Data/pid/ | /tmp/mysql.sock | Windows 使用命名管道 |
 | 初始化命令 | mysqld --initialize-insecure | Same | Same | < 5.7 使用 mysql_install_db |
-| 配置路径 | ~/Library/PhpWebStudy-Data/ | C:\Program Files\FlyEnv-Data\ | ~/.config/FlyEnv/ | 数据目录差异 |
+| 配置路径 | ~/Library/PhpWebStudy-Data/ | C:\Program Files\QTEnvDev-Data\ | ~/.config/QTEnvDev/ | 数据目录差异 |
 | 密码修改 | socket 连接 | named pipe 连接 | socket 连接 | 协议差异 |
 | MacPorts 支持 | Yes | N/A | N/A | 特殊路径处理 |
 

@@ -59,7 +59,7 @@
   "samePortTips": "Sivusto, jolla on sama verkkotunnus ja kuunteluportti, on jo olemassa. Käytä toista porttia lisätäksesi toisen sivuston samalla verkkotunnuksella.",
   "composerVersion": "Säveltäjän Versio",
   "useSysVersion": "Versiot asetettu käyttäen ympäristömuuttujia",
-  "sslTips": "<p>Automaattinen SSL-varmenne vaatii lisäämään FlyEnv-Root-CA -nimisen varmenteen avainketjuun ja asettamaan sen aina luottamaan</p>\n<p>normaalisti, tämä toiminto valmistuu automaattisesti. </p>\n<p>Jos tämä toiminto on epänormaalia. Voit myös kopioida ja suorittaa komentoja päätteessä. </p>\n<p>Voit myös kaksoisnapsauta lisätäksesi varmenteen avattuun kansioon ja asettaa luottamuksen, jotta voit aina luottaa näppäimistösovellukseen</p>",
+  "sslTips": "<p>Automaattinen SSL-varmenne vaatii lisäämään QTEnvDev-Root-CA -nimisen varmenteen avainketjuun ja asettamaan sen aina luottamaan</p>\n<p>normaalisti, tämä toiminto valmistuu automaattisesti. </p>\n<p>Jos tämä toiminto on epänormaalia. Voit myös kopioida ja suorittaa komentoja päätteessä. </p>\n<p>Voit myös kaksoisnapsauta lisätäksesi varmenteen avattuun kansioon ja asettaa luottamuksen, jotta voit aina luottaa näppäimistösovellukseen</p>",
   "copyCommand": "Kopioi Komento",
   "showFile": "Näytä Tiedosto",
   "sticky": "Kiinni",

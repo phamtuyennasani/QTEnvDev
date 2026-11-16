@@ -37,7 +37,7 @@ async function fixture(states: Record<string, string> = { a: 'running', b: 'stop
           export const dbGateEnv = (paths, port, creds) => ({ PASSWORD: creds.password, PORT: String(port) });
           export class DbGateRuntime {
             constructor(base, options) { this.paths={root:base+'/dbgate',entry:base+'/dbgate/node_modules/dbgate-serve/bin/dbgate-serve.js',pid:base+'/dbgate/dbgate.pid',startOut:base+'/dbgate/out',startError:base+'/dbgate/err'}; this.options=options; globalThis.__mcDbGateFork.panel=this; }
-            async open(node,on) { const s=globalThis.__mcDbGateFork; s.opens++;s.events.push('panel-open');on({code:200,msg:'install'}); if(s.openWait)await s.openWait; return {url:'http://flyenv:private@127.0.0.1:3000','APP-Service-Start-PID':'900','APP-Service-Start-Item':{typeFlag:'mongodb',bin:node.bin,path:this.paths.root,version:'dbgate'}}; }
+            async open(node,on) { const s=globalThis.__mcDbGateFork; s.opens++;s.events.push('panel-open');on({code:200,msg:'install'}); if(s.openWait)await s.openWait; return {url:'http://qtenvdev:private@127.0.0.1:3000','APP-Service-Start-PID':'900','APP-Service-Start-Item':{typeFlag:'mongodb',bin:node.bin,path:this.paths.root,version:'dbgate'}}; }
             async stop(pid) { const s=globalThis.__mcDbGateFork;s.panelStops++;s.expectedPid=pid;s.events.push('panel-stop');if(s.failPanel)throw Error('panel cleanup denied');return ['900']; }
           }`
               }
@@ -118,7 +118,7 @@ test('global DbGate open relays install notices and registers its shared entry f
   const events: any[] = []
   const result = await module.openDbGate(node).on((event: any) => events.push(event))
   assert.deepEqual(events, [{ code: 200, msg: 'install' }])
-  assert.equal(result.url, 'http://flyenv:private@127.0.0.1:3000')
+  assert.equal(result.url, 'http://qtenvdev:private@127.0.0.1:3000')
   assert.deepEqual(result['APP-Service-Start-Item'], {
     typeFlag: 'mariadb-cluster',
     version: 'dbgate',
@@ -143,7 +143,7 @@ test('DbGate spawn uses plugin service identity with the global entry and suppre
     node,
     state.panel.paths,
     3000,
-    { login: 'flyenv', password: 'secret' },
+    { login: 'qtenvdev', password: 'secret' },
     () => {}
   )
   assert.equal(state.startOptions.sensitive, true)

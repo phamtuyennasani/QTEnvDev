@@ -9,7 +9,7 @@
 
 ## Overview
 
-CronParser 是 FlyEnv 工具链中一个**纯前端、零 IPC、零 Shell 调用**的 Cron 表达式双向转换器。它完全运行在 Renderer 进程内，通过 `cron-parser.service.ts` 中的纯 TypeScript 函数实现 Cron 字符串的生成与解析。模块定位为开发辅助计算器，不依赖任何系统服务、不读写文件系统、不与其他进程通信。核心依赖仅包括 Vue3 `reactive()` 状态管理与 Element Plus UI 组件。
+CronParser 是 QTEnvDev 工具链中一个**纯前端、零 IPC、零 Shell 调用**的 Cron 表达式双向转换器。它完全运行在 Renderer 进程内，通过 `cron-parser.service.ts` 中的纯 TypeScript 函数实现 Cron 字符串的生成与解析。模块定位为开发辅助计算器，不依赖任何系统服务、不读写文件系统、不与其他进程通信。核心依赖仅包括 Vue3 `reactive()` 状态管理与 Element Plus UI 组件。
 
 Sources: `src/render/components/Tools/CronParser/Module.ts:1-13`, `src/render/components/Tools/CronParser/cron-parser.service.ts:1-267`
 

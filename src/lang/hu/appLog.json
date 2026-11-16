@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Az adatmappa inicializálása sikeres, adatmappa útvonala: {dir}",
   "initDBDataDirFail": "Az adatmappa inicializálása sikertelen, ok: {error}",
   "newProjectFail": "Az új projekt létrehozása sikertelen",
-  "processListFail": "Folyamatlista lekérdezése sikertelen. Kérjük, telepítse a FlyEnv Helper-t"
+  "processListFail": "Folyamatlista lekérdezése sikertelen. Kérjük, telepítse a QTEnvDev Helper-t"
 }

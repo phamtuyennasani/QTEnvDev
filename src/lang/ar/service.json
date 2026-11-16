@@ -5,8 +5,8 @@
   "envTips": "هل تمت إضافة المسار إلى متغيرات البيئة؟",
   "aliasTips": "الاسم المستعار المستخدم في الطرفية (Terminal)",
   "useSysPHP": "استخدام إصدار PHP الافتراضي للنظام",
-  "setByApp": "متغيرات البيئة المعيّنة بواسطة FlyEnv",
-  "setByNoApp": "متغيرات البيئة غير المعيّنة بواسطة FlyEnv",
+  "setByApp": "متغيرات البيئة المعيّنة بواسطة QTEnvDev",
+  "setByNoApp": "متغيرات البيئة غير المعيّنة بواسطة QTEnvDev",
   "bundleinVersionDelTips": "هذا الإصدار هو إصدار مدمج، هل تؤكد عدم عرضه؟",
   "customDirVersionDelTips": "هذا الإصدار هو إصدار مسار مخصص، هل تؤكد عدم عرضه؟",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "ابدأ هذه المهمة يدويًا وأكمل التفويض في الطرفية؛ لا يدعم macOS وLinux تشغيل sudo تلقائيًا في الخلفية.",
-  "linuxFtpUnmanagedRoot": "عملية FTP هذه تعمل بصلاحيات root ولم تبدأها خدمة يديرها FlyEnv. أوقفها بصلاحيات المسؤول قبل إعادة التشغيل.",
+  "linuxFtpUnmanagedRoot": "عملية FTP هذه تعمل بصلاحيات root ولم تبدأها خدمة يديرها QTEnvDev. أوقفها بصلاحيات المسؤول قبل إعادة التشغيل.",
   "linuxFtpUsersRefreshFailed": "حُفظت تغييرات حسابات FTP، لكن تعذر تطبيقها على الخدمة قيد التشغيل: {error}",
   "pathSavedRefreshFailed": "تم حفظ متغيرات البيئة، لكن تعذّر تحديث القائمة: {error}"
 }

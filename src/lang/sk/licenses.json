@@ -1,7 +1,7 @@
 {
-  "description": "Licencia FlyEnv podporuje priebežný vývoj a údržbu projektu. Nemá blokovať základný lokálny vývoj – základné runtime a funkcie správy prostredia zostanú vždy dostupné. Licencia odstráni hodnotiace obmedzenia prémiových nástrojov a pomáha udržiavať FlyEnv na macOS, Windows a Linuxe.",
+  "description": "Licencia QTEnvDev podporuje priebežný vývoj a údržbu projektu. Nemá blokovať základný lokálny vývoj – základné runtime a funkcie správy prostredia zostanú vždy dostupné. Licencia odstráni hodnotiace obmedzenia prémiových nástrojov a pomáha udržiavať QTEnvDev na macOS, Windows a Linuxe.",
   "restrictions": {
-    "title": "FlyEnv funguje aj bez licencie, ale platia tieto hodnotiace obmedzenia:",
+    "title": "QTEnvDev funguje aj bez licencie, ale platia tieto hodnotiace obmedzenia:",
     "items": {
       "0": "Správa webov je obmedzená na najviac 3 lokálne weby.",
       "1": "AI asistent je obmedzený na 3-dňovú skúšobnú verziu.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Ako získať licenciu",
-    "description": "FlyEnv ponúka tieto tri spôsoby získania licencie. Licencie zatiaľ nie je možné vydávať automaticky, preto sa každá žiadosť kontroluje a vydáva ručne:",
+    "description": "QTEnvDev ponúka tieto tri spôsoby získania licencie. Licencie zatiaľ nie je možné vydávať automaticky, preto sa každá žiadosť kontroluje a vydáva ručne:",
     "methods": {
       "0": {
         "title": "Kúpa osobnej licencie",
-        "description": "Osobná licencia FlyEnv stojí 10 USD. Platí pre jedno aktívne zariadenie (prenos na iné zariadenie je podporovaný cez správu licencií) a odstráni všetky hodnotiace obmedzenia. Platbu spracúva Paddle. Po nákupe odošlite svoje číslo objednávky Paddle v tomto formulári. Stránka na nákup:"
+        "description": "Osobná licencia QTEnvDev stojí 10 USD. Platí pre jedno aktívne zariadenie (prenos na iné zariadenie je podporovaný cez správu licencií) a odstráni všetky hodnotiace obmedzenia. Platbu spracúva Paddle. Po nákupe odošlite svoje číslo objednávky Paddle v tomto formulári. Stránka na nákup:"
       },
       "1": {
         "title": "Prispejte do kódu",
-        "description": "Odošlite Pull Request na GitHub a pomôžte zlepšiť FlyEnv. Počíta sa každý zmysluplný príspevok – od veľkých funkcií až po jednoduché opravy dokumentácie."
+        "description": "Odošlite Pull Request na GitHub a pomôžte zlepšiť QTEnvDev. Počíta sa každý zmysluplný príspevok – od veľkých funkcií až po jednoduché opravy dokumentácie."
       },
       "2": {
         "title": "Šírte povedomie",
-        "description": "Podeľte sa o svoje skúsenosti s FlyEnv na akejkoľvek platforme a v akomkoľvek jazyku – články, videá, blogy alebo príspevky. Obsah musí byť pôvodný a autentický; obsah zverejnený pred viac ako 3 mesiacmi už nemusí byť oprávnený."
+        "description": "Podeľte sa o svoje skúsenosti s QTEnvDev na akejkoľvek platforme a v akomkoľvek jazyku – články, videá, blogy alebo príspevky. Obsah musí byť pôvodný a autentický; obsah zverejnený pred viac ako 3 mesiacmi už nemusí byť oprávnený."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Autorizačný kód nebol prijatý",
   "oauthTimeout": "Časový limit autorizácie vypršal",
   "oauthSuccessTitle": "Autorizácia úspešná",
-  "oauthSuccessMessage": "Túto stránku môžete zavrieť. Vráťte sa do FlyEnv a zobrazte informácie o licencii.",
+  "oauthSuccessMessage": "Túto stránku môžete zavrieť. Vráťte sa do QTEnvDev a zobrazte informácie o licencii.",
   "trialExpiredTitle": "Licencia nie je aktivovaná",
-  "trialExpiredTips": "FlyEnv používate {days} dní. Ak vám FlyEnv pomáha, zvážte získanie licencie a podporte projekt."
+  "trialExpiredTips": "QTEnvDev používate {days} dní. Ak vám QTEnvDev pomáha, zvážte získanie licencie a podporte projekt."
 }

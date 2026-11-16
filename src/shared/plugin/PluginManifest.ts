@@ -1,15 +1,15 @@
 import { validatePluginMCP, type PluginMCPDeclaration } from './PluginMCP'
 import type { PluginRuntimeDeclaration } from './PluginRuntime'
 
-export const FLYENV_PLUGIN_API_VERSION = 2
-export const FLYENV_SUPPORTED_PLUGIN_API_VERSIONS = [1, 2] as const
+export const QTENVDEV_PLUGIN_API_VERSION = 2
+export const QTENVDEV_SUPPORTED_PLUGIN_API_VERSIONS = [1, 2] as const
 export const isPluginApiSupported = (version: number = 1) =>
-  (FLYENV_SUPPORTED_PLUGIN_API_VERSIONS as readonly number[]).includes(version)
+  (QTENVDEV_SUPPORTED_PLUGIN_API_VERSIONS as readonly number[]).includes(version)
 
-export const FLYENV_PLUGIN_PLATFORMS = ['macOS', 'Windows', 'Linux'] as const
-export const FLYENV_PLUGIN_ARCHITECTURES = ['x64', 'arm64', 'arm', 'ia32'] as const
+export const QTENVDEV_PLUGIN_PLATFORMS = ['macOS', 'Windows', 'Linux'] as const
+export const QTENVDEV_PLUGIN_ARCHITECTURES = ['x64', 'arm64', 'arm', 'ia32'] as const
 
-type PluginArchitecture = (typeof FLYENV_PLUGIN_ARCHITECTURES)[number]
+type PluginArchitecture = (typeof QTENVDEV_PLUGIN_ARCHITECTURES)[number]
 
 /**
  * Plugin text that may be localized: either a plain string (shown as-is for
@@ -17,14 +17,14 @@ type PluginArchitecture = (typeof FLYENV_PLUGIN_ARCHITECTURES)[number]
  * `{ "en": "...", "zh": "..." }`. Locale codes match the app's language
  * directories (`en`, `zh`, `zh-hant`, `pt-br`, ...).
  */
-export type FlyEnvPluginI18nText = string | Record<string, string>
+export type QTEnvDevPluginI18nText = string | Record<string, string>
 
 /**
- * Resolve a FlyEnvPluginI18nText for a locale. Lookup order: exact locale,
+ * Resolve a QTEnvDevPluginI18nText for a locale. Lookup order: exact locale,
  * base language (`pt-br` -> `pt`), `en`, then the first entry.
  */
 export function resolvePluginI18nText(
-  text: FlyEnvPluginI18nText | undefined,
+  text: QTEnvDevPluginI18nText | undefined,
   locale: string
 ): string | undefined {
   if (!text) return undefined
@@ -45,12 +45,12 @@ function isValidI18nText(value: unknown): boolean {
   return entries.length > 0 && entries.every((item) => typeof item === 'string' && !!item)
 }
 
-export type FlyEnvPluginManifest = {
+export type QTEnvDevPluginManifest = {
   apiVersion: number
   id: string
   name: string
   version: string
-  description?: FlyEnvPluginI18nText
+  description?: QTEnvDevPluginI18nText
   author?: string
   homepage?: string
   icon?: string
@@ -72,32 +72,32 @@ export type FlyEnvPluginManifest = {
   }
 }
 
-export type FlyEnvPluginArtifact = {
+export type QTEnvDevPluginArtifact = {
   url: string
   sha256?: string
 }
 
-export type FlyEnvPluginCatalogItem = {
+export type QTEnvDevPluginCatalogItem = {
   apiVersion?: number
   id: string
   name: string
   version: string
-  description?: FlyEnvPluginI18nText
+  description?: QTEnvDevPluginI18nText
   author?: string
   homepage?: string
   icon?: string
-  module?: FlyEnvPluginManifest['module']
-  platforms?: FlyEnvPluginManifest['module']['platform']
-  artifact: FlyEnvPluginArtifact
+  module?: QTEnvDevPluginManifest['module']
+  platforms?: QTEnvDevPluginManifest['module']['platform']
+  artifact: QTEnvDevPluginArtifact
   /** Legacy registry alias accepted for compatibility with the original proposal. */
-  package?: FlyEnvPluginArtifact
+  package?: QTEnvDevPluginArtifact
   official?: boolean
   source?: string
 }
 
-export type FlyEnvPluginCatalog = {
+export type QTEnvDevPluginCatalog = {
   schemaVersion?: number
-  plugins: FlyEnvPluginCatalogItem[]
+  plugins: QTEnvDevPluginCatalogItem[]
 }
 
 const safeId = /^[a-z0-9][a-z0-9._-]*$/i
@@ -114,11 +114,11 @@ function validateRelativeEntry(entry: string) {
   }
 }
 
-export function validatePluginManifest(value: unknown): FlyEnvPluginManifest {
+export function validatePluginManifest(value: unknown): QTEnvDevPluginManifest {
   if (!value || typeof value !== 'object') {
     throw new Error('plugin.json must contain an object')
   }
-  const manifest = value as FlyEnvPluginManifest
+  const manifest = value as QTEnvDevPluginManifest
   if (!isPluginApiSupported(manifest.apiVersion) || manifest.apiVersion === undefined) {
     throw new Error(`Unsupported plugin apiVersion: ${manifest.apiVersion}`)
   }
@@ -142,7 +142,7 @@ export function validatePluginManifest(value: unknown): FlyEnvPluginManifest {
   if (manifest.module.platform) {
     if (
       !Array.isArray(manifest.module.platform) ||
-      manifest.module.platform.some((platform) => !FLYENV_PLUGIN_PLATFORMS.includes(platform))
+      manifest.module.platform.some((platform) => !QTENVDEV_PLUGIN_PLATFORMS.includes(platform))
     ) {
       throw new Error('Plugin module.platform is invalid')
     }
@@ -151,7 +151,7 @@ export function validatePluginManifest(value: unknown): FlyEnvPluginManifest {
     if (
       !Array.isArray(manifest.architecture) ||
       manifest.architecture.some(
-        (architecture) => !FLYENV_PLUGIN_ARCHITECTURES.includes(architecture)
+        (architecture) => !QTENVDEV_PLUGIN_ARCHITECTURES.includes(architecture)
       )
     ) {
       throw new Error('Plugin architecture is invalid')
@@ -173,7 +173,7 @@ export function validatePluginManifest(value: unknown): FlyEnvPluginManifest {
   return manifest
 }
 
-export function validatePluginCatalog(value: unknown): FlyEnvPluginCatalog {
+export function validatePluginCatalog(value: unknown): QTEnvDevPluginCatalog {
   if (!value || typeof value !== 'object') throw new Error('Plugin registry must contain an object')
   const raw = value as Record<string, any>
   const catalog = (
@@ -190,9 +190,9 @@ export function validatePluginCatalog(value: unknown): FlyEnvPluginCatalog {
             ]
           }
         : raw
-  ) as FlyEnvPluginCatalog
+  ) as QTEnvDevPluginCatalog
   if (!Array.isArray(catalog.plugins)) throw new Error('Plugin registry plugins must be an array')
-  const validated: FlyEnvPluginCatalogItem[] = []
+  const validated: QTEnvDevPluginCatalogItem[] = []
   for (const plugin of catalog.plugins) {
     if (!plugin || !safeId.test(plugin.id) || !plugin.name || !plugin.version) {
       throw new Error('Plugin registry contains an invalid plugin')
@@ -205,14 +205,14 @@ export function validatePluginCatalog(value: unknown): FlyEnvPluginCatalog {
       (!Number.isSafeInteger(plugin.apiVersion) || plugin.apiVersion < 1)
     )
       throw new Error(`Plugin registry apiVersion is invalid: ${plugin.id}`)
-    const candidate = plugin as FlyEnvPluginCatalog['plugins'][number] & {
+    const candidate = plugin as QTEnvDevPluginCatalog['plugins'][number] & {
       url?: string
       downloadUrl?: string
     }
     if (!candidate.artifact && (candidate.url || candidate.downloadUrl)) {
       candidate.artifact = { url: candidate.url ?? candidate.downloadUrl! }
     }
-    const packageArtifact = (plugin as FlyEnvPluginCatalogItem & { package?: FlyEnvPluginArtifact })
+    const packageArtifact = (plugin as QTEnvDevPluginCatalogItem & { package?: QTEnvDevPluginArtifact })
       .package
     if (!candidate.artifact && packageArtifact) candidate.artifact = packageArtifact
     // Draft entries (url intentionally left empty until the release asset is

@@ -1,7 +1,7 @@
 {
-  "description": "La licenza di FlyEnv sostiene lo sviluppo e la manutenzione continui del progetto. Non ha lo scopo di bloccare lo sviluppo locale di base: i runtime principali e le funzionalità di gestione degli ambienti resteranno sempre accessibili. Una licenza rimuove i limiti di valutazione degli strumenti premium e aiuta a mantenere FlyEnv aggiornato su macOS, Windows e Linux.",
+  "description": "La licenza di QTEnvDev sostiene lo sviluppo e la manutenzione continui del progetto. Non ha lo scopo di bloccare lo sviluppo locale di base: i runtime principali e le funzionalità di gestione degli ambienti resteranno sempre accessibili. Una licenza rimuove i limiti di valutazione degli strumenti premium e aiuta a mantenere QTEnvDev aggiornato su macOS, Windows e Linux.",
   "restrictions": {
-    "title": "FlyEnv rimane funzionante anche senza licenza, ma si applicano i seguenti limiti di valutazione:",
+    "title": "QTEnvDev rimane funzionante anche senza licenza, ma si applicano i seguenti limiti di valutazione:",
     "items": {
       "0": "La gestione dei siti è limitata a un massimo di 3 siti locali.",
       "1": "L'assistente AI è limitato a una prova di 3 giorni.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Come Ottenere una Licenza",
-    "description": "FlyEnv offre i seguenti tre modi per ottenere una licenza. Le licenze non possono ancora essere emesse automaticamente, quindi tutte le richieste vengono esaminate ed emesse manualmente:",
+    "description": "QTEnvDev offre i seguenti tre modi per ottenere una licenza. Le licenze non possono ancora essere emesse automaticamente, quindi tutte le richieste vengono esaminate ed emesse manualmente:",
     "methods": {
       "0": {
         "title": "Acquista una Licenza Personale",
-        "description": "Una Licenza Personale di FlyEnv costa $10 USD. Copre un dispositivo attivo (il trasferimento del dispositivo è supportato tramite la gestione della licenza) e rimuove tutti i limiti di valutazione. Il pagamento è gestito da Paddle. Dopo l'acquisto, invia l'ID del tuo ordine Paddle nel modulo di richiesta qui sotto. Pagina di acquisto:"
+        "description": "Una Licenza Personale di QTEnvDev costa $10 USD. Copre un dispositivo attivo (il trasferimento del dispositivo è supportato tramite la gestione della licenza) e rimuove tutti i limiti di valutazione. Il pagamento è gestito da Paddle. Dopo l'acquisto, invia l'ID del tuo ordine Paddle nel modulo di richiesta qui sotto. Pagina di acquisto:"
       },
       "1": {
         "title": "Contribuisci al Codice",
-        "description": "Invia una Pull Request su GitHub per aiutare a migliorare FlyEnv. Ogni contributo significativo conta: dalle grandi funzionalità alle semplici correzioni della documentazione."
+        "description": "Invia una Pull Request su GitHub per aiutare a migliorare QTEnvDev. Ogni contributo significativo conta: dalle grandi funzionalità alle semplici correzioni della documentazione."
       },
       "2": {
         "title": "Diffondi la Voce",
-        "description": "Condividi la tua esperienza con FlyEnv su qualsiasi piattaforma e in qualsiasi lingua: articoli, video, blog o post. Il contenuto deve essere originale e autentico; i contenuti pubblicati da più di 3 mesi potrebbero non essere più idonei."
+        "description": "Condividi la tua esperienza con QTEnvDev su qualsiasi piattaforma e in qualsiasi lingua: articoli, video, blog o post. Il contenuto deve essere originale e autentico; i contenuti pubblicati da più di 3 mesi potrebbero non essere più idonei."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Codice di autorizzazione non ricevuto",
   "oauthTimeout": "Timeout autorizzazione",
   "oauthSuccessTitle": "Autorizzazione Riuscita",
-  "oauthSuccessMessage": "Questa pagina può essere chiusa. Torna su FlyEnv per visualizzare le informazioni sulla licenza.",
+  "oauthSuccessMessage": "Questa pagina può essere chiusa. Torna su QTEnvDev per visualizzare le informazioni sulla licenza.",
   "trialExpiredTitle": "Licenza non attivata",
-  "trialExpiredTips": "Stai usando FlyEnv da {days} giorni. Se FlyEnv ti è stato utile, considera di ottenere una licenza per supportare il progetto."
+  "trialExpiredTips": "Stai usando QTEnvDev da {days} giorni. Se QTEnvDev ti è stato utile, considera di ottenere una licenza per supportare il progetto."
 }

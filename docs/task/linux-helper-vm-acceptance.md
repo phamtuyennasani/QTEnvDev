@@ -3,7 +3,7 @@
 The user authorized native Linux acceptance on the running VM on 2026-10-25.
 Target: Parallels Debian GNU/Linux 12 ARM64, systemd 252, ordinary account
 `parallels` UID/GID 1000. `/tmp` is ext4; `/run` and `/dev/shm` are tmpfs.
-Initial inspection found no installed FlyEnv helper binary, unit, policy or runtime
+Initial inspection found no installed QTEnvDev helper binary, unit, policy or runtime
 directory. This supersedes the previous audit's unavailable-Linux limitation.
 
 ## Contract and plan
@@ -31,9 +31,9 @@ existing user services, hosts, CA trust or application databases are test target
   170 top-level passing executions and 26 platform/identity/opt-in skips. The
   root main suite explicitly enabled the real helper/systemd/FTP fixtures.
 - The HEAD protocol-48 baseline installed successfully and answered an ordinary
-  signed version request. After changing `/etc/flyenv-helper` to `1000:1000`,
+  signed version request. After changing `/etc/qtenvdev-helper` to `1000:1000`,
   mode `0777`, with an inheritable `nobody:rwx` ACL, its actual installer failed
-  with `Unprotected install directory: /etc/flyenv-helper`.
+  with `Unprotected install directory: /etc/qtenvdev-helper`.
 - The current actual installer upgraded that same installation to protocol 49.
   Directory UID/GID, mode and complete ACL were identical before/after. Signed
   version and health RPC passed; systemd restarts also passed with existing
@@ -70,7 +70,7 @@ The normal installed unit removes its runtime directory on stop. This run does
 not introduce new shutdown behavior.
 
 Final inspection found no helper binary, policy/runtime directory, installed or
-transient FlyEnv unit, test process or `/opt` fixture. Only the preexisting CUPS
+transient QTEnvDev unit, test process or `/opt` fixture. Only the preexisting CUPS
 listener remained. The VM stays running; host-installed helper, hosts, CA trust
 and user databases were not changed. Guest test fixtures were removed after
 exporting logs.

@@ -77,7 +77,7 @@ export async function removeStaticPackage(
         path = await realpath(target),
         rel = relative(root, path)
       if (!rel || rel.startsWith('..') || isAbsolute(rel))
-        throw new Error('Only FlyEnv-managed packages can be removed here')
+        throw new Error('Only QTEnvDev-managed packages can be removed here')
       const windows = catalog.platform === 'Windows'
       const norm = (s: string) => {
         s = resolve(s).replace(/\\/g, '/').replace(/\/$/, '')

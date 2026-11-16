@@ -60,7 +60,7 @@
   "samePortTips": "Web s rovnakou doménou a počúvacím portom už existuje. Ak chcete pridať ďalší web s rovnakou doménou, použite iný port.",
   "composerVersion": "Verzia Composer",
   "useSysVersion": "Verzie nastavené pomocou premenných prostredia",
-  "sslTips": "<p>Funkcia automatických SSL certifikátov vyžaduje pridanie certifikátu s názvom FlyEnv-Root-CA do kľúčenky a nastavenie, aby mu bola vždy dôverované</p>\n<p>Táto funkcia sa zvyčajne dokončí automaticky. </p>\n<p>Ak táto funkcia nefunguje správne, môžete príkazy skopírovať a spustiť v termináli. </p>\n<p>Alebo môžete v otvorenom priečinku dvakrát kliknúť na certifikát, pridať ho a v aplikácii Kľúčenka manuálne nastaviť možnosť dôverovať vždy</p>",
+  "sslTips": "<p>Funkcia automatických SSL certifikátov vyžaduje pridanie certifikátu s názvom QTEnvDev-Root-CA do kľúčenky a nastavenie, aby mu bola vždy dôverované</p>\n<p>Táto funkcia sa zvyčajne dokončí automaticky. </p>\n<p>Ak táto funkcia nefunguje správne, môžete príkazy skopírovať a spustiť v termináli. </p>\n<p>Alebo môžete v otvorenom priečinku dvakrát kliknúť na certifikát, pridať ho a v aplikácii Kľúčenka manuálne nastaviť možnosť dôverovať vždy</p>",
   "copyCommand": "Kopírovať príkaz",
   "showFile": "Zobraziť súbor",
   "sticky": "Pripnuté",

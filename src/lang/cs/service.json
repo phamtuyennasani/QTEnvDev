@@ -5,8 +5,8 @@
   "envTips": "Byla přidána cesta k proměnné prostředí",
   "aliasTips": "Alias použitý v terminálu",
   "useSysPHP": "Použít výchozí verzi PHP",
-  "setByApp": "Proměnné prostředí nastavené FlyEnv",
-  "setByNoApp": "Proměnné prostředí nejsou nastaveny FlyEnv",
+  "setByApp": "Proměnné prostředí nastavené QTEnvDev",
+  "setByNoApp": "Proměnné prostředí nejsou nastaveny QTEnvDev",
   "bundleinVersionDelTips": "Tato verze je vestavěná verze. Potvrdit, že se nemá zobrazovat?",
   "customDirVersionDelTips": "Tato verze je verze z vlastní cesty. Potvrdit, že se nemá zobrazovat?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Spusťte tuto úlohu vyžadující zvýšená oprávnění ručně a dokončete autorizaci v terminálu; macOS/Linux nepodporuje automatické sudo na pozadí.",
-  "linuxFtpUnmanagedRoot": "Tento proces FTP běžící jako root nebyl spuštěn spravovanou službou FlyEnv. Před opětovným spuštěním jej zastavte s oprávněními správce.",
+  "linuxFtpUnmanagedRoot": "Tento proces FTP běžící jako root nebyl spuštěn spravovanou službou QTEnvDev. Před opětovným spuštěním jej zastavte s oprávněními správce.",
   "linuxFtpUsersRefreshFailed": "Změny účtů FTP byly uloženy, ale běžící služba je nemohla použít: {error}",
   "pathSavedRefreshFailed": "Proměnné prostředí byly uloženy, ale seznam se nepodařilo obnovit: {error}"
 }

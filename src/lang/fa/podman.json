@@ -2,7 +2,7 @@
   "podmanInstall": "نصب Podman",
   "installPodmanByHomebrew": "نصب Podman از طریق Homebrew",
   "noPodmanFound": "ابزار <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a> شناسایی نشد.\nبرای نصب Podman می‌توانید روی دکمه نصب کلیک کنید.\nهمچنین می‌توانید روی این لینک کلیک کنید:\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nو مستندات را برای نصب دستی دنبال نمایید.",
-  "podmanErrorTips": "در مسیر {bin}، یک فایل اجرایی Podman شناسایی شد.\nاما FlyEnv نمی‌تواند آن را فراخوانی کند. پیام خطا:\n{error}",
+  "podmanErrorTips": "در مسیر {bin}، یک فایل اجرایی Podman شناسایی شد.\nاما QTEnvDev نمی‌تواند آن را فراخوانی کند. پیام خطا:\n{error}",
   "removeContainerTips": "آیا مطمئن هستید که می‌خواهید این کانتینر را حذف کنید؟",
   "removeMachineTips": "آیا مطمئن هستید که می‌خواهید این ماشین مجازی را حذف کنید؟",
   "removeImageTips": "آیا مطمئن هستید که می‌خواهید این ایمیج را حذف کنید؟",

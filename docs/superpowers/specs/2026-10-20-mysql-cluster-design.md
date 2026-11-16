@@ -135,7 +135,7 @@ GR 用户/密码变化对组的影响应在操作说明中表达，不能伪装�
 - 表单、筛选、选择、弹窗可见性属于挂载的 Vue 组件。
 - 插件领域状态由模块本地类单例管理，通过 `reactiveBind` 暴露；不新增 Pinia。
 - 使用 `StorageGetAsync`/`StorageSetAsync`，独立版本化 key
-  `flyenv-plugin-mysql-cluster-v1`；不写 `config.setup`。
+  `qtenvdev-plugin-mysql-cluster-v1`；不写 `config.setup`。
 - Fork 持有进程、PID、端口、身份校验、实际数据库状态与磁盘运行清单。
   Fork 运行清单是已准备实例的进程定位记录，不替代 renderer 的插件偏好存储。
 - 配置、日志、PID、运行清单位于插件专属数据目录，各实例用不可变 ID 分隔；
@@ -267,7 +267,7 @@ SQL 连接和文件/子进程资源在所属操作终态释放；页面不拥有
 8. 项目检查：renderer operation boundaries、插件契约、聚焦 lint/type diagnostics、
    插件构建及归档内容/SHA-256 一致性；只运行与改动相关的宿主检查。
 
-交付插件源码和 `mysql-cluster-0.1.0.flyenv-plugin` 包，README 清楚区分
+交付插件源码和 `mysql-cluster-0.1.0.qtenvdev-plugin` 包，README 清楚区分
 真实原生联调、适配器/错误注入回归及尚待验收的平台。
 不自动发布、安装到用户实际配置或改动已有 MySQL 数据；需要原生端到端验收时使用
 独立临时数据根和空实例，不启动、停止或修改用户现有服务。

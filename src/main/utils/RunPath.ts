@@ -10,7 +10,7 @@ import is from 'electron-is'
 const getMacOSRunPath = (): string => {
   const userData = app.getPath('userData')
   const oldPath = resolve(userData, '../../PhpWebStudy')
-  const newPath = resolve(userData, '../../FlyEnv')
+  const newPath = resolve(userData, '../../QTEnvDev')
 
   if (existsSync(oldPath) && oldPath.includes('PhpWebStudy')) {
     return oldPath
@@ -24,7 +24,7 @@ const getMacOSRunPath = (): string => {
 const getWindowsPortablePath = (): string => {
   const baseDir = process.env.PORTABLE_EXECUTABLE_DIR!
   const oldPath = join(baseDir, 'PhpWebStudy-Data')
-  const newPath = join(baseDir, 'FlyEnv-Data')
+  const newPath = join(baseDir, 'QTEnvDev-Data')
 
   return existsSync(oldPath) ? oldPath : newPath
 }
@@ -36,7 +36,7 @@ const getWindowsInstalledPath = (): string => {
   const exePath = app.getPath('exe')
   const oldPath = resolve(exePath, '../../PhpWebStudy-Data').split('\\').join('/')
   const oldPath1 = resolve(oldPath, '../../PhpWebStudy-Data').split('\\').join('/')
-  const newPath = resolve(exePath, '../../FlyEnv-Data').split('\\').join('/')
+  const newPath = resolve(exePath, '../../QTEnvDev-Data').split('\\').join('/')
 
   if (existsSync(oldPath) && oldPath.includes('PhpWebStudy-Data')) {
     return oldPath
@@ -66,8 +66,8 @@ const getWindowsRunPath = (): string => {
  * 确定运行路径
  */
 export const DetermineRunPath = (): string => {
-  if (process.env.FLYENV_DATA_ROOT) {
-    return resolve(process.env.FLYENV_DATA_ROOT)
+  if (process.env.QTENVDEV_DATA_ROOT) {
+    return resolve(process.env.QTENVDEV_DATA_ROOT)
   }
   let runpath = ''
 
@@ -76,7 +76,7 @@ export const DetermineRunPath = (): string => {
   } else if (isWindows()) {
     runpath = getWindowsRunPath()
   } else {
-    runpath = resolve(app.getPath('userData'), '../FlyEnv')
+    runpath = resolve(app.getPath('userData'), '../QTEnvDev')
   }
 
   return runpath

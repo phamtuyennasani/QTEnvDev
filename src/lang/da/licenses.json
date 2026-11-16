@@ -1,7 +1,7 @@
 {
-  "description": "FlyEnv-licensen understøtter den løbende udvikling og vedligeholdelse af projektet. Den er ikke beregnet til at blokere den grundlæggende lokale udvikling — kernefunktionerne til runtime-miljøer og miljøstyring vil altid forblive tilgængelige. En licens fjerner prøvebegrænsningerne på premium-værktøjer og hjælper med at holde FlyEnv vedligeholdt på tværs af macOS, Windows og Linux.",
+  "description": "QTEnvDev-licensen understøtter den løbende udvikling og vedligeholdelse af projektet. Den er ikke beregnet til at blokere den grundlæggende lokale udvikling — kernefunktionerne til runtime-miljøer og miljøstyring vil altid forblive tilgængelige. En licens fjerner prøvebegrænsningerne på premium-værktøjer og hjælper med at holde QTEnvDev vedligeholdt på tværs af macOS, Windows og Linux.",
   "restrictions": {
-    "title": "FlyEnv fungerer fortsat uden licens, men følgende prøvebegrænsninger gælder:",
+    "title": "QTEnvDev fungerer fortsat uden licens, men følgende prøvebegrænsninger gælder:",
     "items": {
       "0": "Webstedsstyring er begrænset til maksimalt 3 lokale websteder.",
       "1": "AI-assistenten er begrænset til en prøveperiode på 3 dage.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Sådan får du en licens",
-    "description": "FlyEnv tilbyder følgende tre måder at få en licens på. Licenser kan endnu ikke udstedes automatisk, så alle anmodninger gennemgås og udstedes manuelt:",
+    "description": "QTEnvDev tilbyder følgende tre måder at få en licens på. Licenser kan endnu ikke udstedes automatisk, så alle anmodninger gennemgås og udstedes manuelt:",
     "methods": {
       "0": {
         "title": "Køb en personlig licens",
-        "description": "En FlyEnv personlig licens koster $10 USD. Den dækker én aktiv enhed (overførsel af enhed understøttes via licensstyring) og fjerner alle prøvebegrænsninger. Betalingen behandles af Paddle. Efter købet skal du indsende dit Paddle-ordre-ID i anmodningsformularen nedenfor. Købsside:"
+        "description": "En QTEnvDev personlig licens koster $10 USD. Den dækker én aktiv enhed (overførsel af enhed understøttes via licensstyring) og fjerner alle prøvebegrænsninger. Betalingen behandles af Paddle. Efter købet skal du indsende dit Paddle-ordre-ID i anmodningsformularen nedenfor. Købsside:"
       },
       "1": {
         "title": "Bidrag til kodebasen",
-        "description": "Indsend en Pull Request på GitHub for at hjælpe med at forbedre FlyEnv. Ethvert meningsfuldt bidrag tæller — fra store funktioner til simple rettelser af dokumentation."
+        "description": "Indsend en Pull Request på GitHub for at hjælpe med at forbedre QTEnvDev. Ethvert meningsfuldt bidrag tæller — fra store funktioner til simple rettelser af dokumentation."
       },
       "2": {
         "title": "Spred budskabet",
-        "description": "Del din FlyEnv-oplevelse på enhver platform og på ethvert sprog — artikler, videoer, blogs eller opslag. Indholdet skal være originalt og autentisk; indhold, der er publiceret for mere end 3 måneder siden, kvalificerer muligvis ikke længere."
+        "description": "Del din QTEnvDev-oplevelse på enhver platform og på ethvert sprog — artikler, videoer, blogs eller opslag. Indholdet skal være originalt og autentisk; indhold, der er publiceret for mere end 3 måneder siden, kvalificerer muligvis ikke længere."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Godkendelseskode ikke modtaget",
   "oauthTimeout": "Godkendelses-timeout",
   "oauthSuccessTitle": "Godkendelse lykkedes",
-  "oauthSuccessMessage": "Denne side kan lukkes. Vend tilbage til FlyEnv for at se licensoplysningerne.",
+  "oauthSuccessMessage": "Denne side kan lukkes. Vend tilbage til QTEnvDev for at se licensoplysningerne.",
   "trialExpiredTitle": "Licensen er ikke aktiveret",
-  "trialExpiredTips": "Du har brugt FlyEnv i {days} dage. Hvis FlyEnv har været nyttigt for dig, overvej at få en licens for at støtte projektet."
+  "trialExpiredTips": "Du har brugt QTEnvDev i {days} dage. Hvis QTEnvDev har været nyttigt for dig, overvej at få en licens for at støtte projektet."
 }

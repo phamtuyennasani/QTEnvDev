@@ -9,9 +9,9 @@ import { setTimeout as delay } from 'node:timers/promises'
 import { createPackageWithOptions } from '@electron/asar'
 import { createRequire } from 'node:module'
 
-const output = resolve('.superpowers/sdd/2026-11-03-flyenv-ai-memory/runtime-probe')
+const output = resolve('.superpowers/sdd/2026-11-03-qtenvdev-ai-memory/runtime-probe')
 await mkdir(output, { recursive: true })
-const dataRoot = await mkdtemp(join(tmpdir(), 'flyenv-memory-native-'))
+const dataRoot = await mkdtemp(join(tmpdir(), 'qtenvdev-memory-native-'))
 for (const name of ['host', 'worker'])
   await build({
     entryPoints: [`test/fixtures/plugin-memory-runtime-probe-${name}.ts`],

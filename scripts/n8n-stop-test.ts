@@ -29,7 +29,7 @@ if (process.platform !== 'win32') {
   process.exit(0)
 }
 
-const root = await mkdtemp(join(tmpdir(), 'FlyEnv n8n stop '))
+const root = await mkdtemp(join(tmpdir(), 'QTEnvDev n8n stop '))
 const previousServer = global.Server
 const previousPidPath = n8n.pidPath
 const previousCwd = process.cwd()
@@ -93,8 +93,8 @@ try {
   console.log(`n8n process identity regression: ${count} cases passed`)
 
   // Opt in with an installed npm launcher. Only the temporary user folder is used.
-  if (process.env.FLYENV_N8N_TEST_BIN) {
-    const launcher = resolve(process.env.FLYENV_N8N_TEST_BIN)
+  if (process.env.QTENVDEV_N8N_TEST_BIN) {
+    const launcher = resolve(process.env.QTENVDEV_N8N_TEST_BIN)
     const physical = await realpath(launcher)
     const node = join(dirname(launcher), 'node.exe')
     const listener = createServer()
@@ -182,7 +182,7 @@ try {
       'n8n live manual stop/retry: passed; runner stopped and unrelated processes preserved'
     )
 
-    // Exercise the real FlyEnv launcher and make sure it registers the new n8n root,
+    // Exercise the real QTEnvDev launcher and make sure it registers the new n8n root,
     // even while another n8n-shaped process is present in the first process snapshot.
     await writeFile(
       envFile,
@@ -219,7 +219,7 @@ try {
     assert.equal(existsSync(appPidFile), false)
     for (const peer of [unrelated, foreign]) process.kill(peer.pid!, 0)
     console.log(
-      'n8n live FlyEnv launch/quit: passed; root registration and companion cleanup verified'
+      'n8n live QTEnvDev launch/quit: passed; root registration and companion cleanup verified'
     )
   }
 } finally {
@@ -235,6 +235,6 @@ try {
   }
   n8n.pidPath = previousPidPath
   global.Server = previousServer
-  assert.ok(root.startsWith(join(tmpdir(), 'FlyEnv n8n stop ')))
+  assert.ok(root.startsWith(join(tmpdir(), 'QTEnvDev n8n stop ')))
   await rm(root, { recursive: true, force: true })
 }

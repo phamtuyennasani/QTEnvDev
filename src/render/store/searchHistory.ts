@@ -11,7 +11,7 @@ type SearchHistoryType = {
   add: (type: SearchHistoryTypeType, key: string) => void
 }
 
-const SearchHistoryKey = 'flyenv-search-history-key'
+const SearchHistoryKey = 'qtenvdev-search-history-key'
 
 const SearchHistory = reactive<SearchHistoryType>({
   inited: false,

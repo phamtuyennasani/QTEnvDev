@@ -70,7 +70,7 @@ export function localTLSConfig(content: string, folder: string, nodeDN: string, 
   const out: string[] = []
   let skipping = false
   for (const line of lines) {
-    if (line.trim() === '# FlyEnv local TLS') continue
+    if (line.trim() === '# QTEnvDev local TLS') continue
     if (!line.trim() || line.trimStart().startsWith('#')) {
       out.push(line)
       continue
@@ -80,7 +80,7 @@ export function localTLSConfig(content: string, folder: string, nodeDN: string, 
     if (!skipping) out.push(line)
   }
   while (out.length && !out[out.length - 1].trim()) out.pop()
-  out.push('', '# FlyEnv local TLS')
+  out.push('', '# QTEnvDev local TLS')
   for (const [key, value] of Object.entries(settings)) out.push(`${key}: ${JSON.stringify(value)}`)
   const updated = out.join('\n') + '\n'
   // Reject malformed/unsupported YAML before committing any configuration.
@@ -116,7 +116,7 @@ export function issueLocalCertificates(caPEM: string, keyPEM: string) {
     certificate.validity.notAfter = new Date(
       Math.min(ca.validity.notAfter.getTime(), now.getTime() + 365 * 24 * 60 * 60 * 1000)
     )
-    const cn = `FlyEnv-OpenSearch-${admin ? 'Admin' : 'Node'}-${token}`
+    const cn = `QTEnvDev-OpenSearch-${admin ? 'Admin' : 'Node'}-${token}`
     certificate.setSubject([{ name: 'commonName', value: cn }])
     certificate.setIssuer(ca.subject.attributes)
     certificate.setExtensions([
@@ -178,10 +178,10 @@ async function performConfiguration(
     readFile(input.caKey, 'utf8')
   ])
   const certificates = issueLocalCertificates(ca, key)
-  const directory = join(confDir, 'flyenv-tls', randomUUID())
+  const directory = join(confDir, 'qtenvdev-tls', randomUUID())
   const folder = relative(confDir, directory).replaceAll('\\', '/')
   const updated = localTLSConfig(original, folder, certificates.node.dn, certificates.admin.dn)
-  const backup = `${file}.flyenv-${randomUUID()}.bak`
+  const backup = `${file}.qtenvdev-${randomUUID()}.bak`
   const temporary = `${file}.${randomUUID()}.tmp`
   await mkdir(directory, { recursive: true, mode: 0o700 })
   try {
@@ -202,7 +202,7 @@ async function performConfiguration(
     return { directory, backup, caCert: input.caCert }
   } catch (error) {
     // Both paths are newly created here; never remove pre-existing certificates/backups.
-    if (dirname(directory) !== join(confDir, 'flyenv-tls')) throw new Error('Invalid TLS directory')
+    if (dirname(directory) !== join(confDir, 'qtenvdev-tls')) throw new Error('Invalid TLS directory')
     const cleanup = await Promise.allSettled([
       rm(directory, { recursive: true, force: true }),
       rm(temporary, { force: true })

@@ -1,6 +1,6 @@
 {
   "checkForUpdates": "Güncellemeleri Kontrol Et",
-  "update-available-message": "FlyEnv'in daha yeni bir sürümü var, şimdi güncellemek ister misiniz?",
+  "update-available-message": "QTEnvDev'in daha yeni bir sürümü var, şimdi güncellemek ister misiniz?",
   "update-not-available-message": "Uygulamanız zaten güncel!",
   "update-downloaded-message": "Kurulum için hazır...",
   "update-error-message": "Güncelleme Hatası",

@@ -63,7 +63,7 @@ test(
         }),
         port: base + n,
         groupPort: mode === 'group-replication' ? base + 100 + n : undefined,
-        socket: `/tmp/flyenv-native-${group}_${n}.sock`,
+        socket: `/tmp/qtenvdev-native-${group}_${n}.sock`,
         dataDir: join(root, 'data', `${group}_${n}`),
         serverId: base + n
       }))

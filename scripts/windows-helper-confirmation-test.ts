@@ -118,7 +118,7 @@ const fixture = () => {
 
   const install = deferred()
   setInstallGate(install.promise)
-  // This is the entry invoked by APP-FlyEnv-Helper-Install after the UI's confirm button.
+  // This is the entry invoked by APP-QTEnvDev-Helper-Install after the UI's confirm button.
   const confirmed = helper.initHelper()
   assert.equal(helper.initHelper(), confirmed, 'duplicate confirmed IPC shares installation')
   assert.equal(helper.ensureReady(), confirmed, 'business requests join the confirmed installation')

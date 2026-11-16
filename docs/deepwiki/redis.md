@@ -9,7 +9,7 @@
 
 ## Overview
 
-Redis 模块为 FlyEnv 提供 Redis 内存数据库的管理功能，支持多版本安装、服务启停控制、配置文件可视化管理以及日志查看。
+Redis 模块为 QTEnvDev 提供 Redis 内存数据库的管理功能，支持多版本安装、服务启停控制、配置文件可视化管理以及日志查看。
 
 相关文档链接:
 - [Base Module](./base-module.md) - 模块基类，Redis 继承自此基类
@@ -223,7 +223,7 @@ stopService(version) / _stopServer(version)
     ├──> Find processes by PID
     |
     ├──> Search by process name (redis-server)
-    │    └── Filter FlyEnv/PhpWebStudy data paths
+    │    └── Filter QTEnvDev/PhpWebStudy data paths
     |
     └──> Kill processes
          ├── Windows: ProcessKill('-INT', pids)

@@ -95,7 +95,7 @@ export const runWindowsHelperInstaller = async (
   options: InstallOptions = {}
 ): Promise<{ stdout: string; stderr: string }> => {
   const nonce = randomUUID()
-  const pipeName = `FlyEnv.Install.${randomUUID()}`
+  const pipeName = `QTEnvDev.Install.${randomUUID()}`
   const plan = buildWindowsHelperElevationPlan(script, pipeName, nonce)
   // 计划构造保持纯函数；安装开始前验证系统文件，缺失时不启动 broker 或弹 UAC。
   resolveWindowsPowerShellPath()
@@ -148,7 +148,7 @@ export const runWindowsHelperInstaller = async (
     if (result) {
       if (result.exitCode === 0) return { stdout: result.stdout, stderr: result.stderr }
       const diagnostic = `${result.stdout}\n${result.stderr}`.trim()
-      const marker = diagnostic.match(/FLYENV_HELPER_INSTALL_ERROR:([a-z_]+):([^\r\n]*)/)
+      const marker = diagnostic.match(/QTENVDEV_HELPER_INSTALL_ERROR:([a-z_]+):([^\r\n]*)/)
       const codes: AppHelperErrorCode[] = [
         'helper_binary_missing',
         'helper_acl_invalid',
@@ -184,7 +184,7 @@ export const runWindowsHelperInstaller = async (
     )
       throw new AppHelperError(
         'elevation_pipe_connect_failed',
-        'The elevated installer could not connect to the FlyEnv result pipe. An antivirus or pipe policy may have blocked it.',
+        'The elevated installer could not connect to the QTEnvDev result pipe. An antivirus or pipe policy may have blocked it.',
         launchError?.stderr
       )
     // 能确认 RunAs 启动失败的原生错误，与“子进程可能已安装但结果丢失”分开。

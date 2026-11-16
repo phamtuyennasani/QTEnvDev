@@ -5,8 +5,8 @@
   "envTips": "Har stien er lagt til miljøvariabelen",
   "aliasTips": "Alias som brukes i terminalen",
   "useSysPHP": "Bruk standard PHP-versjon",
-  "setByApp": "Miljøvariabler satt av FlyEnv",
-  "setByNoApp": "Miljøvariabler ikke satt av FlyEnv",
+  "setByApp": "Miljøvariabler satt av QTEnvDev",
+  "setByNoApp": "Miljøvariabler ikke satt av QTEnvDev",
   "bundleinVersionDelTips": "Denne versjonen er en innebygd versjon, bekreft ikke?",
   "customDirVersionDelTips": "Denne versjonen er en egendefinert fil-versjon, bekreft ikke?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Start denne oppgaven med forhøyede rettigheter manuelt, og fullfør godkjenningen i terminalen; macOS/Linux støtter ikke automatisk sudo i bakgrunnen.",
-  "linuxFtpUnmanagedRoot": "Denne FTP-prosessen som kjører som root, ble ikke startet av FlyEnvs administrerte tjeneste. Stopp den med administratorrettigheter før du starter den igjen.",
+  "linuxFtpUnmanagedRoot": "Denne FTP-prosessen som kjører som root, ble ikke startet av QTEnvDevs administrerte tjeneste. Stopp den med administratorrettigheter før du starter den igjen.",
   "linuxFtpUsersRefreshFailed": "Endringene i FTP-kontoene ble lagret, men den kjørende tjenesten kunne ikke ta dem i bruk: {error}",
   "pathSavedRefreshFailed": "Miljøvariablene ble lagret, men listen kunne ikke oppdateres: {error}"
 }

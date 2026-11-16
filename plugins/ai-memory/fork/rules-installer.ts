@@ -3,8 +3,8 @@ import { access, mkdir, realpath, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, isAbsolute, join } from 'node:path'
 import { openRegularFile } from './RegularFile'
-const START = '<!-- flyenv-ai-memory:start -->'
-const END = '<!-- flyenv-ai-memory:end -->'
+const START = '<!-- qtenvdev-ai-memory:start -->'
+const END = '<!-- qtenvdev-ai-memory:end -->'
 const CLIENTS = ['claudeCode', 'codex', 'antigravity', 'copilotCli', 'openCode', 'kimi']
 /** Append-only installation: a marked existing block is retained, never rewritten. */
 export class MemoryRulesInstaller {

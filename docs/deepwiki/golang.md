@@ -9,7 +9,7 @@
 
 ## Overview
 
-GoLang 模块为 FlyEnv 提供 Go 编程语言的版本管理和项目管理功能。该模块支持多版本 Go 的安装、切换，以及 Go 项目的创建、运行和管理。与其他语言模块类似，GoLang 采用 Language Project 架构，将版本管理与项目运行分离。
+GoLang 模块为 QTEnvDev 提供 Go 编程语言的版本管理和项目管理功能。该模块支持多版本 Go 的安装、切换，以及 Go 项目的创建、运行和管理。与其他语言模块类似，GoLang 采用 Language Project 架构，将版本管理与项目运行分离。
 
 相关文档链接:
 - [Node.js Deep Dive](./nodejs.md) - 同类型语言模块实现对比
@@ -186,24 +186,24 @@ Sources: src/fork/module/GoLang/index.ts:102-113
 | `saveProject()` | Persist projects to localForage |
 | `addProject()` | Create new project (license check) |
 | `delProject()` | Remove project with cleanup |
-| `setDirEnv()` | Configure .flyenv environment file |
+| `setDirEnv()` | Configure .qtenvdev environment file |
 | `stopAll()` | Stop all running projects |
 | `startAll()` | Start all projects |
 
 #### Environment File Generation
 
-The `setDirEnv()` method creates `.flyenv` files for PATH configuration:
+The `setDirEnv()` method creates `.qtenvdev` files for PATH configuration:
 
-**Windows (.flyenv)**:
+**Windows (.qtenvdev)**:
 ```powershell
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$env:PATH = "C:\Go\bin;" + $env:PATH #FlyEnv-ID-{uuid}
+$env:PATH = "C:\Go\bin;" + $env:PATH #QTEnvDev-ID-{uuid}
 ```
 
-**macOS/Linux (.flyenv)**:
+**macOS/Linux (.qtenvdev)**:
 ```zsh
 #!/bin/zsh
-export PATH="/usr/local/go/bin:$PATH" #FlyEnv-ID-{uuid}
+export PATH="/usr/local/go/bin:$PATH" #QTEnvDev-ID-{uuid}
 ```
 
 Sources: src/render/components/LanguageProjects/Project.ts:160-273
@@ -368,7 +368,7 @@ Sources: src/render/components/ServiceManager/base.vue
 | Archive format | `.tar.gz` | `.zip` | `.tar.gz` |
 | Package manager | Homebrew, MacPorts | - | - |
 | PATH separator | `:` | `;` | `:` |
-| Shell script | `.flyenv` (zsh) | `.flyenv` (PowerShell) | `.flyenv` (zsh) |
+| Shell script | `.qtenvdev` (zsh) | `.qtenvdev` (PowerShell) | `.qtenvdev` (zsh) |
 | Version detection | `gofmt` + `go` | `go.exe` | `gofmt` + `go` |
 
 ### Windows-Specific Handling
@@ -430,7 +430,7 @@ Sources: src/render/components/Host/CreateProject/go/index.vue
 ### Runtime Dependencies
 - `go` / `go.exe` - Go compiler/runtime
 
-### FlyEnv Internal
+### QTEnvDev Internal
 - `Base` class - Version management base
 - `LanguageProjects` - Project management framework
 - `ServiceManager` - Version list UI

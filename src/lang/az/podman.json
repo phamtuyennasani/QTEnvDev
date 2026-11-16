@@ -2,7 +2,7 @@
   "podmanInstall": "Podman quraşdır",
   "installPodmanByHomebrew": "Podman-u Homebrew vasitəsilə quraşdır",
   "noPodmanFound": "<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a> aşkar edilmədi.\nPodman quraşdırmaq üçün quraşdırma düyməsini vuraraq quraşdıra bilərsiniz.\nHəmçinin bu keçidi də vuraraq\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nəmr əsasında quraşdırmaq üçün sənəddən istifadə edə bilərsiniz.",
-  "podmanErrorTips": "{bin} yerdində Podman icra faylı aşkar edilib.\nAmma FlyEnv onu çağırmaq mümkün deyil. Xəta mesajı:\n{error}",
+  "podmanErrorTips": "{bin} yerdində Podman icra faylı aşkar edilib.\nAmma QTEnvDev onu çağırmaq mümkün deyil. Xəta mesajı:\n{error}",
   "removeContainerTips": "Bu konteyneri silməkdən əminsiniz?",
   "removeMachineTips": "Bu virtual maşını silməkdən əminsiniz?",
   "removeImageTips": "Bu obrazı silməkdən əminsiniz?",

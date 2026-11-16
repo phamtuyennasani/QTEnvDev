@@ -157,7 +157,7 @@ func TestUnixDirectoryAllowsUserManagedPermissions(t *testing.T) {
 	if err := os.Chmod(parent, 0777); err != nil {
 		t.Fatal(err)
 	}
-	dir := filepath.Join(parent, "flyenv-managed")
+	dir := filepath.Join(parent, "qtenvdev-managed")
 	if err := os.Mkdir(dir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -235,17 +235,17 @@ func TestManagedHostsPreservesOtherContent(t *testing.T) {
 	}
 }
 func TestUnixFTPConfiguration(t *testing.T) {
-	config, err := ftpConfig("Daemonize yes\nBind 0.0.0.0,21\nPureDB /user/database\nPIDFile /user/pid\nChrootEveryone yes\nUnixAuthentication no\nPassivePortRange 39000 40000\n", "/run/flyenv-helper/ftp-1000")
+	config, err := ftpConfig("Daemonize yes\nBind 0.0.0.0,21\nPureDB /user/database\nPIDFile /user/pid\nChrootEveryone yes\nUnixAuthentication no\nPassivePortRange 39000 40000\n", "/run/qtenvdev-helper/ftp-1000")
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"Daemonize no", "Bind 0.0.0.0,21", "PureDB /run/flyenv-helper/ftp-1000/users.pdb", "PIDFile /run/flyenv-helper/ftp-1000/pure-ftpd.pid"} {
+	for _, expected := range []string{"Daemonize no", "Bind 0.0.0.0,21", "PureDB /run/qtenvdev-helper/ftp-1000/users.pdb", "PIDFile /run/qtenvdev-helper/ftp-1000/pure-ftpd.pid"} {
 		if !strings.Contains(config, expected) {
 			t.Fatalf("missing %s: %s", expected, config)
 		}
 	}
 	for _, input := range []string{"Include /etc/shadow", "ExtAuth /tmp/auth", "AltLog clf:/etc/profile", "CreateHomeDir yes", "UnixAuthentication yes", "Bind $(id),21", "PassivePortRange 1 99999", "Daemonize yes\nDaemonize yes", "MaxClientsNumber 0", "UnknownOption yes"} {
-		if _, err := ftpConfig(input, "/run/flyenv-helper/ftp-1000"); err == nil {
+		if _, err := ftpConfig(input, "/run/qtenvdev-helper/ftp-1000"); err == nil {
 			t.Fatalf("accepted %q", input)
 		}
 	}
@@ -325,18 +325,18 @@ func TestUnixHostsAllowsUserConfiguredParentPermissions(t *testing.T) {
 	if changed, err := store.replace(content, snapshot.Digest); err != nil || !changed {
 		t.Fatal("parent directory permissions must not block editing hosts", changed, err)
 	}
-	if changed, err := store.syncManaged("127.0.0.1 flyenv.test\n", digest(content)); err != nil || !changed {
+	if changed, err := store.syncManaged("127.0.0.1 qtenvdev.test\n", digest(content)); err != nil || !changed {
 		t.Fatal("parent directory permissions must not block site synchronization", changed, err)
 	}
 	snapshot, err = store.read()
-	if err != nil || !strings.Contains(snapshot.Content, "flyenv.test") {
+	if err != nil || !strings.Contains(snapshot.Content, "qtenvdev.test") {
 		t.Fatal("site entry was not written", snapshot, err)
 	}
 	if _, err := store.syncManaged("", snapshot.Digest); err != nil {
 		t.Fatal("parent directory permissions must not block managed entry cleanup", err)
 	}
 	snapshot, err = store.read()
-	if err != nil || !strings.HasPrefix(snapshot.Content, content) || strings.Contains(snapshot.Content, "flyenv.test") {
+	if err != nil || !strings.HasPrefix(snapshot.Content, content) || strings.Contains(snapshot.Content, "qtenvdev.test") {
 		t.Fatal("managed entry cleanup changed unrelated content", snapshot, err)
 	}
 	st, err := os.Stat(dir)

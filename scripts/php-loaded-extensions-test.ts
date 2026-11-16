@@ -42,21 +42,21 @@ assert.equal(
 
 for (const newline of ['\n', '\r\n']) {
   const result = parseLoadedExtensions(
-    `PHP Warning: an unrelated startup warning${newline}FLYENV_LOADED_EXTENSIONS=["Core","curl","Zend OPcache","CURL"]${newline}`
+    `PHP Warning: an unrelated startup warning${newline}QTENVDEV_LOADED_EXTENSIONS=["Core","curl","Zend OPcache","CURL"]${newline}`
   )
   assert.deepEqual(result, [{ name: 'core' }, { name: 'curl' }, { name: 'zend opcache' }])
 }
 assert.throws(() => parseLoadedExtensions('[PHP Modules]\ncurl\n'), /did not return/)
-assert.throws(() => parseLoadedExtensions('FLYENV_LOADED_EXTENSIONS=["curl",false]'), /invalid/)
-assert.throws(() => parseLoadedExtensions('FLYENV_LOADED_EXTENSIONS=not-json'), SyntaxError)
+assert.throws(() => parseLoadedExtensions('QTENVDEV_LOADED_EXTENSIONS=["curl",false]'), /invalid/)
+assert.throws(() => parseLoadedExtensions('QTENVDEV_LOADED_EXTENSIONS=not-json'), SyntaxError)
 const specialIni = '/opt/custom PHP [8.3] & $/配置/php.ini'
 assert.equal(
   parsePhpIniPath(
-    `Warning: unrelated startup output\nFLYENV_PHP_INI=${Buffer.from(specialIni).toString('base64')}`
+    `Warning: unrelated startup output\nQTENVDEV_PHP_INI=${Buffer.from(specialIni).toString('base64')}`
   ),
   specialIni
 )
-assert.equal(parsePhpIniPath('FLYENV_PHP_INI='), '')
+assert.equal(parsePhpIniPath('QTENVDEV_PHP_INI='), '')
 
 const deferred = () => {
   let resolve!: (rows: LoadedPhpExtension[]) => void

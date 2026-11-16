@@ -17,7 +17,7 @@
   "passwordFormatError": "Tietokannan salasana ei voi sisältää kiinalaisia tai erikoismerkkejä",
   "savePassword": "Päivitä salasana",
   "resetPasswordTips": "Tämä toiminto muuttaa tietokannan juurikäyttäjän salasanaa",
-  "savePasswordTips": "Päivittää vain FlyEnviin tallennetun salasanan, ei muuta tietokannan käyttäjän salasanaa. Tätä salasanaa käytetään pääasiassa turvallisesti pysäyttämään {app} instanssit.",
+  "savePasswordTips": "Päivittää vain QTEnvDeviin tallennetun salasanan, ei muuta tietokannan käyttäjän salasanaa. Tätä salasanaa käytetään pääasiassa turvallisesti pysäyttämään {app} instanssit.",
   "resetPasswordConfirm": "Tämä toiminto muuttaa tietokannan juurikäyttäjän salasanaa, oletko varma, että haluat jatkaa?",
   "mysqlNeedRunTips": "Suorita {app} ensin",
   "databaseName": "Tietokannan nimi",

@@ -342,7 +342,7 @@ class N8N extends Base {
    */
   async _n8nLogin(port: string, email: string, password: string): Promise<string> {
     // Generate a stable-ish browserId — n8n only validates that it is present and a string
-    const browserId = `flyenv-${port}-${Buffer.from(email).toString('base64').slice(0, 12)}`
+    const browserId = `qtenvdev-${port}-${Buffer.from(email).toString('base64').slice(0, 12)}`
     let res: any
     try {
       res = await axios({
@@ -457,7 +457,7 @@ class N8N extends Base {
       // 1. OS-native default ~/.n8n
       candidates.push(join(homedir(), '.n8n'))
 
-      // 2. N8N_USER_FOLDER env var (set outside FlyEnv)
+      // 2. N8N_USER_FOLDER env var (set outside QTEnvDev)
       if (process.env['N8N_USER_FOLDER']) {
         candidates.push(process.env['N8N_USER_FOLDER'])
       }

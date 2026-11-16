@@ -1,11 +1,11 @@
 version: 4.20.2
 files:
-  - url: FlyEnv-4.20.2-x64.deb
+  - url: QTEnvDev-4.20.2-x64.deb
     sha512: bzLYVE37rtSOU5DhsEIdGPacgnvDoCTxFRdECjk99li6s8CRLz+u1RjM29Cc58lTlkxMrAxbwNdG2n8+kEpQgg==
     size: 140799120
-  - url: FlyEnv-4.20.2-x64.rpm
+  - url: QTEnvDev-4.20.2-x64.rpm
     sha512: nMLxacQeu8JRR4V4sPZhvTQyZHcvoGY7E86XNBcvQWt5glwhwj7rlzCrg1Eyi8AADkdCSUEiu/1dR6HJvWxhHQ==
     size: 120448693
-path: FlyEnv-4.20.2-x64.deb
+path: QTEnvDev-4.20.2-x64.deb
 sha512: bzLYVE37rtSOU5DhsEIdGPacgnvDoCTxFRdECjk99li6s8CRLz+u1RjM29Cc58lTlkxMrAxbwNdG2n8+kEpQgg==
 releaseDate: '2026-10-26T14:27:03.296Z'

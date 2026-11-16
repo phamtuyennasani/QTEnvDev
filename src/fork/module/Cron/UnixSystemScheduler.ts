@@ -116,7 +116,7 @@ exit "$EXIT_CODE"
   }
 
   private async writeCrontab(content: string): Promise<void> {
-    const tmpFile = join(tmpdir(), `flyenv-crontab-${uuid()}`)
+    const tmpFile = join(tmpdir(), `qtenvdev-crontab-${uuid()}`)
     await writeFile(tmpFile, content.trimEnd() ? `${content.trimEnd()}\n` : '')
     try {
       await execPromise(`crontab ${shellQuote(tmpFile)}`)
@@ -178,8 +178,8 @@ exit "$EXIT_CODE"
   }
 
   private removeCronBlock(content: string, jobId: string): string {
-    const start = `# FlyEnv Cron Start ${jobId}`
-    const end = `# FlyEnv Cron End ${jobId}`
+    const start = `# QTEnvDev Cron Start ${jobId}`
+    const end = `# QTEnvDev Cron End ${jobId}`
     const result: string[] = []
     let removing = false
 
@@ -203,8 +203,8 @@ exit "$EXIT_CODE"
   private async installCrontab(job: CronJob, scriptPath: string) {
     const current = await this.readCrontab()
     const withoutJob = this.removeCronBlock(current, job.id)
-    const start = `# FlyEnv Cron Start ${job.id}`
-    const end = `# FlyEnv Cron End ${job.id}`
+    const start = `# QTEnvDev Cron Start ${job.id}`
+    const end = `# QTEnvDev Cron End ${job.id}`
     const line = `${job.schedule} ${shellQuote(scriptPath)} >/dev/null 2>&1`
     const next = [withoutJob, start, line, end]
       .filter((part) => `${part}`.trim().length > 0)
@@ -229,13 +229,13 @@ exit "$EXIT_CODE"
     const lines = current.split(/\r?\n/)
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index]
-      const start = line.trim().match(/^# FlyEnv Cron Start (.+)$/)
+      const start = line.trim().match(/^# QTEnvDev Cron Start (.+)$/)
       if (start) {
         result.push(line)
         index += 1
         while (index < lines.length) {
           result.push(lines[index])
-          if (lines[index].trim() === `# FlyEnv Cron End ${start[1]}`) {
+          if (lines[index].trim() === `# QTEnvDev Cron End ${start[1]}`) {
             break
           }
           index += 1
@@ -281,14 +281,14 @@ exit "$EXIT_CODE"
 
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index]
-      const start = line.trim().match(/^# FlyEnv Cron Start (.+)$/)
+      const start = line.trim().match(/^# QTEnvDev Cron Start (.+)$/)
       if (start) {
         const jobId = start[1]
         const block: string[] = []
         index += 1
         while (index < lines.length) {
           const current = lines[index]
-          if (current.trim() === `# FlyEnv Cron End ${jobId}`) {
+          if (current.trim() === `# QTEnvDev Cron End ${jobId}`) {
             break
           }
           block.push(current)
@@ -297,7 +297,7 @@ exit "$EXIT_CODE"
 
         const cronLine = block.map((item) => this.parseCronLine(item)).find(Boolean)
         tasks.push({
-          id: `flyenv:${jobId}`,
+          id: `qtenvdev:${jobId}`,
           platform: 'unix',
           name: systemTaskName(jobId),
           fullName: systemTaskName(jobId),
@@ -306,7 +306,7 @@ exit "$EXIT_CODE"
           nextRunTime: this.nextRunTime(cronLine?.schedule),
           state: 'Enabled',
           enabled: true,
-          isFlyEnv: true,
+          isQTEnvDev: true,
           jobId,
           raw: block.join('\n')
         })
@@ -331,7 +331,7 @@ exit "$EXIT_CODE"
         nextRunTime: this.nextRunTime(parsed.schedule),
         state: 'Enabled',
         enabled: true,
-        isFlyEnv: false,
+        isQTEnvDev: false,
         raw: trimmed
       })
     }
@@ -343,10 +343,9 @@ exit "$EXIT_CODE"
     if (!id?.trim()) {
       throw new Error('System task id is required')
     }
-
-    const flyEnv = id.match(/^flyenv:(.+)$/)
-    if (flyEnv) {
-      await this.remove(flyEnv[1])
+    const qtEnvDev = id.match(/^qtenvdev:(.+)$/)
+    if (qtEnvDev) {
+      await this.remove(qtEnvDev[1])
       return
     }
 

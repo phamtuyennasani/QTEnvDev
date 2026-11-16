@@ -87,8 +87,8 @@ const APP_HELPER_UNAVAILABLE_ERROR_CODES = new Set<AppHelperErrorCode>([
 const FALLBACK_ALLOWLIST = new Set([
   'tools/writeFileByRoot',
   'tools/writeBufferBase64ByRoot',
-  'tools/installFlyEnvPowerShellIntegration',
-  'tools/ensureFlyEnvDataDirectory',
+  'tools/installQTEnvDevPowerShellIntegration',
+  'tools/ensureQTEnvDevDataDirectory',
   'tools/rm',
   'tools/setSystemPath',
   'tools/setSystemEnv',
@@ -144,7 +144,7 @@ export const isAppHelperUnavailableError = (error: unknown): error is AppHelperE
 
 const HELPER_CONNECTION_ERROR_MESSAGE = new RegExp(
   String.raw`(?:(?:AppHelper)?Error:\s*)*connect\s+(?:ENOENT|ECONNREFUSED)\s+` +
-    String.raw`(?:\\\\\.\\pipe\\FlyEnv\.Helper\.[a-f0-9]{32}|/run/flyenv-helper/helper\.sock|/private/var/run/flyenv-helper/helper\.sock)(?=$|[\s'"),;])`,
+    String.raw`(?:\\\\\.\\pipe\\QTEnvDev\.Helper\.[a-f0-9]{32}|/run/qtenvdev-helper/helper\.sock|/private/var/run/qtenvdev-helper/helper\.sock)(?=$|[\s'"),;])`,
   'giu'
 )
 

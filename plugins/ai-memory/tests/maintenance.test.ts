@@ -218,7 +218,7 @@ test('interrupted payload installation rolls back while the actual host lock rem
     )
     await recoverMemoryRestore(f.data)
     assert.equal(await readFile(join(f.data, 'keep.txt'), 'utf8'), 'current data')
-    assert.deepEqual((await readdir(f.data)).sort(), ['.flyenv-owner.lock', 'keep.txt'])
+    assert.deepEqual((await readdir(f.data)).sort(), ['.qtenvdev-owner.lock', 'keep.txt'])
     await assert.rejects(DataRootLease.acquire(f.data), (e: any) => e.code === 'owner_busy')
   } finally {
     await lease.release()
@@ -231,13 +231,13 @@ test('restore preserves the live ownership lock inode and never backs it up', as
   const lease = await DataRootLease.acquire(f.data)
   const ws = await MemoryWorkspace.open(f.data)
   try {
-    const before = await lstat(join(f.data, '.flyenv-owner.lock'))
+    const before = await lstat(join(f.data, '.qtenvdev-owner.lock'))
     await ws.run((e) => e.call('store', draft()))
     const backup = await ws.backup(f.root)
     const manifest = JSON.parse(await readFile(join(backup.data!.path, 'manifest.json'), 'utf8'))
-    assert.ok(!manifest.files.some((item: any) => item.path === '.flyenv-owner.lock'))
+    assert.ok(!manifest.files.some((item: any) => item.path === '.qtenvdev-owner.lock'))
     assert.equal((await ws.restore(backup.data!.path)).outcome, 'success')
-    assert.equal((await lstat(join(f.data, '.flyenv-owner.lock'))).ino, before.ino)
+    assert.equal((await lstat(join(f.data, '.qtenvdev-owner.lock'))).ino, before.ino)
     await assert.rejects(DataRootLease.acquire(f.data), (e: any) => e.code === 'owner_busy')
   } finally {
     await ws.close()

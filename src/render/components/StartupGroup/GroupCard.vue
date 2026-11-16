@@ -12,7 +12,7 @@
             <div class="flex items-center gap-2">
               <span
                 class="inline-block h-3 w-3 rounded-full"
-                :style="{ backgroundColor: group.color || '#409eff' }"
+                :style="{ backgroundColor: group.color || 'var(--color-accent)' }"
               ></span>
               <strong class="truncate text-base">{{ group.name }}</strong>
             </div>
@@ -59,7 +59,7 @@
     </div>
 
     <template #footer>
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <el-tooltip
           :content="I18nT('common.startupGroup.defaultTooltip')"
           placement="top"
@@ -71,11 +71,18 @@
         </el-tooltip>
         <div class="flex items-center gap-2">
           <el-tooltip :content="I18nT('common.action.edit')" placement="top">
-            <el-button :icon="Edit" size="small" circle @click="emit('edit', group)" />
+            <el-button
+              :icon="Edit"
+              :aria-label="I18nT('common.action.edit')"
+              size="small"
+              circle
+              @click="emit('edit', group)"
+            />
           </el-tooltip>
           <el-tooltip :content="I18nT('common.action.delete')" placement="top">
             <el-button
               :icon="Delete"
+              :aria-label="I18nT('common.action.delete')"
               size="small"
               circle
               type="danger"

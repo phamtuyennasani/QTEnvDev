@@ -1,7 +1,7 @@
 {
-  "description": "Giấy phép FlyEnv hỗ trợ việc phát triển và bảo trì dự án một cách liên tục. Nó không nhằm mục đích chặn việc phát triển cục bộ cốt lõi — các runtime cốt lõi và tính năng quản lý môi trường sẽ luôn được truy cập. Giấy phép loại bỏ các giới hạn đánh giá của các công cụ cao cấp và giúp FlyEnv được duy trì trên macOS, Windows và Linux.",
+  "description": "Giấy phép QTEnvDev hỗ trợ việc phát triển và bảo trì dự án một cách liên tục. Nó không nhằm mục đích chặn việc phát triển cục bộ cốt lõi — các runtime cốt lõi và tính năng quản lý môi trường sẽ luôn được truy cập. Giấy phép loại bỏ các giới hạn đánh giá của các công cụ cao cấp và giúp QTEnvDev được duy trì trên macOS, Windows và Linux.",
   "restrictions": {
-    "title": "FlyEnv vẫn hoạt động mà không cần giấy phép, nhưng các giới hạn đánh giá sau sẽ áp dụng:",
+    "title": "QTEnvDev vẫn hoạt động mà không cần giấy phép, nhưng các giới hạn đánh giá sau sẽ áp dụng:",
     "items": {
       "0": "Quản lý trang web bị giới hạn tối đa 3 trang web cục bộ.",
       "1": "Trợ lý AI bị giới hạn trong thời gian dùng thử 3 ngày.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Cách Nhận Giấy phép",
-    "description": "FlyEnv cung cấp ba cách sau để nhận giấy phép. Giấy phép chưa thể được cấp tự động, vì vậy tất cả các yêu cầu đều được xem xét và cấp thủ công:",
+    "description": "QTEnvDev cung cấp ba cách sau để nhận giấy phép. Giấy phép chưa thể được cấp tự động, vì vậy tất cả các yêu cầu đều được xem xét và cấp thủ công:",
     "methods": {
       "0": {
         "title": "Mua Giấy phép Cá nhân",
-        "description": "Giấy phép Cá nhân FlyEnv có giá $10 USD. Nó áp dụng cho một thiết bị đang hoạt động (hỗ trợ chuyển thiết bị thông qua quản lý giấy phép) và loại bỏ tất cả các giới hạn đánh giá. Thanh toán được xử lý bởi Paddle. Sau khi mua, hãy gửi ID đơn hàng Paddle của bạn trong biểu mẫu yêu cầu bên dưới. Trang mua hàng:"
+        "description": "Giấy phép Cá nhân QTEnvDev có giá $10 USD. Nó áp dụng cho một thiết bị đang hoạt động (hỗ trợ chuyển thiết bị thông qua quản lý giấy phép) và loại bỏ tất cả các giới hạn đánh giá. Thanh toán được xử lý bởi Paddle. Sau khi mua, hãy gửi ID đơn hàng Paddle của bạn trong biểu mẫu yêu cầu bên dưới. Trang mua hàng:"
       },
       "1": {
         "title": "Đóng góp cho Mã nguồn",
-        "description": "Gửi một Pull Request trên GitHub để giúp cải thiện FlyEnv. Mọi đóng góp có ý nghĩa đều được tính — từ các tính năng lớn đến những sửa đổi tài liệu đơn giản."
+        "description": "Gửi một Pull Request trên GitHub để giúp cải thiện QTEnvDev. Mọi đóng góp có ý nghĩa đều được tính — từ các tính năng lớn đến những sửa đổi tài liệu đơn giản."
       },
       "2": {
         "title": "Quảng bá Dự án",
-        "description": "Chia sẻ trải nghiệm FlyEnv của bạn trên bất kỳ nền tảng nào, bằng bất kỳ ngôn ngữ nào — bài viết, video, blog hoặc bài đăng. Nội dung phải nguyên bản và chân thực; nội dung đã xuất bản hơn 3 tháng trước có thể không còn đủ điều kiện."
+        "description": "Chia sẻ trải nghiệm QTEnvDev của bạn trên bất kỳ nền tảng nào, bằng bất kỳ ngôn ngữ nào — bài viết, video, blog hoặc bài đăng. Nội dung phải nguyên bản và chân thực; nội dung đã xuất bản hơn 3 tháng trước có thể không còn đủ điều kiện."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Không nhận được mã ủy quyền",
   "oauthTimeout": "Ủy quyền đã hết thời gian",
   "oauthSuccessTitle": "Ủy quyền thành công",
-  "oauthSuccessMessage": "Trang này có thể đóng lại. Vui lòng quay lại FlyEnv để xem thông tin giấy phép.",
+  "oauthSuccessMessage": "Trang này có thể đóng lại. Vui lòng quay lại QTEnvDev để xem thông tin giấy phép.",
   "trialExpiredTitle": "Giấy phép chưa được kích hoạt",
-  "trialExpiredTips": "Bạn đã sử dụng FlyEnv được {days} ngày. Nếu FlyEnv hữu ích cho bạn, hãy cân nhắc lấy giấy phép để hỗ trợ dự án."
+  "trialExpiredTips": "Bạn đã sử dụng QTEnvDev được {days} ngày. Nếu QTEnvDev hữu ích cho bạn, hãy cân nhắc lấy giấy phép để hỗ trợ dự án."
 }

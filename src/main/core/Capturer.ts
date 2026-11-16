@@ -145,7 +145,7 @@ class Capturer {
     this.needCheckWindowInPoint = true
 
     let base64Image = ''
-    const title = 'FlyEnv-Capturer-Window-I3MCDmGbp2IJy9T69RHFs7p0mwGg1WHB'
+    const title = 'QTEnvDev-Capturer-Window-I3MCDmGbp2IJy9T69RHFs7p0mwGg1WHB'
     const display = screen.getPrimaryDisplay()
     console.log('scaleFactor: ', display.scaleFactor)
     console.log('原始bounds:', display.bounds)
@@ -436,7 +436,7 @@ class Capturer {
     clipboard.writeImage(nativeImage.createFromBuffer(buffer))
     const chooseDirSave = () => {
       const timestamp = Math.floor(new Date().getTime() / 1000)
-      const name = `flyenv-capturer-${timestamp}.png`
+      const name = `qtenvdev-capturer-${timestamp}.png`
       dialog
         .showSaveDialog({
           properties: ['showHiddenFiles', 'createDirectory', 'showOverwriteConfirmation'],
@@ -493,7 +493,7 @@ class Capturer {
       }
       name += '.png'
     } else {
-      name = `flyenv-capturer-${timestamp}.png`
+      name = `qtenvdev-capturer-${timestamp}.png`
     }
     const filePath = join(this.config.dir, name)
     writeFile(filePath, buffer).then(() => {

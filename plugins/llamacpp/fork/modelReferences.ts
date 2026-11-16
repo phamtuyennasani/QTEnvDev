@@ -27,7 +27,7 @@ export const resolveModelReference = async (
       throw Error('Managed reference is outside models directory')
     const localIdentity = localModelIdentity(path, rel.split(sep).join('/'))
     if (ref.fileKey !== modelFileKey(localIdentity)) {
-      const sidecar = JSON.parse(await readFile(path + '.flyenv.json', 'utf8'))
+      const sidecar = JSON.parse(await readFile(path + '.qtenvdev.json', 'utf8'))
       if (modelFileKey(sidecar) !== ref.fileKey || sidecar.size !== info.size)
         throw Error('Managed file identity changed')
       digest = sidecar.sha256

@@ -13,7 +13,7 @@ const sevenZip = require('7zip-min-electron') as {
   pack(source: string, target: string, callback: (error?: Error | null) => void): void
 }
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const smokeRoot = await mkdtemp(path.join(tmpdir(), 'flyenv-plugin-runtime-smoke-'))
+const smokeRoot = await mkdtemp(path.join(tmpdir(), 'qtenvdev-plugin-runtime-smoke-'))
 const resultPath = path.join(smokeRoot, 'result.json')
 const dataRoot = path.join(smokeRoot, 'data')
 let runner: ReturnType<typeof spawn> | undefined
@@ -61,7 +61,7 @@ export default {
   init() {},
   exec(name, item) {
     if (name === 'allInstalledVersions') return response([{ version: ${JSON.stringify(version)}, bin: 'runtime-smoke', enable: true }])
-    if (name === 'fetchAllOnlineVersion') return response([{ version: ${JSON.stringify(version)}, mVersion: ${JSON.stringify(version)}, url: 'http://127.0.0.1/runtime-smoke.zip', zip: '/flyenv-smoke/runtime-smoke.zip', bin: '/flyenv-smoke/runtime-smoke', appDir: '/flyenv-smoke', name: 'RuntimeSmoke', downloaded: false, installed: false }])
+    if (name === 'fetchAllOnlineVersion') return response([{ version: ${JSON.stringify(version)}, mVersion: ${JSON.stringify(version)}, url: 'http://127.0.0.1/runtime-smoke.zip', zip: '/qtenvdev-smoke/runtime-smoke.zip', bin: '/qtenvdev-smoke/runtime-smoke', appDir: '/qtenvdev-smoke', name: 'RuntimeSmoke', downloaded: false, installed: false }])
     if (name === 'startService') return response({ started: true, version: item?.version })
     if (name === 'stopService') return response({ stopped: true, version: item?.version })
     return response(true)
@@ -69,7 +69,7 @@ export default {
 }
 `
   )
-  const archivePath = path.join(smokeRoot, `runtime-smoke-${version}.flyenv-plugin`)
+  const archivePath = path.join(smokeRoot, `runtime-smoke-${version}.qtenvdev-plugin`)
   await pack(packageRoot, archivePath)
   const bytes = await readFile(archivePath)
   return { bytes, sha256: createHash('sha256').update(bytes).digest('hex') }
@@ -117,7 +117,7 @@ const server = createServer((request, response) => {
             name: 'Runtime Smoke Plugin',
             version,
             artifact: {
-              url: `http://127.0.0.1:${(server.address() as any).port}/runtime-smoke-${version}.flyenv-plugin`,
+              url: `http://127.0.0.1:${(server.address() as any).port}/runtime-smoke-${version}.qtenvdev-plugin`,
               sha256: artifact.sha256
             }
           }
@@ -126,12 +126,12 @@ const server = createServer((request, response) => {
     )
     return
   }
-  if (url.pathname === '/runtime-smoke-1.0.0.flyenv-plugin') {
+  if (url.pathname === '/runtime-smoke-1.0.0.qtenvdev-plugin') {
     phase = 2
     response.end(v1.bytes)
     return
   }
-  if (url.pathname === '/runtime-smoke-2.0.0.flyenv-plugin') {
+  if (url.pathname === '/runtime-smoke-2.0.0.qtenvdev-plugin') {
     response.end(v2.bytes)
     return
   }
@@ -163,11 +163,11 @@ try {
       env: {
         ...process.env,
         NODE_ENV: 'development',
-        FLYENV_DATA_ROOT: dataRoot,
-        FLYENV_PLUGIN_REGISTRY_URL: `http://127.0.0.1:${port}/registry.json`,
-        FLYENV_PLUGIN_SMOKE: '1',
-        FLYENV_PLUGIN_SMOKE_PHASE: smokePhase,
-        FLYENV_PLUGIN_SMOKE_RESULT: resultPath
+        QTENVDEV_DATA_ROOT: dataRoot,
+        QTENVDEV_PLUGIN_REGISTRY_URL: `http://127.0.0.1:${port}/registry.json`,
+        QTENVDEV_PLUGIN_SMOKE: '1',
+        QTENVDEV_PLUGIN_SMOKE_PHASE: smokePhase,
+        QTENVDEV_PLUGIN_SMOKE_RESULT: resultPath
       }
     })
     const collect = (chunk: Buffer) => {

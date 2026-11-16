@@ -78,7 +78,7 @@ export async function replicationAccount(
   } catch (error: any) {
     if (error.code !== 'ENOENT') throw error
     const value = {
-      user: `flyenv_${cluster.id.slice(0, 20)}`,
+      user: `qtenvdev_${cluster.id.slice(0, 20)}`,
       password: randomBytes(16).toString('hex')
     }
     await writeAtomic(file, JSON.stringify(value))

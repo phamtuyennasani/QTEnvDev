@@ -119,86 +119,24 @@ class App extends Base {
   }
 
   licensesInit() {
-    return new ForkPromise(async (resolve, reject, on) => {
-      let uuid = ''
-      try {
-        uuid = await machineId()
-      } catch (e) {
-        appDebugLog(`[machineId][error]`, `${e}`).catch()
-      }
+    return new ForkPromise(async (resolve, _reject, on) => {
+      // License check removed — always report active
       const data = {
-        requestSuccess: false,
-        uuid,
+        requestSuccess: true,
+        uuid: '',
         activeCode: '',
-        isActive: false
+        isActive: true
       }
-
-      this.licensesState()
-        .then((res) => {
-          Object.assign(data, res)
-          data.requestSuccess = true
-          on({
-            'APP-Licenses-Code': data?.activeCode ?? ''
-          })
-          resolve(data)
-        })
-        .catch(() => {
-          data.requestSuccess = false
-          const license = global.Server?.Licenses
-          if (license) {
-            const uid = publicDecrypt(
-              this.getRSAKey(),
-              Buffer.from(license, 'base64') as any
-            ).toString('utf-8')
-            data.isActive = uid === uuid
-            data.activeCode = data.isActive ? license : ''
-          }
-          resolve(data)
-        })
+      on({ 'APP-Licenses-Code': '' })
+      resolve(data)
     })
   }
 
   licensesState() {
-    return new ForkPromise(async (resolve, reject, on) => {
-      const uuid = await machineId()
-      const obj = {
-        uuid,
-        activeCode: '',
-        isActive: false
-      }
-      axios({
-        url: 'https://api.one-env.com/api/app/active_code_info',
-        method: 'post',
-        data: {
-          uuid
-        },
-        proxy: this.getAxiosProxy()
-      })
-        .then((res) => {
-          console.log('licensesState res: ', res)
-          const data = res?.data?.data ?? {}
-          obj.activeCode = data?.code ?? ''
-          if (obj.activeCode) {
-            const uid = publicDecrypt(
-              this.getRSAKey(),
-              Buffer.from(obj.activeCode, 'base64') as any
-            ).toString('utf-8')
-            obj.isActive = uid === uuid
-
-            on({
-              'APP-Licenses-Code': obj.isActive ? obj.activeCode : ''
-            })
-          } else {
-            on({
-              'APP-Licenses-Code': ''
-            })
-          }
-          resolve(obj)
-        })
-        .catch((e) => {
-          console.log('licensesState err: ', e)
-          reject(e)
-        })
+    return new ForkPromise(async (resolve, _reject, on) => {
+      // License check removed — always report active, skip server call
+      on({ 'APP-Licenses-Code': '' })
+      resolve({ uuid: '', activeCode: '', isActive: true })
     })
   }
 
@@ -244,7 +182,7 @@ class App extends Base {
       }
       try {
         const res = await axios({
-          url: `https://raw.githubusercontent.com/xpf0000/FlyEnv/refs/heads/master/${file}`,
+          url: `https://raw.githubusercontent.com/xpf0000/QTEnvDev/refs/heads/master/${file}`,
           method: 'get',
           proxy: this.getAxiosProxy()
         })
@@ -255,22 +193,22 @@ class App extends Base {
         let name = ''
         if (isMacOS()) {
           if (a === 'x64') {
-            name = `FlyEnv-${version}.dmg`
+            name = `QTEnvDev-${version}.dmg`
           } else {
-            name = `FlyEnv-${version}-arm64.dmg`
+            name = `QTEnvDev-${version}-arm64.dmg`
           }
         } else if (isLinux()) {
           const isdeb = await isDEB()
           const ext = isdeb ? '.deb' : '.rpm'
           if (a === 'x64') {
-            name = `FlyEnv-${version}-x64${ext}`
+            name = `QTEnvDev-${version}-x64${ext}`
           } else {
-            name = `FlyEnv-${version}-arm64${ext}`
+            name = `QTEnvDev-${version}-arm64${ext}`
           }
         } else {
-          name = `FlyEnv-Setup-${version}.exe`
+          name = `QTEnvDev-Setup-${version}.exe`
         }
-        const url = `https://github.com/xpf0000/FlyEnv/releases/download/v${version}/${name}`
+        const url = `https://github.com/xpf0000/QTEnvDev/releases/download/v${version}/${name}`
         resolve({
           app: global.Server.APPVersion,
           online: version,

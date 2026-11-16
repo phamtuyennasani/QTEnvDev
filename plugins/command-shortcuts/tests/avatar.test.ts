@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import { folderInitial, folderGradient } from '../render/avatar'
 
 test('folder avatar follows the name and keeps whole Unicode characters', () => {
-  assert.equal(folderInitial(' flyenv '), 'F')
+  assert.equal(folderInitial(' qtenvdev '), 'F')
   assert.equal(folderInitial('中文'), '中')
   assert.equal(folderInitial('🚀 Project'), '🚀')
   assert.equal(folderInitial(''), '?')

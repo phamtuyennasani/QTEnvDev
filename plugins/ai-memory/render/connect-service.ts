@@ -1,7 +1,7 @@
 import { getMcpServerUrl } from '../../../src/shared/mcpClientConfig'
 import type { ConnectSettings } from './connect-controller'
 export const MEMORY_CONNECT_TOOLS = ['search', 'get', 'store', 'update', 'forget'].map(
-  (name) => `flyenv_memory_${name}`
+  (name) => `qtenvdev_memory_${name}`
 )
 export type MCPRequest = <T = any>(
   command: string,

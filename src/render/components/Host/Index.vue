@@ -1,5 +1,5 @@
 <template>
-  <div class="soft-index-panel main-right-panel">
+  <div class="soft-index-panel main-right-panel app-workbench-page">
     <ul class="top-tab mt-3 flex items-center gap-2.5">
       <el-dropdown @command="setTab">
         <el-button class="outline-0 focus:outline-0">
@@ -334,7 +334,7 @@
     }
   }
   const toLicense = () => {
-    setupStore.tab = 'licenses'
+    setupStore.tab = 'module'
     appStore.currentPage = '/setup'
     Router.push({
       path: '/setup'

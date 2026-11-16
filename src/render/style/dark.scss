@@ -4,10 +4,10 @@ html.dark {
   --base-bg-color-1: #32364a;
   --base-bg-color-2: #474b60;
   --base-color-white-07: rgba(255,255,255,0.7);
-  --flyenv-segmented-background: var(--base-bg-color-1);
-  --flyenv-segmented-border: rgba(255, 255, 255, 0.1);
-  --flyenv-segmented-shadow: none;
-  --flyenv-segmented-active-shadow: none;
+  --qtenvdev-segmented-background: var(--base-bg-color-1);
+  --qtenvdev-segmented-border: rgba(255, 255, 255, 0.1);
+  --qtenvdev-segmented-shadow: none;
+  --qtenvdev-segmented-active-shadow: none;
 
   #app {
     background: var(--base-bg-color);

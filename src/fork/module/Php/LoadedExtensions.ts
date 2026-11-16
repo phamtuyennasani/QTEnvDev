@@ -2,14 +2,14 @@ import { posix, win32 } from 'node:path'
 import type { SoftInstalled } from '@shared/app'
 
 export type LoadedPhpExtension = { name: string }
-const marker = 'FLYENV_LOADED_EXTENSIONS='
+const marker = 'QTENVDEV_LOADED_EXTENSIONS='
 
 export function phpIniPathScript(): string {
-  return "echo 'FLYENV_PHP_INI='.base64_encode(php_ini_loaded_file() ?: '');"
+  return "echo 'QTENVDEV_PHP_INI='.base64_encode(php_ini_loaded_file() ?: '');"
 }
 
 export function parsePhpIniPath(stdout: string): string {
-  const value = stdout.match(/FLYENV_PHP_INI=([A-Za-z0-9+/=]*)/)?.[1]
+  const value = stdout.match(/QTENVDEV_PHP_INI=([A-Za-z0-9+/=]*)/)?.[1]
   return value ? Buffer.from(value, 'base64').toString('utf8') : ''
 }
 

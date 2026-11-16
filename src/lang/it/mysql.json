@@ -17,7 +17,7 @@
   "passwordFormatError": "La password del database non può contenere caratteri cinesi o speciali",
   "savePassword": "Aggiorna password",
   "resetPasswordTips": "Questa operazione cambierà la password dell'utente root del database",
-  "savePasswordTips": "Aggiorna solo la password memorizzata in FlyEnv, non cambia la password dell'utente root del database. Questa password è principalmente utilizzata per arrestare in sicurezza le istanze {app}.",
+  "savePasswordTips": "Aggiorna solo la password memorizzata in QTEnvDev, non cambia la password dell'utente root del database. Questa password è principalmente utilizzata per arrestare in sicurezza le istanze {app}.",
   "resetPasswordConfirm": "Questa operazione cambierà la password dell'utente root del database, sei sicuro di voler procedere?",
   "mysqlNeedRunTips": "Per favore esegui prima {app}",
   "databaseName": "Nome database",

@@ -8,8 +8,8 @@
   "noSelected": "Ingen Valgt",
   "inputFilter": "Input To Filter (Automatic Copy)",
   "about": {
-    "thanks": "Tak fordi du bruger FlyEnv. Hvis du har spørgsmål eller forslag, kan du deltage i fællesskabet eller oprette en GitHub-issue.",
-    "starSponsor": "Hvis FlyEnv er nyttigt for dig, så giv projektet en stjerne og støt det. Tak!",
+    "thanks": "Tak fordi du bruger QTEnvDev. Hvis du har spørgsmål eller forslag, kan du deltage i fællesskabet eller oprette en GitHub-issue.",
+    "starSponsor": "Hvis QTEnvDev er nyttigt for dig, så giv projektet en stjerne og støt det. Tak!",
     "github": "GitHub:",
     "sponsor": "Sponsorer:"
   }

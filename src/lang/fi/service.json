@@ -5,8 +5,8 @@
   "envTips": "On lisätty polku ympäristön muuttujaan",
   "aliasTips": "Pääteikkunassa käytetty Alias",
   "useSysPHP": "Käytä PHP oletusversiota",
-  "setByApp": "FlyEnvin määrittämät ympäristömuuttujat",
-  "setByNoApp": "Ympäristömuuttujat, joita FlyEnv ei ole määrittänyt",
+  "setByApp": "QTEnvDevin määrittämät ympäristömuuttujat",
+  "setByNoApp": "Ympäristömuuttujat, joita QTEnvDev ei ole määrittänyt",
   "bundleinVersionDelTips": "Tämä versio on sisäänrakennettu versio, varmista, että sitä ei näytetä?",
   "customDirVersionDelTips": "Tämä versio on mukautettu polkuversio, varmista, että sitä ei näytetä?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Käynnistä tämä korotettuja oikeuksia vaativa tehtävä käsin ja suorita valtuutus päätteessä; macOS/Linux ei tue automaattista sudo-toimintoa taustalla.",
-  "linuxFtpUnmanagedRoot": "FlyEnvin hallittu palvelu ei käynnistänyt tätä root-käyttäjänä toimivaa FTP-prosessia. Pysäytä se järjestelmänvalvojan oikeuksilla ennen uudelleenkäynnistystä.",
+  "linuxFtpUnmanagedRoot": "QTEnvDevin hallittu palvelu ei käynnistänyt tätä root-käyttäjänä toimivaa FTP-prosessia. Pysäytä se järjestelmänvalvojan oikeuksilla ennen uudelleenkäynnistystä.",
   "linuxFtpUsersRefreshFailed": "FTP-tilien muutokset tallennettiin, mutta käynnissä oleva palvelu ei voinut ottaa niitä käyttöön: {error}",
   "pathSavedRefreshFailed": "Ympäristömuuttujat tallennettiin, mutta luettelon päivitys epäonnistui: {error}"
 }

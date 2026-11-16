@@ -42,7 +42,7 @@ async function paths(
     isMacOS: () => false,
     isLinux: () => false,
     windowsSystemDirectory: () => 'C:\\Windows\\System32',
-    __static: 'C:\\FlyEnv\\static',
+    __static: 'C:\\QTEnvDev\\static',
     createBaseDirectories: async () => {
       created = true
       if (creation instanceof Error) throw creation
@@ -53,7 +53,7 @@ async function paths(
   })
   runInContext(pathCode, context)
   const subject = context.subject as (root: string) => Promise<boolean>
-  const ready = await subject('D:\\FlyEnv-Data')
+  const ready = await subject('D:\\QTEnvDev-Data')
   return { ready, server, warnings, created }
 }
 const missing = await paths(new Error("Failed to get 'documents' path"))

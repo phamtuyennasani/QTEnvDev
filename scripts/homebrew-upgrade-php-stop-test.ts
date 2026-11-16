@@ -109,9 +109,9 @@ console.log(
 
 // Opt-in native acceptance uses existing binaries with isolated ini/FPM config,
 // private sockets and detached test-only process groups. No package is upgraded.
-if (process.env.FLYENV_TEST_PHP_FPM) {
-  const bin = await realpath(process.env.FLYENV_TEST_PHP_FPM)
-  const nativeRoot = await realpath(await mkdtemp('/tmp/flyenv-fpm-stop-'))
+if (process.env.QTENVDEV_TEST_PHP_FPM) {
+  const bin = await realpath(process.env.QTENVDEV_TEST_PHP_FPM)
+  const nativeRoot = await realpath(await mkdtemp('/tmp/qtenvdev-fpm-stop-'))
   const children: ChildProcess[] = []
   let diagnostics = ''
   try {

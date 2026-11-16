@@ -515,8 +515,8 @@
         return I18nT('flutter.sourceDefault')
       case 'custom':
         return I18nT('flutter.sourceCustom')
-      case 'flyenv':
-        return I18nT('flutter.sourceFlyenv')
+      case 'qtenvdev':
+        return I18nT('flutter.sourceQTEnvDev')
       default:
         return I18nT('flutter.sourceUnknown')
     }
@@ -716,7 +716,7 @@
   /* ── Status Bar ─────────────────────────────────────────── */
   .fg-status-bar {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 8px;
     flex-shrink: 0;
   }
@@ -737,7 +737,7 @@
     min-width: 0;
 
     &:hover {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--shadow-panel);
     }
 
     &--ok {
@@ -897,7 +897,7 @@
   }
 
   .fg-mono {
-    font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+    font-family: var(--app-code-font, var(--font-mono));
     font-size: 11px;
   }
 
@@ -1003,7 +1003,7 @@
     border-radius: 12px;
     background: var(--el-color-info-light-9);
     color: var(--el-text-color-secondary);
-    transition: all 0.2s;
+    transition: opacity var(--dur-short) var(--ease-out);
 
     &--active {
       background: var(--el-color-primary-light-8);
@@ -1108,16 +1108,51 @@
     flex: 1;
     margin: 0;
     padding: 12px 14px;
-    font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+    font-family: var(--app-code-font, var(--font-mono));
     font-size: 12px;
     line-height: 1.65;
     white-space: pre-wrap;
     word-break: break-all;
     overflow-y: auto;
-    background: #1a1a1e;
-    color: #cdd6f4;
+    background: var(--color-surface-muted);
+    color: var(--color-ink);
     min-height: 0;
     scrollbar-width: thin;
-    scrollbar-color: #45475a #1a1a1e;
+    scrollbar-color: var(--color-rule-strong) var(--color-surface-muted);
+  }
+
+  @media (max-width: 60rem) {
+    .flutter-general {
+      overflow-y: auto;
+    }
+    .fg-status-bar {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .fg-body {
+      flex-direction: column;
+      overflow: visible;
+      flex: none;
+    }
+    .fg-left,
+    .fg-right {
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+    .fg-console {
+      min-height: 16rem;
+    }
+    .fg-console-hd {
+      flex-wrap: wrap;
+      gap: var(--space-2xs);
+    }
+    .fg-btn-row .el-button {
+      margin-left: 0;
+    }
+  }
+  @media (max-width: 30rem) {
+    .fg-status-bar {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 </style>

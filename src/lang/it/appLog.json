@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Cartella dati inizializzata con successo, percorso: {dir}",
   "initDBDataDirFail": "Inizializzazione della cartella dati fallita, motivo: {error}",
   "newProjectFail": "Impossibile creare un nuovo progetto",
-  "processListFail": "Recupero lista processi fallito. Si prega di installare FlyEnv Helper"
+  "processListFail": "Recupero lista processi fallito. Si prega di installare QTEnvDev Helper"
 }

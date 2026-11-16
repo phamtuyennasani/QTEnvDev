@@ -35,7 +35,7 @@ export const AppUI = () => {
   watch(
     theme,
     (val) => {
-      localForage.setItem('flyenv-app-theme', val).catch()
+      localForage.setItem('qtenvdev-app-theme', val).catch()
     },
     {
       immediate: true

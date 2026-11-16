@@ -70,7 +70,7 @@ test(
   'reports a masked JVM error and does not format storage',
   { skip: process.platform !== 'win32' },
   async () => {
-    const root = await mkdtemp(join(tmpdir(), 'FlyEnv Kafka failure '))
+    const root = await mkdtemp(join(tmpdir(), 'QTEnvDev Kafka failure '))
     const previousServer = global.Server
     const { default: kafka } = await import('../fork/Kafka')
     const { default: EnvSync } = await import('../../../src/shared/EnvSync')
@@ -109,7 +109,7 @@ test(
       kafka.pidPath = previousPidPath
       EnvSync.AppEnv = previousEnv
       global.Server = previousServer
-      assert.ok(root.startsWith(join(tmpdir(), 'FlyEnv Kafka failure ')))
+      assert.ok(root.startsWith(join(tmpdir(), 'QTEnvDev Kafka failure ')))
       await rm(root, { recursive: true, force: true })
     }
   }
@@ -117,9 +117,9 @@ test(
 
 test(
   'real Kafka initializes, starts, lists topics and stops with space-containing paths',
-  { skip: process.platform !== 'win32' || !process.env.FLYENV_KAFKA_TEST_ROOT },
+  { skip: process.platform !== 'win32' || !process.env.QTENVDEV_KAFKA_TEST_ROOT },
   async () => {
-    const root = await mkdtemp(join(tmpdir(), 'FlyEnv Kafka 测试 '))
+    const root = await mkdtemp(join(tmpdir(), 'QTEnvDev Kafka 测试 '))
     const previousServer = global.Server
     const previousCwd = process.cwd()
     const { default: kafka } = await import('../fork/Kafka')
@@ -133,9 +133,9 @@ test(
       _fixRunClassBat: (bin: string) => Promise<void>
     }
     try {
-      const installedRoot = process.env.FLYENV_KAFKA_TEST_ROOT!
-      const javaHome = process.env.FLYENV_KAFKA_TEST_JAVA_HOME!
-      assert.ok(javaHome, 'FLYENV_KAFKA_TEST_JAVA_HOME is required for live validation')
+      const installedRoot = process.env.QTENVDEV_KAFKA_TEST_ROOT!
+      const javaHome = process.env.QTENVDEV_KAFKA_TEST_JAVA_HOME!
+      assert.ok(javaHome, 'QTENVDEV_KAFKA_TEST_JAVA_HOME is required for live validation')
       const install = join(root, 'distribution')
       const binDir = join(install, 'bin/windows')
       await mkdir(binDir, { recursive: true })
@@ -192,7 +192,7 @@ test(
       await runtime._initKRaft(version, javaHome)
       assert.equal(await readFile(metaFile, 'utf8'), meta, 'existing data is not reformatted')
       await assert.rejects(
-        execPromiseWithEnv(`"${join(binDir, 'kafka-run-class.bat')}" flyenv.fixture.NoSuchClass`, {
+        execPromiseWithEnv(`"${join(binDir, 'kafka-run-class.bat')}" qtenvdev.fixture.NoSuchClass`, {
           cwd: install,
           env: { JAVA_HOME: javaHome },
           timeout: 60_000
@@ -237,7 +237,7 @@ test(
       kafka.pidPath = previousPidPath
       EnvSync.AppEnv = previousEnv
       global.Server = previousServer
-      assert.ok(root.startsWith(join(tmpdir(), 'FlyEnv Kafka 测试 ')))
+      assert.ok(root.startsWith(join(tmpdir(), 'QTEnvDev Kafka 测试 ')))
       await rm(root, { recursive: true, force: true })
     }
   }

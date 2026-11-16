@@ -4,7 +4,7 @@
   "inputTips": "//Adjon meg JSON-t, JavaScript objektumot/tömböt, PHP tömböt, XML-t, YAML-t vagy PListet. Automatikus konvertálás a kiválasztott formátumba",
   "parseFailTips": "Feldolgozás sikertelen",
   "inputCheckFailTips": "Azonosítatlan",
-  "systemProxyCheck": "A rendszer proxyhasználatot észlelt a hálózaton. Beállítsa a FlyEnv ezt a proxyt?",
+  "systemProxyCheck": "A rendszer proxyhasználatot észlelt a hálózaton. Beállítsa a QTEnvDev ezt a proxyt?",
   "systemProxyUsed": "Beállítás sikeres. Ha módosítani szeretné, tegye meg a Beállítások->Proxy beállítások menüpontban.",
   "windowCount": "Ablakok száma",
   "codemake": "Kódgenerálás",

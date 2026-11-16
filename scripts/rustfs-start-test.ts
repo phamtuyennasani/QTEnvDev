@@ -11,9 +11,9 @@ import { ProcessKillStrict, ProcessListByExactPid } from '../src/shared/Process'
 import { waitForServiceProcessExit } from '../src/shared/ServiceStop'
 import type { SoftInstalled } from '../src/shared/app'
 
-if (process.platform !== 'win32' || !process.env.FLYENV_RUSTFS_TEST_ROOT) process.exit(0)
+if (process.platform !== 'win32' || !process.env.QTENVDEV_RUSTFS_TEST_ROOT) process.exit(0)
 
-const root = await mkdtemp(join(tmpdir(), "FlyEnv RustFS Program Files 测试 ' "))
+const root = await mkdtemp(join(tmpdir(), "QTEnvDev RustFS Program Files 测试 ' "))
 const previousServer = global.Server
 const previousEnv = EnvSync.AppEnv
 const previousCwd = process.cwd()
@@ -32,7 +32,7 @@ try {
     /rustfs\.exe/i.test(item.EXECUTABLE ?? '')
   )
   for (const versionText of ['1.0.0-alpha.99', '1.0.3']) {
-    const source = join(process.env.FLYENV_RUSTFS_TEST_ROOT, versionText, 'rustfs.exe')
+    const source = join(process.env.QTENVDEV_RUSTFS_TEST_ROOT, versionText, 'rustfs.exe')
     assert.ok(existsSync(source), `Missing RustFS ${versionText}`)
     const bin = join(root, `install ${versionText}`, 'rustfs.exe')
     await mkdir(dirname(bin))
@@ -57,8 +57,8 @@ try {
     )
     // Relative credential files must retain their old install-directory meaning.
     await mkdir(join(dirname(bin), 'keys'))
-    await writeFile(join(dirname(bin), 'keys/access key.txt'), 'flyenvtest')
-    await writeFile(join(dirname(bin), 'keys/secret key.txt'), 'flyenv-isolated-secret')
+    await writeFile(join(dirname(bin), 'keys/access key.txt'), 'qtenvdevtest')
+    await writeFile(join(dirname(bin), 'keys/secret key.txt'), 'qtenvdev-isolated-secret')
     await writeFile(
       join(root, 'rustfs/rustfs.conf'),
       [
@@ -133,6 +133,6 @@ try {
   rustfs.pidPath = previousPidPath
   EnvSync.AppEnv = previousEnv
   global.Server = previousServer
-  assert.ok(root.startsWith(join(tmpdir(), "FlyEnv RustFS Program Files 测试 ' ")))
+  assert.ok(root.startsWith(join(tmpdir(), "QTEnvDev RustFS Program Files 测试 ' ")))
   await rm(root, { recursive: true, force: true })
 }

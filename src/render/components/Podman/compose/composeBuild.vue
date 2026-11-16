@@ -311,7 +311,7 @@
     const compose = {
       services,
       networks: {
-        'flyenv-network': {
+        'qtenvdev-network': {
           driver: 'bridge'
         }
       }

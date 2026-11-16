@@ -148,7 +148,7 @@
     summary: '',
     tags: [],
     content: '',
-    source: { kind: 'user_statement', agent: 'FlyEnv UI', description: T('manualSource') },
+    source: { kind: 'user_statement', agent: 'QTEnvDev UI', description: T('manualSource') },
     status: 'active',
     pinned: false
   })

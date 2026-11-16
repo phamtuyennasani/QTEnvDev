@@ -101,7 +101,7 @@
   "allTasks": "Bütün tapşırıqlar",
   "systemTasks": "Sistem tapşırıqları",
   "systemTask": "Sistem tapşırığı",
-  "flyenvTask": "FlyEnv tapşırığı",
+  "qtenvdevTask": "QTEnvDev tapşırığı",
   "otherTask": "Digər tapşırıq",
   "taskTrigger": "Tətikləyici",
   "deleteSystemTaskTips": "Bu sistem planlaşdırılmış tapşırığını silmək istəyirsiniz?",

@@ -52,7 +52,7 @@ test('configures a replica channel with MariaDB GTID slave_pos', async () => {
     }
   }
   await api.configureReplicaChannel(session, 13307, {
-    user: 'flyenv_repl_g',
+    user: 'qtenvdev_repl_g',
     password: 'p\'"$`'
   })
   const change = commands.find((c) => /CHANGE /.test(c.sql))!
@@ -60,7 +60,7 @@ test('configures a replica channel with MariaDB GTID slave_pos', async () => {
     change.sql,
     /^CHANGE MASTER TO MASTER_HOST='127\.0\.0\.1', MASTER_PORT=\?, MASTER_USER=\?, MASTER_PASSWORD=\?, MASTER_USE_GTID=slave_pos$/
   )
-  assert.deepEqual(change.params, [13307, 'flyenv_repl_g', 'p\'"$`'])
+  assert.deepEqual(change.params, [13307, 'qtenvdev_repl_g', 'p\'"$`'])
   assert.match(commands.at(-2)!.sql, /^START SLAVE$/)
   assert.match(commands.at(-1)!.sql, /^SET GLOBAL read_only=ON$/)
   assert.ok(!commands.some((c) => /super_read_only/i.test(c.sql)))

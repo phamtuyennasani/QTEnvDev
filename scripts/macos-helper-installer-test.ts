@@ -55,7 +55,7 @@ runInNewContext(bundle.outputFiles[0].text, {
 })
 const { macOSHelperBootstrap, buildMacOSHelperInstallCommand } = module.exports
 const quote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`
-const root = mkdtempSync(join(tmpdir(), 'flyenv-helper-installer-'))
+const root = mkdtempSync(join(tmpdir(), 'qtenvdev-helper-installer-'))
 let passed = 0
 const failures: string[] = []
 function test(name: string, run: () => void) {
@@ -72,11 +72,11 @@ function executable(path: string, text: string) {
   writeFileSync(path, `#!/bin/sh\nset -eu\n${text}\n`, { mode: 0o755 })
 }
 try {
-  const app = join(root, "FlyEnv's 中文 $literal.app")
+  const app = join(root, "QTEnvDev's 中文 $literal.app")
   const resources = join(app, 'Contents/Resources')
-  const binary = join(resources, 'helper/flyenv-helper')
-  const installer = join(resources, 'helper/flyenv-helper-init.sh')
-  const plist = join(resources, 'plist/com.flyenv.helper.plist')
+  const binary = join(resources, 'helper/qtenvdev-helper')
+  const installer = join(resources, 'helper/qtenvdev-helper-init.sh')
+  const plist = join(resources, 'plist/com.qtenvdev.helper.plist')
   const stageParent = join(root, 'private-stage')
   const record = join(root, 'record')
   const verify = join(root, 'verify')
@@ -191,10 +191,10 @@ done
 
   // Replay the actual publishing script against disposable paths and executors.
   const library = join(root, 'Library')
-  const helperDir = join(library, 'Application Support/FlyEnv/Helper')
+  const helperDir = join(library, 'Application Support/QTEnvDev/Helper')
   mkdirSync(helperDir, { recursive: true })
   mkdirSync(join(library, 'LaunchDaemons'))
-  const publishingStage = join(stageParent, 'flyenv-helper-install.fixture')
+  const publishingStage = join(stageParent, 'qtenvdev-helper-install.fixture')
   mkdirSync(publishingStage)
   const publishScript = join(publishingStage, 'installer.sh')
   const publishBinary = join(publishingStage, 'binary')
@@ -207,7 +207,7 @@ done
     publishBinary,
     `/usr/bin/touch ${quote(policyRecord)}\n/usr/bin/printf '{}' > ${quote(join(helperDir, 'policy.json'))}`
   )
-  writeFileSync(publishPlist, readFileSync('build/plist/com.flyenv.helper.plist'))
+  writeFileSync(publishPlist, readFileSync('build/plist/com.qtenvdev.helper.plist'))
   const launchctl = join(root, 'launchctl')
   executable(
     launchctl,
@@ -233,7 +233,7 @@ esac`
   )
   writeFileSync(
     publishScript,
-    readFileSync('static/sh/macOS/flyenv-helper-init.sh', 'utf8')
+    readFileSync('static/sh/macOS/qtenvdev-helper-init.sh', 'utf8')
       .replaceAll('/private/var/root', stageParent)
       .replaceAll('/Library/', `${library}/`)
       .replaceAll('/bin/launchctl', launchctl)

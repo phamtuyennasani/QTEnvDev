@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { openMemoryDirectory } from '../render/directory'
 
-test('directory adapter accepts FlyEnv acknowledgement and Electron empty success result', async () => {
+test('directory adapter accepts QTEnvDev acknowledgement and Electron empty success result', async () => {
   const paths: string[] = []
   for (const response of [true, '']) {
     await openMemoryDirectory(async (path) => {

@@ -29,17 +29,17 @@ const Perl = reactive({
       image: `${mirror}perl:${Perl.version}`,
       ports: Perl.ports.map((p) => `${p.out}:${p.in}`),
       environment,
-      networks: ['flyenv-network'],
+      networks: ['qtenvdev-network'],
       working_dir: '/app',
       command: Perl.command
     }
 
     const volumes: any[] = []
 
-    const flyenvPerlDir = join(dirname(base.dir), 'flyenv-docker-compose/perl')
-    await fs.mkdirp(flyenvPerlDir)
+    const qtenvdevPerlDir = join(dirname(base.dir), 'qtenvdev-docker-compose/perl')
+    await fs.mkdirp(qtenvdevPerlDir)
 
-    const perlCacheHostPath = join(flyenvPerlDir, 'cpanm_cache')
+    const perlCacheHostPath = join(qtenvdevPerlDir, 'cpanm_cache')
     await fs.mkdirp(perlCacheHostPath)
 
     volumes.push({

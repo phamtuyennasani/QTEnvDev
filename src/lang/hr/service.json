@@ -5,8 +5,8 @@
   "envTips": "Je li putanja dodana u varijablu okruženja",
   "aliasTips": "Alias koji se koristi u terminalu",
   "useSysPHP": "Koristi zadanu PHP verziju",
-  "setByApp": "Varijable okruženja postavljene od FlyEnv-a",
-  "setByNoApp": "Varijable okruženja nisu postavljene od FlyEnv-a",
+  "setByApp": "Varijable okruženja postavljene od QTEnvDev-a",
+  "setByNoApp": "Varijable okruženja nisu postavljene od QTEnvDev-a",
   "bundleinVersionDelTips": "Ova verzija je ugrađena verzija, potvrdite da nije prikazana?",
   "customDirVersionDelTips": "Ova verzija je verzija prilagođene putanje, potvrdite da nije prikazana?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Ručno pokrenite ovaj zadatak s povišenim ovlastima i dovršite autorizaciju u terminalu; macOS/Linux ne podržava automatski sudo u pozadini.",
-  "linuxFtpUnmanagedRoot": "Ovaj FTP proces s ovlastima root nije pokrenula upravljana usluga FlyEnva. Zaustavite ga s administratorskim ovlastima prije ponovnog pokretanja.",
+  "linuxFtpUnmanagedRoot": "Ovaj FTP proces s ovlastima root nije pokrenula upravljana usluga QTEnvDeva. Zaustavite ga s administratorskim ovlastima prije ponovnog pokretanja.",
   "linuxFtpUsersRefreshFailed": "Promjene FTP računa su spremljene, ali ih pokrenuta usluga nije mogla primijeniti: {error}",
   "pathSavedRefreshFailed": "Varijable okruženja spremljene su, ali osvježavanje popisa nije uspjelo: {error}"
 }

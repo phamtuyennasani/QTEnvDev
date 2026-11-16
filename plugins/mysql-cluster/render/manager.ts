@@ -13,7 +13,7 @@ import { MysqlClusterController } from './controller'
 import { t } from './lang'
 
 const flag = 'mysql-cluster'
-const key = 'flyenv-plugin-mysql-cluster-v1'
+const key = 'qtenvdev-plugin-mysql-cluster-v1'
 const binFor = (id: string) =>
   join(window.Server.MysqlDir!, 'mysql-cluster', 'instances', id, 'my.cnf')
 const moduleFor = () => BrewStore().module(flag)

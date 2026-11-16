@@ -225,7 +225,7 @@ class MCP {
   }
 
   get stdioConfigSnippet(): string {
-    const bridgePath = this.bridgePath || '<FlyEnv>/mcp/flyenv-mcp-stdio.mjs'
+    const bridgePath = this.bridgePath || '<QTEnvDev>/mcp/qtenvdev-mcp-stdio.mjs'
     return buildStdioClientConfigSnippet(bridgePath, this.serverUrl, this.config.token)
   }
 
@@ -241,7 +241,7 @@ class MCP {
     })
   }
 
-  /** Register FlyEnv through the shared client-config operation. */
+  /** Register QTEnvDev through the shared client-config operation. */
   async addToClient(clientFlag: MCPHttpClientFlag) {
     const result = await configureMCPClient(clientFlag, {
       serverUrl: this.serverUrl,

@@ -17,7 +17,7 @@ import type {
   StartupGroupResolvedMember
 } from '../type'
 
-const storageKey = 'flyenv-startup-groups'
+const storageKey = 'qtenvdev-startup-groups'
 
 export class StartupGroupManagerService {
   private loadingCount = 0

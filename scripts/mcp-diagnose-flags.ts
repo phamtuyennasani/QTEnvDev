@@ -57,7 +57,7 @@ async function main() {
   console.log(`[diag] target: ${url}`)
   console.log(`[diag] flags count: ${flags.length}`)
 
-  const client = new Client({ name: 'flyenv-mcp-diag', version: '1.0.0' })
+  const client = new Client({ name: 'qtenvdev-mcp-diag', version: '1.0.0' })
   const transport = new StreamableHTTPClientTransport(new URL(url), { fetch: fetchWithAuth })
   await client.connect(transport)
 

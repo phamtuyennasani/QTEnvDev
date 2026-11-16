@@ -15,9 +15,9 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const linuxPolicyPath = "/etc/flyenv-helper/policy.json"
-const linuxKeyPath = "/etc/flyenv-helper/client.key"
-const linuxSocketPath = "/run/flyenv-helper/helper.sock"
+const linuxPolicyPath = "/etc/qtenvdev-helper/policy.json"
+const linuxKeyPath = "/etc/qtenvdev-helper/client.key"
+const linuxSocketPath = "/run/qtenvdev-helper/helper.sock"
 
 type linuxPolicy = unixPolicy
 
@@ -110,10 +110,10 @@ func installLinuxPolicy(args []string) error {
 	if err != nil {
 		return err
 	}
-	if err = os.MkdirAll("/etc/flyenv-helper", 0755); err != nil {
+	if err = os.MkdirAll("/etc/qtenvdev-helper", 0755); err != nil {
 		return err
 	}
-	if err = unixDirectory("/etc/flyenv-helper"); err != nil {
+	if err = unixDirectory("/etc/qtenvdev-helper"); err != nil {
 		return err
 	}
 

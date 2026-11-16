@@ -2,7 +2,7 @@
 
 # --- Configuration ---
 BUILD_DIR="./dist"
-APP_NAME="flyenv-helper"
+APP_NAME="qtenvdev-helper"
 MAIN_PACKAGE="." # Build the whole package; main.go references sibling files such as startup_diagnostics.go
 
 # Determine architecture and set TARGET

@@ -14,7 +14,7 @@ import {
 } from '../fork/terminal'
 
 test('quoted Unix directory is literal and multiline command is preserved', async () => {
-  const root = await mkdtemp(join(tmpdir(), "flyenv-' $() "))
+  const root = await mkdtemp(join(tmpdir(), "qtenvdev-' $() "))
   try {
     const command = 'printf "%s\\n" "$PWD"\nprintf second'
     const script = buildDirectoryCommand(root, command, 'darwin')
@@ -28,7 +28,7 @@ test('quoted Unix directory is literal and multiline command is preserved', asyn
 })
 
 test('failed cd never runs the preset command', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-shortcuts-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-shortcuts-'))
   try {
     const marker = join(root, 'marker')
     const script = buildDirectoryCommand(join(root, 'missing'), `touch '${marker}'`, 'linux')
@@ -42,7 +42,7 @@ test('failed cd never runs the preset command', async () => {
 })
 
 test('terminal stays in the chosen directory after the preset completes', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-cwd-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-cwd-'))
   try {
     const script = buildDirectoryCommand(root, 'true', 'darwin')
     const { stdout } = await promisify(execFile)('/bin/bash', [
@@ -87,7 +87,7 @@ test('Linux terminal arguments preserve one payload and use terminal-specific ex
 })
 
 test('directory-only mode performs cd without running a placeholder command', async () => {
-  const root = await mkdtemp(join(tmpdir(), "flyenv-cd-' $-"))
+  const root = await mkdtemp(join(tmpdir(), "qtenvdev-cd-' $-"))
   try {
     const command = buildDirectoryCommand(root, undefined, 'darwin')
     const { stdout } = await promisify(execFile)('/bin/bash', [

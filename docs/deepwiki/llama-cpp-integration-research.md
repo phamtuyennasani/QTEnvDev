@@ -8,9 +8,9 @@
 
 ## 结论
 
-llama.cpp 可以集成进 FlyEnv，并且适合做成独立的 AI 服务模块。
+llama.cpp 可以集成进 QTEnvDev，并且适合做成独立的 AI 服务模块。
 
-推荐以官方预编译可执行文件作为外部进程运行，不建议第一版将 `libllama` 直接编译成 Electron/Node 原生扩展。这样可以复用 FlyEnv 当前服务模块、版本管理、PID 管理、日志和端口检查机制，同时避免 Electron ABI、CMake、GPU SDK 和跨平台签名带来的维护成本。
+推荐以官方预编译可执行文件作为外部进程运行，不建议第一版将 `libllama` 直接编译成 Electron/Node 原生扩展。这样可以复用 QTEnvDev 当前服务模块、版本管理、PID 管理、日志和端口检查机制，同时避免 Electron ABI、CMake、GPU SDK 和跨平台签名带来的维护成本。
 
 llama.cpp 与 Ollama 是互补关系：
 
@@ -54,7 +54,7 @@ llama-b10293-bin-win-cuda-12.4-x64.zip
 cudart-llama-bin-win-cuda-12.4-x64.zip
 ```
 
-CUDA 13.3 也是同样的主包和 `cudart` DLL 包组合。FlyEnv 应将它们作为一个完整的 CUDA 运行时变体管理，而不是把 `cudart` 当成独立版本。
+CUDA 13.3 也是同样的主包和 `cudart` DLL 包组合。QTEnvDev 应将它们作为一个完整的 CUDA 运行时变体管理，而不是把 `cudart` 当成独立版本。
 
 官方 Release 资产提供 SHA-256 digest，安装时应校验 digest 后再解压和执行。
 
@@ -83,7 +83,7 @@ llama serve \
 
 差异主要体现在二进制、驱动和运行时依赖，而不是 HTTP API。
 
-| 后端 | 运行要求 | FlyEnv 运行时处理 |
+| 后端 | 运行要求 | QTEnvDev 运行时处理 |
 |---|---|---|
 | CPU | 不需要 GPU 驱动；模型完全在 CPU/RAM 中运行 | 直接启动；可用 `--device none` 禁用 GPU |
 | Vulkan | 系统显卡驱动必须提供 Vulkan | 启动前检查驱动；允许用户选择设备 |
@@ -103,9 +103,9 @@ llama serve \
 
 ---
 
-## 与 FlyEnv 现有架构的匹配
+## 与 QTEnvDev 现有架构的匹配
 
-FlyEnv 已经有 Ollama 模块，可以作为结构参考：
+QTEnvDev 已经有 Ollama 模块，可以作为结构参考：
 
 - [Ollama fork 模块](../../src/fork/module/Ollama/index.ts)
 - [Ollama 模块定义](../../src/render/components/Ollama/Module.ts)
@@ -185,7 +185,7 @@ llama.cpp 要求模型为 GGUF 格式。它支持：
 - Hugging Face 仓库和量化选择，例如 `-hf ggml-org/gemma-3-1b-it-GGUF`
 - 已下载模型的本地路径
 
-与 Ollama 不同，llama.cpp 没有同等定位的统一官方模型目录和模型名称协议。FlyEnv 不应直接复用 Ollama 的 `pull/rm/list` 语义，建议分成：
+与 Ollama 不同，llama.cpp 没有同等定位的统一官方模型目录和模型名称协议。QTEnvDev 不应直接复用 Ollama 的 `pull/rm/list` 语义，建议分成：
 
 1. 本地模型导入：选择 GGUF 文件或模型目录。
 2. Hugging Face 下载：输入仓库、量化版本和保存目录，显示文件级进度。

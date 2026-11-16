@@ -20,6 +20,6 @@ Default SQL ports start after the highest saved SQL port and skip conflicts acro
 - Plugin ESLint: zero errors, three unchanged v-html warnings in copied version-help templates.
 - Full vue-tsc (8GiB): 53 existing diagnostics, identical byte-for-byte to the established baseline; no new diagnostics.
 - Renderer operation boundary audit and production build passed; Vue view expressions compile. Host source unchanged: `git diff 619d7c8d -- src scripts` is empty.
-- Final archive: `dist/plugins/mysql-cluster/mysql-cluster-0.1.3.flyenv-plugin`, 601461 bytes, SHA-256 `d611ceff79e7ed7f7d17b29d25bec19bf7f22a916be4478b70e9cea3da67dbfe`, matching registry. Manifest and payload entries verified.
+- Final archive: `dist/plugins/mysql-cluster/mysql-cluster-0.1.3.qtenvdev-plugin`, 601461 bytes, SHA-256 `d611ceff79e7ed7f7d17b29d25bec19bf7f22a916be4478b70e9cea3da67dbfe`, matching registry. Manifest and payload entries verified.
 
 The prior native MySQL 9.6 acceptance remains applicable to the unchanged Fork implementation; it was not rerun for these renderer corrections. No user service, installed plugin, package manager or database was altered by the checks; no publication/push.

@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const allowedRootsFileUnix = "/usr/local/share/FlyEnv/flyenv.allowed-roots"
+const allowedRootsFileUnix = "/usr/local/share/QTEnvDev/qtenvdev.allowed-roots"
 
 var (
 	envKeyPattern       = regexp.MustCompile(`^[A-Z][A-Z0-9_]{0,63}$`)
@@ -44,9 +44,9 @@ var allowedEnvKeys = map[string]bool{
 }
 
 var allowedAutoStartTasks = map[string]bool{
-	"FlyEnvHelperTask": true,
-	"FlyEnvStartup":    true,
-	"flyenv-helper":    true,
+	"QTEnvDevHelperTask": true,
+	"QTEnvDevStartup":    true,
+	"qtenvdev-helper":    true,
 }
 
 type configuredAllowedRoots struct {
@@ -143,22 +143,22 @@ func readConfiguredAllowedRoots() configuredAllowedRoots {
 	info, err := os.Lstat(path)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			fmt.Printf("Warning: failed to inspect FlyEnv allowed roots file '%s': %v\n", path, err)
+			fmt.Printf("Warning: failed to inspect QTEnvDev allowed roots file '%s': %v\n", path, err)
 			return configuredAllowedRoots{filePresent: true}
 		}
 		return configuredAllowedRoots{}
 	}
 	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() || info.Size() > 64*1024 {
-		fmt.Printf("Warning: ignoring invalid FlyEnv allowed roots file: %s\n", path)
+		fmt.Printf("Warning: ignoring invalid QTEnvDev allowed roots file: %s\n", path)
 		return configuredAllowedRoots{filePresent: true}
 	}
 	if err := validateAllowedRootsFileSecurity(path, info); err != nil {
-		fmt.Printf("Warning: ignoring insecure FlyEnv allowed roots file '%s': %v\n", path, err)
+		fmt.Printf("Warning: ignoring insecure QTEnvDev allowed roots file '%s': %v\n", path, err)
 		return configuredAllowedRoots{filePresent: true}
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		fmt.Printf("Warning: failed to read FlyEnv allowed roots file '%s': %v\n", path, err)
+		fmt.Printf("Warning: failed to read QTEnvDev allowed roots file '%s': %v\n", path, err)
 		return configuredAllowedRoots{filePresent: true}
 	}
 
@@ -173,7 +173,7 @@ func readConfiguredAllowedRoots() configuredAllowedRoots {
 		}
 		clean, err := cleanAbsPath(line)
 		if err != nil {
-			fmt.Printf("Warning: ignoring invalid FlyEnv allowed root '%s': %v\n", line, err)
+			fmt.Printf("Warning: ignoring invalid QTEnvDev allowed root '%s': %v\n", line, err)
 			continue
 		}
 		key := comparePath(clean)
@@ -270,8 +270,8 @@ func isSensitiveSystemPath(path string) bool {
 func isManagedPathByName(path string) bool {
 	p := strings.ToLower(filepath.ToSlash(path))
 	fragments := []string{
-		"/flyenv",
-		"/flyenv.app",
+		"/qtenvdev",
+		"/qtenvdev.app",
 		"/php-web-study",
 		"/phpwebstudy",
 		"/phpwebstudy-data",
@@ -293,7 +293,7 @@ func isManagedPathByExecutable(path string) bool {
 	dir := filepath.Dir(exe)
 	for {
 		base := strings.ToLower(filepath.Base(dir))
-		if strings.Contains(base, "flyenv") || strings.Contains(base, "phpwebstudy") || strings.Contains(base, "php-web-study") {
+		if strings.Contains(base, "qtenvdev") || strings.Contains(base, "phpwebstudy") || strings.Contains(base, "php-web-study") {
 			return pathInDir(path, dir)
 		}
 		parent := filepath.Dir(dir)
@@ -305,7 +305,7 @@ func isManagedPathByExecutable(path string) bool {
 	return false
 }
 
-func isWindowsProgramFilesFlyEnvPath(path string) bool {
+func isWindowsProgramFilesQTEnvDevPath(path string) bool {
 	if runtime.GOOS != "windows" {
 		return false
 	}
@@ -318,7 +318,7 @@ func isWindowsProgramFilesFlyEnvPath(path string) bool {
 			continue
 		}
 		p := strings.ToLower(filepath.ToSlash(path))
-		return strings.Contains(p, "/flyenv") || strings.Contains(p, "/phpwebstudy") || strings.Contains(p, "/php-web-study")
+		return strings.Contains(p, "/qtenvdev") || strings.Contains(p, "/phpwebstudy") || strings.Contains(p, "/php-web-study")
 	}
 	return false
 }
@@ -384,14 +384,14 @@ func isHomebrewPackagePath(path, packageName string) bool {
 	return false
 }
 
-func isFlyEnvSharedPath(path string) bool {
+func isQTEnvDevSharedPath(path string) bool {
 	if runtime.GOOS == "windows" {
 		return false
 	}
 	allowed := []string{
-		"/Applications/FlyEnv.app",
-		"/Library/Application Support/FlyEnv",
-		"/usr/local/share/FlyEnv",
+		"/Applications/QTEnvDev.app",
+		"/Library/Application Support/QTEnvDev",
+		"/usr/local/share/QTEnvDev",
 	}
 	for _, dir := range allowed {
 		if pathInDir(path, dir) {
@@ -425,7 +425,7 @@ func isBusinessPathAllowed(path string) bool {
 	configured := readConfiguredAllowedRoots()
 	if isConfiguredAllowedRoot(path, configured.roots) ||
 		isExplicitSystemFile(path) ||
-		isFlyEnvSharedPath(path) ||
+		isQTEnvDevSharedPath(path) ||
 		isMacPortsPath(path) ||
 		isHomebrewPHPPath(path) ||
 		isUserHomeProfilePath(path) {
@@ -434,7 +434,7 @@ func isBusinessPathAllowed(path string) bool {
 	if !configured.filePresent {
 		return isManagedPathByName(path) ||
 			isManagedPathByExecutable(path) ||
-			isWindowsProgramFilesFlyEnvPath(path)
+			isWindowsProgramFilesQTEnvDevPath(path)
 	}
 	return false
 }
@@ -512,7 +512,7 @@ func validatePathAccess(path string, forWrite bool) error {
 		return fmt.Errorf("sensitive system path is not allowed: %s", path)
 	}
 	if !isBusinessPathAllowed(clean) {
-		return fmt.Errorf("path outside FlyEnv allowed scope: %s", path)
+		return fmt.Errorf("path outside QTEnvDev allowed scope: %s", path)
 	}
 	hasSymlink, err := PathHasSymlinkComponent(clean)
 	if err != nil {
@@ -535,7 +535,7 @@ func ValidatePathForWrite(path string) error {
 	return validatePathAccess(path, true)
 }
 
-func isExactConfiguredFlyEnvDataDirectoryRoot(path string, roots []string) bool {
+func isExactConfiguredQTEnvDevDataDirectoryRoot(path string, roots []string) bool {
 	for _, root := range roots {
 		if pathEqual(path, root) {
 			return true
@@ -544,11 +544,11 @@ func isExactConfiguredFlyEnvDataDirectoryRoot(path string, roots []string) bool 
 	return false
 }
 
-// ValidateFlyEnvDataDirectoryRoot permits only the exact data root recorded by
+// ValidateQTEnvDevDataDirectoryRoot permits only the exact data root recorded by
 // the elevated installer. It intentionally does not allow a configured root's
 // children, so this recovery operation cannot be repurposed as a generic
 // privileged mkdir endpoint.
-func ValidateFlyEnvDataDirectoryRoot(path string) (string, error) {
+func ValidateQTEnvDevDataDirectoryRoot(path string) (string, error) {
 	if runtime.GOOS == "windows" {
 		protectedRoot := filepath.Dir(allowedRootsFilePath())
 		if pathInDir(path, protectedRoot) || pathInDir(protectedRoot, path) {
@@ -556,7 +556,7 @@ func ValidateFlyEnvDataDirectoryRoot(path string) (string, error) {
 		}
 	}
 	if runtime.GOOS != "windows" {
-		return "", fmt.Errorf("FlyEnv data-directory recovery is only supported on Windows")
+		return "", fmt.Errorf("QTEnvDev data-directory recovery is only supported on Windows")
 	}
 	clean, err := cleanAbsPath(path)
 	if err != nil {
@@ -574,18 +574,18 @@ func ValidateFlyEnvDataDirectoryRoot(path string) (string, error) {
 	}
 	configured := readConfiguredAllowedRoots()
 	if !configured.filePresent || len(configured.roots) == 0 {
-		return "", fmt.Errorf("FlyEnv data-directory roots are unavailable")
+		return "", fmt.Errorf("QTEnvDev data-directory roots are unavailable")
 	}
-	if !isExactConfiguredFlyEnvDataDirectoryRoot(clean, configured.roots) {
-		return "", fmt.Errorf("unexpected FlyEnv data-directory root")
+	if !isExactConfiguredQTEnvDevDataDirectoryRoot(clean, configured.roots) {
+		return "", fmt.Errorf("unexpected QTEnvDev data-directory root")
 	}
 	return clean, nil
 }
 
-// ValidateFlyEnvPowerShellRuntimeScriptPath only permits the runtime script
-// directly below a configured FlyEnv data root. It intentionally does not
+// ValidateQTEnvDevPowerShellRuntimeScriptPath only permits the runtime script
+// directly below a configured QTEnvDev data root. It intentionally does not
 // inherit the generic "descendant of an allowed root" write capability.
-func ValidateFlyEnvPowerShellRuntimeScriptPath(path string) (string, error) {
+func ValidateQTEnvDevPowerShellRuntimeScriptPath(path string) (string, error) {
 	clean, err := cleanAbsPath(path)
 	if err != nil {
 		return "", err
@@ -595,22 +595,22 @@ func ValidateFlyEnvPowerShellRuntimeScriptPath(path string) (string, error) {
 	}
 	configured := readConfiguredAllowedRoots()
 	if !configured.filePresent || len(configured.roots) == 0 {
-		return "", fmt.Errorf("FlyEnv runtime script roots are unavailable")
+		return "", fmt.Errorf("QTEnvDev runtime script roots are unavailable")
 	}
 	for _, root := range configured.roots {
-		if pathEqual(clean, filepath.Join(root, "bin", "flyenv.ps1")) {
+		if pathEqual(clean, filepath.Join(root, "bin", "qtenvdev.ps1")) {
 			return clean, nil
 		}
 	}
-	return "", fmt.Errorf("unexpected FlyEnv runtime script path: %s", path)
+	return "", fmt.Errorf("unexpected QTEnvDev runtime script path: %s", path)
 }
 
-// ValidateFlyEnvPowerShellProfilePath only permits the two standard
+// ValidateQTEnvDevPowerShellProfilePath only permits the two standard
 // edition-specific PowerShell profile names. Windows may relocate Documents
 // outside the helper user's home, so profile location is not restricted to it.
 // The caller obtains Documents from Electron app.getPath("documents"); by
 // product policy its ancestors do not need to be owned by the target SID.
-func ValidateFlyEnvPowerShellProfilePath(path, edition string) (string, error) {
+func ValidateQTEnvDevPowerShellProfilePath(path, edition string) (string, error) {
 	if runtime.GOOS != "windows" {
 		return "", fmt.Errorf("PowerShell profile validation is only supported on Windows")
 	}
@@ -690,7 +690,7 @@ func ValidateSymlinkPair(oldname, newname string) error {
 		}
 	}
 	if !isPythonExecutableSymlink(oldClean, newClean) {
-		return fmt.Errorf("symlink pair outside FlyEnv allowed scope: %s -> %s", oldname, newname)
+		return fmt.Errorf("symlink pair outside QTEnvDev allowed scope: %s -> %s", oldname, newname)
 	}
 	if isSensitiveSystemPath(oldClean) || isSensitiveSystemPath(newClean) {
 		return fmt.Errorf("sensitive system path is not allowed")
@@ -718,7 +718,7 @@ func ValidateRabbitMQPluginDir(cwd string) error {
 		return err
 	}
 	if !isBusinessPathAllowed(clean) && !isHomebrewPackagePath(clean, "rabbitmq") {
-		return fmt.Errorf("RabbitMQ plugin directory outside FlyEnv allowed scope: %s", cwd)
+		return fmt.Errorf("RabbitMQ plugin directory outside QTEnvDev allowed scope: %s", cwd)
 	}
 	if isSensitiveSystemPath(clean) {
 		return fmt.Errorf("sensitive system path is not allowed: %s", cwd)
@@ -846,7 +846,7 @@ func ValidateSystemEnvKey(key string, allowWhitelisted bool) error {
 	if !envKeyPattern.MatchString(key) {
 		return fmt.Errorf("invalid environment variable key: %s", key)
 	}
-	if strings.HasPrefix(key, "FLYENV_") {
+	if strings.HasPrefix(key, "QTENVDEV_") {
 		return nil
 	}
 	if allowWhitelisted && allowedEnvKeys[key] {
@@ -918,7 +918,7 @@ func ValidateSystemEnvValue(key, value string) error {
 		if prefix == "" || (len(value) > len(prefix) && value[len(prefix)] != '\\') {
 			return fmt.Errorf("invalid environment path for %s", key)
 		}
-		return ValidateWindowsAbsolutePath(`C:\FlyEnvEnvValue`+value[len(prefix):], false)
+		return ValidateWindowsAbsolutePath(`C:\QTEnvDevEnvValue`+value[len(prefix):], false)
 	}
 	if strings.ContainsAny(value, `/\`) {
 		return fmt.Errorf("environment variable value must be an allowed path: %s", key)
@@ -943,15 +943,15 @@ func ValidateAutoStartTask(enabled bool, taskName, exePath string) error {
 	base := strings.ToLower(filepath.Base(clean))
 	allowedExe := map[string]bool{
 		"electron.exe":      true,
-		"flyenv-helper.exe": true,
-		"flyenv.exe":        true,
+		"qtenvdev-helper.exe": true,
+		"qtenvdev.exe":        true,
 		"phpwebstudy.exe":   true,
 	}
 	if !allowedExe[base] {
 		return fmt.Errorf("invalid auto-start executable: %s", base)
 	}
 	if !isBusinessPathAllowed(clean) && !isManagedPathByName(clean) {
-		return fmt.Errorf("auto-start executable outside FlyEnv allowed scope: %s", exePath)
+		return fmt.Errorf("auto-start executable outside QTEnvDev allowed scope: %s", exePath)
 	}
 	return nil
 }

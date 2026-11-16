@@ -8,10 +8,10 @@ import { configuredExtensions } from '../src/fork/module/Php.win/ExtensionConfig
 import type { SoftInstalled } from '../src/shared/app'
 
 // Explicit integration test: downloads official Redis/Xdebug archives into an isolated PHP copy.
-const source = process.argv[2] || process.env.FLYENV_PHP_TEST_BIN
+const source = process.argv[2] || process.env.QTENVDEV_PHP_TEST_BIN
 assert.ok(source, 'Pass the path to a real Windows PHP executable')
 assert.equal(process.platform, 'win32')
-const root = await mkdtemp(join(tmpdir(), 'FlyEnv PHP live [路径] & $ '))
+const root = await mkdtemp(join(tmpdir(), 'QTEnvDev PHP live [路径] & $ '))
 const previousServer = global.Server
 try {
   const path = join(root, 'PHP with spaces')
@@ -101,7 +101,7 @@ try {
   assert.ok(!disabledRedis.loaded.some((name) => name.toLowerCase() === 'redis'))
   const disabledXdebug = await installer.disable(version, 'xdebug')
   assert.ok(!disabledXdebug.loaded.some((name) => name.toLowerCase() === 'xdebug'))
-  assert.doesNotMatch(await readFile(ini, 'utf8'), /FlyEnv-xdebug-ini-begin/)
+  assert.doesNotMatch(await readFile(ini, 'utf8'), /QTEnvDev-xdebug-ini-begin/)
   console.log(
     `Real PHP ${before.version}: Redis install/reinstall with old full path, Xdebug defaults and disable passed`
   )
@@ -109,7 +109,7 @@ try {
   global.Server = previousServer
   assert.ok(
     resolve(root).startsWith(resolve(tmpdir()) + sep) &&
-      root.includes('FlyEnv PHP live [路径] & $ ')
+      root.includes('QTEnvDev PHP live [路径] & $ ')
   )
   await rm(root, { recursive: true, force: true })
 }

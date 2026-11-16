@@ -1,7 +1,7 @@
 export default {
   tlsTitle: 'Local TLS certificates',
   tlsDescription:
-    'Reuse the FlyEnv root CA, a CA from the SSL certificate tool, or mkcert rootCA.pem and rootCA-key.pem. Generates separate node/admin certificates for localhost, this computer name, 127.0.0.1 and ::1; enables HTTPS. The CA private key stays in its original location.',
+    'Reuse the QTEnvDev root CA, a CA from the SSL certificate tool, or mkcert rootCA.pem and rootCA-key.pem. Generates separate node/admin certificates for localhost, this computer name, 127.0.0.1 and ::1; enables HTTPS. The CA private key stays in its original location.',
   tlsCACert: 'CA certificate',
   tlsCAKey: 'CA private key',
   tlsConfigure: 'Generate and configure TLS',

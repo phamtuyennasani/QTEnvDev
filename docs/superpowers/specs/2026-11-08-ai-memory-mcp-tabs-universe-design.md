@@ -2,7 +2,7 @@
 
 ## 目标
 
-1. FlyEnv MCP 的工具页按内置工具与插件划分 Tab，不再混排；只展示已安装且启用插件的工具。
+1. QTEnvDev MCP 的工具页按内置工具与插件划分 Tab，不再混排；只展示已安装且启用插件的工具。
 2. 移除 AI Memory 左侧栏的独立 MCP 开关，插件可用状态完全由安装和启用状态决定。
 3. 在保留现有记忆管理能力的前提下，将默认管理视图升级为可交互的 3D 记忆星图。
 
@@ -13,7 +13,7 @@
 ## MCP 工具分组
 
 - `PluginMCPRegistration` 和 `MCPRuntimeTool` 增加通用 `pluginName`，由 `PluginManager` 从已启用插件 manifest 传入，经 `PluginMCPRegistry.listTools()` 返回。
-- 新增纯函数按 `pluginId` 分组：无 `pluginId` 的工具属于 FlyEnv 内置组；插件组使用 `pluginName`，缺失时回退为 `pluginId`。
+- 新增纯函数按 `pluginId` 分组：无 `pluginId` 的工具属于 QTEnvDev 内置组；插件组使用 `pluginName`，缺失时回退为 `pluginId`。
 - `Tools.vue` 使用 `el-tabs`。每组保留“启用工具”和“审批”两个现有区域，工具开关与审批继续调用 `MCPSetup`，不改变权限默认值。
 - 分组完全基于 `mcp:listTools` 的实时目录。主进程现有 `getMCPRegistrations()` 已排除未安装、停用或缺少安装代次的插件，不在渲染层复制启用判断。
 - 当前组随工具目录刷新而消失时，回退到内置组。

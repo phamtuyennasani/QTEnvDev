@@ -114,12 +114,12 @@ export class Cron extends Base {
   }
 
   private systemTaskJobId(systemTaskId: string): string | undefined {
-    const unix = systemTaskId.match(/^flyenv:(.+)$/)
+    const unix = systemTaskId.match(/^qtenvdev:(.+)$/)
     if (unix) {
       return unix[1]
     }
 
-    const task = systemTaskId.match(/(?:^|[\\/])FlyEnv-Cron-([^\\/]+)$/)
+    const task = systemTaskId.match(/(?:^|[\\/])QTEnvDev-Cron-([^\\/]+)$/)
     return task?.[1]
   }
 
@@ -307,7 +307,7 @@ export class Cron extends Base {
               ...task,
               name: job.name || task.name,
               description: job.description || task.description,
-              isFlyEnv: true,
+              isQTEnvDev: true,
               jobId
             }
           })

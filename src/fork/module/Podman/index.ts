@@ -58,7 +58,7 @@ class Podman extends Base {
       const env = await EnvSync.sync()
       const configHome = env.XDG_CONFIG_HOME || join(homedir(), '.config')
       const confDir = join(configHome, 'containers', 'containers.conf.d')
-      const rosettaConfig = join(confDir, 'flyenv-podman.conf')
+      const rosettaConfig = join(confDir, 'qtenvdev-podman.conf')
       await mkdirp(confDir)
       await writeFile(
         rosettaConfig,
@@ -453,7 +453,7 @@ class Podman extends Base {
   fetchImagesVersion() {
     return new ForkPromise(async (resolve) => {
       const json = await axios({
-        url: 'https://flyenv.com/static/podman/allImagesTags.json',
+        url: 'https://qtenvdev.com/static/podman/allImagesTags.json',
         method: 'get',
         timeout: 30000,
         withCredentials: false
@@ -603,12 +603,12 @@ class Podman extends Base {
   }
 
   getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
-    // Podman 通过系统 CLI 与 machine 管理容器，FlyEnv 未为其维护独立的配置文件
+    // Podman 通过系统 CLI 与 machine 管理容器，QTEnvDev 未为其维护独立的配置文件
     return []
   }
 
   getLogFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
-    // Podman 通过系统 CLI 与 machine 管理容器，FlyEnv 未为其维护独立的日志文件
+    // Podman 通过系统 CLI 与 machine 管理容器，QTEnvDev 未为其维护独立的日志文件
     return []
   }
 }

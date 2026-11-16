@@ -29,7 +29,7 @@ func TestWindowsAllowedRootsACLRejectsUsersWrite(t *testing.T) {
 	}
 
 	dir := t.TempDir()
-	file := filepath.Join(dir, "flyenv.allowed-roots")
+	file := filepath.Join(dir, "qtenvdev.allowed-roots")
 	if err := os.WriteFile(file, []byte(dir), 0600); err != nil {
 		t.Fatal(err)
 	}

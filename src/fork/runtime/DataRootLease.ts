@@ -22,7 +22,7 @@ export class DataRootLease {
     }
     await mkdir(root, { recursive: true, mode: 0o700 })
     const dataRoot = await realpath(root)
-    const path = join(dataRoot, '.flyenv-owner.lock')
+    const path = join(dataRoot, '.qtenvdev-owner.lock')
     const handle = await open(
       path,
       constants.O_CREAT | constants.O_RDWR | (constants.O_NOFOLLOW ?? 0),

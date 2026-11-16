@@ -59,7 +59,7 @@
   "samePortTips": "Der findes allerede et websted med samme domæne og lytteport. Brug en anden port til at tilføje et andet websted med det samme domæne.",
   "composerVersion": "Komponist Version",
   "useSysVersion": "Versioner sat ved brug af miljøvariabler",
-  "sslTips": "<p>Den automatiske SSL-certifikatfunktion kræver tilføjelse af et certifikat med navnet FlyEnv-Root-CA til nøgleringen og indstilling til altid at stole på</p>\n<p>Normalt denne funktion vil automatisk blive fuldført. </p>\n<p>Hvis denne funktion er unormal. Du kan også kopiere og udføre kommandoer på terminalen. </p>\n<p>Du kan også dobbeltklikke på for at tilføje certifikatet i den åbnede mappe og manuelt indstille tilliden til altid at stole på nøglering app</p>",
+  "sslTips": "<p>Den automatiske SSL-certifikatfunktion kræver tilføjelse af et certifikat med navnet QTEnvDev-Root-CA til nøgleringen og indstilling til altid at stole på</p>\n<p>Normalt denne funktion vil automatisk blive fuldført. </p>\n<p>Hvis denne funktion er unormal. Du kan også kopiere og udføre kommandoer på terminalen. </p>\n<p>Du kan også dobbeltklikke på for at tilføje certifikatet i den åbnede mappe og manuelt indstille tilliden til altid at stole på nøglering app</p>",
   "copyCommand": "Kopier Kommando",
   "showFile": "Vis Fil",
   "sticky": "Klæbrig",

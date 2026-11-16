@@ -2,7 +2,7 @@
   "podmanInstall": "安裝 Podman",
   "installPodmanByHomebrew": "使用 Homebrew 安裝 Podman",
   "noPodmanFound": "未偵測到 <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a>。\n如需安裝 Podman，可點擊安裝按鈕進行安裝。\n也可以點擊此連結\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\n按照文件說明自行安裝。",
-  "podmanErrorTips": "在此位置 {bin}，偵測到 Podman 的可執行檔案。\n但是 FlyEnv 無法調用。錯誤訊息：\n{error}",
+  "podmanErrorTips": "在此位置 {bin}，偵測到 Podman 的可執行檔案。\n但是 QTEnvDev 無法調用。錯誤訊息：\n{error}",
   "removeContainerTips": "確定移除此容器？",
   "removeMachineTips": "確定移除此虛擬機？",
   "removeImageTips": "確定移除此映像？",

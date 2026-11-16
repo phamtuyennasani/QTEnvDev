@@ -49,13 +49,13 @@ class Helper {
       // 提示属于附加动作，窗口状态不能阻止实际安装请求。
     }
     const request = new Promise<any>((resolve, reject) => {
-      const sent = IPC.send('APP-FlyEnv-Helper-Install')
+      const sent = IPC.send('APP-QTEnvDev-Helper-Install')
       const timer = setTimeout(() => {
         IPC.off(sent.key)
         resolve({
           code: 1,
           reason: 'elevation_status_timeout',
-          msg: I18nT('setup.flyenvHelperInstallTimeout')
+          msg: I18nT('setup.qtenvdevHelperInstallTimeout')
         })
       }, 300_000)
       try {
@@ -102,7 +102,7 @@ class Helper {
    */
   verifyHelperReady(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      IPC.send('APP:FlyEnv-Helper-Check', true).then((key: string, res: any) => {
+      IPC.send('APP:QTEnvDev-Helper-Check', true).then((key: string, res: any) => {
         if (res?.code === 200) return
         IPC.off(key)
         if (res?.code !== 0) {
@@ -164,9 +164,9 @@ class Helper {
     ) {
       const message = I18nT(
         reason === 'elevation_status_timeout'
-          ? 'setup.flyenvHelperInstallTimeout'
+          ? 'setup.qtenvdevHelperInstallTimeout'
           : window.Server.isWindows
-            ? 'setup.flyenvHelperInstallFailTips'
+            ? 'setup.qtenvdevHelperInstallFailTips'
             : 'menu.helperInstallFailTips'
       )
       const diagnostic = stderr
@@ -186,8 +186,8 @@ class Helper {
     } else {
       if (this.manualInstallerOpening) return
       this.manualInstallerOpening = true
-      import('@/components/FlyEnvHelper/setup')
-        .then(({ FlyEnvHelperSetup }) => FlyEnvHelperSetup.open())
+      import('@/components/QTEnvDevHelper/setup')
+        .then(({ QTEnvDevHelperSetup }) => QTEnvDevHelperSetup.open())
         .catch((error) => MessageError(`${I18nT('menu.helperInstallFailTips')}: ${error}`))
         .finally(() => {
           this.manualInstallerOpening = false

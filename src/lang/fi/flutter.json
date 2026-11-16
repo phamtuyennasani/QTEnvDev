@@ -18,7 +18,7 @@
   "sourcePath": "Järjestelmän POLKU",
   "sourceDefault": "Oletus SDK sijainti",
   "sourceCustom": "Määritetty mukautettu polku",
-  "sourceFlyenv": "FlyEnv hallinnoitu SDK",
+  "sourceQTEnvDev": "QTEnvDev hallinnoitu SDK",
   "sourceUnknown": "Tuntematon",
   "createProjectTitle": "Luo Flutter-projekti",
   "create": "Luo",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Flutter moduuli upotetaan olemassa olevaan Android/iOS-sovellukseen.",
   "templateSkeletonDesc": "Lista / yksityiskohta Lattiasovellus Materiaali 3 ja Navigaatio 2.0.",
   "androidSdkNotDetected": "Android SDK:ta ei havaittu",
-  "androidSdkInstallHint": "FlyEnv ei asenna Android SDK:ta automaattisesti. Asenna SDK Android Studiolla tai Androidin virallisilla komentorivityökaluilla.",
+  "androidSdkInstallHint": "QTEnvDev ei asenna Android SDK:ta automaattisesti. Asenna SDK Android Studiolla tai Androidin virallisilla komentorivityökaluilla.",
   "installAndroidStudio": "Asenna Android Studio",
   "androidCommandLineTools": "Androidin komentorivityökalut",
-  "androidSdkAfterInstall": "Kun SDK on asennettu, palaa FlyEnviin, napsauta Päivitä (Refresh) ja määritä sitten ympäristö Auto-fix-toiminnolla."
+  "androidSdkAfterInstall": "Kun SDK on asennettu, palaa QTEnvDeviin, napsauta Päivitä (Refresh) ja määritä sitten ympäristö Auto-fix-toiminnolla."
 }

@@ -59,7 +59,7 @@
   "samePortTips": "Eine Website mit derselben Domäne und demselben Abhörport ist bereits vorhanden. Verwenden Sie einen anderen Port, um eine andere Website mit derselben Domain hinzuzufügen.",
   "composerVersion": "Composer-Version",
   "useSysVersion": "Versionen mit Umgebungsvariablen",
-  "sslTips": "<p>Die automatische SSL-Zertifikatsfunktion erfordert das Hinzufügen eines Zertifikats mit dem Namen FlyEnv-Root-CA in den Schlüsselbund und die Einstellung auf immer</p>\n<p>Normalerweise wird diese Funktion automatisch abgeschlossen. </p>\n<p>Wenn diese Funktion abnormal ist, können Sie auch Befehle auf dem Terminal kopieren und ausführen. </p>\n<p>Sie können auch doppelklicken um das Zertifikat im geöffneten Ordner hinzuzufügen und manuell das Vertrauen in die Schlüsselbündnis-App</p> setzen",
+  "sslTips": "<p>Die automatische SSL-Zertifikatsfunktion erfordert das Hinzufügen eines Zertifikats mit dem Namen QTEnvDev-Root-CA in den Schlüsselbund und die Einstellung auf immer</p>\n<p>Normalerweise wird diese Funktion automatisch abgeschlossen. </p>\n<p>Wenn diese Funktion abnormal ist, können Sie auch Befehle auf dem Terminal kopieren und ausführen. </p>\n<p>Sie können auch doppelklicken um das Zertifikat im geöffneten Ordner hinzuzufügen und manuell das Vertrauen in die Schlüsselbündnis-App</p> setzen",
   "copyCommand": "Befehl kopieren",
   "showFile": "Datei anzeigen",
   "sticky": "Angepinnt",

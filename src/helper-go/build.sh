@@ -3,7 +3,7 @@ set -euo pipefail
 
 # --- Configuration ---
 BUILD_DIR="./dist"
-APP_NAME="flyenv-helper"
+APP_NAME="qtenvdev-helper"
 MAIN_PACKAGE="." # Build the whole package; main.go references sibling files such as startup_diagnostics.go
 
 # Define target platforms: GOOS GOARCH GOAMD64_SETTING

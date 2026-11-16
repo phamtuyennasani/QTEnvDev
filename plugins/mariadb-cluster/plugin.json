@@ -7,7 +7,7 @@
     "en": "MariaDB Cluster plugin: run multiple independent MariaDB instances simultaneously on different ports, with one-click setup of GTID source/replica groups.",
     "zh": "MariaDB集群插件, 使用不同的端口号同时运行多个独立 MariaDB 实例，一键创建 GTID 主从复制组。"
   },
-  "author": "FlyEnv",
+  "author": "QTEnvDev",
   "module": {
     "typeFlag": "mariadb-cluster",
     "moduleType": "dataBaseServer",

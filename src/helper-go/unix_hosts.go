@@ -97,7 +97,7 @@ func (s *hostsStore) update(expected string, transform func(string) (string, err
 	if err = validateHostsMutation(opened); err != nil {
 		return err
 	}
-	temp, err := os.CreateTemp(filepath.Dir(s.path), ".flyenv-hosts-*")
+	temp, err := os.CreateTemp(filepath.Dir(s.path), ".qtenvdev-hosts-*")
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func mergeManagedHosts(content, entries string) (string, error) {
 	result := ""
 	for start >= 0 || stop >= 0 {
 		if start < 0 || stop < start || strings.Contains(content[start+len(begin):stop], begin) {
-			return "", fmt.Errorf("ambiguous FlyEnv hosts markers; edit hosts manually")
+			return "", fmt.Errorf("ambiguous QTEnvDev hosts markers; edit hosts manually")
 		}
 		result += content[:start] + block
 		content = content[stop+len(end):]

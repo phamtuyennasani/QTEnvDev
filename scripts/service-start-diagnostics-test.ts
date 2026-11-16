@@ -26,7 +26,7 @@ const bundle = await build({
     }
   ]
 })
-const root = await mkdtemp(join(tmpdir(), 'flyenv-start-diagnostics-'))
+const root = await mkdtemp(join(tmpdir(), 'qtenvdev-start-diagnostics-'))
 const children = new Set<ChildProcess>()
 let passed = 0
 const failures: string[] = []

@@ -114,7 +114,7 @@ func TestDarwinFTPExecutableAndFixedPlist(t *testing.T) {
 		t.Fatal("accepted FIFO")
 	}
 	plist := darwinFTPPlist(darwinPolicy{UID: 501}, "/user/&/pure-ftpd", "/private/fixed")
-	for _, expected := range []string{"com.flyenv.pure-ftpd.501", "/user/&amp;/pure-ftpd", "AbandonProcessGroup</key><false/>", "KeepAlive</key><false/>"} {
+	for _, expected := range []string{"com.qtenvdev.pure-ftpd.501", "/user/&amp;/pure-ftpd", "AbandonProcessGroup</key><false/>", "KeepAlive</key><false/>"} {
 		if !strings.Contains(plist, expected) {
 			t.Fatal("missing fixed setting", expected)
 		}

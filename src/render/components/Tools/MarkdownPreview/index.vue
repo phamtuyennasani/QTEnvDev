@@ -195,7 +195,7 @@
     document.removeEventListener('mouseup', mouseUp)
     maskDom.remove()
     handleMoving.value = false
-    localStorage.setItem('FlyEnv-MarkdownPreview-LeftStyle', JSON.stringify(leftStyle.value))
+    localStorage.setItem('QTEnvDev-MarkdownPreview-LeftStyle', JSON.stringify(leftStyle.value))
   }
   const HandleMoveMouseDown = (e: MouseEvent) => {
     e?.stopPropagation?.()

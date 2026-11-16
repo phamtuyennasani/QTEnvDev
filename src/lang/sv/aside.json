@@ -11,7 +11,7 @@
   "aiCoding": "AI-kodning",
   "ai": "AI",
   "objectStorage": "Objektlagring",
-  "appExit": "Stoppa alla startade tjänster och avsluta FlyEnv",
+  "appExit": "Stoppa alla startade tjänster och avsluta QTEnvDev",
   "groupStart": "Starta enkelt alla tillgängliga tjänster som visas på panelen",
   "networkTunnel": "Nätverkstunnel",
   "cacheAndQueue": "Cache & Meddelandekö",

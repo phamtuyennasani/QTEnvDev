@@ -52,8 +52,8 @@ type FN =
   | 'health'
   | 'writeFileByRoot'
   | 'writeBufferBase64ByRoot'
-  | 'installFlyEnvPowerShellIntegration'
-  | 'ensureFlyEnvDataDirectory'
+  | 'installQTEnvDevPowerShellIntegration'
+  | 'ensureQTEnvDevDataDirectory'
   | 'readFileByRoot'
   | 'processList'
   | 'macportsDirFixed'
@@ -243,10 +243,10 @@ export class Helper {
     }
     process?.send?.({
       on: true,
-      key: 'App-Need-Init-FlyEnv-Helper',
+      key: 'App-Need-Init-QTEnvDev-Helper',
       info: {
         code: 200,
-        msg: 'App-Need-Init-FlyEnv-Helper'
+        msg: 'App-Need-Init-QTEnvDev-Helper'
       }
     })
   }
@@ -388,7 +388,7 @@ export class Helper {
       let client: ReturnType<HelperDeps['createConnection']> | undefined
       const isHelperFirstOperation =
         module === 'tools' &&
-        (fn === 'installFlyEnvPowerShellIntegration' || fn === 'ensureFlyEnvDataDirectory')
+        (fn === 'installQTEnvDevPowerShellIntegration' || fn === 'ensureQTEnvDevDataDirectory')
       let requestTimer: ReturnType<typeof setTimeout> | undefined
 
       const clearRequestTimer = () => {

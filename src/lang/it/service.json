@@ -5,8 +5,8 @@
   "envTips": "Il percorso è stato aggiunto alla variabile d’ambiente?",
   "aliasTips": "Alias utilizzato nel terminale",
   "useSysPHP": "Usa la versione PHP predefinita",
-  "setByApp": "Variabili d’ambiente impostate da FlyEnv",
-  "setByNoApp": "Variabili d’ambiente non impostate da FlyEnv",
+  "setByApp": "Variabili d’ambiente impostate da QTEnvDev",
+  "setByNoApp": "Variabili d’ambiente non impostate da QTEnvDev",
   "bundleinVersionDelTips": "Questa versione è incorporata, confermi di non visualizzarla?",
   "customDirVersionDelTips": "Questa versione usa un percorso personalizzato, confermi di non visualizzarla?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Avvia manualmente questa attività che richiede privilegi elevati e completa l’autorizzazione nel terminale; macOS/Linux non supporta sudo automatico in background.",
-  "linuxFtpUnmanagedRoot": "Questo processo FTP eseguito come root non è stato avviato dal servizio gestito di FlyEnv. Arrestalo con privilegi di amministratore prima di riavviarlo.",
+  "linuxFtpUnmanagedRoot": "Questo processo FTP eseguito come root non è stato avviato dal servizio gestito di QTEnvDev. Arrestalo con privilegi di amministratore prima di riavviarlo.",
   "linuxFtpUsersRefreshFailed": "Le modifiche agli account FTP sono state salvate, ma il servizio in esecuzione non ha potuto applicarle: {error}",
   "pathSavedRefreshFailed": "Le variabili d’ambiente sono state salvate, ma non è stato possibile aggiornare l’elenco: {error}"
 }

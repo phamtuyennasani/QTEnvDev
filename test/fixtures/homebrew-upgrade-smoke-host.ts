@@ -61,7 +61,7 @@ async function run() {
     const wait = async (expression: string, timeout = 60_000) => {
       const until = Date.now() + timeout
       while (Date.now() < until) {
-        await js(`window.__FLYENV_PLUGIN_HOST__?.['element-plus']?.ElMessageBox.close()`).catch(
+        await js(`window.__QTENVDEV_PLUGIN_HOST__?.['element-plus']?.ElMessageBox.close()`).catch(
           () => {}
         )
         if (await js(expression).catch(() => false)) return
@@ -71,10 +71,10 @@ async function run() {
         `UI timeout: ${expression}; state=${await js('JSON.stringify({phase:window.brewSmoke?.phase,error:window.brewSmoke?.error})').catch(() => 'unavailable')}`
       )
     }
-    await wait('!!window.__FLYENV_PLUGIN_ROUTER__', 100_000)
+    await wait('!!window.__QTENVDEV_PLUGIN_ROUTER__', 100_000)
     win.webContents.closeDevTools()
     await js(
-      `(async()=>{ const { AppModuleTab }=await import('/core/Module.ts'); const { BrewStore }=await import('/store/brew.ts');AppModuleTab.php=2;BrewStore().LibUse.php='brew';await window.__FLYENV_PLUGIN_ROUTER__.push('/php');window.brewSmoke=(await import('/components/VersionManager/brew/Controller.ts')).homebrewUpgrade;})()`
+      `(async()=>{ const { AppModuleTab }=await import('/core/Module.ts'); const { BrewStore }=await import('/store/brew.ts');AppModuleTab.php=2;BrewStore().LibUse.php='brew';await window.__QTENVDEV_PLUGIN_ROUTER__.push('/php');window.brewSmoke=(await import('/components/VersionManager/brew/Controller.ts')).homebrewUpgrade;})()`
     )
     const update = `Array.from(document.querySelectorAll('.el-table button')).find(b=>b.textContent.trim()==='Update')`
     await wait(`!!(${update}) && !(${update}).disabled`, 100_000)
@@ -169,9 +169,9 @@ async function run() {
     await startService()
     await confirm()
     await wait(`window.brewSmoke.phase==='upgrading'`)
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/mcp')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/mcp')`)
     await new Promise((r) => setTimeout(r, 250))
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/php')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/php')`)
     await wait(`window.brewSmoke.phase==='succeeded'`)
     await wait(`document.querySelector('.el-table')?.textContent.includes('8.5.12')`)
     assert.equal(ServiceProcess.statusOf('php').instances.length, 0)
@@ -230,7 +230,7 @@ async function run() {
     checkpoints.push('catalog-query-failure-visible-success-preserved-no-replay-refresh-recovers')
 
     await js(
-      `(async()=>{await (await import('/core/LanguageService.ts')).RendererLanguage.switchLocale('zh');window.__FLYENV_PLUGIN_HOST__['element-plus'].ElMessage.closeAll();window.__FLYENV_PLUGIN_HOST__['element-plus'].ElMessageBox.close();document.documentElement.classList.remove('light');document.documentElement.classList.add('dark')})()`
+      `(async()=>{await (await import('/core/LanguageService.ts')).RendererLanguage.switchLocale('zh');window.__QTENVDEV_PLUGIN_HOST__['element-plus'].ElMessage.closeAll();window.__QTENVDEV_PLUGIN_HOST__['element-plus'].ElMessageBox.close();document.documentElement.classList.remove('light');document.documentElement.classList.add('dark')})()`
     )
     await wait(`document.body.textContent.includes('更新成功')`)
     win.setSize(900, 760)

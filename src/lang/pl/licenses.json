@@ -1,7 +1,7 @@
 {
-  "description": "Licencja FlyEnv wspiera ciągły rozwój i utrzymanie projektu. Nie ma na celu blokowania podstawowej pracy lokalnej — podstawowe środowiska uruchomieniowe i funkcje zarządzania środowiskiem zawsze pozostaną dostępne. Licencja usuwa ograniczenia wersji próbnej narzędzi premium i pomaga utrzymać FlyEnv na macOS, Windows i Linux.",
+  "description": "Licencja QTEnvDev wspiera ciągły rozwój i utrzymanie projektu. Nie ma na celu blokowania podstawowej pracy lokalnej — podstawowe środowiska uruchomieniowe i funkcje zarządzania środowiskiem zawsze pozostaną dostępne. Licencja usuwa ograniczenia wersji próbnej narzędzi premium i pomaga utrzymać QTEnvDev na macOS, Windows i Linux.",
   "restrictions": {
-    "title": "FlyEnv pozostaje funkcjonalny bez licencji, ale obowiązują następujące ograniczenia wersji próbnej:",
+    "title": "QTEnvDev pozostaje funkcjonalny bez licencji, ale obowiązują następujące ograniczenia wersji próbnej:",
     "items": {
       "0": "Zarządzanie witrynami jest ograniczone do maksymalnie 3 lokalnych witryn.",
       "1": "Asystent AI jest dostępny w wersji próbnej przez 3 dni.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Jak uzyskać licencję",
-    "description": "FlyEnv oferuje następujące trzy sposoby uzyskania licencji. Licencje nie są jeszcze wydawane automatycznie, dlatego wszystkie wnioski są rozpatrywane i realizowane ręcznie:",
+    "description": "QTEnvDev oferuje następujące trzy sposoby uzyskania licencji. Licencje nie są jeszcze wydawane automatycznie, dlatego wszystkie wnioski są rozpatrywane i realizowane ręcznie:",
     "methods": {
       "0": {
         "title": "Kup licencję osobistą",
-        "description": "Licencja osobista FlyEnv kosztuje $10 USD. Obejmuje jedno aktywne urządzenie (przeniesienie na inne urządzenie jest możliwe w zarządzaniu licencjami) i usuwa wszystkie ograniczenia wersji próbnej. Płatność obsługuje Paddle. Po zakupie podaj identyfikator zamówienia Paddle w poniższym formularzu. Strona zakupu:"
+        "description": "Licencja osobista QTEnvDev kosztuje $10 USD. Obejmuje jedno aktywne urządzenie (przeniesienie na inne urządzenie jest możliwe w zarządzaniu licencjami) i usuwa wszystkie ograniczenia wersji próbnej. Płatność obsługuje Paddle. Po zakupie podaj identyfikator zamówienia Paddle w poniższym formularzu. Strona zakupu:"
       },
       "1": {
         "title": "Wnieś wkład w kod",
-        "description": "Prześlij Pull Request na GitHub, aby pomóc ulepszyć FlyEnv. Liczy się każdy znaczący wkład — od dużych funkcji po proste poprawki dokumentacji."
+        "description": "Prześlij Pull Request na GitHub, aby pomóc ulepszyć QTEnvDev. Liczy się każdy znaczący wkład — od dużych funkcji po proste poprawki dokumentacji."
       },
       "2": {
         "title": "Rozpowszechnij informację",
-        "description": "Podziel się swoimi doświadczeniami z FlyEnv na dowolnej platformie i w dowolnym języku — artykuły, filmy, blogi lub posty. Treść musi być oryginalna i autentyczna; treści opublikowane ponad 3 miesiące temu mogą już nie kwalifikować się do licencji."
+        "description": "Podziel się swoimi doświadczeniami z QTEnvDev na dowolnej platformie i w dowolnym języku — artykuły, filmy, blogi lub posty. Treść musi być oryginalna i autentyczna; treści opublikowane ponad 3 miesiące temu mogą już nie kwalifikować się do licencji."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Nie otrzymano kodu autoryzacji",
   "oauthTimeout": "Przekroczono limit czasu autoryzacji",
   "oauthSuccessTitle": "Autoryzacja powiodła się",
-  "oauthSuccessMessage": "Tę stronę można zamknąć. Wróć do aplikacji FlyEnv, aby zobaczyć informacje o licencji.",
+  "oauthSuccessMessage": "Tę stronę można zamknąć. Wróć do aplikacji QTEnvDev, aby zobaczyć informacje o licencji.",
   "trialExpiredTitle": "Licencja nie jest aktywowana",
-  "trialExpiredTips": "Używasz FlyEnv od {days} dni. Jeśli FlyEnv był dla Ciebie pomocny, rozważ uzyskanie licencji, aby wesprzeć projekt."
+  "trialExpiredTips": "Używasz QTEnvDev od {days} dni. Jeśli QTEnvDev był dla Ciebie pomocny, rozważ uzyskanie licencji, aby wesprzeć projekt."
 }

@@ -152,8 +152,8 @@
                 <el-button
                   type="primary"
                   link
-                  @click.stop="toUrl('https://flyenv.com/license.html')"
-                  >https://flyenv.com/license.html</el-button
+                  @click.stop="toUrl('https://qtenvdev.com/license.html')"
+                  >https://qtenvdev.com/license.html</el-button
                 >
               </p>
               <p>2. {{ I18nT('licenses.howToObtain.methods.1.title') }} </p>
@@ -162,8 +162,8 @@
                 <el-button
                   type="primary"
                   link
-                  @click.stop="toUrl('https://github.com/xpf0000/FlyEnv')"
-                  >https://github.com/xpf0000/FlyEnv</el-button
+                  @click.stop="toUrl('https://github.com/xpf0000/QTEnvDev')"
+                  >https://github.com/xpf0000/QTEnvDev</el-button
                 ></p
               >
               <p> 3. {{ I18nT('licenses.howToObtain.methods.2.title') }} </p>
@@ -172,8 +172,8 @@
                 <el-button
                   type="primary"
                   link
-                  @click.stop="toUrl('https://flyenv.com/license.html')"
-                  >https://flyenv.com/license.html</el-button
+                  @click.stop="toUrl('https://qtenvdev.com/license.html')"
+                  >https://qtenvdev.com/license.html</el-button
                 >
               </p>
               <p>{{ I18nT('licenses.submitInfo') }}</p>

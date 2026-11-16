@@ -179,7 +179,7 @@ export class PhpProjectCreateController {
   }
 
   private addCreateProjectCommands(commands: string[], request: PhpProjectCreateRequest): void {
-    const command = `create-project --prefer-dist "${request.package}" "flyenv-create-project" "${request.version}"`
+    const command = `create-project --prefer-dist "${request.package}" "qtenvdev-create-project" "${request.version}"`
 
     if (request.isWindows) {
       if (request.php && request.composer) {

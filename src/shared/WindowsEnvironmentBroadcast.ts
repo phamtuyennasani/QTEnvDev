@@ -39,12 +39,12 @@ export const buildWindowsEnvironmentBroadcastScript = (): string => {
   return `$ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 try {
-  Add-Type -Namespace FlyEnvFallback -Name NativeMethods -MemberDefinition @'
+  Add-Type -Namespace QTEnvDevFallback -Name NativeMethods -MemberDefinition @'
 [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
 public static extern System.IntPtr SendMessageTimeout(System.IntPtr hWnd, uint Msg, System.UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out System.UIntPtr lpdwResult);
 '@
   $notifyResult = [System.UIntPtr]::Zero
-  [FlyEnvFallback.NativeMethods]::SendMessageTimeout(
+  [QTEnvDevFallback.NativeMethods]::SendMessageTimeout(
     [System.IntPtr]0xffff, 0x001A, [System.UIntPtr]::Zero,
     'Environment', 0x0002, 5000, [ref]$notifyResult
   ) | Out-Null

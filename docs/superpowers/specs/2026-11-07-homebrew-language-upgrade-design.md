@@ -41,7 +41,7 @@ Homebrew 页区分“已安装”和“可用版本”，只在可更新的已�
 - 根据 brew info / outdated 获取实际安装版本、可用版本/revision、固定状态及更新资格；不以字符串大小判断版本。
 - 配方身份包含真实 brew 路径、prefix/Cellar、full_name、tap 和必要的安装收据来源。Homebrew 专用数据放在 Homebrew 模块目录，不加入通用 SoftInstalled。
 - 相关服务通过该 Homebrew 实例、Cellar 中的实际安装路径及配方归属识别，包括该配方下所有相关已安装 keg；不能仅凭 PHP 名称或版本号停止其他来源的服务。
-- 只停止 FlyEnv 已管理且可确认身份的实例。无法确认必须停止的实例时，阻止当前更新并解释原因；列表中其他独立配方仍可正常查看和操作。
+- 只停止 QTEnvDev 已管理且可确认身份的实例。无法确认必须停止的实例时，阻止当前更新并解释原因；列表中其他独立配方仍可正常查看和操作。
 - 确认后、停止前重查更新资格和目标。目标、来源或需停止的服务集合变化时，更新对话框信息并重新确认；不能沿用过时快照静默执行。
 
 不采集、比较或迁移 php.ini 正文、扩展配置、站点绑定和启动组引用。旧路径可能失效是警告覆盖的用户后续处理事项，不以自动修复为更新成功条件。
@@ -57,9 +57,9 @@ Homebrew 页区分“已安装”和“可用版本”，只在可更新的已�
 7. **失败**：brew 非零退出或执行异常则提示“更新失败”，保留错误/输出日志；不自动重试、不回滚、不启动服务，也不声称 Homebrew 已恢复原状态。
 8. **清理**：确认真实执行终态后释放任务状态和监听资源。
 
-为避免确认后由本次命令自动刷新元数据改变目标，可在该子进程范围设置 HOMEBREW_NO_AUTO_UPDATE=1；Homebrew 支持默认询问时，在 FlyEnv 已确认的前提下使用其非询问模式。不修改用户 shell 配置，不增加备份/迁移/清理旧版本操作，包安装与依赖处理沿用 Homebrew 行为。
+为避免确认后由本次命令自动刷新元数据改变目标，可在该子进程范围设置 HOMEBREW_NO_AUTO_UPDATE=1；Homebrew 支持默认询问时，在 QTEnvDev 已确认的前提下使用其非询问模式。不修改用户 shell 配置，不增加备份/迁移/清理旧版本操作，包安装与依赖处理沿用 Homebrew 行为。
 
-Homebrew 可能更新依赖或依赖方，指定一个配方不等于只改变一个目录。执行前检查潜在影响与 FlyEnv 运行实例；需额外停止其他受管实例时必须纳入确认。无法确认必要停止范围，或计划包含首版未支持的数据库变更时，当前任务不自动执行。该检查只用于避免更新正在使用的安装，不扩展成依赖配置迁移。
+Homebrew 可能更新依赖或依赖方，指定一个配方不等于只改变一个目录。执行前检查潜在影响与 QTEnvDev 运行实例；需额外停止其他受管实例时必须纳入确认。无法确认必要停止范围，或计划包含首版未支持的数据库变更时，当前任务不自动执行。该检查只用于避免更新正在使用的安装，不扩展成依赖配置迁移。
 
 ## 6. 刷新不等于自动修改关联
 
@@ -103,6 +103,6 @@ Homebrew 可能更新依赖或依赖方，指定一个配方不等于只改变�
 ## 9. 依据
 
 - 用户本轮反馈：只在 Homebrew 页更新；警告确认后停止相关服务并升级；关联/配置由用户自行处理。
-- Issue：https://github.com/xpf0000/FlyEnv/issues/938
+- Issue：https://github.com/xpf0000/QTEnvDev/issues/938
 - Homebrew 行为：https://docs.brew.sh/Manpage（info、outdated、upgrade、pin 和环境变量章节）
-- 项目约定：.codex/skills/flyenv-module-boundaries/SKILL.md；docs/skills/flyenv-failure-boundaries/SKILL.md。
+- 项目约定：.codex/skills/qtenvdev-module-boundaries/SKILL.md；docs/skills/qtenvdev-failure-boundaries/SKILL.md。

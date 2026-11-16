@@ -190,13 +190,13 @@ export const validateTomcatSite = async (
 }
 
 export const contextMarker = (siteId: number, contextId: string) => {
-  return `<!-- FlyEnv Tomcat Context site=${siteId} context=${contextId} -->`
+  return `<!-- QTEnvDev Tomcat Context site=${siteId} context=${contextId} -->`
 }
 
-export const rewriteMarker = (siteId: number) => `# FlyEnv Tomcat Rewrite site=${siteId}`
+export const rewriteMarker = (siteId: number) => `# QTEnvDev Tomcat Rewrite site=${siteId}`
 
-const contextMarkerPattern = /^<!-- FlyEnv Tomcat Context site=\d+ context=[A-Za-z0-9]+ -->$/
-const rewriteMarkerPattern = /^# FlyEnv Tomcat Rewrite site=\d+$/
+const contextMarkerPattern = /^<!-- QTEnvDev Tomcat Context site=\d+ context=[A-Za-z0-9]+ -->$/
+const rewriteMarkerPattern = /^# QTEnvDev Tomcat Rewrite site=\d+$/
 
 const escapeXml = (value: string) => {
   return value.replace(/[&<>"']/g, (character) => {

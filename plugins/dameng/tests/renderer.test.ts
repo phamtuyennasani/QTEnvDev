@@ -972,7 +972,7 @@ assert.equal(form.show, true)
 assert.equal(
   harness.pickerCalls.length,
   nativeCount,
-  'download opens FlyEnv dialog before native picker'
+  'download opens QTEnvDev dialog before native picker'
 )
 assert.equal(harness.sent.length, ipcCount, 'opening dialog never downloads')
 form.directory = '/typed/DM8'

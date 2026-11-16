@@ -454,7 +454,7 @@ class Mssql extends Base {
     )
     if (!catalog) throw new Error(MssqlT('mediaInvalid'))
     const root = join(global.Server.Cache!, 'mssql-media', row.version)
-    const readyFile = join(root, 'flyenv-media.json')
+    const readyFile = join(root, 'qtenvdev-media.json')
     if (existsSync(readyFile)) {
       const ready = JSON.parse(await readFile(readyFile, 'utf8'))
       if (
@@ -561,7 +561,7 @@ class Mssql extends Base {
       packageFile: basename(row.zip),
       url: row.url
     }
-    await writeFile(join(dir, 'flyenv-runtime.json'), JSON.stringify(manifest, null, 2))
+    await writeFile(join(dir, 'qtenvdev-runtime.json'), JSON.stringify(manifest, null, 2))
   }
 
   private _ownedInstallDir(row: any): string {
@@ -597,7 +597,7 @@ class Mssql extends Base {
               await this._download(request, on)
               const setup = await this._prepareWindowsMedia(request, on)
               on({ stage: 'setup-launch' })
-              const service = windowsServiceName(`FLYENV${request.version.split('-')[0]}`)
+              const service = windowsServiceName(`QTENVDEV${request.version.split('-')[0]}`)
               const result = await this._runWindowsElevated(
                 windowsInstallBody(
                   setup,
@@ -654,7 +654,7 @@ class Mssql extends Base {
             this.assertNativeArchitecture()
             if (!isLinux()) throw new Error(MssqlT('ownedInstallRequired'))
             const dir = this._ownedInstallDir(request)
-            const manifest = JSON.parse(await readFile(join(dir, 'flyenv-runtime.json'), 'utf8'))
+            const manifest = JSON.parse(await readFile(join(dir, 'qtenvdev-runtime.json'), 'utf8'))
             if (manifest.version !== request.version)
               throw new Error(MssqlT('ownedInstallRequired'))
             // Fork admission serializes deletion with starts and the existing stop
@@ -755,7 +755,7 @@ class Mssql extends Base {
     for (const dir of dirs) {
       if (dir.startsWith('.')) continue
       const path = join(root, dir)
-      const manifestFile = join(path, 'flyenv-runtime.json')
+      const manifestFile = join(path, 'qtenvdev-runtime.json')
       if (!existsSync(manifestFile)) continue
       try {
         const manifest = JSON.parse(await readFile(manifestFile, 'utf-8')) as MssqlRuntimeManifest
@@ -961,7 +961,7 @@ class Mssql extends Base {
         this.assertNativeArchitecture()
         if (!existsSync('/usr/bin/bwrap')) throw new Error(MssqlT('bubblewrapRequired'))
         if (totalmem() < 2 * 1024 ** 3) throw new Error(MssqlT('memoryNotice'))
-        runtime = JSON.parse(await readFile(join(version.path, 'flyenv-runtime.json'), 'utf8'))
+        runtime = JSON.parse(await readFile(join(version.path, 'qtenvdev-runtime.json'), 'utf8'))
         if (runtime.version !== version.version) throw new Error(MssqlT('ownedInstallRequired'))
         const port = Number(params?.port ?? MSSQL_DEFAULT_PORT)
         if (!Number.isInteger(port) || port < 1 || port > 65535)

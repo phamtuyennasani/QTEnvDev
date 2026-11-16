@@ -2,7 +2,7 @@
   <el-card
     style="--el-card-padding: 12px 16px"
     shadow="never"
-    class="app-base-el-card flex-1 overflow-hidden"
+    class="app-container-detail app-base-el-card flex-1 overflow-hidden"
   >
     <template v-if="machine?.name" #header>
       <div class="flex items-center justify-between">

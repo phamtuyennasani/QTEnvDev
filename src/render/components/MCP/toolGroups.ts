@@ -8,7 +8,7 @@ export type MCPToolGroup = {
 }
 
 export function groupMcpTools(tools: MCPRuntimeTool[]): MCPToolGroup[] {
-  const builtin: MCPToolGroup = { id: 'builtin', label: 'FlyEnv', tools: [] }
+  const builtin: MCPToolGroup = { id: 'builtin', label: 'QTEnvDev', tools: [] }
   const plugins = new Map<string, MCPToolGroup>()
   for (const tool of tools) {
     if (!tool.pluginId) {

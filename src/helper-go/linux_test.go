@@ -81,7 +81,7 @@ func TestLinuxRootACL(t *testing.T) {
 	if os.Geteuid() != 0 {
 		t.Skip("requires root")
 	}
-	dir, err := os.MkdirTemp("/opt", ".flyenv-acl-test-")
+	dir, err := os.MkdirTemp("/opt", ".qtenvdev-acl-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func TestLinuxSignedRPC(t *testing.T) {
 	if os.Geteuid() != 0 {
 		t.Skip("requires root")
 	}
-	dir, err := os.MkdirTemp("/opt", ".flyenv-rpc-test-")
+	dir, err := os.MkdirTemp("/opt", ".qtenvdev-rpc-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +159,7 @@ func TestLinuxSignedRPC(t *testing.T) {
 	}()
 	self, _ := os.Executable()
 	cmd := exec.Command(self, "-test.run=^TestLinuxRPCClient$", "-test.v")
-	cmd.Env = append(os.Environ(), "FLYENV_RPC_SOCKET="+socket)
+	cmd.Env = append(os.Environ(), "QTENVDEV_RPC_SOCKET="+socket)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Credential: &syscall.Credential{Uid: 1000, Gid: 1000, Groups: []uint32{1000}}}
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -176,7 +176,7 @@ func TestLinuxSignedRPC(t *testing.T) {
 }
 
 func TestLinuxRPCClient(t *testing.T) {
-	socket := os.Getenv("FLYENV_RPC_SOCKET")
+	socket := os.Getenv("QTENVDEV_RPC_SOCKET")
 	if socket == "" {
 		t.Skip("internal test client")
 	}
@@ -231,11 +231,11 @@ func TestLinuxRPCClient(t *testing.T) {
 }
 
 func TestLinuxServiceCredentials(t *testing.T) {
-	binary := os.Getenv("FLYENV_TEST_HELPER")
+	binary := os.Getenv("QTENVDEV_TEST_HELPER")
 	if os.Geteuid() != 0 || binary == "" {
 		t.Skip("requires root and an isolated test helper binary")
 	}
-	dir, err := os.MkdirTemp("/opt", ".flyenv-helper-test-")
+	dir, err := os.MkdirTemp("/opt", ".qtenvdev-helper-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -370,7 +370,7 @@ func TestLinuxPortOwnershipQuery(t *testing.T) {
 		t.Fatalf("released port must return an empty result: %+v, %v", result, err)
 	}
 	// Optional read-only checks against services already running on a test host.
-	for _, target := range strings.Fields(os.Getenv("FLYENV_TEST_PORT_OWNERS")) {
+	for _, target := range strings.Fields(os.Getenv("QTENVDEV_TEST_PORT_OWNERS")) {
 		pair := strings.SplitN(target, ":", 2)
 		if len(pair) != 2 {
 			t.Fatal("invalid test port owner")
@@ -472,7 +472,7 @@ func TestHostsPreservesACLAndXattrs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	attributes := map[string][]byte{"user.flyenv-test": []byte("metadata"), "system.posix_acl_access": linuxKeyACL(65534)}
+	attributes := map[string][]byte{"user.qtenvdev-test": []byte("metadata"), "system.posix_acl_access": linuxKeyACL(65534)}
 	for name, value := range attributes {
 		if err = unix.Fsetxattr(int(f.Fd()), name, value, 0); err != nil {
 			f.Close()

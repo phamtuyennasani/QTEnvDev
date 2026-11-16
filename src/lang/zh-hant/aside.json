@@ -11,7 +11,7 @@
   "aiCoding": "AI 編碼",
   "ai": "AI",
   "objectStorage": "物件儲存",
-  "appExit": "停止所有已啟動的服務並離開 FlyEnv",
+  "appExit": "停止所有已啟動的服務並離開 QTEnvDev",
   "groupStart": "一鍵啟動所有顯示在面板上的可用服務",
   "networkTunnel": "網路隧道",
   "cacheAndQueue": "緩存&訊息佇列",

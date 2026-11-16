@@ -101,7 +101,7 @@
   "allTasks": "Kaikki tehtävät",
   "systemTasks": "Järjestelmätehtävät",
   "systemTask": "Järjestelmätehtävä",
-  "flyenvTask": "FlyEnv-tehtävä",
+  "qtenvdevTask": "QTEnvDev-tehtävä",
   "otherTask": "Muu tehtävä",
   "taskTrigger": "Laukaisin",
   "deleteSystemTaskTips": "Poistetaanko tämä järjestelmän ajastettu tehtävä?",

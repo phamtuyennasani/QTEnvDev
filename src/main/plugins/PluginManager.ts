@@ -8,13 +8,13 @@ import axios from 'axios'
 import { AjvJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/ajv-provider.js'
 import { getAxiosProxy } from '../../fork/util/Axios'
 import {
-  FLYENV_PLUGIN_ARCHITECTURES,
+  QTENVDEV_PLUGIN_ARCHITECTURES,
   isPluginApiSupported,
   validatePluginCatalog,
   validatePluginManifest,
-  type FlyEnvPluginCatalog,
-  type FlyEnvPluginI18nText,
-  type FlyEnvPluginManifest
+  type QTEnvDevPluginCatalog,
+  type QTEnvDevPluginI18nText,
+  type QTEnvDevPluginManifest
 } from '@shared/plugin/PluginManifest'
 import { verifyLicenseCode } from '@shared/license'
 
@@ -46,8 +46,8 @@ type PluginStateFile = {
   sources: string[]
 }
 
-export type FlyEnvPluginRecord = {
-  manifest: FlyEnvPluginManifest
+export type QTEnvDevPluginRecord = {
+  manifest: QTEnvDevPluginManifest
   rootPath: string
   renderEntry?: string
   forkEntry?: string
@@ -65,9 +65,9 @@ export type InstalledPlugin = {
   id: string
   name: string
   version: string
-  description?: FlyEnvPluginI18nText
+  description?: QTEnvDevPluginI18nText
   author?: string
-  module: FlyEnvPluginManifest['module']
+  module: QTEnvDevPluginManifest['module']
   enabled: boolean
   source?: string
   development: boolean
@@ -146,8 +146,8 @@ const proxiedFetch: typeof fetch = async (input, init) => {
 }
 
 export class PluginManager {
-  private plugins = new Map<string, FlyEnvPluginRecord>()
-  private moduleToPlugin = new Map<string, FlyEnvPluginRecord>()
+  private plugins = new Map<string, QTEnvDevPluginRecord>()
+  private moduleToPlugin = new Map<string, QTEnvDevPluginRecord>()
   private state: PluginStateFile = { version: PLUGIN_STATE_VERSION, plugins: {}, sources: [] }
   private readonly rootOverride?: string
   private readonly stateOverride?: string
@@ -350,16 +350,16 @@ export class PluginManager {
     this.diagnostics = []
     if ((globalThis as any).Server?.DataDirectoryReady === false) {
       throw new Error(
-        'FlyEnv data directory is unavailable; plugin installation records were preserved'
+        'QTEnvDev data directory is unavailable; plugin installation records were preserved'
       )
     }
     // Token verification must never replace a missing/decryption-failed authority.
     // This is a shared prerequisite, rather than an independently invalid plugin.
-    // Development mode (FLYENV_PLUGIN_PATH) loads only the development plugin and
+    // Development mode (QTENVDEV_PLUGIN_PATH) loads only the development plugin and
     // bypasses install-token verification entirely, so the shared data
     // directory's install secret — possibly encrypted by a differently-signed
     // build — must not brick the dev instance.
-    const developmentMode = !!process.env.FLYENV_PLUGIN_PATH
+    const developmentMode = !!process.env.QTENVDEV_PLUGIN_PATH
     if (
       !developmentMode &&
       Object.values(this.state.plugins).some((plugin) => plugin.installToken)
@@ -371,8 +371,8 @@ export class PluginManager {
         this.recordDiagnostic(this.statePath, error)
       )
     }
-    const records: FlyEnvPluginRecord[] = []
-    const developmentPath = process.env.FLYENV_PLUGIN_PATH
+    const records: QTEnvDevPluginRecord[] = []
+    const developmentPath = process.env.QTENVDEV_PLUGIN_PATH
     if (developmentPath) {
       records.push(await this.loadPlugin(resolve(developmentPath), true, 'development'))
     } else {
@@ -417,7 +417,7 @@ export class PluginManager {
       }
     }
 
-    const selected = new Map<string, FlyEnvPluginRecord>()
+    const selected = new Map<string, QTEnvDevPluginRecord>()
     for (const record of records) {
       const state = this.state.plugins[record.manifest.id]
       const current = selected.get(record.manifest.id)
@@ -528,14 +528,12 @@ export class PluginManager {
    * version 1 record with an active license. This prevents an ordinary copy
    * of plugin files from activating without a corresponding local record.
    */
-  private async assertScannedPluginAllowed(record: FlyEnvPluginRecord) {
+  private async assertScannedPluginAllowed(record: QTEnvDevPluginRecord) {
     const state = this.state.plugins[record.manifest.id]
     if (!state?.activeVersion) {
       throw new Error(`Plugin was not installed through the plugin manager: ${record.manifest.id}`)
     }
-    if (!state.installToken && this.legacyState && !(await this.licenseCheck())) {
-      throw new Error(`An active license is required to migrate plugin: ${record.manifest.id}`)
-    }
+    // License check removed
     const manifestRaw = await fs.readFile(join(record.rootPath, 'plugin.json'), 'utf8')
     const token = await this.computeInstallToken(
       record.manifest.id,
@@ -557,7 +555,7 @@ export class PluginManager {
   }
 
   /**
-   * Per-installation random secret used to bind install tokens to this FlyEnv
+   * Per-installation random secret used to bind install tokens to this QTEnvDev
    * installation. Deliberately not derived from the machine id, which can
    * change. Stored outside both the plugins directory and plugins.json, so
    * copying those to another installation is not enough to forge tokens.
@@ -688,7 +686,7 @@ export class PluginManager {
     const result: Array<{
       id: string
       version: string
-      module: FlyEnvPluginManifest['module']
+      module: QTEnvDevPluginManifest['module']
       code: string
       css?: string
     }> = []
@@ -734,7 +732,7 @@ export class PluginManager {
   }
 
   private async failAfterRuntimeRecovery(
-    installed: FlyEnvPluginRecord,
+    installed: QTEnvDevPluginRecord,
     error: unknown
   ): Promise<never> {
     // The caller has confirmed exit and restored the previous durable state/files.
@@ -775,9 +773,9 @@ export class PluginManager {
   }
 
   async listCatalog() {
-    const catalogs: Array<{ catalog: FlyEnvPluginCatalog; source: string; official: boolean }> = []
+    const catalogs: Array<{ catalog: QTEnvDevPluginCatalog; source: string; official: boolean }> = []
     const officialUrl =
-      process.env.FLYENV_PLUGIN_REGISTRY_URL ?? 'https://oss.macphpstudy.com/plugins/registry.json'
+      process.env.QTENVDEV_PLUGIN_REGISTRY_URL ?? 'https://oss.macphpstudy.com/plugins/registry.json'
     const sources = [officialUrl, ...(await this.listSources()).map((item) => item.url)]
     for (const source of sources) {
       try {
@@ -835,17 +833,15 @@ export class PluginManager {
     source?: string
   }) {
     if (!isPluginApiSupported(input.apiVersion))
-      throw new Error('Update FlyEnv to install this plugin')
+      throw new Error('Update QTEnvDev to install this plugin')
     this.assertSourceUrl(input.url)
-    if (!(await this.licenseCheck())) {
-      throw new Error('An active license is required to install or update plugins')
-    }
+    // License check removed
     if (input.source && !input.sha256) {
       throw new Error('Plugin catalog installs require a SHA-256 checksum')
     }
     await this.ensureStateLoaded()
     await fs.mkdir(this.pluginsRoot, { recursive: true })
-    const temporary = join(tmpdir(), `flyenv-plugin-${randomUUID()}.flyenv-plugin`)
+    const temporary = join(tmpdir(), `qtenvdev-plugin-${randomUUID()}.qtenvdev-plugin`)
     const extraction = join(this.pluginsRoot, `.staging-${randomUUID()}`)
     try {
       const response = await this.fetchImpl(input.url, { signal: AbortSignal.timeout(120_000) })
@@ -1089,7 +1085,7 @@ export class PluginManager {
     rootPath: string,
     development: boolean,
     source?: string
-  ): Promise<FlyEnvPluginRecord> {
+  ): Promise<QTEnvDevPluginRecord> {
     if (!(await isDirectory(rootPath))) throw new Error(`Plugin directory not found: ${rootPath}`)
     const manifest = validatePluginManifest(
       JSON.parse(await fs.readFile(join(rootPath, 'plugin.json'), 'utf8'))
@@ -1107,7 +1103,7 @@ export class PluginManager {
     }
   }
 
-  private async validatePackageRoot(rootPath: string, manifest: FlyEnvPluginManifest) {
+  private async validatePackageRoot(rootPath: string, manifest: QTEnvDevPluginManifest) {
     for (const entry of [manifest.entry.render, manifest.entry.fork]) {
       if (!entry) continue
       const entryPath = resolveEntry(rootPath, entry)
@@ -1153,14 +1149,14 @@ export class PluginManager {
     return 'Linux'
   }
 
-  private currentArchitecture(): (typeof FLYENV_PLUGIN_ARCHITECTURES)[number] {
-    if (FLYENV_PLUGIN_ARCHITECTURES.includes(process.arch as never)) {
-      return process.arch as (typeof FLYENV_PLUGIN_ARCHITECTURES)[number]
+  private currentArchitecture(): (typeof QTENVDEV_PLUGIN_ARCHITECTURES)[number] {
+    if (QTENVDEV_PLUGIN_ARCHITECTURES.includes(process.arch as never)) {
+      return process.arch as (typeof QTENVDEV_PLUGIN_ARCHITECTURES)[number]
     }
     return 'x64'
   }
 
-  private assertToolNamesAvailable(manifest: FlyEnvPluginManifest) {
+  private assertToolNamesAvailable(manifest: QTEnvDevPluginManifest) {
     const names = new Set((manifest.mcp?.tools ?? []).map((tool) => tool.name))
     for (const record of this.plugins.values()) {
       if (record.manifest.id === manifest.id) continue
@@ -1169,7 +1165,7 @@ export class PluginManager {
     }
   }
 
-  private assertManifestCompatibility(manifest: FlyEnvPluginManifest) {
+  private assertManifestCompatibility(manifest: QTEnvDevPluginManifest) {
     // Resolve schema references before installation/activation, not at application startup.
     for (const tool of manifest.mcp?.tools ?? [])
       new AjvJsonSchemaValidator().getValidator(tool.inputSchema)

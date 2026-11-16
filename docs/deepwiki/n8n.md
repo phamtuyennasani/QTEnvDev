@@ -9,7 +9,7 @@
 
 ## Overview
 
-n8n 是一个开源的工作流自动化平台，FlyEnv 将其作为 AI 类模块集成，提供可视化界面来管理 n8n 服务的生命周期、环境配置和用户管理。与其他模块不同，n8n 采用 SQLite 直接操作实现离线用户管理，无需依赖 n8n 服务运行状态即可管理用户数据。
+n8n 是一个开源的工作流自动化平台，QTEnvDev 将其作为 AI 类模块集成，提供可视化界面来管理 n8n 服务的生命周期、环境配置和用户管理。与其他模块不同，n8n 采用 SQLite 直接操作实现离线用户管理，无需依赖 n8n 服务运行状态即可管理用户数据。
 
 相关文档链接:
 - [Node.js 模块](./nodejs.md) - n8n 基于 Node.js 运行，版本管理依赖 npm
@@ -22,7 +22,7 @@ n8n 是一个开源的工作流自动化平台，FlyEnv 将其作为 AI 类模�
 ### Component Hierarchy Diagram
 
 ```
-FlyEnv Application
+QTEnvDev Application
 ├── Main Process (Application.ts)
 │   └── ForkManager
 │       └── Fork Process (BaseManager)
@@ -430,7 +430,7 @@ n8n 用户管理采用直接 SQLite 数据库操作，核心设计决策：
 
 ```
 User Management Flow
-├── FlyEnv IPC Command
+├── QTEnvDev IPC Command
 │   └── database.ts method
 │       └── Node.js script (temp file)
 │           └── System Node executable

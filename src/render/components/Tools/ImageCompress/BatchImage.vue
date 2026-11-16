@@ -189,18 +189,7 @@
   })
 
   const isLocked = computed(() => {
-    if (setupStore.isActive) {
-      return false
-    }
-    if (ImageBatch.trialStartTime === 0) {
-      return false
-    }
-
-    const currentTime = Math.round(new Date().getTime() / 1000)
-    if (ImageBatch.trialStartTime + 3 * 24 * 60 * 60 < currentTime) {
-      return true
-    }
-
+    // License check removed
     return false
   })
 

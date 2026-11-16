@@ -1,17 +1,10 @@
 <template>
-  <div class="main-right-panel p-5 overflow-hidden h-screen">
-    <el-card class="h-full" body-class="h-full" style="--el-card-padding: 0px">
-      <div class="flex h-full w-full relative overflow-hidden p-3">
-        <div
-          class="h-full w-60 flex-shrink-0 bg-white px-3 transition-all duration-300 relative dark:bg-transparent"
-          :style="asideStyle"
-        >
+  <div class="main-right-panel p-5 overflow-hidden h-screen app-workbench-page">
+    <el-card class="h-full app-tools-surface" body-class="h-full" style="--el-card-padding: 0px">
+      <div class="app-tools-layout flex h-full w-full relative overflow-hidden p-3">
+        <div class="app-tools-aside h-full w-60 flex-shrink-0 px-3 relative" :style="asideStyle">
           <el-scrollbar>
-            <div
-              class="flex justify-center p-6 text-3xl pt-4 font-bold text-slate-500 dark:text-gray-400"
-            >
-              <span>{{ I18nT('base.leftTools').toUpperCase() }}</span>
-            </div>
+            <h1 class="app-tools-title">{{ I18nT('base.leftTools') }}</h1>
             <el-tree
               ref="tree"
               :data="asideData"
@@ -46,34 +39,74 @@
           </el-scrollbar>
         </div>
         <div
-          class="h-full flex-1 flex flex-col bg-slate-100 p-4 transition-all duration-300 overflow-hidden dark:bg-gray-800"
+          class="app-tools-content h-full flex-1 flex flex-col p-4 overflow-hidden"
           :style="mainStyle"
         >
-          <div class="pb-4 flex items-center flex-shrink-0">
+          <div class="app-tools-toolbar pb-4 flex items-center flex-shrink-0">
             <template v-if="AppToolStore.expand">
-              <el-button size="large" link @click.stop="AppToolStore.expand = !AppToolStore.expand">
+              <el-button
+                class="app-tools-toggle"
+                size="large"
+                link
+                :aria-label="I18nT('base.leftTools')"
+                @click.stop="AppToolStore.expand = !AppToolStore.expand"
+              >
                 <Fold class="w-6 h-6" />
               </el-button>
             </template>
             <template v-else>
-              <el-button size="large" link @click.stop="AppToolStore.expand = !AppToolStore.expand">
+              <el-button
+                class="app-tools-toggle"
+                size="large"
+                link
+                :aria-label="I18nT('base.leftTools')"
+                @click.stop="AppToolStore.expand = !AppToolStore.expand"
+              >
                 <Expand class="w-6 h-6" />
               </el-button>
             </template>
-            <el-button size="large" link @click.stop="AppToolStore.id = 'home'">
+            <el-button
+              size="large"
+              link
+              :aria-label="I18nT('tools.AllTools')"
+              @click.stop="AppToolStore.id = 'home'"
+            >
               <yb-icon :svg="import('@/svg/host.svg?raw')" class="w-6 h-6" />
             </el-button>
             <el-autocomplete
               v-model.trim="AppToolStore.search"
               :fetch-suggestions="querySearch"
               class="mx-4"
+              :aria-label="I18nT('common.action.search')"
+              :placeholder="I18nT('common.action.search')"
               clearable
               @select="selectTool"
             ></el-autocomplete>
-            <el-button size="large" link @click.stop="doAdd(undefined)">
+            <el-button
+              size="large"
+              link
+              :aria-label="I18nT('common.action.add')"
+              @click.stop="doAdd(undefined)"
+            >
               <Plus class="w-6 h-6" />
             </el-button>
           </div>
+          <select
+            v-model="AppToolStore.id"
+            class="app-tools-picker"
+            :aria-label="I18nT('base.leftTools')"
+          >
+            <option value="home">{{ I18nT('tools.AllTools') }}</option>
+            <optgroup
+              v-for="group in asideData"
+              :key="group.label"
+              :label="group.i18nKey ? I18nT(group.i18nKey) : I18nT(`toolType.${group.label}`)"
+            >
+              <option v-for="item in group.children" :key="item.id" :value="item.id">
+                {{ typeof item.label === 'function' ? item.label() : item.label }}
+              </option>
+            </optgroup>
+          </select>
           <template v-if="AppToolStore.id === 'home'">
             <el-scrollbar class="flex-1">
               <template v-if="likeData.length > 0">
@@ -83,7 +116,11 @@
                 >
                   <template v-for="(item, _index) in likeData" :key="_index">
                     <div
-                      class="overflow-hidden p-2 group relative flex flex-col items-center justify-center py-6 bg-white gap-2 cursor-pointer hover:shadow-lg dark:bg-gray-700 dark:hover:shadow-slate-600"
+                      class="app-tool-tile overflow-hidden p-2 group relative flex flex-col items-center justify-center py-6 gap-2 cursor-pointer"
+                      role="button"
+                      tabindex="0"
+                      @keydown.enter.self.prevent="AppToolStore.id = item.id"
+                      @keydown.space.self.prevent="AppToolStore.id = item.id"
                       @click.stop="AppToolStore.id = item.id"
                     >
                       <yb-icon
@@ -135,7 +172,11 @@
               >
                 <template v-for="(item, _index) in homeData" :key="_index">
                   <div
-                    class="overflow-hidden p-2 group flex flex-col items-center justify-center py-6 bg-white gap-2 cursor-pointer hover:shadow-lg relative dark:bg-gray-700 dark:hover:shadow-slate-600"
+                    class="app-tool-tile overflow-hidden p-2 group flex flex-col items-center justify-center py-6 gap-2 cursor-pointer relative"
+                    role="button"
+                    tabindex="0"
+                    @keydown.enter.self.prevent="AppToolStore.id = item.id"
+                    @keydown.space.self.prevent="AppToolStore.id = item.id"
                     @click.stop="AppToolStore.id = item.id"
                   >
                     <yb-icon

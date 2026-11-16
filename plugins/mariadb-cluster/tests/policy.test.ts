@@ -75,7 +75,7 @@ test('accepts MariaDB 10.4+ and rejects older versions for replication', () => {
 test('treats Windows paths case-insensitively and sockets as pipe names', () => {
   const r: any = request()
   r.instances[0].dataDir = 'C:\\data\\one'
-  r.instances[0].socket = 'FlyEnv-one'
+  r.instances[0].socket = 'QTEnvDev-one'
   assert.equal(policy.validateCreateRequest(r, 'Windows'), true)
   r.instances[0].socket = '/tmp/mariadb.sock'
   assert.throws(() => policy.validateCreateRequest(r, 'Windows'), /pipe/i)

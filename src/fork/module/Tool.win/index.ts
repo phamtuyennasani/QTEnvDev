@@ -21,7 +21,7 @@ import { getPidsByKey, killPids, getPortPids, killPorts } from './process'
 import { fetchPATH, removePATH, updatePATH, envPathList, envPathUpdate } from './path'
 import { setAlias, cleanAlias } from './alias'
 import { openPathByApp } from './ide'
-import { initAllowDir, initFlyEnvSH } from './init'
+import { initAllowDir, initQTEnvDevSH } from './init'
 import EnvSync from '@shared/EnvSync'
 import { appDebugLog } from '@shared/utils'
 import { resolveWindowsPowerShellPath, windowsSystemDirectory } from '@shared/WindowsSystemPaths'
@@ -211,7 +211,7 @@ subjectAltName=@alt_names
   openPathByApp = openPathByApp
 
   initAllowDir = initAllowDir
-  initFlyEnvSH = initFlyEnvSH
+  initQTEnvDevSH = initQTEnvDevSH
 
   openSysdmCpl() {
     return new ForkPromise(async (resolve, reject) => {

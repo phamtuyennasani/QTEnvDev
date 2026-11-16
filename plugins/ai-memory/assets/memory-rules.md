@@ -1,6 +1,6 @@
-# FlyEnv Memory Rules — developer preview
+# QTEnvDev Memory Rules — developer preview
 
-Use these rules only after enabling the five FlyEnv memory tools. The tools share local data while FlyEnv is running. Copied rules are not automatically installed.
+Use these rules only after enabling the five QTEnvDev memory tools. The tools share local data while QTEnvDev is running. Copied rules are not automatically installed.
 
 ## Read for the current task
 

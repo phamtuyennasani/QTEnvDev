@@ -2,7 +2,7 @@
   "podmanInstall": "Cài đặt Podman",
   "installPodmanByHomebrew": "Cài đặt Podman qua Homebrew",
   "noPodmanFound": "Không phát hiện <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a>.\nBạn có thể nhấn vào nút cài đặt để cài Podman.\nHoặc nhấn vào liên kết này\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nvà làm theo hướng dẫn để tự cài đặt.",
-  "podmanErrorTips": "Tại vị trí {bin}, đã phát hiện tệp thực thi Podman.\nNhưng FlyEnv không thể gọi được. Thông báo lỗi:\n{error}",
+  "podmanErrorTips": "Tại vị trí {bin}, đã phát hiện tệp thực thi Podman.\nNhưng QTEnvDev không thể gọi được. Thông báo lỗi:\n{error}",
   "removeContainerTips": "Bạn có chắc muốn xóa container này?",
   "removeMachineTips": "Bạn có chắc muốn xóa máy ảo này?",
   "removeImageTips": "Bạn có chắc muốn xóa ảnh này?",

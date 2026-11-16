@@ -30,19 +30,19 @@ export type StorageAsyncItem<T> = {
   data: T
 }
 
-export const StorageGetAsync = async <T>(key: string): Promise<T> => {
+export const StorageGetAsync = async <T>(key: string): Promise<T | undefined> => {
   const saved = await localForage.getItem<StorageAsyncItem<T>>(key)
   if (saved?.expire) {
     const time = Math.round(new Date().getTime() / 1000)
     if (time < saved.expire) {
       return saved.data
     }
-    throw new Error('expire')
+    return undefined
   }
   if (saved?.data) {
     return saved.data
   }
-  throw new Error('no found')
+  return undefined
 }
 
 export const StorageSetAsync = async (key: string, obj: any, second?: number) => {

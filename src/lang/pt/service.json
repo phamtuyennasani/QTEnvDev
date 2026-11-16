@@ -5,8 +5,8 @@
   "envTips": "O caminho foi adicionado à variável de ambiente",
   "aliasTips": "Alias usado no terminal",
   "useSysPHP": "Usar versão PHP padrão",
-  "setByApp": "Variáveis de ambiente definidas pelo FlyEnv",
-  "setByNoApp": "Variáveis de ambiente não definidas pelo FlyEnv",
+  "setByApp": "Variáveis de ambiente definidas pelo QTEnvDev",
+  "setByNoApp": "Variáveis de ambiente não definidas pelo QTEnvDev",
   "bundleinVersionDelTips": "Esta versão é uma versão integrada, confirmar não exibir?",
   "customDirVersionDelTips": "Esta versão é uma versão de caminho personalizado, confirmar não exibir?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Inicie esta tarefa com privilégios elevados manualmente e conclua a autorização no terminal; o macOS/Linux não suporta sudo automático em segundo plano.",
-  "linuxFtpUnmanagedRoot": "Este processo FTP com privilégios de root não foi iniciado pelo serviço gerido do FlyEnv. Pare-o com privilégios de administrador antes de voltar a iniciar.",
+  "linuxFtpUnmanagedRoot": "Este processo FTP com privilégios de root não foi iniciado pelo serviço gerido do QTEnvDev. Pare-o com privilégios de administrador antes de voltar a iniciar.",
   "linuxFtpUsersRefreshFailed": "As alterações às contas FTP foram guardadas, mas o serviço em execução não conseguiu aplicá-las: {error}",
   "pathSavedRefreshFailed": "As variáveis de ambiente foram guardadas, mas não foi possível atualizar a lista: {error}"
 }

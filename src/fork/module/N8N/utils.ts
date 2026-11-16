@@ -110,7 +110,7 @@ export async function resolveN8nModulesDir(): Promise<string | null> {
  * The system `node` has the correct ABI for n8n's native sqlite3 binding.
  */
 export async function runNodeScript(script: string): Promise<string> {
-  const tmpFile = join(tmpdir(), `flyenv-n8n-${Date.now()}.js`)
+  const tmpFile = join(tmpdir(), `qtenvdev-n8n-${Date.now()}.js`)
   await writeFile(tmpFile, script, 'utf-8')
   try {
     const result = await execPromiseWithEnv(`node "${tmpFile}"`)

@@ -2,7 +2,7 @@ import path from 'node:path'
 import fs from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 import { buildPlugin } from './plugin-builder'
-import type { FlyEnvPluginCatalog } from '../src/shared/plugin/PluginManifest'
+import type { QTEnvDevPluginCatalog } from '../src/shared/plugin/PluginManifest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.resolve(__dirname, '..')
@@ -16,7 +16,7 @@ type ReleaseEntry = {
   archive: string
 }
 
-const archiveFileName = (id: string, version: string) => `${id}-${version}.flyenv-plugin`
+const archiveFileName = (id: string, version: string) => `${id}-${version}.qtenvdev-plugin`
 
 async function collectPluginFolders(only?: string[]): Promise<string[]> {
   const pluginsDir = path.resolve(root, 'plugins')
@@ -87,7 +87,7 @@ async function main() {
   for (const item of released) {
     const fileName = archiveFileName(item.id, item.version)
     for (const existing of await fs.readdir(releaseRoot)) {
-      if (existing.startsWith(`${item.id}-`) && existing.endsWith('.flyenv-plugin')) {
+      if (existing.startsWith(`${item.id}-`) && existing.endsWith('.qtenvdev-plugin')) {
         await fs.remove(path.join(releaseRoot, existing))
       }
     }
@@ -99,11 +99,11 @@ async function main() {
   // keep their URL (their files already live on OSS); entries never published
   // and not built now are dropped with a warning.
   const registryPath = path.resolve(root, 'plugins/registry.json')
-  const registry: FlyEnvPluginCatalog = (await fs.pathExists(registryPath))
+  const registry: QTEnvDevPluginCatalog = (await fs.pathExists(registryPath))
     ? await fs.readJson(registryPath)
     : { schemaVersion: 1, plugins: [] }
   const archives = new Set(
-    (await fs.readdir(releaseRoot)).filter((f) => f.endsWith('.flyenv-plugin'))
+    (await fs.readdir(releaseRoot)).filter((f) => f.endsWith('.qtenvdev-plugin'))
   )
   const plugins = registry.plugins.flatMap((entry) => {
     const fileName = archiveFileName(entry.id, entry.version)
@@ -114,7 +114,7 @@ async function main() {
     console.warn(`[release] dropping unpublished entry without archive: ${entry.id}`)
     return []
   })
-  const releaseRegistry: FlyEnvPluginCatalog = { schemaVersion: 1, plugins }
+  const releaseRegistry: QTEnvDevPluginCatalog = { schemaVersion: 1, plugins }
   await fs.writeFile(
     path.join(releaseRoot, 'registry.json'),
     JSON.stringify(releaseRegistry, null, 2) + '\n'

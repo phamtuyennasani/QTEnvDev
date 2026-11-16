@@ -1,7 +1,7 @@
 {
-  "description": "FlyEnv-licensen stödjer den fortsatta utvecklingen och det löpande underhållet av projektet. Den är inte avsedd att blockera den centrala lokala utvecklingen — viktiga körtider och miljöhanteringsfunktioner kommer alltid att förbli tillgängliga. En licens tar bort provbegränsningarna i premiumverktygen och hjälper till att hålla FlyEnv underhållet på macOS, Windows och Linux.",
+  "description": "QTEnvDev-licensen stödjer den fortsatta utvecklingen och det löpande underhållet av projektet. Den är inte avsedd att blockera den centrala lokala utvecklingen — viktiga körtider och miljöhanteringsfunktioner kommer alltid att förbli tillgängliga. En licens tar bort provbegränsningarna i premiumverktygen och hjälper till att hålla QTEnvDev underhållet på macOS, Windows och Linux.",
   "restrictions": {
-    "title": "FlyEnv fungerar utan licens, men följande provbegränsningar gäller:",
+    "title": "QTEnvDev fungerar utan licens, men följande provbegränsningar gäller:",
     "items": {
       "0": "Webbplatshanteringen är begränsad till maximalt 3 lokala webbplatser.",
       "1": "AI-assistenten är begränsad till en provperiod på 3 dagar.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Hur man skaffar en licens",
-    "description": "FlyEnv erbjuder följande tre sätt att skaffa en licens. Licenser kan ännu inte utfärdas automatiskt, så alla förfrågningar granskas och utfärdas manuellt:",
+    "description": "QTEnvDev erbjuder följande tre sätt att skaffa en licens. Licenser kan ännu inte utfärdas automatiskt, så alla förfrågningar granskas och utfärdas manuellt:",
     "methods": {
       "0": {
         "title": "Köp en personlig licens",
-        "description": "En personlig FlyEnv-licens kostar $10 USD. Den täcker en aktiv enhet (enhetsbyte stöds via licenshanteringen) och tar bort alla provbegränsningar. Betalningen hanteras av Paddle. Efter köpet anger du ditt Paddle-order-ID i ansökningsformuläret nedan. Köpsida:"
+        "description": "En personlig QTEnvDev-licens kostar $10 USD. Den täcker en aktiv enhet (enhetsbyte stöds via licenshanteringen) och tar bort alla provbegränsningar. Betalningen hanteras av Paddle. Efter köpet anger du ditt Paddle-order-ID i ansökningsformuläret nedan. Köpsida:"
       },
       "1": {
         "title": "Bidra till kodbasen",
-        "description": "Skicka in en Pull Request på GitHub för att hjälpa till att förbättra FlyEnv. Varje meningsfullt bidrag räknas — från stora funktioner till enkla dokumentationsrättningar."
+        "description": "Skicka in en Pull Request på GitHub för att hjälpa till att förbättra QTEnvDev. Varje meningsfullt bidrag räknas — från stora funktioner till enkla dokumentationsrättningar."
       },
       "2": {
         "title": "Sprid budskapet",
-        "description": "Dela din erfarenhet av FlyEnv på valfri plattform och på valfritt språk — artiklar, videor, bloggar eller inlägg. Innehållet måste vara originellt och äkta; innehåll som publicerats för mer än 3 månader sedan kanske inte längre är giltigt."
+        "description": "Dela din erfarenhet av QTEnvDev på valfri plattform och på valfritt språk — artiklar, videor, bloggar eller inlägg. Innehållet måste vara originellt och äkta; innehåll som publicerats för mer än 3 månader sedan kanske inte längre är giltigt."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Auktoriseringskod inte mottagen",
   "oauthTimeout": "Auktoriseringstimeout",
   "oauthSuccessTitle": "Auktorisering lyckades",
-  "oauthSuccessMessage": "Den här sidan kan stängas. Vänligen återvänd till FlyEnv för att se licensinformationen.",
+  "oauthSuccessMessage": "Den här sidan kan stängas. Vänligen återvänd till QTEnvDev för att se licensinformationen.",
   "trialExpiredTitle": "Licensen är inte aktiverad",
-  "trialExpiredTips": "Du har använt FlyEnv i {days} dagar. Om FlyEnv har varit till hjälp för dig, överväg att skaffa en licens för att stödja projektet."
+  "trialExpiredTips": "Du har använt QTEnvDev i {days} dagar. Om QTEnvDev har varit till hjälp för dig, överväg att skaffa en licens för att stödja projektet."
 }

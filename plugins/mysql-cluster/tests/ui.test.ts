@@ -63,7 +63,7 @@ test('replica count adds a source and Windows previews use pipe names', () => {
     'Windows'
   )
   assert.equal(request.instances.length, 3)
-  assert.equal(request.instances[0].socket, 'FlyEnvMC_abc_1')
+  assert.equal(request.instances[0].socket, 'QTEnvDevMC_abc_1')
   assert.equal(request.credentials.abc_1.password, 'pw')
 })
 

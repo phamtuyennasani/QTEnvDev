@@ -9,7 +9,7 @@
 
 ## Overview
 
-Java 模块为 FlyEnv 提供 Java Development Kit (JDK) 的多版本管理能力，支持通过多种包管理器（Homebrew、MacPorts、SDKMAN）以及静态二进制分发版安装和管理不同版本的 Java 运行时环境。与典型的服务类模块不同，Java 模块主要关注版本切换和环境配置，而非守护进程的生命周期管理。
+Java 模块为 QTEnvDev 提供 Java Development Kit (JDK) 的多版本管理能力，支持通过多种包管理器（Homebrew、MacPorts、SDKMAN）以及静态二进制分发版安装和管理不同版本的 Java 运行时环境。与典型的服务类模块不同，Java 模块主要关注版本切换和环境配置，而非守护进程的生命周期管理。
 
 相关文档链接:
 - [Maven](./maven.md) - Java 项目构建工具，与 Java 模块紧密集成
@@ -43,7 +43,7 @@ Java Module
 
 ### Module Registration
 
-Java 模块通过 `Module.ts` 注册到 FlyEnv 应用框架，配置为语言类型模块：
+Java 模块通过 `Module.ts` 注册到 QTEnvDev 应用框架，配置为语言类型模块：
 
 | Property | Value | Description |
 |----------|-------|-------------|
@@ -279,7 +279,7 @@ Sources: src/fork/module/Base/index.ts34-43
 
 ### Static Version API
 
-Static JDK builds are fetched from FlyEnv's version API:
+Static JDK builds are fetched from QTEnvDev's version API:
 
 ```typescript
 const res = await axios({
@@ -352,7 +352,7 @@ Sources: src/render/components/ServiceManager/base.vue1-182
 The Manager tab (`VersionManager/index.vue`) provides multi-source installation:
 
 **macOS:**
-- Static - Pre-built binaries from FlyEnv
+- Static - Pre-built binaries from QTEnvDev
 - Homebrew - `brew install openjdk@version`
 - MacPorts - `port install openjdkversion`
 - SDKMAN - `sdk install java version`

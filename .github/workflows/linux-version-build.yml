@@ -1,4 +1,4 @@
-name: Build FlyEnv Linux Packages
+name: Build QTEnvDev Linux Packages
 on:
   push:
     paths:

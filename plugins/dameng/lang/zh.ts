@@ -14,12 +14,12 @@ export default {
   registrationSaveTimeout: '保存自定义版本目录超时',
   settings: '会话凭据 / 初始化默认设置',
   sessionNotice:
-    '密码仅保留在本次 FlyEnv 会话中。重启 FlyEnv 或在数据库中修改密码后，请重新输入当前 SYSDBA 密码；此处不会修改已有账户。',
+    '密码仅保留在本次 QTEnvDev 会话中。重启 QTEnvDev 或在数据库中修改密码后，请重新输入当前 SYSDBA 密码；此处不会修改已有账户。',
   initialSysdbaPassword: '初始 SYSDBA 密码',
   initialSysdbaHelp:
-    '为初始化时创建的内置数据库管理员 SYSDBA 设置登录密码。FlyEnv 会使用它检查启动结果和查询实例信息，密码仅保留在本次会话中。',
+    '为初始化时创建的内置数据库管理员 SYSDBA 设置登录密码。QTEnvDev 会使用它检查启动结果和查询实例信息，密码仅保留在本次会话中。',
   currentSysdbaHelp:
-    '请输入已有数据库管理员 SYSDBA 的登录密码。如果数据库由 FlyEnv 创建，就是初始化时设置的“初始 SYSDBA 密码”；在数据库中改过密码则填写新密码。此处不会重置密码。',
+    '请输入已有数据库管理员 SYSDBA 的登录密码。如果数据库由 QTEnvDev 创建，就是初始化时设置的“初始 SYSDBA 密码”；在数据库中改过密码则填写新密码。此处不会重置密码。',
   auditorHelp:
     '为内置审计账户 SYSAUDITOR 设置登录密码。它与 SYSDBA 是两个不同的账户，初始化时也必须设置此密码。',
   generatePassword: '生成密码',
@@ -67,7 +67,7 @@ export default {
   operationInProgress: '此安装的安装、初始化或卸载操作仍在执行。',
   operationTimeout: '操作超时，结果未知。请检查安装目录与日志；本次会话禁止重放此操作。',
   outcomeUnknown:
-    '此安装有结果未知或未完成的操作。请检查文件和日志后再重启 FlyEnv，不要覆盖现有文件重新安装。',
+    '此安装有结果未知或未完成的操作。请检查文件和日志后再重启 QTEnvDev，不要覆盖现有文件重新安装。',
   rescanFailed: '操作已完成，但无法刷新已安装列表，请刷新服务页。',
   installComplete: '达梦程序已安装，请从服务操作菜单初始化数据库。',
   initializeComplete: '达梦数据库已初始化。',

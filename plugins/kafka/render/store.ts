@@ -10,7 +10,7 @@ import {
 } from './policy'
 import { KafkaT } from './lang'
 
-const storageKey = 'flyenv-kafka-java-bindings'
+const storageKey = 'qtenvdev-kafka-java-bindings'
 
 export type KafkaJavaBinding = {
   javaHome: string

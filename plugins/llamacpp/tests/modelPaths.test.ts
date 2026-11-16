@@ -67,7 +67,7 @@ test('download, sidecar, scan and managed launch agree through a linked models d
   assert.equal(downloaded.localPath, await realpath(downloaded.localPath))
   assert.equal(downloaded.managedRoot, actual)
   assert.equal(
-    JSON.parse(await readFile(downloaded.localPath + '.flyenv.json', 'utf8')).localPath,
+    JSON.parse(await readFile(downloaded.localPath + '.qtenvdev.json', 'utf8')).localPath,
     downloaded.localPath
   )
   const scan = await scanModelsDirectory(link + '/')

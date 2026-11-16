@@ -254,7 +254,7 @@ class DotNet extends Base {
   }
 
   getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
-    // .NET SDK 是运行时/开发工具包，FlyEnv 仅负责下载安装，不生成服务端配置文件
+    // .NET SDK 是运行时/开发工具包，QTEnvDev 仅负责下载安装，不生成服务端配置文件
     return []
   }
 

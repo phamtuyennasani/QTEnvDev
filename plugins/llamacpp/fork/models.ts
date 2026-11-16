@@ -77,7 +77,7 @@ export const formatHubRequestError = (
     typeof proxy === 'object' ? `${proxy.host}${proxy.port ? `:${proxy.port}` : ''}` : ''
   let guidance = ''
   if (proxyConfigured && detail?.code === 'ECONNREFUSED') {
-    guidance = `Proxy ${address || 'server'} is not accepting connections. Start it or update FlyEnv proxy settings. `
+    guidance = `Proxy ${address || 'server'} is not accepting connections. Start it or update QTEnvDev proxy settings. `
   } else if (
     proxyConfigured &&
     /before secure TLS connection was established/i.test(detail?.message ?? '')
@@ -86,7 +86,7 @@ export const formatHubRequestError = (
       'TLS setup failed through the configured proxy; check whether the proxy can reach huggingface.co. '
   }
   return new Error(
-    `Hugging Face Hub request failed${status} (FlyEnv proxy: ${proxyConfigured ? 'on' : 'off'}): ${guidance}${detail?.message ?? error}`
+    `Hugging Face Hub request failed${status} (QTEnvDev proxy: ${proxyConfigured ? 'on' : 'off'}): ${guidance}${detail?.message ?? error}`
   )
 }
 
@@ -326,7 +326,7 @@ export const scanModelsDirectory = async (modelsRoot: string): Promise<ModelDire
 
         let metadata: Partial<LocalModel> | undefined
         try {
-          metadata = JSON.parse(await readFile(`${realPath}.flyenv.json`, 'utf8'))
+          metadata = JSON.parse(await readFile(`${realPath}.qtenvdev.json`, 'utf8'))
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
             skipped.push(
@@ -440,7 +440,7 @@ export const downloadHubModelFile = async (
     )
       throw new Error('Model SHA-256 verification failed')
     signal.throwIfAborted()
-    const metadataPartial = `${partialPath}.flyenv.json`
+    const metadataPartial = `${partialPath}.qtenvdev.json`
     await deps.rename(partialPath, finalPath)
     finalized = true
     const description = await deps
@@ -462,14 +462,14 @@ export const downloadHubModelFile = async (
     signal.throwIfAborted()
     await deps.write(metadataPartial, JSON.stringify(local, null, 2))
     signal.throwIfAborted()
-    await deps.rename(metadataPartial, `${finalPath}.flyenv.json`)
+    await deps.rename(metadataPartial, `${finalPath}.qtenvdev.json`)
     return local
   } catch (error) {
     await deps.remove(partialPath).catch(() => {})
-    await deps.remove(`${partialPath}.flyenv.json`).catch(() => {})
+    await deps.remove(`${partialPath}.qtenvdev.json`).catch(() => {})
     if (finalized) {
       await deps.remove(finalPath).catch(() => {})
-      await deps.remove(`${finalPath}.flyenv.json`).catch(() => {})
+      await deps.remove(`${finalPath}.qtenvdev.json`).catch(() => {})
     }
     throw error
   }
@@ -495,7 +495,7 @@ export const deleteLocalModel = async (
   if (activeModelPath && resolve(activeModelPath) === resolved)
     throw new Error('Stop the active server before deleting its model')
   if (await deps.exists(resolved)) await deps.remove(resolved)
-  await deps.remove(`${resolved}.flyenv.json`).catch(() => {})
+  await deps.remove(`${resolved}.qtenvdev.json`).catch(() => {})
 }
 
 export const createModelDownloadDeps = (): ModelDownloadDeps => productionDeps

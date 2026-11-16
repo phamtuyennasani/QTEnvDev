@@ -19,7 +19,7 @@ import { AtomicFile, AtomicWriteFailure } from '../fork/AtomicFile'
 import type { ResolvedScope } from '../shared'
 
 async function fixture() {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-projects-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-projects-'))
   const data = join(root, 'data')
   const project = join(root, '代码 with spaces')
   await mkdir(project)

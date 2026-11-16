@@ -177,7 +177,7 @@ export type AppModuleItem = {
   isOnlyRunOne?: boolean
 
   /**
-   * Present only for dynamically loaded FlyEnv plugins.
+   * Present only for dynamically loaded QTEnvDev plugins.
    */
   plugin?: {
     id: string

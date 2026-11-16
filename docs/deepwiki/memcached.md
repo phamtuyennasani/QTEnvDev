@@ -9,7 +9,7 @@
 
 ## Overview
 
-Memcached 是一个高性能的分布式内存对象缓存系统，FlyEnv 通过封装 Memcached 二进制程序，提供跨平台的缓存服务生命周期管理。与其他数据库模块不同，Memcached 采用极简的架构设计，无需复杂配置即可快速启动。
+Memcached 是一个高性能的分布式内存对象缓存系统，QTEnvDev 通过封装 Memcached 二进制程序，提供跨平台的缓存服务生命周期管理。与其他数据库模块不同，Memcached 采用极简的架构设计，无需复杂配置即可快速启动。
 
 相关文档链接:
 - [Base 模块](./base.md) - 所有服务模块的基类
@@ -247,7 +247,7 @@ _stopServer() (Base.ts:123-250)
     │   ├─ From version.pid
     │   └─ From process search (name: 'memcached')
     │
-    ├─► 3. Filter by FlyEnv data directories
+    ├─► 3. Filter by QTEnvDev data directories
     │   Only kill processes with:
     │   - BaseDir in command
     │   - AppDir in command
@@ -413,10 +413,10 @@ Sources: src/render/components/Memcached/Module.ts:4-15
 
 | Variable | Value | Description |
 |----------|-------|-------------|
-| `global.Server.MemcachedDir` | `~/Library/Application Support/FlyEnv/memcached` | Memcached 工作目录 |
-| `global.Server.BaseDir` | `~/Library/Application Support/FlyEnv` | FlyEnv 基础目录 |
-| `global.Server.AppDir` | `~/Library/Application Support/FlyEnv/app` | 应用安装目录 |
-| `global.Server.Cache` | `~/Library/Application Support/FlyEnv/cache` | 下载缓存目录 |
+| `global.Server.MemcachedDir` | `~/Library/Application Support/QTEnvDev/memcached` | Memcached 工作目录 |
+| `global.Server.BaseDir` | `~/Library/Application Support/QTEnvDev` | QTEnvDev 基础目录 |
+| `global.Server.AppDir` | `~/Library/Application Support/QTEnvDev/app` | 应用安装目录 |
+| `global.Server.Cache` | `~/Library/Application Support/QTEnvDev/cache` | 下载缓存目录 |
 | `this.pidPath` | `${MemcachedDir}/memcached.pid` | PID 文件路径 |
 
 Sources: src/fork/module/Memcached/index.ts:32-34
@@ -424,7 +424,7 @@ Sources: src/fork/module/Memcached/index.ts:32-34
 ### Generated Files
 
 ```
-~/Library/Application Support/FlyEnv/memcached/
+~/Library/Application Support/QTEnvDev/memcached/
 ├── memcached.pid                    # 当前进程 PID
 ├── memcached-{version}-start-out.log   # 启动日志
 └── memcached-{version}-start-error.log # 错误日志

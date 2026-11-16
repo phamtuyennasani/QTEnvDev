@@ -148,7 +148,7 @@ $process = Start-Process -FilePath ${powerShellSingleQuoted(params.powerShellPat
     -RedirectStandardError $ERRLOG
 
 if ($process) {
-    Write-Host "##FlyEnv-Process-ID$($process.Id)FlyEnv-Process-ID##"
+    Write-Host "##QTEnvDev-Process-ID$($process.Id)QTEnvDev-Process-ID##"
 }
 else {
     Write-Error "Exec Failed"
@@ -353,7 +353,7 @@ export async function customerServiceStartExec(
   if (!version.pidPath) {
     let pid = ''
     const stdout = res.stdout.trim() + '\n' + res.stderr.trim()
-    const regex = /FlyEnv-Process-ID(.*?)FlyEnv-Process-ID/g
+    const regex = /QTEnvDev-Process-ID(.*?)QTEnvDev-Process-ID/g
     const match = regex.exec(stdout)
     if (match) {
       pid = match[1]

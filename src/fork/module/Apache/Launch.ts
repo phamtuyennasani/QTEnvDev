@@ -43,7 +43,7 @@ export async function resolveLinuxApacheLaunch(
     // Source as the desktop user. Paths are positional arguments, never shell interpolation.
     const { stdout } = await execFileAsync(
       '/bin/sh',
-      ['-c', 'set -a; . "$1" >&2 || exit $?; /usr/bin/env -0', 'flyenv-apache-env', envFile],
+      ['-c', 'set -a; . "$1" >&2 || exit $?; /usr/bin/env -0', 'qtenvdev-apache-env', envFile],
       { cwd: selectedDir, env, timeout: 5000, maxBuffer: 1024 * 1024, encoding: 'utf8' }
     )
     execEnv = {}

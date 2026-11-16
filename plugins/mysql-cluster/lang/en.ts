@@ -26,7 +26,7 @@ export default {
   removeVersionHint: 'Uninstall this MySQL installation? Instance databases are retained.',
   nativeInUse: 'The built-in MySQL service is using this installation. Stop it first.',
   downloads: 'Downloads',
-  packageManagerRequired: 'Install the selected package manager in FlyEnv before installing MySQL.',
+  packageManagerRequired: 'Install the selected package manager in QTEnvDev before installing MySQL.',
   installed: 'Installed',
   install: 'Install',
   uninstall: 'Uninstall',

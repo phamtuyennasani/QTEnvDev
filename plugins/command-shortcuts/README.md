@@ -12,13 +12,13 @@
 
 文件夹和命令可编辑或删除；删除文件夹会同时删除预设命令，需确认，不会删除磁盘文件。
 
-macOS 使用 Terminal 的默认 shell，Windows 使用 PowerShell，Linux 使用系统终端中的 Bash。请使用对应 shell 的命令语法。执行前检查目录，目录切换失败不会执行命令。终端交接完成只代表已打开终端，不代表用户命令运行成功。终端由用户管理，离开页面或退出 FlyEnv 不会终止已打开的终端。
+macOS 使用 Terminal 的默认 shell，Windows 使用 PowerShell，Linux 使用系统终端中的 Bash。请使用对应 shell 的命令语法。执行前检查目录，目录切换失败不会执行命令。终端交接完成只代表已打开终端，不代表用户命令运行成功。终端由用户管理，离开页面或退出 QTEnvDev 不会终止已打开的终端。
 
-数据保存于独立 Storage 键 `flyenv-plugin-command-shortcuts-v1`。插件禁用/升级/卸载不主动删除目录记录或文件；存储读取失败或数据损坏时禁止覆盖，页面提供重试。命令只在用户点击执行时运行，不会在加载插件时自动执行。
+数据保存于独立 Storage 键 `qtenvdev-plugin-command-shortcuts-v1`。插件禁用/升级/卸载不主动删除目录记录或文件；存储读取失败或数据损坏时禁止覆盖，页面提供重试。命令只在用户点击执行时运行，不会在加载插件时自动执行。
 
 开发：`yarn plugin:dev command-shortcuts`。
 
-构建：`yarn plugin:build command-shortcuts`，产物 `dist/plugins/command-shortcuts/command-shortcuts-0.1.3.flyenv-plugin`。
+构建：`yarn plugin:build command-shortcuts`，产物 `dist/plugins/command-shortcuts/command-shortcuts-0.1.3.qtenvdev-plugin`。
 
 验证：`node --import tsx --test plugins/command-shortcuts/tests/*.test.ts`、`yarn plugin:test command-shortcuts`。
 

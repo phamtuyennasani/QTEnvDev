@@ -39,7 +39,7 @@ export const launchWindowsDnsRefresh = async (): Promise<boolean> => {
       })
       child.once('spawn', () => {
         launched = true
-        // 无管道/IPC 引用，且解除 ChildProcess 引用；FlyEnv 不等待 DNS 刷新结束，
+        // 无管道/IPC 引用，且解除 ChildProcess 引用；QTEnvDev 不等待 DNS 刷新结束，
         // 退出后该工具仍可继续运行。不能在 exit/close 上 resolve，否则仍然阻塞退出。
         child.unref()
         void log('dns.refresh-spawned', {

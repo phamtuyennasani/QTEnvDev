@@ -9,7 +9,7 @@
 
 ## Overview
 
-OpenClaw 模块在 FlyEnv 中并非传统意义上的"常驻服务管理器"，而是一个**外部 AI CLI 工具链的封装层**。它不对 `openclaw` 二进制本身执行版本化安装或目录隔离，而是通过以下三种模式与底层交互：
+OpenClaw 模块在 QTEnvDev 中并非传统意义上的"常驻服务管理器"，而是一个**外部 AI CLI 工具链的封装层**。它不对 `openclaw` 二进制本身执行版本化安装或目录隔离，而是通过以下三种模式与底层交互：
 
 1. **IPC 静默探测模式**: 通过 Fork 进程执行 `openclaw --version` 和 `openclaw gateway status` 来判断 CLI 与 Gateway 的健康状态。
 2. **XTermExec 终端安装模式**: 对于缺失的 CLI 或 Gateway，直接在渲染进程的 XTerm 终端中执行远程安装脚本（curl / PowerShell）。
@@ -345,7 +345,7 @@ Sources: `src/render/components/OpenClaw/setup.ts:102-134`, `src/render/componen
 
 ### 3.5 命令面板代理系统（90+ CLI 命令的 UI 映射）
 
-**机制概述**: `command.json` 作为静态命令注册表，将 `openclaw` 的 90 余条子命令按功能域分类，渲染层通过动态按钮生成 + `XTerm` 透传，把 FlyEnv 变成一个 OpenClaw CLI 的图形化代理终端。
+**机制概述**: `command.json` 作为静态命令注册表，将 `openclaw` 的 90 余条子命令按功能域分类，渲染层通过动态按钮生成 + `XTerm` 透传，把 QTEnvDev 变成一个 OpenClaw CLI 的图形化代理终端。
 
 **核心数据**:
 
@@ -442,7 +442,7 @@ fork/module/OpenClaw/index.ts -> getGatewayStatus()
   → <Conf :file="file" :file-ext="'json'" :show-load-default="false" :show-commond="false" />
 ```
 
-**注意**: `Conf` 组件为 FlyEnv 通用配置编辑器，支持保存时直接覆写文件。OpenClaw 模块未在此层做额外校验。
+**注意**: `Conf` 组件为 QTEnvDev 通用配置编辑器，支持保存时直接覆写文件。OpenClaw 模块未在此层做额外校验。
 
 Sources: `src/render/components/OpenClaw/Config.vue:1-23`, `src/fork/module/OpenClaw/index.ts:80`
 
@@ -457,7 +457,7 @@ Sources: `src/render/components/OpenClaw/Config.vue:1-23`, `src/fork/module/Open
 | `app-fork:openclaw` (fn=`startGateway`) | `void` | `boolean` | `src/fork/module/OpenClaw/index.ts:95` | `openclaw gateway start` + 平台服务注册 + 轮询验证 | 若失败，渲染层弹 `MessageError` |
 | `app-fork:openclaw` (fn=`stopGateway`) | `void` | `boolean` | `src/fork/module/OpenClaw/index.ts:136` | `openclaw gateway stop` + 进程扫描 + `kill -9` | 渲染层直接 `gatewayRunning = false` |
 
-**说明**: OpenClaw 未定义独立的 IPC 事件名，而是通过 FlyEnv 统一的 `IPC.send('app-fork:openclaw', fnName)` 协议，由 `BaseManager.exec()` 解包 `module='openclaw'` 和 `fn`，再通过 `Base.exec(fnName)` 反射调用对应方法。
+**说明**: OpenClaw 未定义独立的 IPC 事件名，而是通过 QTEnvDev 统一的 `IPC.send('app-fork:openclaw', fnName)` 协议，由 `BaseManager.exec()` 解包 `module='openclaw'` 和 `fn`，再通过 `Base.exec(fnName)` 反射调用对应方法。
 
 Sources: `src/fork/BaseManager.ts:456-461`, `src/fork/module/Base/index.ts:34-43`, `src/render/components/OpenClaw/setup.ts:69`, `src/render/components/OpenClaw/setup.ts:82`, `src/render/components/OpenClaw/setup.ts:139`, `src/render/components/OpenClaw/setup.ts:156`
 
@@ -485,7 +485,7 @@ Sources: `src/fork/BaseManager.ts:456-461`, `src/fork/module/Base/index.ts:34-43
 
 1. **Gateway 安装时**，macOS 需要 `sudo` 权限，因为 `openclaw gateway install` 在 macOS 上默认会写入系统级或用户级 LaunchAgent 目录；而 Linux 和 Windows 不需要 `sudo`。
 2. **Gateway 启动时**，OpenClaw 模块在 macOS 和 Linux 上做了"双层启动"：先执行 `openclaw gateway start`，再分别通过 `launchctl` 或 `systemctl` 显式注册/启动服务单元；Windows 则完全依赖 `openclaw` CLI 自身的服务管理能力。
-3. **进程清理时**，Windows 使用 `ProcessPidList()`，而 macOS/Linux 使用 `ProcessListFetch()`，这是 FlyEnv 共享的跨平台进程工具函数的固定模式。
+3. **进程清理时**，Windows 使用 `ProcessPidList()`，而 macOS/Linux 使用 `ProcessListFetch()`，这是 QTEnvDev 共享的跨平台进程工具函数的固定模式。
 
 Sources: `src/fork/module/OpenClaw/index.ts:95-171`, `src/render/components/OpenClaw/setup.ts:102-207`
 

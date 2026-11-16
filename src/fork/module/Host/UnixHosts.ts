@@ -27,7 +27,7 @@ async function refreshDNSAfterWrite(changed: boolean): Promise<boolean> {
 }
 
 export function replaceUnixHosts(content: string, digest: string): Promise<boolean> {
-  if (closing) return Promise.reject(new Error('FlyEnv is closing; hosts editing is unavailable'))
+  if (closing) return Promise.reject(new Error('QTEnvDev is closing; hosts editing is unavailable'))
   if (!digest)
     return Promise.reject(new Error('Full hosts edits require the original snapshot digest'))
   const operation = pendingEdit
@@ -48,10 +48,10 @@ export async function finishUnixHostsEditing(): Promise<void> {
   await pendingEdit.catch(() => {})
 }
 
-/** Only automatic synchronization owns the FlyEnv block; editors own full text. */
+/** Only automatic synchronization owns the QTEnvDev block; editors own full text. */
 export function syncUnixHosts(lines: string[] = []): Promise<boolean> {
   if (closing && lines.length)
-    return Promise.reject(new Error('FlyEnv is closing; hosts synchronization is unavailable'))
+    return Promise.reject(new Error('QTEnvDev is closing; hosts synchronization is unavailable'))
   const operation = pendingEdit
     .catch(() => {})
     .then(async () => {

@@ -1,31 +1,28 @@
 <template>
-  <div class="soft-index-panel main-right-panel startup-group-page">
-    <div class="flex flex-shrink-0 items-center justify-between gap-4 py-3">
-      <div>
-        <h2 class="text-xl font-semibold">{{ I18nT('common.startupGroup.title') }}</h2>
-        <p class="text-sm text-zinc-500">{{ I18nT('common.startupGroup.description') }}</p>
-      </div>
-      <el-tooltip
-        v-if="isAddLocked"
-        placement="left"
-        :content="I18nT('common.startupGroup.licenseTips')"
-      >
-        <el-button :icon="Lock" type="warning" @click="toLicense">
+  <div class="soft-index-panel main-right-panel startup-group-page app-workbench-page">
+    <AppPageHeader
+      :title="I18nT('common.startupGroup.title')"
+      :description="I18nT('common.startupGroup.description')"
+    >
+      <template #actions>
+        <el-tooltip
+          v-if="isAddLocked"
+          placement="left"
+          :content="I18nT('common.startupGroup.licenseTips')"
+        >
+          <el-button :icon="Lock" type="warning" @click="toLicense">
+            {{ I18nT('common.startupGroup.add') }}
+          </el-button>
+        </el-tooltip>
+        <el-button v-else type="primary" @click="openEditor()">
           {{ I18nT('common.startupGroup.add') }}
         </el-button>
-      </el-tooltip>
-      <el-button v-else type="primary" @click="openEditor()">
-        {{ I18nT('common.startupGroup.add') }}
-      </el-button>
-    </div>
+      </template>
+    </AppPageHeader>
 
     <div class="main-block">
       <el-scrollbar>
-        <el-empty v-if="groups.length === 0" :description="I18nT('common.startupGroup.noGroups')">
-          <el-button type="primary" @click="openEditor()">
-            {{ I18nT('common.startupGroup.add') }}
-          </el-button>
-        </el-empty>
+        <AppState v-if="groups.length === 0" :description="I18nT('common.startupGroup.noGroups')" />
 
         <draggable
           v-else
@@ -64,6 +61,8 @@
   import draggable from 'vuedraggable'
 
   import { I18nT } from '@lang/index'
+  import AppPageHeader from '@/components/AppShell/AppPageHeader.vue'
+  import AppState from '@/components/AppShell/AppState.vue'
   import { SetupStore } from '@/components/Setup/store'
   import Router from '@/router'
   import { AppStore } from '@/store/app'
@@ -89,7 +88,7 @@
     StartupGroupManager.getMemberDisplayTitle(item, I18nT('common.startupGroup.noRemark'))
 
   const toLicense = () => {
-    setupStore.tab = 'licenses'
+    setupStore.tab = 'module'
     appStore.currentPage = '/setup'
     Router.push({ path: '/setup' }).then().catch()
   }

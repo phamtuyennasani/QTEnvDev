@@ -51,7 +51,7 @@
           <el-table-column :label="T('operation')" min-width="160">
             <template #default="{ row }"
               ><span class="memory-call-tool">{{
-                T(row.tool?.replace('flyenv_memory_', '') ?? 'unknown')
+                T(row.tool?.replace('qtenvdev_memory_', '') ?? 'unknown')
               }}</span></template
             >
           </el-table-column>

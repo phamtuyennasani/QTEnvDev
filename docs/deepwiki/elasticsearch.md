@@ -9,12 +9,12 @@
 
 ## Overview
 
-Elasticsearch 是一个分布式搜索和分析引擎，FlyEnv 通过封装 Elasticsearch 的二进制分发版，提供一键启动/停止、版本管理和配置编辑功能。该模块属于 `searchEngine` 类型，支持从官方静态二进制包安装和多版本并行管理。
+Elasticsearch 是一个分布式搜索和分析引擎，QTEnvDev 通过封装 Elasticsearch 的二进制分发版，提供一键启动/停止、版本管理和配置编辑功能。该模块属于 `searchEngine` 类型，支持从官方静态二进制包安装和多版本并行管理。
 
 相关文档链接:
 - [Base 模块](./base.md) - 服务基类，定义通用生命周期
 - [Module 系统](./module-system.md) - 前端模块架构
-- [FlyEnv 架构概述](https://deepwiki.com/xpf0000/FlyEnv/3-architecture-overview)
+- [QTEnvDev 架构概述](https://deepwiki.com/xpf0000/QTEnvDev/3-architecture-overview)
 
 ---
 
@@ -58,7 +58,7 @@ Elasticsearch._startServer() / _stopServer()
 
 ### Module Registration
 
-Elasticsearch 模块通过 `Module.ts` 注册到 FlyEnv 应用框架：
+Elasticsearch 模块通过 `Module.ts` 注册到 QTEnvDev 应用框架：
 
 | Field | Value | Description |
 |-------|-------|-------------|
@@ -373,7 +373,7 @@ Sources: src/fork/module/Elasticsearch/index.ts:36-99, src/fork/module/Elasticse
 
 ### Online Versions
 
-从 FlyEnv API 获取可用版本：
+从 QTEnvDev API 获取可用版本：
 
 ```
 POST https://api.one-env.com/api/version/fetch

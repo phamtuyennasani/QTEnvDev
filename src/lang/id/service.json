@@ -5,8 +5,8 @@
   "envTips": "Apakah path telah ditambahkan ke variabel lingkungan",
   "aliasTips": "Alias yang digunakan di terminal",
   "useSysPHP": "Gunakan versi PHP default",
-  "setByApp": "Variabel lingkungan yang disetel oleh FlyEnv",
-  "setByNoApp": "Variabel lingkungan yang tidak disetel oleh FlyEnv",
+  "setByApp": "Variabel lingkungan yang disetel oleh QTEnvDev",
+  "setByNoApp": "Variabel lingkungan yang tidak disetel oleh QTEnvDev",
   "bundleinVersionDelTips": "Versi ini adalah versi bawaan, yakin ingin tidak menampilkannya?",
   "customDirVersionDelTips": "Versi ini adalah versi jalur kustom, yakin ingin tidak menampilkannya?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Mulai tugas ini secara manual dan berikan otorisasi di terminal; macOS/Linux tidak mendukung sudo otomatis di latar belakang.",
-  "linuxFtpUnmanagedRoot": "Proses FTP root ini tidak dimulai oleh layanan yang dikelola FlyEnv. Hentikan dengan hak administrator sebelum memulai kembali.",
+  "linuxFtpUnmanagedRoot": "Proses FTP root ini tidak dimulai oleh layanan yang dikelola QTEnvDev. Hentikan dengan hak administrator sebelum memulai kembali.",
   "linuxFtpUsersRefreshFailed": "Perubahan akun FTP telah disimpan, tetapi layanan yang berjalan tidak dapat menerapkannya: {error}",
   "pathSavedRefreshFailed": "Variabel lingkungan telah disimpan, tetapi daftar gagal disegarkan: {error}"
 }

@@ -59,7 +59,7 @@
   "samePortTips": "Já existe um site com o mesmo domínio e a mesma porta de escuta. Use outra porta para adicionar outro site com o mesmo domínio.",
   "composerVersion": "Versão do Composer",
   "useSysVersion": "Usar versão definida nas variáveis de ambiente",
-  "sslTips": "A funcionalidade de certificado SSL automático requer a adição de um certificado chamado FlyEnv-Root-CA à Keychain e a sua definição como 'Sempre confiar'.\n\nNormalmente, esta funcionalidade é concluída automaticamente. Se houver um problema, pode copiar o comando para executar no terminal por si mesmo. Ou, na pasta que se abre, clique duas vezes para adicionar o certificado e, no programa Keychain, defina manualmente a confiança para 'Sempre confiar'.",
+  "sslTips": "A funcionalidade de certificado SSL automático requer a adição de um certificado chamado QTEnvDev-Root-CA à Keychain e a sua definição como 'Sempre confiar'.\n\nNormalmente, esta funcionalidade é concluída automaticamente. Se houver um problema, pode copiar o comando para executar no terminal por si mesmo. Ou, na pasta que se abre, clique duas vezes para adicionar o certificado e, no programa Keychain, defina manualmente a confiança para 'Sempre confiar'.",
   "copyCommand": "Copiar comando",
   "showFile": "Mostrar ficheiro",
   "sticky": "Fixar",

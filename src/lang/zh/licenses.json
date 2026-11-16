@@ -1,7 +1,7 @@
 {
-  "description": "许可证用于支持 FlyEnv 的持续开发与维护。其目的并非阻止核心的本地开发功能——核心运行时和环境管理功能将始终可用。许可证可解除高级功能的试用限制，并帮助 FlyEnv 在 macOS、Windows 和 Linux 平台上得到长期维护。",
+  "description": "许可证用于支持 QTEnvDev 的持续开发与维护。其目的并非阻止核心的本地开发功能——核心运行时和环境管理功能将始终可用。许可证可解除高级功能的试用限制，并帮助 QTEnvDev 在 macOS、Windows 和 Linux 平台上得到长期维护。",
   "restrictions": {
-    "title": "未激活许可证时 FlyEnv 仍可正常使用，但试用版有以下限制:",
+    "title": "未激活许可证时 QTEnvDev 仍可正常使用，但试用版有以下限制:",
     "items": {
       "0": "站点管理最多可创建 3 个本地站点。",
       "1": "AI 助手仅限 3 天试用。",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "许可证获取方式",
-    "description": "FlyEnv 提供以下三种许可证获取方式。目前许可证无法自动签发，所有申请均由人工审核并手动签发：",
+    "description": "QTEnvDev 提供以下三种许可证获取方式。目前许可证无法自动签发，所有申请均由人工审核并手动签发：",
     "methods": {
       "0": {
         "title": "购买个人许可证",
-        "description": "FlyEnv 个人许可证售价 10 美元，可绑定一台设备（支持在许可证管理中迁移设备），并解除所有试用限制。支付由 Paddle 处理。购买后请在下方申请表中提交 Paddle 订单号。购买地址:"
+        "description": "QTEnvDev 个人许可证售价 10 美元，可绑定一台设备（支持在许可证管理中迁移设备），并解除所有试用限制。支付由 Paddle 处理。购买后请在下方申请表中提交 Paddle 订单号。购买地址:"
       },
       "1": {
         "title": "参与项目开发",
-        "description": "在 GitHub 上提交 Pull Request 帮助改进 FlyEnv。无论是重大功能还是简单的文档修复，任何有意义的贡献都符合条件。"
+        "description": "在 GitHub 上提交 Pull Request 帮助改进 QTEnvDev。无论是重大功能还是简单的文档修复，任何有意义的贡献都符合条件。"
       },
       "2": {
         "title": "帮助推广项目",
-        "description": "在任何平台、以任何语言分享你的 FlyEnv 使用体验——文章、视频、博客或帖子均可。内容需为原创且真实客观；发布超过 3 个月的内容可能不再符合条件。"
+        "description": "在任何平台、以任何语言分享你的 QTEnvDev 使用体验——文章、视频、博客或帖子均可。内容需为原创且真实客观；发布超过 3 个月的内容可能不再符合条件。"
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "未收到授权码",
   "oauthTimeout": "授权已超时",
   "oauthSuccessTitle": "授权成功",
-  "oauthSuccessMessage": "此页面可关闭. 请回到FlyEnv中查看许可证信息",
+  "oauthSuccessMessage": "此页面可关闭. 请回到QTEnvDev中查看许可证信息",
   "trialExpiredTitle": "许可证未激活",
-  "trialExpiredTips": "这是你使用 FlyEnv 的第 {days} 天，如果 FlyEnv 对你有帮助，请获取许可证支持项目发展。"
+  "trialExpiredTips": "这是你使用 QTEnvDev 的第 {days} 天，如果 QTEnvDev 对你有帮助，请获取许可证支持项目发展。"
 }

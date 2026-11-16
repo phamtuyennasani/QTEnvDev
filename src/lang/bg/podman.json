@@ -2,7 +2,7 @@
   "podmanInstall": "Инсталиране на Podman",
   "installPodmanByHomebrew": "Инсталирайте Podman чрез Homebrew",
   "noPodmanFound": "<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a> не беше открит.\nЗа да инсталирате Podman, можете да кликнете върху бутона за инсталиране.\nМожете също да кликнете върху този линк<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">\nhttps://podman.io/docs/installation\n</a>и да следвате инструкциите в документацията, за да го инсталирате ръчно.",
-  "podmanErrorTips": "На място {bin} беше открит изпълним файл на Podman.\nНо FlyEnv не може да го стартира. Съобщение за грешка:\n{error}",
+  "podmanErrorTips": "На място {bin} беше открит изпълним файл на Podman.\nНо QTEnvDev не може да го стартира. Съобщение за грешка:\n{error}",
   "removeContainerTips": "Сигурен ли сте, че искате да премахнете този контейнер?",
   "removeMachineTips": "Сигурен ли сте, че искате да премахнете тази виртуална машина?",
   "removeImageTips": "Сигурен ли сте, че искате да изтриете тази снимка?",

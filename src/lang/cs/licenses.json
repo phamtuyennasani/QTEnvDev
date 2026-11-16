@@ -1,7 +1,7 @@
 {
-  "description": "Licence FlyEnv podporuje průběžný vývoj a údržbu projektu. Jejím cílem není blokovat základní lokální vývoj — základní runtime prostředí a funkce správy prostředí zůstanou vždy dostupné. Licence odstraňuje zkušební omezení prémiových nástrojů a pomáhá udržovat FlyEnv v chodu na macOS, Windows i Linuxu.",
+  "description": "Licence QTEnvDev podporuje průběžný vývoj a údržbu projektu. Jejím cílem není blokovat základní lokální vývoj — základní runtime prostředí a funkce správy prostředí zůstanou vždy dostupné. Licence odstraňuje zkušební omezení prémiových nástrojů a pomáhá udržovat QTEnvDev v chodu na macOS, Windows i Linuxu.",
   "restrictions": {
-    "title": "FlyEnv zůstává funkční i bez licence, platí však následující zkušební omezení:",
+    "title": "QTEnvDev zůstává funkční i bez licence, platí však následující zkušební omezení:",
     "items": {
       "0": "Správa stránek je omezena na maximálně 3 lokální stránky.",
       "1": "AI asistent je omezen na 3denní zkušební dobu.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Jak získat licenci",
-    "description": "FlyEnv nabízí následující tři způsoby, jak získat licenci. Licence zatím nelze vydávat automaticky, takže všechny žádosti jsou kontrolovány a vydávány ručně:",
+    "description": "QTEnvDev nabízí následující tři způsoby, jak získat licenci. Licence zatím nelze vydávat automaticky, takže všechny žádosti jsou kontrolovány a vydávány ručně:",
     "methods": {
       "0": {
         "title": "Zakoupit osobní licenci",
-        "description": "Osobní licence FlyEnv stojí $10 USD. Vztahuje se na jedno aktivní zařízení (přenos na jiné zařízení je podporován prostřednictvím správy licencí) a odstraňuje všechna zkušební omezení. Platba je zpracovávána službou Paddle. Po zakoupení zadejte ID své objednávky Paddle do formuláře žádosti níže. Stránka nákupu:"
+        "description": "Osobní licence QTEnvDev stojí $10 USD. Vztahuje se na jedno aktivní zařízení (přenos na jiné zařízení je podporován prostřednictvím správy licencí) a odstraňuje všechna zkušební omezení. Platba je zpracovávána službou Paddle. Po zakoupení zadejte ID své objednávky Paddle do formuláře žádosti níže. Stránka nákupu:"
       },
       "1": {
         "title": "Přispět do kódu projektu",
-        "description": "Odešlete Pull Request na GitHubu a pomozte vylepšit FlyEnv. Počítá se každý smysluplný příspěvek — od rozsáhlých funkcí až po jednoduché opravy dokumentace."
+        "description": "Odešlete Pull Request na GitHubu a pomozte vylepšit QTEnvDev. Počítá se každý smysluplný příspěvek — od rozsáhlých funkcí až po jednoduché opravy dokumentace."
       },
       "2": {
         "title": "Šiřte povědomí o projektu",
-        "description": "Sdílejte své zkušenosti s FlyEnv na libovolné platformě a v libovolném jazyce — články, videa, blogy nebo příspěvky. Obsah musí být originální a autentický; obsah publikovaný před více než 3 měsíci již nemusí být způsobilý."
+        "description": "Sdílejte své zkušenosti s QTEnvDev na libovolné platformě a v libovolném jazyce — články, videa, blogy nebo příspěvky. Obsah musí být originální a autentický; obsah publikovaný před více než 3 měsíci již nemusí být způsobilý."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Autorizační kód nebyl přijat",
   "oauthTimeout": "Platnost ověření vypršela",
   "oauthSuccessTitle": "Ověření úspěšné",
-  "oauthSuccessMessage": "Tuto stránku lze zavřít. Vraťte se do FlyEnv a zkontrolujte si licenční údaje.",
+  "oauthSuccessMessage": "Tuto stránku lze zavřít. Vraťte se do QTEnvDev a zkontrolujte si licenční údaje.",
   "trialExpiredTitle": "Licence není aktivována",
-  "trialExpiredTips": "Používáte FlyEnv {days} dní. Pokud vám FlyEnv pomohl, zvažte získání licence pro podporu projektu."
+  "trialExpiredTips": "Používáte QTEnvDev {days} dní. Pokud vám QTEnvDev pomohl, zvažte získání licence pro podporu projektu."
 }

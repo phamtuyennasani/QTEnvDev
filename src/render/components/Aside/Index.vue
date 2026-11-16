@@ -85,7 +85,7 @@
               <span class="shrink-0">{{ item.label }}</span>
               <span
                 aria-hidden="true"
-                class="h-px flex-1 bg-[var(--flyenv-sidebar-divider-color)]"
+                class="h-px flex-1 bg-[var(--qtenvdev-sidebar-divider-color)]"
               ></span>
             </div>
             <template v-for="(i, _j) in item.sub" :key="_j">
@@ -799,7 +799,7 @@
       groupDo(false)
       return
     }
-    IPC.send('APP:FlyEnv-Helper-Check').then((key: string, res: any) => {
+    IPC.send('APP:QTEnvDev-Helper-Check').then((key: string, res: any) => {
       if (res?.code === 0 && res?.data) {
         groupDo()
       } else {

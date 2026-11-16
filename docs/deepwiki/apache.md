@@ -9,7 +9,7 @@
 
 ## Overview
 
-Apache 模块为 FlyEnv 提供 Apache HTTP Server 的完整生命周期管理，包括版本管理、服务启停、配置文件生成和虚拟主机支持。该模块实现了与 Nginx 类似的 Web 服务器功能，但使用 Apache 特有的配置语法和模块加载机制。
+Apache 模块为 QTEnvDev 提供 Apache HTTP Server 的完整生命周期管理，包括版本管理、服务启停、配置文件生成和虚拟主机支持。该模块实现了与 Nginx 类似的 Web 服务器功能，但使用 Apache 特有的配置语法和模块加载机制。
 
 相关文档链接:
 - [Nginx 模块](./nginx.md) - 同类 Web 服务器实现对比
@@ -151,7 +151,7 @@ Sources: src/fork/module/Apache/index.ts29-486
 2. **获取默认配置**: 执行 `httpd -V` 获取默认配置文件路径
 3. **解析关键路径**: 提取 CustomLog、ErrorLog、SRVROOT 路径
 4. **启用必要模块**: 启用 headers、deflate、proxy、proxy_fcgi、ssl、rewrite 等模块
-5. **更新日志路径**: 指向 FlyEnv 统一日志目录
+5. **更新日志路径**: 指向 QTEnvDev 统一日志目录
 6. **更新 SRVROOT**: 指向实际安装路径
 7. **添加 Include**: 包含虚拟主机配置目录
 
@@ -256,7 +256,7 @@ _stopServer() [Base class]
     │    - From version.pid
     │    - From process search (httpd)
     │
-    ├──► Filter FlyEnv-managed processes
+    ├──► Filter QTEnvDev-managed processes
     │    - Check COMMAND includes BaseDir/AppDir
     │    - Exclude brew/install/uninstall/link/unlink
     │

@@ -112,7 +112,7 @@ export class Base {
   /**
    * 配置文件清单。各服务模块覆写自己的（部分服务按版本，故接收 version）。
    * 返回 [] 表示该模块不支持/无配置文件。name 是人类可读标识（如 'main' / 'error'）。
-   * 只返回 name + path，不返回内容——FlyEnv 是本地工具，AI 代理自行读文件。
+   * 只返回 name + path，不返回内容——QTEnvDev 是本地工具，AI 代理自行读文件。
    */
   getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
     return []
@@ -190,9 +190,9 @@ export class Base {
 
   /**
    * Windows 服务目标由 fork 确认，只从登记/PID 文件及服务名加归属标记发现。
-   * 命令行归属使用版本路径和模块给出的配置标记，不用整个 FlyEnv 数据目录匹配。
+   * 命令行归属使用版本路径和模块给出的配置标记，不用整个 QTEnvDev 数据目录匹配。
    * 不按实际 EXE 路径遍历并纳入全部实例：用户可能使用同一安装自行启动服务，
-   * 相同程序路径不能单独证明实例归 FlyEnv 管理。名称/标记匹配精度仍由其规则决定。
+   * 相同程序路径不能单独证明实例归 QTEnvDev 管理。名称/标记匹配精度仍由其规则决定。
    * 子孙直接归属于已确认的根，不分别校验其程序路径。独立实例模块可传更准确标记。
    */
   protected async windowsServiceTargets(
@@ -338,7 +338,7 @@ export class Base {
     const pidDir = join(global.Server.BaseDir!, 'pid')
     const probeFile = join(
       pidDir,
-      `.flyenv-write-test-${this.type}-${process.pid}-${Date.now()}.tmp`
+      `.qtenvdev-write-test-${this.type}-${process.pid}-${Date.now()}.tmp`
     )
     let lastError: any
 

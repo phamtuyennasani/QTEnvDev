@@ -32,7 +32,7 @@ const draft = (): MemoryInputs['store'] => ({
   source: { kind: 'document', agent: 'fixture', description: 'Private source' }
 })
 async function fixture() {
-  const root = await realpath(await mkdtemp(join(tmpdir(), 'flyenv-delete-')))
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'qtenvdev-delete-')))
   const scope: ResolvedScope = { key: 'global', directory: join(root, 'global') }
   const coordinator = new ScopeCoordinator()
   const store = new RecordStore(EXPERIMENT_BUDGETS)

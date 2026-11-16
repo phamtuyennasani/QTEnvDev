@@ -36,8 +36,8 @@ if (-not (Test-IsAdmin)) {
 }
 
 $bundledGo = "D:\Program Files\PhpWebStudy-Data\app\static-go-1.25.0\bin\go.exe"
-if ($env:FLYENV_GO) {
-  $go = $env:FLYENV_GO
+if ($env:QTENVDEV_GO) {
+  $go = $env:QTENVDEV_GO
 } elseif (Test-Path $bundledGo) {
   $go = $bundledGo
 } else {

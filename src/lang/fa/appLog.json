@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "مقداردهی اولیه پوشه داده با موفقیت انجام شد، مسیر پوشه داده: {dir}",
   "initDBDataDirFail": "مقداردهی اولیه پوشه داده با شکست مواجه شد، علت: {error}",
   "newProjectFail": "ایجاد پروژه جدید با شکست مواجه شد",
-  "processListFail": "دریافت لیست فرآیندها با شکست مواجه شد. لطفاً FlyEnv Helper را نصب کنید"
+  "processListFail": "دریافت لیست فرآیندها با شکست مواجه شد. لطفاً QTEnvDev Helper را نصب کنید"
 }

@@ -3,9 +3,10 @@ import App from './tray/App.vue'
 import './index.scss'
 // Shares the brand tokens with the main window (style/index.scss): without this
 // the tray falls back to Element Plus's default --el-color-success (#67c23a)
-// instead of FlyEnv green (#01cc74), so tray switches render a different green.
+// instead of QTEnvDev green (#01cc74), so tray switches render a different green.
 import './style/theme/base-tokens.scss'
 import './style/theme/light-tokens.scss'
+import './style/tokens.css'
 import { createPinia } from 'pinia'
 import IPC from './util/IPC'
 import { AppStore } from './tray/store/app'

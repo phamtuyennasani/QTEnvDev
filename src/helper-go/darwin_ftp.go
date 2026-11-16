@@ -63,7 +63,7 @@ func darwinFTPBinary(path, name string) (string, error) {
 	}
 	return resolved, nil
 }
-func darwinFTPLabel(p darwinPolicy) string { return fmt.Sprintf("com.flyenv.pure-ftpd.%d", p.UID) }
+func darwinFTPLabel(p darwinPolicy) string { return fmt.Sprintf("com.qtenvdev.pure-ftpd.%d", p.UID) }
 func darwinFTPDirectory(p darwinPolicy) string {
 	return filepath.Join(filepath.Dir(darwinSocketPath), fmt.Sprintf("ftp-%d", p.UID))
 }

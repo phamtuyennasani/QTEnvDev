@@ -22,7 +22,7 @@ export function configureMCPClient(
       const request = IPC.sendSensitive(
         `app-fork:${client}`,
         'addMcp',
-        'flyenv',
+        'qtenvdev',
         type,
         config.serverUrl,
         config.token

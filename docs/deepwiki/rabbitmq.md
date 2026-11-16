@@ -9,7 +9,7 @@
 
 ## Overview
 
-RabbitMQ 模块为 FlyEnv 提供 AMQP 消息队列服务的生命周期管理，支持 Erlang/OTP 分布式节点配置、管理插件自动启用、EPMD (Erlang Port Mapper Daemon) 进程管理等功能。
+RabbitMQ 模块为 QTEnvDev 提供 AMQP 消息队列服务的生命周期管理，支持 Erlang/OTP 分布式节点配置、管理插件自动启用、EPMD (Erlang Port Mapper Daemon) 进程管理等功能。
 
 相关文档链接:
 - [Base 模块](./base.md) - 服务生命周期基类
@@ -310,7 +310,7 @@ async _initEPMD() {
   
   // 2. Find ERLANG_HOME
   const stdout = await execPromise(
-    'Write-Host "##FlyEnv-ERLANG_HOME$($env:ERLANG_HOME)FlyEnv-ERLANG_HOME##"',
+    'Write-Host "##QTEnvDev-ERLANG_HOME$($env:ERLANG_HOME)QTEnvDev-ERLANG_HOME##"',
     { shell: 'powershell.exe' }
   )
   
@@ -369,7 +369,7 @@ Sources: src/render/components/RabbitMQ/Index.vue:45-56
 ## Directory Structure
 
 ```
-{FlyEnv BaseDir}/rabbitmq/
+{QTEnvDev BaseDir}/rabbitmq/
 ├── rabbitmq-{v}.conf        # Environment config (Unix)
 ├── rabbitmq-{v}.bat         # Environment config (Windows)
 ├── rabbitmq-{v}-default.conf # Default config backup

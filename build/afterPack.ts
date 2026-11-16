@@ -17,35 +17,35 @@ export default async function after(pack: PackContext) {
   if (isLinux()) {
     console.log('Linux pack: ', pack)
     /**
-     * /home/xpf0000/Desktop/GitHub/FlyEnv/release/linux-unpacked/resources/
+     * /home/xpf0000/Desktop/GitHub/QTEnvDev/release/linux-unpacked/resources/
      * {
-     *   appOutDir: '/home/xpf0000/Desktop/GitHub/FlyEnv/release/linux-unpacked',
-     *   outDir: '/home/xpf0000/Desktop/GitHub/FlyEnv/release',
+     *   appOutDir: '/home/xpf0000/Desktop/GitHub/QTEnvDev/release/linux-unpacked',
+     *   outDir: '/home/xpf0000/Desktop/GitHub/QTEnvDev/release',
      *   arch: 1,
      *   electronPlatformName: 'linux'
      * }
      */
 
     if (pack.arch === 1) {
-      let fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/flyenv-helper-linux-amd64-v1')
-      const toBinDir = join(pack.appOutDir, 'resources/helper/flyenv-helper')
+      let fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/qtenvdev-helper-linux-amd64-v1')
+      const toBinDir = join(pack.appOutDir, 'resources/helper/qtenvdev-helper')
       await mkdirp(dirname(toBinDir))
       await copyFile(fromBinDir, toBinDir)
     }
     // arm64
     else if (pack.arch === 3) {
-      let fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/flyenv-helper-linux-arm64')
-      const toBinDir = join(pack.appOutDir, 'resources/helper/flyenv-helper')
+      let fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/qtenvdev-helper-linux-arm64')
+      const toBinDir = join(pack.appOutDir, 'resources/helper/qtenvdev-helper')
       await mkdirp(dirname(toBinDir))
       await copyFile(fromBinDir, toBinDir)
     }
 
-    let shFile = join(pack.appOutDir, 'resources/helper/flyenv.sh')
-    let tmplFile = resolve(pack.appOutDir, '../../static/sh/Linux/fly-env.sh')
+    let shFile = join(pack.appOutDir, 'resources/helper/qtenvdev.sh')
+    let tmplFile = resolve(pack.appOutDir, '../../static/sh/Linux/qt-env-dev.sh')
     await copyFile(tmplFile, shFile)
 
-    shFile = join(pack.appOutDir, 'resources/helper/flyenv-helper-init.sh')
-    tmplFile = resolve(pack.appOutDir, '../../static/sh/Linux/flyenv-helper-init.sh')
+    shFile = join(pack.appOutDir, 'resources/helper/qtenvdev-helper-init.sh')
+    tmplFile = resolve(pack.appOutDir, '../../static/sh/Linux/qtenvdev-helper-init.sh')
     await copyFile(tmplFile, shFile)
 
     shFile = join(pack.appOutDir, 'resources/helper/512x512.png')
@@ -57,15 +57,15 @@ export default async function after(pack: PackContext) {
   if (isWindows()) {
     console.log('Windows pack: ', pack)
     if (pack.arch === 1) {
-      let fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/flyenv-helper-windows-amd64-v1.exe')
-      const toBinDir = join(pack.appOutDir, 'resources/helper/flyenv-helper.exe')
+      let fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/qtenvdev-helper-windows-amd64-v1.exe')
+      const toBinDir = join(pack.appOutDir, 'resources/helper/qtenvdev-helper.exe')
       await mkdirp(dirname(toBinDir))
       await copyFile(fromBinDir, toBinDir)
     }
     // arm64
     else if (pack.arch === 3) {
-      let fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/flyenv-helper-windows-arm64.exe')
-      const toBinDir = join(pack.appOutDir, 'resources/helper/flyenv-helper.exe')
+      let fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/qtenvdev-helper-windows-arm64.exe')
+      const toBinDir = join(pack.appOutDir, 'resources/helper/qtenvdev-helper.exe')
       await mkdirp(dirname(toBinDir))
       await copyFile(fromBinDir, toBinDir)
     }
@@ -73,8 +73,8 @@ export default async function after(pack: PackContext) {
     return
   }
   if (pack.arch === 1) {
-    const fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/flyenv-helper-darwin-amd64')
-    const toBinDir = join(pack.appOutDir, 'FlyEnv.app/Contents/Resources/helper/flyenv-helper')
+    const fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/qtenvdev-helper-darwin-amd64')
+    const toBinDir = join(pack.appOutDir, 'QTEnvDev.app/Contents/Resources/helper/qtenvdev-helper')
     await mkdirp(dirname(toBinDir))
     const command = `cp "${fromBinDir}" "${toBinDir}" && xattr -dr "com.apple.quarantine" "${toBinDir}" && chmod 755 "${toBinDir}"`
     console.log('command: ', command)
@@ -82,8 +82,8 @@ export default async function after(pack: PackContext) {
   }
   // arm64
   else if (pack.arch === 3) {
-    const fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/flyenv-helper-darwin-arm64')
-    const toBinDir = join(pack.appOutDir, 'FlyEnv.app/Contents/Resources/helper/flyenv-helper')
+    const fromBinDir = resolve(pack.appOutDir, '../../src/helper-go/dist/qtenvdev-helper-darwin-arm64')
+    const toBinDir = join(pack.appOutDir, 'QTEnvDev.app/Contents/Resources/helper/qtenvdev-helper')
     await mkdirp(dirname(toBinDir))
     const command = `cp "${fromBinDir}" "${toBinDir}" && xattr -dr "com.apple.quarantine" "${toBinDir}" && chmod 755 "${toBinDir}"`
     console.log('command: ', command)
@@ -91,7 +91,7 @@ export default async function after(pack: PackContext) {
   }
 
   let fromBinDir = resolve(pack.appOutDir, '../../build/plist')
-  let toBinDir = join(pack.appOutDir, 'FlyEnv.app/Contents/Resources/plist/')
+  let toBinDir = join(pack.appOutDir, 'QTEnvDev.app/Contents/Resources/plist/')
   await mkdirp(toBinDir)
   let command = `cp ./* "${toBinDir}"`
   console.log('command: ', command)
@@ -99,12 +99,12 @@ export default async function after(pack: PackContext) {
     cwd: fromBinDir
   })
 
-  let shFile = join(pack.appOutDir, 'FlyEnv.app/Contents/Resources/helper/flyenv.sh')
-  let tmplFile = resolve(pack.appOutDir, '../../static/sh/macOS/fly-env.sh')
+  let shFile = join(pack.appOutDir, 'QTEnvDev.app/Contents/Resources/helper/qtenvdev.sh')
+  let tmplFile = resolve(pack.appOutDir, '../../static/sh/macOS/qt-env-dev.sh')
   await copyFile(tmplFile, shFile)
 
-  shFile = join(pack.appOutDir, 'FlyEnv.app/Contents/Resources/helper/flyenv-helper-init.sh')
-  tmplFile = resolve(pack.appOutDir, '../../static/sh/macOS/flyenv-helper-init.sh')
+  shFile = join(pack.appOutDir, 'QTEnvDev.app/Contents/Resources/helper/qtenvdev-helper-init.sh')
+  tmplFile = resolve(pack.appOutDir, '../../static/sh/macOS/qtenvdev-helper-init.sh')
   await copyFile(tmplFile, shFile)
 
   console.log('afterPack handle end !!!!!!')

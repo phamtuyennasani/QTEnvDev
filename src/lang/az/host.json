@@ -59,7 +59,7 @@
   "samePortTips": "Eyni domen və dinləmə portu olan sayt artıq mövcuddur. Eyni domenli başqa bir sayt əlavə etmək üçün başqa bir limandan istifadə edin.",
   "composerVersion": "Composer Versiyası",
   "useSysVersion": "Mühit dəyişənlərindən təyin edilən versiyalar",
-  "sslTips": "<p>Avtomatik SSL sertifikat funksiyası, FlyEnv-Root-CA adlı sertifikatın açar zəncirinə əlavə edilməsini və 'həmişə etibar et' olaraq təyin edilməsini tələb edir</p>\n<p>Bu proses adətən avtomatik həyata keçirilir.</p>\n<p>Əgər funksiya düzgün işləmirsə, terminalda əmrləri əl ilə icra edə bilərsiniz.</p>\n<p>Həmçinin sertifikat faylına iki dəfə klikləyərək açılan pəncərədə sertifikatı əlavə edib açar zəncirində 'həmişə etibar et' olaraq dəyişə bilərsiniz.</p>",
+  "sslTips": "<p>Avtomatik SSL sertifikat funksiyası, QTEnvDev-Root-CA adlı sertifikatın açar zəncirinə əlavə edilməsini və 'həmişə etibar et' olaraq təyin edilməsini tələb edir</p>\n<p>Bu proses adətən avtomatik həyata keçirilir.</p>\n<p>Əgər funksiya düzgün işləmirsə, terminalda əmrləri əl ilə icra edə bilərsiniz.</p>\n<p>Həmçinin sertifikat faylına iki dəfə klikləyərək açılan pəncərədə sertifikatı əlavə edib açar zəncirində 'həmişə etibar et' olaraq dəyişə bilərsiniz.</p>",
   "copyCommand": "Əmri Kopyala",
   "showFile": "Faylı Göstər",
   "sticky": "Sabit",

@@ -5,7 +5,7 @@ import { AppI18n } from '@lang/index'
 import {
   isPluginApiSupported,
   resolvePluginI18nText,
-  type FlyEnvPluginI18nText
+  type QTEnvDevPluginI18nText
 } from '@shared/plugin/PluginManifest'
 
 export type PluginCatalogItem = {
@@ -14,7 +14,7 @@ export type PluginCatalogItem = {
   id: string
   name: string
   version: string
-  description?: FlyEnvPluginI18nText
+  description?: QTEnvDevPluginI18nText
   author?: string
   artifact: { url: string; sha256?: string }
   official?: boolean
@@ -27,7 +27,7 @@ export type PluginCatalogItem = {
  * Localized plugin description for the current UI language. Reads the
  * reactive vue-i18n locale, so templates re-render on language change.
  */
-export function pluginDescription(item: { description?: FlyEnvPluginI18nText }): string {
+export function pluginDescription(item: { description?: QTEnvDevPluginI18nText }): string {
   return resolvePluginI18nText(item.description, AppI18n().global.locale) ?? ''
 }
 
@@ -152,7 +152,7 @@ class PluginMarketControllerState {
 
   async install(item: PluginCatalogItem, acknowledged = false) {
     if (!isPluginApiSupported(item.apiVersion))
-      throw new Error('Update FlyEnv to install this plugin')
+      throw new Error('Update QTEnvDev to install this plugin')
     if (
       this.isThirdParty(item) &&
       !acknowledged &&

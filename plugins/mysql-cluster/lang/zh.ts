@@ -25,7 +25,7 @@ export default {
   removeVersionHint: '卸载此 MySQL 安装版本？实例数据库将保留。',
   nativeInUse: '内置 MySQL 服务正在使用此版本，请先停止该服务。',
   downloads: '下载版本',
-  packageManagerRequired: '请先在 FlyEnv 中安装所选包管理器，再安装 MySQL。',
+  packageManagerRequired: '请先在 QTEnvDev 中安装所选包管理器，再安装 MySQL。',
   installed: '已安装',
   install: '安装',
   uninstall: '卸载',

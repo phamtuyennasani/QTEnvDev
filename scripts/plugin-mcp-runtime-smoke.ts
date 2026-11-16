@@ -10,9 +10,9 @@ import { join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
 import electron from 'electron'
 
-const output = resolve('.superpowers/sdd/2026-11-03-flyenv-ai-memory/mcp-smoke')
+const output = resolve('.superpowers/sdd/2026-11-03-qtenvdev-ai-memory/mcp-smoke')
 await mkdir(output, { recursive: true })
-const data = await mkdtemp(join(tmpdir(), 'flyenv-mcp-smoke-'))
+const data = await mkdtemp(join(tmpdir(), 'qtenvdev-mcp-smoke-'))
 const require = createRequire(import.meta.url)
 const zip = require('7zip-min-electron')
 const pack = (source: string, destination: string) =>
@@ -83,7 +83,7 @@ try {
   const preload = join(output, 'preload.cjs')
   await writeFile(
     preload,
-    "const {contextBridge, ipcRenderer} = require('electron'); contextBridge.exposeInMainWorld('FlyEnvNodeAPI', { send: (command, key, ...args) => ipcRenderer.send('command', command, key, ...args), receive: callback => ipcRenderer.on('reply', (_event, ...args) => callback(...args)) });"
+    "const {contextBridge, ipcRenderer} = require('electron'); contextBridge.exposeInMainWorld('QTEnvDevNodeAPI', { send: (command, key, ...args) => ipcRenderer.send('command', command, key, ...args), receive: callback => ipcRenderer.on('reply', (_event, ...args) => callback(...args)) });"
   )
   const html = join(output, 'index.html')
   await writeFile(
@@ -109,7 +109,7 @@ try {
       forkFile: join(output, 'host/fork.mjs')
     })
   )
-  const env: NodeJS.ProcessEnv = { ...process.env, FLYENV_DATA_ROOT: data }
+  const env: NodeJS.ProcessEnv = { ...process.env, QTENVDEV_DATA_ROOT: data }
   delete env.ELECTRON_RUN_AS_NODE
   child = spawn(electron as unknown as string, [join(output, 'host/host.mjs')], {
     env,

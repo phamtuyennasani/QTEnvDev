@@ -2,7 +2,7 @@
   "podmanInstall": "Nainstalovat Podman",
   "installPodmanByHomebrew": "Nainstalovat Podman přes Homebrew",
   "noPodmanFound": "Nebyl detekován žádný <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a>.\nChcete-li nainstalovat Podman, můžete kliknout na tlačítko instalace.\nMůžete také kliknout na tento odkaz\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\na podle dokumentace jej nainstalovat ručně.",
-  "podmanErrorTips": "V umístění {bin} byl zjištěn spustitelný soubor Podman.\nAle FlyEnv jej nemůže vyvolat. Chybová zpráva:\n{error}",
+  "podmanErrorTips": "V umístění {bin} byl zjištěn spustitelný soubor Podman.\nAle QTEnvDev jej nemůže vyvolat. Chybová zpráva:\n{error}",
   "removeContainerTips": "Jste si jisti, že chcete odstranit tento kontejner?",
   "removeMachineTips": "Jste si jisti, že chcete odstranit tento virtuální stroj?",
   "removeImageTips": "Jste si jisti, že chcete odstranit tento obraz?",

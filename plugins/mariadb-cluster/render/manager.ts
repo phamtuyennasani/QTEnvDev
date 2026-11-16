@@ -13,7 +13,7 @@ import { MariadbClusterController } from './controller'
 import { t } from './lang'
 
 const flag = 'mariadb-cluster'
-const key = 'flyenv-plugin-mariadb-cluster-v1'
+const key = 'qtenvdev-plugin-mariadb-cluster-v1'
 const binFor = (id: string) =>
   join(window.Server.MariaDBDir!, 'mariadb-cluster', 'instances', id, 'my.cnf')
 const moduleFor = () => BrewStore().module(flag)

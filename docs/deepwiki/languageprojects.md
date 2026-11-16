@@ -9,7 +9,7 @@
 
 ## Overview
 
-`LanguageProjects` 并非 FlyEnv 中传统意义上的独立服务模块，而是一套**可复用的语言项目运行时管理框架**。它被 `node`, `python`, `golang`, `rust`, `java`, `erlang`, `deno`, `zig`, `perl`, `php`, `bun`, `ruby` 等 12+ 个语言模块复用。每个语言模块在渲染层拥有独立的 `Module.ts`（如 `src/render/components/Nodejs/Module.ts`），但全部共享 `src/render/components/LanguageProjects/` 下的 UI 组件与状态逻辑；Fork 进程侧则统一由 `src/fork/module/LanguageProject/index.ts` 处理所有项目级生命周期操作。
+`LanguageProjects` 并非 QTEnvDev 中传统意义上的独立服务模块，而是一套**可复用的语言项目运行时管理框架**。它被 `node`, `python`, `golang`, `rust`, `java`, `erlang`, `deno`, `zig`, `perl`, `php`, `bun`, `ruby` 等 12+ 个语言模块复用。每个语言模块在渲染层拥有独立的 `Module.ts`（如 `src/render/components/Nodejs/Module.ts`），但全部共享 `src/render/components/LanguageProjects/` 下的 UI 组件与状态逻辑；Fork 进程侧则统一由 `src/fork/module/LanguageProject/index.ts` 处理所有项目级生命周期操作。
 
 该框架解决的核心痛点是：**在同一套 Electron 应用中，以统一 UX 管理多语言、多版本、多目录的自定义命令服务**，并处理跨平台进程守护、环境变量隔离、终端打开、PID 探测等底层细节。
 
@@ -38,7 +38,7 @@ graph TD
 渲染层状态以 **Vue reactive** 驱动：
 - `ProjectItem._state` 是一个 `reactive({ running: boolean, isRun: boolean, pid: string })` 对象，通过 `get state()` 暴露给 UI。
 - `ProjectSetup(typeFlag)` 在 `setup.ts` 中通过 `reactiveBind(new Project(typeFlag))` 创建单例，确保同一 `typeFlag` 在应用生命周期内状态唯一。
-- 项目列表持久化到 **localForage**，key 为 `flyenv-${typeFlag}-projects`。
+- 项目列表持久化到 **localForage**，key 为 `qtenvdev-${typeFlag}-projects`。
 
 Fork 层通过 `ForkPromise` + `IPC` 回调回写状态：
 - `startService` 成功时返回 `{ 'APP-Service-Start-PID': pid }`，渲染层在 `ProjectItem.start().then()` 中将 `this._state.isRun = true` 并写入 `pid`。
@@ -113,7 +113,7 @@ Sources: `src/shared/LanguageProjectRunner.ts:1-27`, `src/render/components/Lang
 - **UI 触发**: `LanguageProjects/index.vue` 中点击 `<FolderAdd />` 触发 `project.addProject()` (`index.vue:26`).
 - **Store 层**: `Project.addProject()` (`Project.ts:100-120`) 弹出 `ProjectEdit.vue` 抽屉，用户保存后通过 `AsyncComponentShow` 回调拿到 `ProjectItemType`。
 - **状态绑定**: `reactiveBind(new ProjectItem(res))` 将原始对象转为响应式，并压入 `this.project` 数组。
-- **持久化**: `Project.saveProject()` 调用 `localForage.setItem('flyenv-${this.flagType}-projects', JSON.parse(JSON.stringify(this.project)))`。
+- **持久化**: `Project.saveProject()` 调用 `localForage.setItem('qtenvdev-${this.flagType}-projects', JSON.parse(JSON.stringify(this.project)))`。
 - **加载**: `Project.fetchProject()` 在初始化时从 localForage 反序列化并重建响应式对象。
 
 **边缘情况处理**:
@@ -161,27 +161,27 @@ Sources: `src/render/components/LanguageProjects/ProjectItem.ts:93-178`, `src/fo
 
 ---
 
-### 3.3 环境变量与 PATH 隔离（按项目 ID 的 .flyenv 文件机制）
+### 3.3 环境变量与 PATH 隔离（按项目 ID 的 .qtenvdev 文件机制）
 
-**机制概述**: 每个语言项目可绑定特定版本运行时，FlyEnv 需要确保在该项目目录下打开终端时，PATH 优先指向选定的版本。该机制通过在每个项目目录生成 `.flyenv` 文件实现，并按 `#FlyEnv-ID-${item.id}` 注释隔离，防止多项目共目录时配置冲突。
+**机制概述**: 每个语言项目可绑定特定版本运行时，QTEnvDev 需要确保在该项目目录下打开终端时，PATH 优先指向选定的版本。该机制通过在每个项目目录生成 `.qtenvdev` 文件实现，并按 `#QTEnvDev-ID-${item.id}` 注释隔离，防止多项目共目录时配置冲突。
 
 **调用链**:
 - **UI 触发**: `index.vue` 中用户修改版本（QuickEdit 的 `binBin`）后触发 `project.setDirEnv(item)` (`index.vue:491`).
 - **Store 层**: `Project.setDirEnv(item)` (`Project.ts:160-273`).
-  - 先调用 `IPC.send('app-fork:tools', 'initFlyEnvSH')` 初始化全局脚本。
+  - 先调用 `IPC.send('app-fork:tools', 'initQTEnvDevSH')` 初始化全局脚本。
   - 将 `item.path` 加入 `allDirs` 并调用 `initDirs()` 向 Fork 进程注册允许访问的目录。
 - **文件写入逻辑**:
-  - **Windows** (`Project.ts:173-222`): 写入 `.flyenv`，内容为 PowerShell 语法：
+  - **Windows** (`Project.ts:173-222`): 写入 `.qtenvdev`，内容为 PowerShell 语法：
     ```powershell
     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-    $env:PATH = "${arr.join(';')};" + $env:PATH #FlyEnv-ID-${item.id}
+    $env:PATH = "${arr.join(';')};" + $env:PATH #QTEnvDev-ID-${item.id}
     ```
-  - **macOS/Linux** (`Project.ts:223-273`): 写入 `.flyenv`，内容为 Shell 语法：
+  - **macOS/Linux** (`Project.ts:223-273`): 写入 `.qtenvdev`，内容为 Shell 语法：
     ```bash
     #!/bin/zsh
-    export PATH="${arr.join(':')}:$PATH" #FlyEnv-ID-${item.id}
+    export PATH="${arr.join(':')}:$PATH" #QTEnvDev-ID-${item.id}
     ```
-- **冲突避免**: 读取已有 `.flyenv` 后，按行过滤掉包含 `#FlyEnv-ID-${item.id}` 的旧记录，再追加新记录。
+- **冲突避免**: 读取已有 `.qtenvdev` 后，按行过滤掉包含 `#QTEnvDev-ID-${item.id}` 的旧记录，再追加新记录。
 
 **数据清洗**:
 - 路径数组 `arr` 的构建逻辑：遍历 `[item.binPath, join(item.binPath, 'bin'), join(item.binPath, 'sbin')]`，仅当 `fs.existsSync(s)` 为真时才加入数组。
@@ -192,7 +192,7 @@ Sources: `src/render/components/LanguageProjects/Project.ts:160-273`, `src/rende
 
 ### 3.4 终端打开模式（macOS AppleScript / Linux 终端探测 / Windows PowerShell 探测）
 
-**机制概述**: 当用户选择 "Run In Terminal" 时，FlyEnv 不再使用后台静默 `nohup` / `Start-Process` 模式，而是唤起系统终端并执行命令。由于各平台终端差异巨大，需要三套完全不同的实现。
+**机制概述**: 当用户选择 "Run In Terminal" 时，QTEnvDev 不再使用后台静默 `nohup` / `Start-Process` 模式，而是唤起系统终端并执行命令。由于各平台终端差异巨大，需要三套完全不同的实现。
 
 #### macOS 分支
 - **文件**: `src/fork/module/LanguageProject/index.ts:127-182`
@@ -228,7 +228,7 @@ Sources: `src/fork/module/LanguageProject/index.ts:127-293`, `static/sh/Linux/ex
 
 ### 3.5 PID 文件轮询探测机制
 
-**机制概述**: 后台启动服务时，子进程可能尚未写入 PID 文件。FlyEnv 使用递归轮询而非文件监听器（FSWatcher）来探测 PID 文件出现，以保证兼容各种权限场景。
+**机制概述**: 后台启动服务时，子进程可能尚未写入 PID 文件。QTEnvDev 使用递归轮询而非文件监听器（FSWatcher）来探测 PID 文件出现，以保证兼容各种权限场景。
 
 **实现细节**:
 - **函数**: `waitPidFile(pidFile, time = 0, maxTime = 20, timeToWait = 500)` (`src/fork/Fn.ts:354-393`).
@@ -246,21 +246,21 @@ Sources: `src/fork/Fn.ts:354-393`
 
 ---
 
-### 3.6 启动脚本模板引擎（flyenv-async-exec 占位符替换）
+### 3.6 启动脚本模板引擎（qtenvdev-async-exec 占位符替换）
 
-**机制概述**: FlyEnv 不直接执行用户命令，而是将其填充到预置的脚本模板中，以统一处理 `nohup`、日志重定向、环境变量注入、工作目录切换等底层细节。
+**机制概述**: QTEnvDev 不直接执行用户命令，而是将其填充到预置的脚本模板中，以统一处理 `nohup`、日志重定向、环境变量注入、工作目录切换等底层细节。
 
-#### macOS/Linux 模板 (`static/sh/macOS|Linux/flyenv-async-exec.sh`)
+#### macOS/Linux 模板 (`static/sh/macOS|Linux/qtenvdev-async-exec.sh`)
 ```bash
 #!/bin/zsh  # macOS
 #!/bin/bash # Linux
 #ENV#
 cd "#CWD#"
 nohup "#BIN#" #ARGS# > "#OUTLOG#" 2>"#ERRLOG#" &
-echo "##FlyEnv-Process-ID$!FlyEnv-Process-ID##"
+echo "##QTEnvDev-Process-ID$!QTEnvDev-Process-ID##"
 ```
 
-#### Windows 模板 (`static/sh/Windows/flyenv-customer-exec.ps1`)
+#### Windows 模板 (`static/sh/Windows/qtenvdev-customer-exec.ps1`)
 ```powershell
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 #ENV#
@@ -269,7 +269,7 @@ $process = Start-Process -FilePath "powershell.exe" `
     -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$BIN`"" `
     -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput "$OUTLOG" -RedirectStandardError "$ERRLOG"
-Write-Host "##FlyEnv-Process-ID$($process.Id)FlyEnv-Process-ID##"
+Write-Host "##QTEnvDev-Process-ID$($process.Id)QTEnvDev-Process-ID##"
 ```
 
 **填充流程** (`customerServiceStartExec` / `customerServiceStartExecWin`):
@@ -284,12 +284,12 @@ Write-Host "##FlyEnv-Process-ID$($process.Id)FlyEnv-Process-ID##"
 **数据清洗（PID 从 stdout 提取）**:
 ```typescript
 const stdout = res.stdout.trim() + '\n' + res.stderr.trim()
-const regex = /FlyEnv-Process-ID(.*?)FlyEnv-Process-ID/g
+const regex = /QTEnvDev-Process-ID(.*?)QTEnvDev-Process-ID/g
 const match = regex.exec(stdout)
 if (match) { pid = match[1] }
 ```
 
-Sources: `src/fork/util/ServiceStart.ts:181-335`, `src/fork/util/ServiceStart.win.ts:316-434`, `static/sh/macOS/flyenv-async-exec.sh:1-7`, `static/sh/Windows/flyenv-customer-exec.ps1:1-28`
+Sources: `src/fork/util/ServiceStart.ts:181-335`, `src/fork/util/ServiceStart.win.ts:316-434`, `static/sh/macOS/qtenvdev-async-exec.sh:1-7`, `static/sh/Windows/qtenvdev-customer-exec.ps1:1-28`
 
 ---
 
@@ -315,7 +315,7 @@ Sources: `src/render/components/LanguageProjects/ASide.vue:1-97`, `src/render/co
 
 ### 3.8 配置与日志查看（多文件切换 Drawer）
 
-**机制概述**: 每个项目可配置多个配置文件路径（`configPath`）和日志文件路径（`logPath`）。FlyEnv 提供统一的 Drawer 组件，支持多文件 Tab 切换和实时内容刷新。
+**机制概述**: 每个项目可配置多个配置文件路径（`configPath`）和日志文件路径（`logPath`）。QTEnvDev 提供统一的 Drawer 组件，支持多文件 Tab 切换和实时内容刷新。
 
 **调用链**:
 - **配置查看**: `index.vue` 中点击 "Project Env Set" 触发 `showConfig(item)` (`index.vue:429-435`) → 异步加载 `config.vue` → 使用 `ConfSetup(p)` 初始化 Monaco/CodeMirror 编辑器。
@@ -351,8 +351,8 @@ Sources: `src/fork/BaseManager.ts:480-486`, `src/render/components/LanguageProje
 | **macOS/Linux** | 服务停止 | 使用 `ProcessListFetch` 获取进程列表，`ProcessPidsByPid` 递归找子进程，先 `TERM` 再等 500ms 后 `INT` | `src/fork/module/LanguageProject/index.ts:48-67` |
 | **Windows** | 标准启动 | `customerServiceStartExecWin` 使用 `.ps1` 脚本 + `Start-Process` + 日志重定向 | `src/fork/util/ServiceStart.win.ts:316-434` |
 | **macOS/Linux** | 标准启动 | `customerServiceStartExec` 使用 `.sh` 脚本 + `nohup` + `zsh`/`bash` | `src/fork/util/ServiceStart.ts:181-335` |
-| **Windows** | 环境变量隔离 | `.flyenv` 文件生成 PowerShell `$env:PATH = "..."` 语法 | `src/render/components/LanguageProjects/Project.ts:173-222` |
-| **macOS/Linux** | 环境变量隔离 | `.flyenv` 文件生成 `export PATH="..."` 语法（macOS 用 `#!/bin/zsh`） | `src/render/components/LanguageProjects/Project.ts:223-273` |
+| **Windows** | 环境变量隔离 | `.qtenvdev` 文件生成 PowerShell `$env:PATH = "..."` 语法 | `src/render/components/LanguageProjects/Project.ts:173-222` |
+| **macOS/Linux** | 环境变量隔离 | `.qtenvdev` 文件生成 `export PATH="..."` 语法（macOS 用 `#!/bin/zsh`） | `src/render/components/LanguageProjects/Project.ts:223-273` |
 | **macOS** | 终端打开 | 生成 `.scpt` AppleScript，调用 `osascript` 打开 Terminal.app | `src/fork/module/LanguageProject/index.ts:127-182` |
 | **Linux** | 终端打开 | 调用 `exec-by-terminal.sh` 自动探测 gnome-terminal/kitty/konsole 等 | `src/fork/module/LanguageProject/index.ts:184-233` |
 | **Windows** | 终端打开 | 调用 `exec-by-terminal.ps1` 自动探测 wt/pwsh/powershell | `src/fork/module/LanguageProject/index.ts:235-293` |
@@ -373,10 +373,10 @@ Sources: `src/fork/module/LanguageProject/index.ts:34-293`, `src/fork/util/Servi
 ### 数据从哪里来？
 
 1. **UI 输入**: `ProjectEdit.vue` 收集用户填写的路径、命令、端口、环境变量等。
-2. **配置文件**: `.flyenv` 文件从磁盘读取并过滤旧记录后重写。
+2. **配置文件**: `.qtenvdev` 文件从磁盘读取并过滤旧记录后重写。
 3. **Shell 输出**: 
-   - `flyenv-async-exec.sh` / `.ps1` 的 stdout 通过正则 `/FlyEnv-Process-ID(.*?)FlyEnv-Process-ID/g` 提取 PID。
-   - PID 文件内容由子进程写入，FlyEnv 通过 `waitPidFile` 轮询读取。
+   - `qtenvdev-async-exec.sh` / `.ps1` 的 stdout 通过正则 `/QTEnvDev-Process-ID(.*?)QTEnvDev-Process-ID/g` 提取 PID。
+   - PID 文件内容由子进程写入，QTEnvDev 通过 `waitPidFile` 轮询读取。
    - 错误日志写入 `${version.id}-error.log`，启动失败时作为错误消息回显。
 
 ### 如何转换？

@@ -9,7 +9,7 @@
 
 ## Overview
 
-PostgreSQL 模块为 FlyEnv 提供开源关系型数据库的完整生命周期管理，支持多版本共存、数据目录自定义、pgvector 扩展安装等高级功能。
+PostgreSQL 模块为 QTEnvDev 提供开源关系型数据库的完整生命周期管理，支持多版本共存、数据目录自定义、pgvector 扩展安装等高级功能。
 
 相关文档链接:
 - [MySQL Deep Dive](./mysql.md) - 同类型数据库模块对比
@@ -166,7 +166,7 @@ DATA_DIR Resolution Logic:
 2. Otherwise:
    → {Server.PostgreSqlDir}/postgresql{majorVersion}
    
-   Example: /Users/xxx/FlyEnv-Data/postgresql/postgresql16
+   Example: /Users/xxx/QTEnvDev-Data/postgresql/postgresql16
 ```
 
 Sources: src/render/components/PostgreSql/Index.vue:70-89 src/fork/module/Postgresql/index.ts:51-54
@@ -358,7 +358,7 @@ Sources: src/render/core/ASide.ts:56-71
 
 | Feature | macOS | Windows | Linux | Notes |
 |---------|-------|---------|-------|-------|
-| Data Directory | `~/FlyEnv-Data/postgresql/` | `%USERPROFILE%\FlyEnv-Data\postgresql\` | `~/.FlyEnv-Data/postgresql/` | User data directory |
+| Data Directory | `~/QTEnvDev-Data/postgresql/` | `%USERPROFILE%\QTEnvDev-Data\postgresql\` | `~/.QTEnvDev-Data/postgresql/` | User data directory |
 | Binary Name | `pg_ctl` | `pg_ctl.exe` | `pg_ctl` | Control binary |
 | Init Binary | `initdb` | `initdb.exe` | `initdb` | Database initialization |
 | Start Method | `serviceStartExec()` | `serviceStartExecCMD()` | `serviceStartExec()` | Windows uses CMD wrapper |

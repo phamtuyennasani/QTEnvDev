@@ -104,21 +104,21 @@
     },
     {
       "module": "tools",
-      "function": "installFlyEnvPowerShellIntegration",
+      "function": "installQTEnvDevPowerShellIntegration",
       "args": [
         {
           "name": "request",
           "type": "object"
         }
       ],
-      "return": "flyEnvPowerShellIntegrationResult",
+      "return": "QTEnvDevPowerShellIntegrationResult",
       "platform": "windows",
       "privileged": true,
       "pathAccess": "write"
     },
     {
       "module": "tools",
-      "function": "ensureFlyEnvDataDirectory",
+      "function": "ensureQTEnvDevDataDirectory",
       "args": [
         {
           "name": "dataDirectory",

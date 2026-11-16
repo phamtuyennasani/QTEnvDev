@@ -18,7 +18,7 @@
   "sourcePath": "সিস্টেম PATH",
   "sourceDefault": "ডিফল্ট SDK অবস্থান",
   "sourceCustom": "কনফিগার করা কাস্টম পাথ",
-  "sourceFlyenv": "FlyEnv-পরিচালিত SDK",
+  "sourceQTEnvDev": "QTEnvDev-পরিচালিত SDK",
   "sourceUnknown": "অজানা",
   "createProjectTitle": "Flutter প্রকল্প তৈরি করুন",
   "create": "তৈরি করুন",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "বিদ্যমান Android/iOS অ্যাপে এম্বেড করার জন্য একটি Flutter মডিউল।",
   "templateSkeletonDesc": "Material 3 এবং Navigation 2.0 সহ একটি তালিকা/বিস্তারিত Flutter অ্যাপ্লিকেশন।",
   "androidSdkNotDetected": "Android SDK শনাক্ত করা যায়নি",
-  "androidSdkInstallHint": "FlyEnv স্বয়ংক্রিয়ভাবে Android SDK ইনস্টল করে না। Android Studio বা Android-এর আনুষ্ঠানিক কমান্ড-লাইন টুল ব্যবহার করে SDK ইনস্টল করুন।",
+  "androidSdkInstallHint": "QTEnvDev স্বয়ংক্রিয়ভাবে Android SDK ইনস্টল করে না। Android Studio বা Android-এর আনুষ্ঠানিক কমান্ড-লাইন টুল ব্যবহার করে SDK ইনস্টল করুন।",
   "installAndroidStudio": "Android Studio ইনস্টল করুন",
   "androidCommandLineTools": "Android কমান্ড-লাইন টুল",
-  "androidSdkAfterInstall": "SDK ইনস্টল করার পর FlyEnv-এ ফিরে রিফ্রেশ (Refresh) ক্লিক করুন, তারপর পরিবেশ কনফিগার করতে Auto-fix ব্যবহার করুন।"
+  "androidSdkAfterInstall": "SDK ইনস্টল করার পর QTEnvDev-এ ফিরে রিফ্রেশ (Refresh) ক্লিক করুন, তারপর পরিবেশ কনফিগার করতে Auto-fix ব্যবহার করুন।"
 }

@@ -254,7 +254,7 @@ class Php extends Base {
 
   /**
    * PHP 自己识别服务归属：实际程序路径必须是当前版本的 spawner/php-cgi，且
-   * 命令行带本版本 FlyEnv 专用 ini。相对命令行不能拿来区分两个安装目录；
+   * 命令行带本版本 QTEnvDev 专用 ini。相对命令行不能拿来区分两个安装目录；
    * EXECUTABLE 来自系统查询，中文/空格路径按 Windows 规则比较，不依赖 PATH。
    */
   private fastCgiProcesses(version: SoftInstalled, list: PItem[], parentsOnly = false): PItem[] {
@@ -424,7 +424,7 @@ class Php extends Base {
                   this.stopWindowsServiceProcesses(residualPids, finalList)
                 )
                 // 成功补停的 PID 合并进本次终态，登记注销与 PID 文件清理仍使用最终快照。
-                // 仅补停一次，避免持续新建进程或外部重启使 FlyEnv 退出无限循环；权限、
+                // 仅补停一次，避免持续新建进程或外部重启使 QTEnvDev 退出无限循环；权限、
                 // 身份变化、查询和原树等待失败仍直接传播，不清文件或伪装成功。
                 arr.push(...residualPids.filter((pid) => !arr.includes(pid)))
                 remaining = timeOperationSync('php.stop.check-version-residuals', () =>
@@ -760,7 +760,7 @@ class Php extends Base {
         content = content.replace(regex, ``).trim()
         if (name === 'php_xdebug') {
           content = content
-            .replace(/;\[FlyEnv-xdebug-ini-begin\]([\s\S]*?);\[FlyEnv-xdebug-ini-end\]/g, ``)
+            .replace(/;\[QTEnvDev-xdebug-ini-begin\]([\s\S]*?);\[QTEnvDev-xdebug-ini-end\]/g, ``)
             .trim()
         }
       } else {
@@ -868,7 +868,7 @@ class Php extends Base {
         if (name === 'php_xdebug') {
           const output_dir = join(global.Server.PhpDir!, 'xdebug')
           await mkdirp(output_dir)
-          content += `\n;[FlyEnv-xdebug-ini-begin]
+          content += `\n;[QTEnvDev-xdebug-ini-begin]
 xdebug.idekey = "PHPSTORM"
 xdebug.client_host = localhost
 xdebug.client_port = 9003
@@ -878,7 +878,7 @@ xdebug.profiler_output_name = cachegrind.out.%p
 xdebug.start_with_request = yes
 xdebug.trigger_value=StartProfileForMe
 xdebug.output_dir = "${output_dir}"
-;[FlyEnv-xdebug-ini-end]`
+;[QTEnvDev-xdebug-ini-end]`
         }
       }
 

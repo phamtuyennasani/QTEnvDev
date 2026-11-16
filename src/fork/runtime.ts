@@ -13,10 +13,10 @@ import { AppI18n, getActiveLocale, I18nT } from '@lang/runtime'
 import { FALLBACK_LOCALE } from '@lang/catalog'
 
 // Fork-side plugin host bridge: fork plugin bundles resolve `@lang/runtime` to
-// this object (see the 'flyenv-plugin-host-lang' esbuild plugin in
+// this object (see the 'qtenvdev-plugin-host-lang' esbuild plugin in
 // scripts/plugin-builder.ts) so they share this process's live i18n instance
 // instead of bundling a copy that never receives language updates.
-;(globalThis as any).__FLYENV_PLUGIN_HOST__ = {
+;(globalThis as any).__QTENVDEV_PLUGIN_HOST__ = {
   lang: { AppI18n, FALLBACK_LOCALE, getActiveLocale, I18nT }
 }
 import { StopProcessListClient } from './StopProcessListClient'

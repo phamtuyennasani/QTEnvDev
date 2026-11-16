@@ -56,7 +56,7 @@ test('rules append preserves content, serializes duplicate writes and honors Cod
     assert.equal(results.filter((result) => result.unchanged).length, 1)
     const text = await readFile(file, 'utf8')
     assert.equal(text.startsWith('My existing instructions.\n'), true)
-    assert.equal(text.match(/<!-- flyenv-ai-memory:start -->/g)?.length, 1)
+    assert.equal(text.match(/<!-- qtenvdev-ai-memory:start -->/g)?.length, 1)
   } finally {
     await rm(home, { recursive: true, force: true })
   }
@@ -68,7 +68,7 @@ test('unsafe, malformed, oversized and non-UTF8 instructions fail without replac
     await mkdir(join(home, '.codex'))
     const file = join(home, '.codex/AGENTS.md')
     for (const content of [
-      Buffer.from('<!-- flyenv-ai-memory:start -->\nbroken'),
+      Buffer.from('<!-- qtenvdev-ai-memory:start -->\nbroken'),
       Buffer.alloc(32760, 65),
       Buffer.from([0xff, 0xfe])
     ]) {

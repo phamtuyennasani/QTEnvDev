@@ -1,14 +1,14 @@
-# FlyEnv - AI Agent Development Guide
+# QTEnvDev - AI Agent Development Guide
 
 ## Project Overview
 
-**FlyEnv** is an All-In-One Full-Stack Environment Management Tool built with Electron and Vue 3. It provides a lightweight, modular development environment manager for Windows, macOS, and Linux, allowing developers to install and manage Apache, PHP, Node.js, Python, databases, and more—running natively without Docker.
+**QTEnvDev** is an All-In-One Full-Stack Environment Management Tool built with Electron and Vue 3. It provides a lightweight, modular development environment manager for Windows, macOS, and Linux, allowing developers to install and manage Apache, PHP, Node.js, Python, databases, and more—running natively without Docker.
 
 - **Version**: 4.17.0
 - **Electron Version**: 39.8.7
 - **License**: MIT
 - **Author**: Pengfei Xu
-- **Repository**: <https://github.com/xpf0000/FlyEnv>
+- **Repository**: <https://github.com/xpf0000/QTEnvDev>
 
 ## Technology Stack
 
@@ -34,7 +34,7 @@
 
 ## Project Architecture
 
-FlyEnv follows Electron's multi-process architecture with three main components:
+QTEnvDev follows Electron's multi-process architecture with three main components:
 
 ### 1. Main Process (`/src/main`)
 
@@ -202,7 +202,7 @@ yarn postinstall                  # Install Electron app dependencies
 
 ## Module Boundaries and Operation Ownership
 
-Apply these rules to every new or changed module, renderer IPC flow, service lifecycle, background operation, download, installation, web panel, or external process. Before making such a change, read `.codex/skills/flyenv-module-boundaries/SKILL.md` and record the required operation contract in the implementation plan.
+Apply these rules to every new or changed module, renderer IPC flow, service lifecycle, background operation, download, installation, web panel, or external process. Before making such a change, read `.codex/skills/qtenvdev-module-boundaries/SKILL.md` and record the required operation contract in the implementation plan.
 
 - UI state belongs to the mounted Vue component only. It includes inputs, dialogs, selections, and display-only filters; it may reset when the page is destroyed.
 - Existing shared domain state belongs to Pinia or the established module store. New module-owned domain state follows **New Module Constraints** and defaults to a module-local class bound with `reactiveBind`.
@@ -225,7 +225,7 @@ Before implementation, record the exception authorization (if any) and verify th
 
 ## Failure Boundaries and Partial Completion
 
-When adding or changing a multi-step operation, batch processing, candidate filtering, cleanup, or error propagation, read `docs/skills/flyenv-failure-boundaries/SKILL.md` before implementation and use it again during review. This project skill is loaded through this instruction; it does not depend on automatic skill discovery.
+When adding or changing a multi-step operation, batch processing, candidate filtering, cleanup, or error propagation, read `docs/skills/qtenvdev-failure-boundaries/SKILL.md` before implementation and use it again during review. This project skill is loaded through this instruction; it does not depend on automatic skill discovery.
 
 - Define success by the user's requested outcome. Classify each changed step as a required dependency, independent item, or supplementary action; record what its failure may stop.
 - A supplementary action such as DNS refresh after a successful hosts write must only report its own failure. It must not reject the completed write, overwrite its result, or trigger a replay of the write.
@@ -313,8 +313,8 @@ Contains various test files and utilities:
 
 ```bash
 # Clone and install
-git clone git@github.com:xpf0000/FlyEnv.git
-cd FlyEnv
+git clone git@github.com:xpf0000/QTEnvDev.git
+cd QTEnvDev
 yarn install
 
 # Development
@@ -329,11 +329,11 @@ yarn build
 **macOS**:
 
 - May require `sudo xattr -dr "com.apple.quarantine"` for helper binaries
-- Uses `flyenv-helper` for privileged operations
+- Uses `qtenvdev-helper` for privileged operations
 
 **Windows**:
 
-- Uses `flyenv-helper-windows-amd64-v1.exe` Go binary for admin tasks
+- Uses `qtenvdev-helper-windows-amd64-v1.exe` Go binary for admin tasks
 - PowerShell scripts in `/scripts/`
 
 **Linux**:
@@ -366,7 +366,7 @@ yarn build
 
 ```bash
 # Fix macOS helper permissions
-yarn fix-flyenv-helper
+yarn fix-qtenvdev-helper
 
 # Kill running Electron processes (Windows)
 npx tsx scripts/electron-process-kill.ts
@@ -383,7 +383,7 @@ yarn upgrade-interactive
 
 ## Resources
 
-- **Website**: <https://www.flyenv.com>
-- **Documentation**: <https://deepwiki.com/xpf0000/FlyEnv>
+- **Website**: <https://www.qtenvdev.com>
+- **Documentation**: <https://deepwiki.com/xpf0000/QTEnvDev>
 - **Discord**: <https://discord.gg/u5SuMGxjPE>
-- **Releases**: <https://github.com/xpf0000/FlyEnv/releases>
+- **Releases**: <https://github.com/xpf0000/QTEnvDev/releases>

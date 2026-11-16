@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
  */
 export default class MCPBridgeManager {
   private get sourcePath(): string {
-    return join(global.Server.Static!, 'mcp', 'flyenv-mcp-stdio.mjs')
+    return join(global.Server.Static!, 'mcp', 'qtenvdev-mcp-stdio.mjs')
   }
 
   private get externalDir(): string {
@@ -18,7 +18,7 @@ export default class MCPBridgeManager {
   }
 
   private get externalPath(): string {
-    return join(this.externalDir, 'flyenv-mcp-stdio.mjs')
+    return join(this.externalDir, 'qtenvdev-mcp-stdio.mjs')
   }
 
   /** 确保外部存在最新 bridge 脚本，返回外部路径 */

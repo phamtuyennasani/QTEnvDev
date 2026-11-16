@@ -37,7 +37,7 @@ import type { ExtensionInstallResult } from '../src/fork/module/Php.win/WindowsE
 const version = { bin: 'C:\\PHP 8.3\\php-cgi.exe', path: 'C:\\PHP 8.3' } as SoftInstalled
 const target = phpExtensionTarget(version)
 assert.equal(target.bin, 'C:\\PHP 8.3\\php.exe')
-const info = `PHP Extension Build => API20230831,NTS,VS16\r\nArchitecture => x64\r\nThread Safety => disabled\r\nFLYENV_EXT_PROFILE=${JSON.stringify({ version: '8.3.36', ini: target.ini, dir: 'ext', loaded: ['Core'] })}`
+const info = `PHP Extension Build => API20230831,NTS,VS16\r\nArchitecture => x64\r\nThread Safety => disabled\r\nQTENVDEV_EXT_PROFILE=${JSON.stringify({ version: '8.3.36', ini: target.ini, dir: 'ext', loaded: ['Core'] })}`
 const profile = parsePhpExtensionProfile(info, target)
 assert.equal(profile.version, '8.3.36')
 assert.equal(profile.build, 'API20230831,NTS,VS16')
@@ -497,7 +497,7 @@ assert.ok(scopedXdebug.indexOf('xdebug.client_port = 9003') < scopedXdebug.index
 assert.match(scopedXdebug, /\[PATH=C:\/site\]\nxdebug.client_port=9011/)
 assert.ok(scopedXdebug.startsWith('[PHP]\nzend_extension='))
 
-const root = await mkdtemp(join(tmpdir(), 'FlyEnv PHP [路径] & $ '))
+const root = await mkdtemp(join(tmpdir(), 'QTEnvDev PHP [路径] & $ '))
 const previousServer = global.Server
 const previousAdapter = axios.defaults.adapter
 try {
@@ -599,8 +599,8 @@ try {
   assert.match(await readFile(ini, 'utf8'), /concurrent user edit/)
   assert.deepEqual(await readFile(dll), Buffer.from('MZ-test-dll'))
 
-  if (process.env.FLYENV_PHP_TEST_BIN) {
-    const bin = process.env.FLYENV_PHP_TEST_BIN
+  if (process.env.QTENVDEV_PHP_TEST_BIN) {
+    const bin = process.env.QTENVDEV_PHP_TEST_BIN
     await writeFile(ini, '[PHP]\n')
     const output = execFileSync(bin, ['-c', ini, '-r', phpExtensionProfileScript()], {
       cwd: root,
@@ -609,9 +609,9 @@ try {
       env: {
         ...process.env,
         PHP_INI_SCAN_DIR: '',
-        FLYENV_LARGE_VARIABLE: 'x'.repeat(24000),
-        FLYENV_LARGE_VARIABLE_2: 'y'.repeat(24000),
-        FLYENV_LARGE_VARIABLE_3: 'z'.repeat(24000)
+        QTENVDEV_LARGE_VARIABLE: 'x'.repeat(24000),
+        QTENVDEV_LARGE_VARIABLE_2: 'y'.repeat(24000),
+        QTENVDEV_LARGE_VARIABLE_3: 'z'.repeat(24000)
       }
     })
     assert.ok(output.length < 64000, 'profile output excludes large environment variables')
@@ -653,7 +653,7 @@ try {
   global.Server = previousServer
   const temporaryRoot = resolve(tmpdir())
   assert.ok(
-    resolve(root).startsWith(temporaryRoot + sep) && root.includes('FlyEnv PHP [路径] & $ '),
+    resolve(root).startsWith(temporaryRoot + sep) && root.includes('QTEnvDev PHP [路径] & $ '),
     'Refusing to remove an unexpected temporary path'
   )
   await rm(root, { recursive: true, force: true })

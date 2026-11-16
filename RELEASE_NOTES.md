@@ -1,27 +1,27 @@
-# FlyEnv Release Notes
+# QTEnvDev Release Notes
 
-All notable changes to FlyEnv will be documented in this file.
+All notable changes to QTEnvDev will be documented in this file.
 
 ## [4.20.2] - 2026-10-26
 
-# **FlyEnv v4.20.2 Update Release Notes**
+# **QTEnvDev v4.20.2 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added Windows Project Environment Support for Git Bash**
 
-FlyEnv's Windows shell initialization now integrates with **Git Bash**, allowing configured projects to use their selected runtime paths automatically in the terminal.
+QTEnvDev's Windows shell initialization now integrates with **Git Bash**, allowing configured projects to use their selected runtime paths automatically in the terminal.
 
 This integration provides:
 
-- **Automatic Project PATH Loading**: Load runtime paths from a configured project's `.flyenv` file when opening Git Bash in that directory or navigating into it
+- **Automatic Project PATH Loading**: Load runtime paths from a configured project's `.qtenvdev` file when opening Git Bash in that directory or navigating into it
 - **Environment Switching**: Remove the previous project's injected paths when switching projects or leaving a configured directory
 - **Shell Profile Integration**: Configure interactive and login shells while preserving existing profile content and prompt handlers
 - **Setup Feedback**: Report Git Bash setup problems while allowing PowerShell initialization to complete
 
-Run **Shell Initialization** in FlyEnv and open a new Git Bash session to activate the integration. The script reads supported PATH assignments from Windows `.flyenv` files without executing their PowerShell commands.
+Run **Shell Initialization** in QTEnvDev and open a new Git Bash session to activate the integration. The script reads supported PATH assignments from Windows `.qtenvdev` files without executing their PowerShell commands.
 
-Thanks to [@Ray123fa](https://github.com/Ray123fa) for the contribution! [Pull Request #930](https://github.com/xpf0000/FlyEnv/pull/930)
+Thanks to [@Ray123fa](https://github.com/Ray123fa) for the contribution! [Pull Request #930](https://github.com/xpf0000/QTEnvDev/pull/930)
 
 ---
 
@@ -39,7 +39,7 @@ The installer provides:
 
 An online search result does not guarantee a compatible Windows binary. Restart the selected PHP service after changing extensions to apply the configuration to running sites.
 
-Thanks to [@mspacemedia](https://github.com/mspacemedia) for the contribution! [Pull Request #922](https://github.com/xpf0000/FlyEnv/pull/922)
+Thanks to [@mspacemedia](https://github.com/mspacemedia) for the contribution! [Pull Request #922](https://github.com/xpf0000/QTEnvDev/pull/922)
 
 ---
 
@@ -92,29 +92,29 @@ Also corrected broken translation placeholders and clarified missing-runtime mes
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can inspect the build process and download workflow artifacts from the public build history:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can inspect the build process and download workflow artifacts from the public build history:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues).
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues).
 
 **Enjoy the update!**
 
 ## [4.20.1] - 2026-10-13
 
-# **FlyEnv v4.20.1 Update Release Notes**
+# **QTEnvDev v4.20.1 Update Release Notes**
 
 ## **🛠️ Improvements & Bug Fixes**
 
 ### **1. Fixed macOS Helper Installation Failure**
 
-Resolved an issue where installing the FlyEnv helper after a DMG installation could repeatedly fail with `Terminal exited with code 5` or `Bootstrap failed: 5: Input/output error`, preventing access to local sites and other operations that require the helper.
+Resolved an issue where installing the QTEnvDev helper after a DMG installation could repeatedly fail with `Terminal exited with code 5` or `Bootstrap failed: 5: Input/output error`, preventing access to local sites and other operations that require the helper.
 
 The installer now removes inherited macOS quarantine attributes from both the installed helper executable and its LaunchDaemon configuration before registering the service. This addresses the installation failure reported on macOS 27.
 
-Thanks to [@zhoujians](https://github.com/zhoujians) for the contribution, [@PaulDelwig](https://github.com/PaulDelwig) and [@lizejun999](https://github.com/lizejun999) for the reports, and [@Tastaturberuf](https://github.com/Tastaturberuf) for helping identify the cause! [Pull Request #893](https://github.com/xpf0000/FlyEnv/pull/893) · [Issue #899](https://github.com/xpf0000/FlyEnv/issues/899) · [Issue #901](https://github.com/xpf0000/FlyEnv/issues/901)
+Thanks to [@zhoujians](https://github.com/zhoujians) for the contribution, [@PaulDelwig](https://github.com/PaulDelwig) and [@lizejun999](https://github.com/lizejun999) for the reports, and [@Tastaturberuf](https://github.com/Tastaturberuf) for helping identify the cause! [Pull Request #893](https://github.com/xpf0000/QTEnvDev/pull/893) · [Issue #899](https://github.com/xpf0000/QTEnvDev/issues/899) · [Issue #901](https://github.com/xpf0000/QTEnvDev/issues/901)
 
 ---
 
@@ -122,19 +122,19 @@ Thanks to [@zhoujians](https://github.com/zhoujians) for the contribution, [@Pau
 
 Resolved an issue reported on Fedora 44 KDE where Apache failed to start after updating to v4.20.0 with `AppHelperError: unapproved service executable name`.
 
-FlyEnv now resolves Apache launcher scripts such as `apachectl` and `apache2ctl` to the actual `httpd` or `apache2` server executable before starting the service. Required Apache environment settings are preserved, along with the selected installation's existing FlyEnv configuration.
+QTEnvDev now resolves Apache launcher scripts such as `apachectl` and `apache2ctl` to the actual `httpd` or `apache2` server executable before starting the service. Required Apache environment settings are preserved, along with the selected installation's existing QTEnvDev configuration.
 
-Thanks to [@DigionsPieces](https://github.com/DigionsPieces) for the report! [Issue #894](https://github.com/xpf0000/FlyEnv/issues/894)
+Thanks to [@DigionsPieces](https://github.com/DigionsPieces) for the report! [Issue #894](https://github.com/xpf0000/QTEnvDev/issues/894)
 
 ---
 
 ### **3. Fixed PostgreSQL Startup When the Server Is Already Stopped**
 
-Resolved an issue on macOS and Linux where starting a stopped PostgreSQL instance failed during the pre-start cleanup with a missing `postmaster.pid` error. Users no longer need to start PostgreSQL manually before using FlyEnv's start button.
+Resolved an issue on macOS and Linux where starting a stopped PostgreSQL instance failed during the pre-start cleanup with a missing `postmaster.pid` error. Users no longer need to start PostgreSQL manually before using QTEnvDev's start button.
 
-FlyEnv now checks whether the selected database instance is actually running before requesting a native stop. A stopped instance, including one with an outdated PID file from an unclean shutdown, can proceed to startup; genuine stop failures still report an error.
+QTEnvDev now checks whether the selected database instance is actually running before requesting a native stop. A stopped instance, including one with an outdated PID file from an unclean shutdown, can proceed to startup; genuine stop failures still report an error.
 
-Thanks to [@Megumi1773](https://github.com/Megumi1773) for the contribution and [@glitter1105](https://github.com/glitter1105) for the report! [Pull Request #900](https://github.com/xpf0000/FlyEnv/pull/900) · [Issue #902](https://github.com/xpf0000/FlyEnv/issues/902)
+Thanks to [@Megumi1773](https://github.com/Megumi1773) for the contribution and [@glitter1105](https://github.com/glitter1105) for the report! [Pull Request #900](https://github.com/xpf0000/QTEnvDev/pull/900) · [Issue #902](https://github.com/xpf0000/QTEnvDev/issues/902)
 
 ---
 
@@ -144,71 +144,71 @@ Resolved an issue where the llama.cpp plugin passed a numeric GPU index directly
 
 Saved numeric indices now resolve to the device name for the selected backend, such as `CUDA0`, `Vulkan0`, or `MTL0`. The GPU device setting also accepts explicit device names and comma-separated device lists, while leaving it empty lets llama.cpp choose its default device. Updated settings hints explain the accepted values.
 
-Thanks to [@Megumi1773](https://github.com/Megumi1773) for the contribution! [Pull Request #898](https://github.com/xpf0000/FlyEnv/pull/898)
+Thanks to [@Megumi1773](https://github.com/Megumi1773) for the contribution! [Pull Request #898](https://github.com/xpf0000/QTEnvDev/pull/898)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can inspect the build process and download workflow artifacts from the public build history:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can inspect the build process and download workflow artifacts from the public build history:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues).
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues).
 
 **Enjoy the update!**
 
 ## [4.20.0] - 2026-10-07
 
-# **FlyEnv v4.20.0 Update Release Notes**
+# **QTEnvDev v4.20.0 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added Windows UAC Authorization Mode**
 
-FlyEnv can now perform supported Windows administrator operations through the native **User Account Control (UAC)** prompt, without requiring the FlyEnv helper to be installed. This gives users an alternative on devices where installing a background helper is inconvenient.
+QTEnvDev can now perform supported Windows administrator operations through the native **User Account Control (UAC)** prompt, without requiring the QTEnvDev helper to be installed. This gives users an alternative on devices where installing a background helper is inconvenient.
 
 The new authorization workflow provides:
 
-- **Your Choice of Authorization Method**: Choose UAC or the FlyEnv helper when administrator access is first needed, and change the preference later in Settings
+- **Your Choice of Authorization Method**: Choose UAC or the QTEnvDev helper when administrator access is first needed, and change the preference later in Settings
 - **Helper-Free UAC Operation**: In UAC mode, privileged tasks request Windows authorization directly, without automatically installing or repairing the helper
 - **System Task Coverage**: Supports administrator operations for hosts entries, DNS refresh, environment variables and PATH, certificates, and managed process operations
 - **Clear Cancellation and Failure Feedback**: Cancelling an authorization request leaves the selected method intact and reports the affected operation's result
-- **Existing Helper Management**: Users switching to UAC can choose to disable their existing FlyEnv helper
+- **Existing Helper Management**: Users switching to UAC can choose to disable their existing QTEnvDev helper
 
 ---
 
 ### **2. Added llama.cpp Plugin**
 
-The Plugin Market now includes **llama.cpp** for managing local inference runtimes and GGUF models directly in FlyEnv.
+The Plugin Market now includes **llama.cpp** for managing local inference runtimes and GGUF models directly in QTEnvDev.
 
 The plugin provides:
 
 - **Runtime Version Management**: Download and manage official llama.cpp releases with the CPU or GPU backend available for your platform
 - **GGUF Model Library**: Browse and search public Hugging Face model repositories, inspect model files and sizes, and download models into a local library
 - **Inference Settings**: Configure the selected model, context size, CPU threads, GPU layers, listening address, and port
-- **Service Controls and Logs**: Start, stop, and restart the local inference server through FlyEnv's service controls, and inspect its logs
+- **Service Controls and Logs**: Start, stop, and restart the local inference server through QTEnvDev's service controls, and inspect its logs
 - **Local API Access**: Run an OpenAI-compatible local endpoint, with API key configuration for authenticated access
 
-Thanks to [@vaanwd](https://github.com/vaanwd) for the feature request! [Issue #722](https://github.com/xpf0000/FlyEnv/issues/722)
+Thanks to [@vaanwd](https://github.com/vaanwd) for the feature request! [Issue #722](https://github.com/xpf0000/QTEnvDev/issues/722)
 
 ---
 
 ### **3. Added OpenSearch Plugin**
 
-The new **OpenSearch** plugin adds a search and analytics engine to the Plugin Market, with version management and the standard FlyEnv service workflow on Windows, macOS, and Linux.
+The new **OpenSearch** plugin adds a search and analytics engine to the Plugin Market, with version management and the standard QTEnvDev service workflow on Windows, macOS, and Linux.
 
 The plugin provides:
 
-- **Version Management**: Download and manage OpenSearch versions from FlyEnv
+- **Version Management**: Download and manage OpenSearch versions from QTEnvDev
 - **Service Controls**: Start and stop OpenSearch from its module or the system tray
 - **Configuration and Logs**: Edit OpenSearch, JVM, and logging settings, and inspect service logs
 - **Local Development Mode**: Disable the OpenSearch security plugin through a dedicated development-mode switch, with restart guidance
 - **OpenSearch Dashboards**: Prepare and open the matching Dashboards version for the running OpenSearch service
 
-Thanks to [@xnhinzkyx](https://github.com/xnhinzkyx) for the feature request! [Issue #880](https://github.com/xpf0000/FlyEnv/issues/880)
+Thanks to [@xnhinzkyx](https://github.com/xnhinzkyx) for the feature request! [Issue #880](https://github.com/xpf0000/QTEnvDev/issues/880)
 
 ---
 
@@ -218,68 +218,68 @@ Thanks to [@xnhinzkyx](https://github.com/xnhinzkyx) for the feature request! [I
 
 The classic tray menu now moves entries beyond its top-level limit into a **More** submenu. This keeps long lists of startup groups and services from pushing the main-window and exit actions out of reach, while retaining access to every service control.
 
-Thanks to [@TanNhatCMS](https://github.com/TanNhatCMS) for the report! [Issue #878](https://github.com/xpf0000/FlyEnv/issues/878)
+Thanks to [@TanNhatCMS](https://github.com/TanNhatCMS) for the report! [Issue #878](https://github.com/xpf0000/QTEnvDev/issues/878)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can inspect the build process and download workflow artifacts from the public build history:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can inspect the build process and download workflow artifacts from the public build history:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues).
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues).
 
 **Enjoy the update!**
 
 ## [4.19.1] - 2026-09-27
 
-# **FlyEnv v4.19.1 Update Release Notes**
+# **QTEnvDev v4.19.1 Update Release Notes**
 
 ## **🛠️ Improvements & Bug Fixes**
 
 ### **1. Fixed Invisible Tray Window Blocking Mouse Clicks on macOS**
 
-Resolved an issue where, after updating to v4.19.0, an invisible FlyEnv window could sit above all other applications and intercept mouse clicks. The affected area extended from the top-left corner of the screen down the left side, making windows, buttons, links, and desktop icons in that zone unclickable until FlyEnv was fully closed.
+Resolved an issue where, after updating to v4.19.0, an invisible QTEnvDev window could sit above all other applications and intercept mouse clicks. The affected area extended from the top-left corner of the screen down the left side, making windows, buttons, links, and desktop icons in that zone unclickable until QTEnvDev was fully closed.
 
 The cause was the tray popup's "fake hide" mechanism: instead of truly hiding, the popup window was made fully transparent and parked off-screen. A transparent window still intercepts mouse input, and macOS can move off-screen windows back onto the display — leaving an invisible overlay blocking the top-left area. The tray popup now truly hides with the native window-hide call. It is set to fully transparent right before hiding, so the system window fade that Windows replays on transparent windows still plays invisibly, and full opacity is restored when the popup appears — no click blocking, and no visible fade.
 
-Thanks to [@dkoychev](https://github.com/dkoychev) for the report! [Issue #869](https://github.com/xpf0000/FlyEnv/issues/869)
+Thanks to [@dkoychev](https://github.com/dkoychev) for the report! [Issue #869](https://github.com/xpf0000/QTEnvDev/issues/869)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.19.0] - 2026-09-26
 
-# **FlyEnv v4.19.0 Update Release Notes**
+# **QTEnvDev v4.19.0 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added Plugin Market**
 
-FlyEnv now includes a dedicated **Plugin Market** (Settings → Plugin Market) that lets you extend the app with optional modules while keeping the core application focused. Plugins can provide complete FlyEnv modules — including services with their own pages, configuration, and logs — that integrate into the same workflow as the built-in modules.
+QTEnvDev now includes a dedicated **Plugin Market** (Settings → Plugin Market) that lets you extend the app with optional modules while keeping the core application focused. Plugins can provide complete QTEnvDev modules — including services with their own pages, configuration, and logs — that integrate into the same workflow as the built-in modules.
 
 The Plugin Market provides:
-- **Official Catalog**: Browse and install official FlyEnv plugins with one click
+- **Official Catalog**: Browse and install official QTEnvDev plugins with one click
 - **Third-Party Registries**: Add community plugin registry URLs as additional sources; third-party sources are explicitly acknowledged before their plugins can be installed
 - **Installed Plugin Management**: Update, disable, re-enable, or uninstall installed plugins from one place
 - **No Restart Required**: Installing, updating, disabling, and removing plugins takes effect immediately — new modules appear in the menu and running services are stopped safely before changes
 - **Verified Installs**: Every catalog plugin carries an exact SHA-256 checksum, and installed plugins are protected by per-installation tokens encrypted with the OS keychain, so copying plugin files between machines does not activate them
 
-Installing and updating plugins requires an active FlyEnv license; already-installed plugins keep working without one.
+Installing and updating plugins requires an active QTEnvDev license; already-installed plugins keep working without one.
 
 ---
 
@@ -288,9 +288,9 @@ Installing and updating plugins requires an active FlyEnv license; already-insta
 The Plugin Market launches with **Kafka** as its first official service plugin. The plugin adds a complete Apache Kafka module that runs a single-node KRaft-mode broker (no ZooKeeper required) on Windows, macOS, and Linux.
 
 This integration provides:
-- **Version Management**: Download and manage Kafka releases directly from FlyEnv
+- **Version Management**: Download and manage Kafka releases directly from QTEnvDev
 - **Java Runtime Binding**: Runs on a Java 17+ runtime, with validation of the selected Java version
-- **Service Controls**: Start and stop the broker through the standard FlyEnv service workflow, including system tray integration
+- **Service Controls**: Start and stop the broker through the standard QTEnvDev service workflow, including system tray integration
 - **Topic Management**: Create, inspect, and delete Kafka topics from the built-in Topics page
 - **Configuration and Logs**: Edit the generated server configuration and inspect broker logs from the module
 
@@ -300,17 +300,17 @@ This integration provides:
 
 ### **3. Improved Podman Rosetta Setting on Apple Silicon**
 
-The Rosetta switch for Podman machines is now disabled with an explanatory tip when the installed Podman version is known to be too old (below 5.1.0, which introduced the `[machine] rosetta` containers.conf option), while unknown versions no longer false-disable the control. The setting is also clearly documented as a global Podman preference rather than a per-VM option, and the FlyEnv-managed `flyenv-podman.conf` drop-in now carries a header comment explaining its origin and safe removal.
+The Rosetta switch for Podman machines is now disabled with an explanatory tip when the installed Podman version is known to be too old (below 5.1.0, which introduced the `[machine] rosetta` containers.conf option), while unknown versions no longer false-disable the control. The setting is also clearly documented as a global Podman preference rather than a per-VM option, and the QTEnvDev-managed `qtenvdev-podman.conf` drop-in now carries a header comment explaining its origin and safe removal.
 
-Thanks to [@YoloCyber](https://github.com/YoloCyber) for the contribution! [Pull Request #863](https://github.com/xpf0000/FlyEnv/pull/863)
+Thanks to [@YoloCyber](https://github.com/YoloCyber) for the contribution! [Pull Request #863](https://github.com/xpf0000/QTEnvDev/pull/863)
 
 ---
 
 ### **4. Fixed MySQL Root Password Initialization on Custom Ports**
 
-Resolved an issue where the first start of a MySQL instance configured on a non-default port failed to set the root password: the initialization command always connected to the default port 3306, leaving the new instance with an empty password while FlyEnv kept connecting with the configured one. FlyEnv now resolves the instance's own configuration file, passes the correct port explicitly, and retries the initialization for slow-starting servers.
+Resolved an issue where the first start of a MySQL instance configured on a non-default port failed to set the root password: the initialization command always connected to the default port 3306, leaving the new instance with an empty password while QTEnvDev kept connecting with the configured one. QTEnvDev now resolves the instance's own configuration file, passes the correct port explicitly, and retries the initialization for slow-starting servers.
 
-Thanks to [@ulusoyomer](https://github.com/ulusoyomer) for the contribution! [Pull Request #866](https://github.com/xpf0000/FlyEnv/pull/866) [Issue #773](https://github.com/xpf0000/FlyEnv/issues/773)
+Thanks to [@ulusoyomer](https://github.com/ulusoyomer) for the contribution! [Pull Request #866](https://github.com/xpf0000/QTEnvDev/pull/866) [Issue #773](https://github.com/xpf0000/QTEnvDev/issues/773)
 
 ---
 
@@ -318,47 +318,47 @@ Thanks to [@ulusoyomer](https://github.com/ulusoyomer) for the contribution! [Pu
 
 Resolved several issues with the Windows tray popup: it was clipped off-screen whenever the taskbar was docked to the top, left, or right edge; it re-laid-out visibly right after appearing; and every opening replayed a ~300ms system window fade. The popup now positions itself from the actual taskbar edge with the arrow pointing at the tray icon, appears instantly in a single frame, and handles focus correctly so clicking outside closes it as expected.
 
-Thanks to [@darius-gs](https://github.com/darius-gs) for the contribution! [Pull Request #868](https://github.com/xpf0000/FlyEnv/pull/868)
+Thanks to [@darius-gs](https://github.com/darius-gs) for the contribution! [Pull Request #868](https://github.com/xpf0000/QTEnvDev/pull/868)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.18.3] - 2026-09-12
 
-# **FlyEnv v4.18.3 Update Release Notes**
+# **QTEnvDev v4.18.3 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added First-Run Technology Stack Selection**
 
-FlyEnv now gives genuinely new users a guided technology-stack selector before the main workspace opens. Instead of showing the entire module catalog by default, users can start with only the technologies relevant to their work.
+QTEnvDev now gives genuinely new users a guided technology-stack selector before the main workspace opens. Instead of showing the entire module catalog by default, users can start with only the technologies relevant to their work.
 
 The new onboarding experience includes:
 
 - **Eight Stack Presets**: PHP, Node.js, Java, Python, Go, .NET, Ruby, and Rust
-- **Multi-Stack Selection**: Multiple presets can be combined, and FlyEnv enables the union of their recommended modules
+- **Multi-Stack Selection**: Multiple presets can be combined, and QTEnvDev enables the union of their recommended modules
 - **Practical Defaults**: PHP is initially selected, while Startup Groups, Hosts, and Tools remain available as common utilities
 - **Full Control**: Users can still show every module or open Settings → Modules for detailed customization
 - **Safe First-Run Behavior**: The selector only applies to fresh installations, so existing users keep their current module visibility settings
 
-This makes the initial FlyEnv experience more focused and reduces the cognitive load caused by modules that a new user may not need.
+This makes the initial QTEnvDev experience more focused and reduces the cognitive load caused by modules that a new user may not need.
 
 ---
 
 ### **2. Added Drag-and-Drop Sorting for Startup Groups**
 
-Startup Group cards can now be reordered directly from their drag handles. The chosen order is stored locally and restored the next time FlyEnv opens.
+Startup Group cards can now be reordered directly from their drag handles. The chosen order is stored locally and restored the next time QTEnvDev opens.
 
 The implementation also preserves the default group identity, avoids unnecessary storage writes when the order has not changed, rejects invalid reorder data, and restores the last saved order if persistence fails.
 
@@ -368,11 +368,11 @@ The implementation also preserves the default group identity, avoids unnecessary
 
 ### **3. Fixed Windows Machine ID Detection for Licensing**
 
-FlyEnv now has a more resilient Windows machine ID lookup for systems where the primary UUID provider returns an empty value or fails.
+QTEnvDev now has a more resilient Windows machine ID lookup for systems where the primary UUID provider returns an empty value or fails.
 
-The fallback process reads Windows' `MachineGuid` first and then tries `Win32_ComputerSystemProduct.UUID`, validating the result before it is used. This fixes cases where affected users could not request or activate a FlyEnv license because no machine UUID was available.
+The fallback process reads Windows' `MachineGuid` first and then tries `Win32_ComputerSystemProduct.UUID`, validating the result before it is used. This fixes cases where affected users could not request or activate a QTEnvDev license because no machine UUID was available.
 
-Thanks to [@FunkZero](https://github.com/FunkZero) for reporting the UUID issue! [Discussion #606](https://github.com/xpf0000/FlyEnv/discussions/606)
+Thanks to [@FunkZero](https://github.com/FunkZero) for reporting the UUID issue! [Discussion #606](https://github.com/xpf0000/QTEnvDev/discussions/606)
 
 ---
 
@@ -380,32 +380,32 @@ Thanks to [@FunkZero](https://github.com/FunkZero) for reporting the UUID issue!
 
 Podman machine creation has been updated to avoid unsupported command-line parameters and to match Podman's expected configuration behavior:
 
-- **Rosetta Configuration**: Rosetta support on Apple Silicon is now written to a FlyEnv-managed `containers.conf.d` drop-in instead of passing the invalid `--rosetta` initialization flag
+- **Rosetta Configuration**: Rosetta support on Apple Silicon is now written to a QTEnvDev-managed `containers.conf.d` drop-in instead of passing the invalid `--rosetta` initialization flag
 - **Disk Sizing**: The disk size setting and dashboard display now consistently use GiB, with a supported range of 10–1024 GiB
-- **SSH Identity Handling**: The unsupported `--identity-path` initialization argument has been removed; FlyEnv continues to display Podman's generated SSH identity as read-only information
-- **Configuration Compatibility**: FlyEnv respects synchronized `XDG_CONFIG_HOME` values and preserves custom `CONTAINERS_CONF` configurations through Podman's override mechanism
+- **SSH Identity Handling**: The unsupported `--identity-path` initialization argument has been removed; QTEnvDev continues to display Podman's generated SSH identity as read-only information
+- **Configuration Compatibility**: QTEnvDev respects synchronized `XDG_CONFIG_HOME` values and preserves custom `CONTAINERS_CONF` configurations through Podman's override mechanism
 
-Thanks to [@YoloCyber](https://github.com/YoloCyber) for the contribution and detailed follow-up reports! [Issue #800](https://github.com/xpf0000/FlyEnv/issues/800) · [Pull Request #855](https://github.com/xpf0000/FlyEnv/pull/855) · [Issue #856](https://github.com/xpf0000/FlyEnv/issues/856) · [Issue #857](https://github.com/xpf0000/FlyEnv/issues/857)
+Thanks to [@YoloCyber](https://github.com/YoloCyber) for the contribution and detailed follow-up reports! [Issue #800](https://github.com/xpf0000/QTEnvDev/issues/800) · [Pull Request #855](https://github.com/xpf0000/QTEnvDev/pull/855) · [Issue #856](https://github.com/xpf0000/QTEnvDev/issues/856) · [Issue #857](https://github.com/xpf0000/QTEnvDev/issues/857)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv builds continue to be produced through public GitHub Actions workflows. Build logs, workflow definitions, and release artifacts remain available for inspection in the repository.
+All QTEnvDev builds continue to be produced through public GitHub Actions workflows. Build logs, workflow definitions, and release artifacts remain available for inspection in the repository.
 
-Thank you to everyone who reports issues, contributes fixes, and helps improve FlyEnv. Feedback and suggestions are always welcome through [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues) and [GitHub Discussions](https://github.com/xpf0000/FlyEnv/discussions).
+Thank you to everyone who reports issues, contributes fixes, and helps improve QTEnvDev. Feedback and suggestions are always welcome through [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues) and [GitHub Discussions](https://github.com/xpf0000/QTEnvDev/discussions).
 
 ---
 
 ## [4.18.1] - 2026-08-22
 
-# **FlyEnv v4.18.1 Update Release Notes**
+# **QTEnvDev v4.18.1 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added Tomcat Application Mappings**
 
-Tomcat sites can now map application directories or WAR files to explicit context paths while creating or editing a site. FlyEnv validates the mapping, writes the required Tomcat Context descriptors, and keeps the generated configuration synchronized when the site changes.
+Tomcat sites can now map application directories or WAR files to explicit context paths while creating or editing a site. QTEnvDev validates the mapping, writes the required Tomcat Context descriptors, and keeps the generated configuration synchronized when the site changes.
 
 This makes it possible to serve multiple applications from one Tomcat site using paths such as `/`, `/api`, or `/admin` without manually maintaining Tomcat XML files.
 
@@ -413,19 +413,19 @@ This makes it possible to serve multiple applications from one Tomcat site using
 
 ### **2. Added Configurable PHP FastCGI Worker Counts on Windows**
 
-Windows PHP FastCGI installations can now set the number of `php-cgi` workers for each installed PHP version. Choose an integer from 1 to 64 in FlyEnv; restarting a running PHP service applies the updated count.
+Windows PHP FastCGI installations can now set the number of `php-cgi` workers for each installed PHP version. Choose an integer from 1 to 64 in QTEnvDev; restarting a running PHP service applies the updated count.
 
 This gives local PHP projects a supported way to tune concurrency when several sites or heavier development workloads are running at once.
 
-[Issue #830](https://github.com/xpf0000/FlyEnv/issues/830)
+[Issue #830](https://github.com/xpf0000/QTEnvDev/issues/830)
 
 ---
 
 ### **3. Added Persian Language Support**
 
-FlyEnv is now available in Persian (`fa`). The new locale covers the application's built-in translation catalog and is selectable from the language settings.
+QTEnvDev is now available in Persian (`fa`). The new locale covers the application's built-in translation catalog and is selectable from the language settings.
 
-Thanks to [@Nitron2020](https://github.com/Nitron2020) for the contribution! [Pull Request #829](https://github.com/xpf0000/FlyEnv/pull/829)
+Thanks to [@Nitron2020](https://github.com/Nitron2020) for the contribution! [Pull Request #829](https://github.com/xpf0000/QTEnvDev/pull/829)
 
 ---
 
@@ -441,72 +441,72 @@ This makes it faster to return to the right project context without manually ope
 
 ### **5. Improved Windows Helper and Data Directory Initialization**
 
-FlyEnv now coordinates Windows Helper startup with data-directory initialization more reliably. When a new installation needs elevated access to create or repair its data location, FlyEnv can recover permissions and retry the operation before dependent setup continues.
+QTEnvDev now coordinates Windows Helper startup with data-directory initialization more reliably. When a new installation needs elevated access to create or repair its data location, QTEnvDev can recover permissions and retry the operation before dependent setup continues.
 
-This improves first-run reliability for Windows users who previously could not start using FlyEnv because its data directory or Helper had not initialized correctly.
+This improves first-run reliability for Windows users who previously could not start using QTEnvDev because its data directory or Helper had not initialized correctly.
 
 ---
 
 ### **6. Fixed Rust Installation on Windows**
 
-Resolved a Windows installation issue that could leave downloaded Rust archives in an invalid layout. FlyEnv now unpacks the official archive through a staging directory and installs its expected root directory correctly.
+Resolved a Windows installation issue that could leave downloaded Rust archives in an invalid layout. QTEnvDev now unpacks the official archive through a staging directory and installs its expected root directory correctly.
 
 ---
 
 ### **7. Removed NVM and FNM Support on Windows**
 
-FlyEnv no longer detects or operates the external NVM and FNM Node.js version managers on Windows. Managed Node.js versions continue to work through FlyEnv's built-in installation workflow, while removing this integration prevents the NVM startup popup reported by affected users.
+QTEnvDev no longer detects or operates the external NVM and FNM Node.js version managers on Windows. Managed Node.js versions continue to work through QTEnvDev's built-in installation workflow, while removing this integration prevents the NVM startup popup reported by affected users.
 
-[Issue #831](https://github.com/xpf0000/FlyEnv/issues/831)
+[Issue #831](https://github.com/xpf0000/QTEnvDev/issues/831)
 
 ---
 
 ### **8. Fixed Windows Tray Menu Click Behavior**
 
-The Windows modern tray menu now opens from a right-click only. Double-clicking the tray icon opens the main FlyEnv window without also displaying the quick-action menu.
+The Windows modern tray menu now opens from a right-click only. Double-clicking the tray icon opens the main QTEnvDev window without also displaying the quick-action menu.
 
-[Issue #831](https://github.com/xpf0000/FlyEnv/issues/831)
+[Issue #831](https://github.com/xpf0000/QTEnvDev/issues/831)
 
 ---
 
 ### **9. Fixed macOS Alias PATH Entries**
 
-Resolved an issue where editing a FlyEnv alias on macOS could write a stray quote into the `PATH` export in `.zshrc`. Alias setup now parses existing path entries safely and preserves a valid shell configuration.
+Resolved an issue where editing a QTEnvDev alias on macOS could write a stray quote into the `PATH` export in `.zshrc`. Alias setup now parses existing path entries safely and preserves a valid shell configuration.
 
-[Issue #832](https://github.com/xpf0000/FlyEnv/issues/832)
+[Issue #832](https://github.com/xpf0000/QTEnvDev/issues/832)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.18.0] - 2026-08-10
 
-# **FlyEnv v4.18.0 Update Release Notes**
+# **QTEnvDev v4.18.0 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added Neo4j Support**
 
-FlyEnv now includes a dedicated **Neo4j** module for installing and managing local Neo4j graph database servers.
+QTEnvDev now includes a dedicated **Neo4j** module for installing and managing local Neo4j graph database servers.
 
 This integration provides:
-- **Version Management**: Download and manage Neo4j versions directly from FlyEnv
+- **Version Management**: Download and manage Neo4j versions directly from QTEnvDev
 - **Java Compatibility**: Select and persist a compatible Java runtime for each installed Neo4j version
-- **Service Controls**: Start and stop Neo4j instances through the standard FlyEnv service workflow
+- **Service Controls**: Start and stop Neo4j instances through the standard QTEnvDev service workflow
 - **Configuration and Logs**: Edit the Neo4j configuration and inspect service startup and runtime logs
 - **Neo4j Browser Access**: Open the local Neo4j Browser for a running instance
 
-[Issue #719](https://github.com/xpf0000/FlyEnv/issues/719)
+[Issue #719](https://github.com/xpf0000/QTEnvDev/issues/719)
 
 ---
 
@@ -514,21 +514,21 @@ This integration provides:
 
 PostgreSQL now includes a built-in **pgAdmin 4** web management panel. When PostgreSQL is running, open the panel from the service toolbar to manage the active local database in a browser.
 
-FlyEnv installs pgAdmin 4 on demand with the selected Python runtime, keeps its data and logs in the PostgreSQL workspace, registers the active FlyEnv PostgreSQL server, and stops the companion process together with PostgreSQL.
+QTEnvDev installs pgAdmin 4 on demand with the selected Python runtime, keeps its data and logs in the PostgreSQL workspace, registers the active QTEnvDev PostgreSQL server, and stops the companion process together with PostgreSQL.
 
-[Issue #680](https://github.com/xpf0000/FlyEnv/issues/680)
+[Issue #680](https://github.com/xpf0000/QTEnvDev/issues/680)
 
 ---
 
 ### **3. Added MongoDB DbGate Panel**
 
-MongoDB now provides an on-demand **DbGate** web management panel for working with local MongoDB databases. FlyEnv installs the DbGate runtime with the selected Node.js version, stores its workspace under FlyEnv data, protects the local panel with generated credentials, reuses healthy instances, and stops DbGate with MongoDB.
+MongoDB now provides an on-demand **DbGate** web management panel for working with local MongoDB databases. QTEnvDev installs the DbGate runtime with the selected Node.js version, stores its workspace under QTEnvDev data, protects the local panel with generated credentials, reuses healthy instances, and stops DbGate with MongoDB.
 
 ---
 
 ### **4. Added Redis Commander Panel**
 
-Redis now includes an on-demand **Redis Commander** web management panel. FlyEnv installs it with the selected Node.js runtime, connects it to the running Redis instance, opens an authenticated local URL, reuses healthy instances, and cleans up the companion process when Redis stops.
+Redis now includes an on-demand **Redis Commander** web management panel. QTEnvDev installs it with the selected Node.js runtime, connects it to the running Redis instance, opens an authenticated local URL, reuses healthy instances, and cleans up the companion process when Redis stops.
 
 ---
 
@@ -538,47 +538,47 @@ Redis now includes an on-demand **Redis Commander** web management panel. FlyEnv
 
 Site QR codes now encode the complete site URL, including the `http://` or `https://` protocol and any configured port. Scanning a code from the Hosts or Tomcat site list now opens the site as a link instead of treating the hostname as plain text.
 
-[Issue #815](https://github.com/xpf0000/FlyEnv/issues/815)
+[Issue #815](https://github.com/xpf0000/QTEnvDev/issues/815)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.17.1] - 2026-07-26
 
-# **FlyEnv v4.17.1 Update Release Notes**
+# **QTEnvDev v4.17.1 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added ClickHouse Support**
 
-FlyEnv now includes a dedicated **ClickHouse** module for installing, managing, configuring, and monitoring local ClickHouse database servers on macOS and Linux.
+QTEnvDev now includes a dedicated **ClickHouse** module for installing, managing, configuring, and monitoring local ClickHouse database servers on macOS and Linux.
 
 This integration provides:
-- **Version Management**: Download and manage ClickHouse releases directly from FlyEnv
+- **Version Management**: Download and manage ClickHouse releases directly from QTEnvDev
 - **Service Controls**: Start and stop installed ClickHouse versions alongside your other local services
 - **Configuration and Logs**: Edit the `config.xml` and `users.xml` files and review server, startup, and error logs from the module
 - **Built-In Browser UI**: Open a managed CH-UI browser interface for a running ClickHouse server
 
-[Issue #774](https://github.com/xpf0000/FlyEnv/issues/774)
+[Issue #774](https://github.com/xpf0000/QTEnvDev/issues/774)
 
 ---
 
 ### **2. Added Temporal Server Support**
 
-FlyEnv now includes a dedicated **Temporal** module for running a local Temporal Server. You can download and manage server versions, edit the generated server configuration, inspect logs, and open the Temporal Web UI when you need to explore workflows and namespaces in a browser.
+QTEnvDev now includes a dedicated **Temporal** module for running a local Temporal Server. You can download and manage server versions, edit the generated server configuration, inspect logs, and open the Temporal Web UI when you need to explore workflows and namespaces in a browser.
 
-[Issue #730](https://github.com/xpf0000/FlyEnv/issues/730)
+[Issue #730](https://github.com/xpf0000/QTEnvDev/issues/730)
 
 ---
 
@@ -586,15 +586,15 @@ FlyEnv now includes a dedicated **Temporal** module for running a local Temporal
 
 A separate **Temporal CLI** module is now available for local development workflows. It manages the official Temporal CLI and its `temporal server start-dev` development server, with configurable ports, local database settings, logs, and direct access to the built-in Web UI.
 
-[Issue #730](https://github.com/xpf0000/FlyEnv/issues/730)
+[Issue #730](https://github.com/xpf0000/QTEnvDev/issues/730)
 
 ---
 
 ### **4. Control Startup Groups from the Tray Menu**
 
-Startup Groups are now displayed in the FlyEnv tray menu, ahead of individual services. You can start or stop a saved group directly from either tray style, making it easier to switch an entire project environment without opening the main window.
+Startup Groups are now displayed in the QTEnvDev tray menu, ahead of individual services. You can start or stop a saved group directly from either tray style, making it easier to switch an entire project environment without opening the main window.
 
-[Issue #782](https://github.com/xpf0000/FlyEnv/issues/782)
+[Issue #782](https://github.com/xpf0000/QTEnvDev/issues/782)
 
 ---
 
@@ -602,37 +602,37 @@ Startup Groups are now displayed in the FlyEnv tray menu, ahead of individual se
 
 ### **5. Improved Windows Privileged Operations and Helper Recovery**
 
-Windows users can now choose the elevation method used for operations that require administrator permission: the persistent FlyEnv Helper or standard **UAC** prompts. FlyEnv continues to use the Helper by default, while UAC offers a practical alternative for supported operations on systems where the Helper cannot be installed or used.
+Windows users can now choose the elevation method used for operations that require administrator permission: the persistent QTEnvDev Helper or standard **UAC** prompts. QTEnvDev continues to use the Helper by default, while UAC offers a practical alternative for supported operations on systems where the Helper cannot be installed or used.
 
-If Helper installation fails, FlyEnv now automatically switches to UAC so supported privileged actions remain available instead of being blocked by the failed Helper setup.
+If Helper installation fails, QTEnvDev now automatically switches to UAC so supported privileged actions remain available instead of being blocked by the failed Helper setup.
 
-[Issue #756](https://github.com/xpf0000/FlyEnv/issues/756) [Issue #797](https://github.com/xpf0000/FlyEnv/issues/797)
+[Issue #756](https://github.com/xpf0000/QTEnvDev/issues/756) [Issue #797](https://github.com/xpf0000/QTEnvDev/issues/797)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.17.0] - 2026-07-19
 
-# **FlyEnv v4.17.0 Update Release Notes**
+# **QTEnvDev v4.17.0 Update Release Notes**
 
 ## **🔐 Security & Trust**
 
 ### **1. Added Code Signing for Windows**
 
-FlyEnv releases for Windows are now digitally signed, making it easier to verify the publisher and confirm that downloaded application files have not been altered after signing.
+QTEnvDev releases for Windows are now digitally signed, making it easier to verify the publisher and confirm that downloaded application files have not been altered after signing.
 
-Special thanks to [SignPath](https://signpath.io/) for sponsoring open-source code signing for FlyEnv.
+Special thanks to [SignPath](https://signpath.io/) for sponsoring open-source code signing for QTEnvDev.
 
 ---
 
@@ -640,49 +640,49 @@ Special thanks to [SignPath](https://signpath.io/) for sponsoring open-source co
 
 ### **2. Reduced Memory Usage**
 
-FlyEnv now uses memory more efficiently during everyday operation, reducing its resource footprint and leaving more system memory available for your development services and tools.
+QTEnvDev now uses memory more efficiently during everyday operation, reducing its resource footprint and leaving more system memory available for your development services and tools.
 
 ---
 
 ### **3. Fixed Scheduled Task Execution on Windows**
 
-Resolved an issue that could prevent scheduled tasks from executing correctly on Windows. Scheduled jobs created and managed through FlyEnv now run more reliably.
+Resolved an issue that could prevent scheduled tasks from executing correctly on Windows. Scheduled jobs created and managed through QTEnvDev now run more reliably.
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.16.2] - 2026-07-12
 
-# **FlyEnv v4.16.2 Update Release Notes**
+# **QTEnvDev v4.16.2 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added Startup Groups**
 
-FlyEnv now includes a dedicated **Startup Groups** module for organizing exact service versions and language projects into reusable development environments. Instead of starting every visible service or switching services one by one, you can create groups for specific projects and control only the runtimes, databases, and project services each workflow needs.
+QTEnvDev now includes a dedicated **Startup Groups** module for organizing exact service versions and language projects into reusable development environments. Instead of starting every visible service or switching services one by one, you can create groups for specific projects and control only the runtimes, databases, and project services each workflow needs.
 
 This integration provides:
 - **Custom Environment Groups**: Create named, color-coded groups with descriptions for different projects or development scenarios
 - **Service and Project Selection**: Add installed service versions and independently runnable language projects to the same group
-- **Controlled Startup Order**: Arrange members in the required startup sequence; FlyEnv starts them in order and stops them in reverse order
+- **Controlled Startup Order**: Arrange members in the required startup sequence; QTEnvDev starts them in order and stops them in reverse order
 - **Group and Member Controls**: Start or stop a complete group with one switch, or control an individual member without changing the rest of the group
-- **Default Group Integration**: Choose a default startup group for the top-left one-click control and automatic service startup when FlyEnv launches
+- **Default Group Integration**: Choose a default startup group for the top-left one-click control and automatic service startup when QTEnvDev launches
 - **Live Status and Safety Feedback**: See stopped, running, partially running, executing, and invalid states, with warnings for potential module or port conflicts
 
 The same service can be reused across multiple groups, making it easy to share common infrastructure such as MySQL or Redis while keeping project-specific environments separate.
 
-Thanks to [@branll](https://github.com/branll), [@freenessfish](https://github.com/freenessfish), and [@SevenJoker](https://github.com/SevenJoker) for the feature requests! [Discussion #706](https://github.com/xpf0000/FlyEnv/discussions/706) [Issue #742](https://github.com/xpf0000/FlyEnv/issues/742) [Issue #757](https://github.com/xpf0000/FlyEnv/issues/757)
+Thanks to [@branll](https://github.com/branll), [@freenessfish](https://github.com/freenessfish), and [@SevenJoker](https://github.com/SevenJoker) for the feature requests! [Discussion #706](https://github.com/xpf0000/QTEnvDev/discussions/706) [Issue #742](https://github.com/xpf0000/QTEnvDev/issues/742) [Issue #757](https://github.com/xpf0000/QTEnvDev/issues/757)
 
 ---
 
@@ -690,17 +690,17 @@ Thanks to [@branll](https://github.com/branll), [@freenessfish](https://github.c
 
 ### **2. Fixed .NET Version Detection for Long Preview Versions**
 
-Resolved an issue where long .NET preview version strings such as `11.0.100-preview.5.26302.115` could leave the available-version view stuck on loading or crash the UI during version comparison. FlyEnv now normalizes these values safely for semantic version sorting, keeps download progress state reactive, and batches version-list updates to reduce unnecessary rendering work.
+Resolved an issue where long .NET preview version strings such as `11.0.100-preview.5.26302.115` could leave the available-version view stuck on loading or crash the UI during version comparison. QTEnvDev now normalizes these values safely for semantic version sorting, keeps download progress state reactive, and batches version-list updates to reduce unnecessary rendering work.
 
 Long version names are also truncated cleanly in the table and can be viewed in full by hovering over them.
 
-Thanks to [@TanNhatCMS](https://github.com/TanNhatCMS) for the contribution! [Pull Request #770](https://github.com/xpf0000/FlyEnv/pull/770)
+Thanks to [@TanNhatCMS](https://github.com/TanNhatCMS) for the contribution! [Pull Request #770](https://github.com/xpf0000/QTEnvDev/pull/770)
 
 ---
 
 ### **3. Improved Startup Performance and Resource Usage**
 
-FlyEnv now performs less repeated work while detecting runtimes, synchronizing environment variables, and stopping services. These internal optimizations improve application startup and service-management responsiveness while reducing duplicate filesystem scans, process enumeration, and cross-process environment loading.
+QTEnvDev now performs less repeated work while detecting runtimes, synchronizing environment variables, and stopping services. These internal optimizations improve application startup and service-management responsiveness while reducing duplicate filesystem scans, process enumeration, and cross-process environment loading.
 
 This improvement includes:
 - **Persistent Version Probe Cache**: Reuses runtime version results instead of repeatedly launching binaries or reading the same version files
@@ -712,30 +712,30 @@ This improvement includes:
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.16.0] - 2026-07-02
 
-# **FlyEnv v4.16.0 Update Release Notes**
+# **QTEnvDev v4.16.0 Update Release Notes**
 
 ## **🚀 New Features**
 
-### **1. Added FlyEnv MCP Server**
+### **1. Added QTEnvDev MCP Server**
 
-FlyEnv now includes a built-in **MCP Server** that lets AI clients connect directly to your local FlyEnv environment. You can start the server from FlyEnv, generate ready-to-use client configuration snippets, and register the server into supported AI coding CLIs without editing everything by hand.
+QTEnvDev now includes a built-in **MCP Server** that lets AI clients connect directly to your local QTEnvDev environment. You can start the server from QTEnvDev, generate ready-to-use client configuration snippets, and register the server into supported AI coding CLIs without editing everything by hand.
 
 This integration provides:
-- **MCP Service Control**: Start and stop the FlyEnv MCP server from the UI, configure host, port, access token, and local/remote access behavior
-- **Client Quick Config**: Generate HTTP and stdio-compatible configuration snippets and copy them directly from FlyEnv
-- **One-Click Client Registration**: Register the FlyEnv MCP server into Claude Code, Codex, OpenCode, Kimi, Antigravity CLI, and GitHub Copilot CLI
+- **MCP Service Control**: Start and stop the QTEnvDev MCP server from the UI, configure host, port, access token, and local/remote access behavior
+- **Client Quick Config**: Generate HTTP and stdio-compatible configuration snippets and copy them directly from QTEnvDev
+- **One-Click Client Registration**: Register the QTEnvDev MCP server into Claude Code, Codex, OpenCode, Kimi, Antigravity CLI, and GitHub Copilot CLI
 - **Tool Policy Management**: Enable or disable individual MCP tools and require confirmation for risky operations such as service control, installation, or site changes
 - **Audit Logging**: Review MCP tool activity through the built-in audit log
 
@@ -743,16 +743,16 @@ This integration provides:
 
 ### **2. Added AI Coding CLI Modules**
 
-FlyEnv now includes dedicated modules for **Claude Code**, **Codex**, **OpenCode**, **Kimi**, **Antigravity CLI**, and **GitHub Copilot CLI**. These integrations bring AI coding CLIs into the same desktop workflow as your local runtimes and services, making them easier to install, inspect, and manage from one place.
+QTEnvDev now includes dedicated modules for **Claude Code**, **Codex**, **OpenCode**, **Kimi**, **Antigravity CLI**, and **GitHub Copilot CLI**. These integrations bring AI coding CLIs into the same desktop workflow as your local runtimes and services, making them easier to install, inspect, and manage from one place.
 
 This integration provides:
-- **CLI Installation & Detection**: Install supported AI coding CLIs and check their installed version from FlyEnv
+- **CLI Installation & Detection**: Install supported AI coding CLIs and check their installed version from QTEnvDev
 - **Config File Access**: View important config file paths and manage client configuration from the UI
 - **Session Management**: Browse saved sessions, reopen them in a terminal, and clean up old sessions when supported
-- **MCP Management**: List configured MCP servers and add or remove FlyEnv MCP connections directly from each client module
+- **MCP Management**: List configured MCP servers and add or remove QTEnvDev MCP connections directly from each client module
 - **Client-Specific Extras**: Manage plugins for Claude Code and Codex, skills for Antigravity CLI and GitHub Copilot CLI, provider/stats views for OpenCode, and logs/session export workflows for Kimi
 
-[Issue #712](https://github.com/xpf0000/FlyEnv/issues/712)
+[Issue #712](https://github.com/xpf0000/QTEnvDev/issues/712)
 
 ---
 
@@ -760,31 +760,31 @@ This integration provides:
 
 ### **3. Updated MinIO Download Source**
 
-FlyEnv now uses the maintained **pgsty/minio** fork as the updated MinIO download source, improving install availability after upstream distribution changes and making MinIO version downloads more reliable.
+QTEnvDev now uses the maintained **pgsty/minio** fork as the updated MinIO download source, improving install availability after upstream distribution changes and making MinIO version downloads more reliable.
 
-[Issue #626](https://github.com/xpf0000/FlyEnv/issues/626)
+[Issue #626](https://github.com/xpf0000/QTEnvDev/issues/626)
 
 ---
 
 ### **4. Fixed Windows Python Environment Variable Setup**
 
-Resolved a Windows issue where FlyEnv could register an incorrect Python environment path during setup. Python environment registration now points to the correct FlyEnv-managed runtime layout, so newly installed Python versions are exposed more reliably.
+Resolved a Windows issue where QTEnvDev could register an incorrect Python environment path during setup. Python environment registration now points to the correct QTEnvDev-managed runtime layout, so newly installed Python versions are exposed more reliably.
 
-[Issue #633](https://github.com/xpf0000/FlyEnv/issues/633)
+[Issue #633](https://github.com/xpf0000/QTEnvDev/issues/633)
 
 ---
 
 ### **5. Fixed Rust Toolchain Detection for Custom `CARGO_HOME` / `RUSTUP_HOME`**
 
-Resolved an issue where FlyEnv could miss Rust toolchains installed through `rustup` when `CARGO_HOME` or `RUSTUP_HOME` had been customized. FlyEnv now respects those environment variables when locating `rustup`, toolchains, and related runtime data.
+Resolved an issue where QTEnvDev could miss Rust toolchains installed through `rustup` when `CARGO_HOME` or `RUSTUP_HOME` had been customized. QTEnvDev now respects those environment variables when locating `rustup`, toolchains, and related runtime data.
 
-[Issue #691](https://github.com/xpf0000/FlyEnv/issues/691)
+[Issue #691](https://github.com/xpf0000/QTEnvDev/issues/691)
 
 ---
 
 ### **6. Improved Local Site Support for `localhost` + Port Workflows**
 
-FlyEnv site management now supports using **`localhost` with explicit ports** such as `localhost:8080` when adding or editing sites. This makes local multi-port workflows easier to model without creating extra fake domains just to separate ports.
+QTEnvDev site management now supports using **`localhost` with explicit ports** such as `localhost:8080` when adding or editing sites. This makes local multi-port workflows easier to model without creating extra fake domains just to separate ports.
 
 This improvement includes:
 - **Port-Aware Duplicate Checks**: Sites with the same hostname are allowed as long as their listening ports do not conflict
@@ -792,65 +792,65 @@ This improvement includes:
 - **Cleaner Hosts File Behavior**: Pure loopback sites no longer require redundant hosts-file writes, which reduces unnecessary admin prompts
 - **Stable Vhost File Naming**: Generated vhost, rewrite, and log files now avoid same-name collisions across multi-port localhost sites
 
-[Issue #700](https://github.com/xpf0000/FlyEnv/issues/700)
+[Issue #700](https://github.com/xpf0000/QTEnvDev/issues/700)
 
 ---
 
-### **7. Fixed FlyEnv Environment Variable Ordering**
+### **7. Fixed QTEnvDev Environment Variable Ordering**
 
-Resolved an issue where FlyEnv-managed environment variables could appear in the wrong order, allowing system or Homebrew Python binaries to take precedence over the version selected in FlyEnv. FlyEnv now rebuilds Python PATH entries with dedicated shims so `python` and `python3` resolve consistently to the active FlyEnv version.
+Resolved an issue where QTEnvDev-managed environment variables could appear in the wrong order, allowing system or Homebrew Python binaries to take precedence over the version selected in QTEnvDev. QTEnvDev now rebuilds Python PATH entries with dedicated shims so `python` and `python3` resolve consistently to the active QTEnvDev version.
 
-[Issue #713](https://github.com/xpf0000/FlyEnv/issues/713)
+[Issue #713](https://github.com/xpf0000/QTEnvDev/issues/713)
 
 ---
 
 ### **8. Fixed Windows Cron Jobs for Paths Containing Spaces**
 
-Resolved a Windows scheduled-task issue where cron jobs could fail when the generated task wrapper or working directory path contained spaces. FlyEnv now launches the PowerShell wrapper through a safer quoted command path, improving reliability for projects stored under directories such as `C:\\Program Files\\...` or other spaced workspace paths.
+Resolved a Windows scheduled-task issue where cron jobs could fail when the generated task wrapper or working directory path contained spaces. QTEnvDev now launches the PowerShell wrapper through a safer quoted command path, improving reliability for projects stored under directories such as `C:\\Program Files\\...` or other spaced workspace paths.
 
-[Issue #728](https://github.com/xpf0000/FlyEnv/issues/728) [Issue #729](https://github.com/xpf0000/FlyEnv/issues/729)
+[Issue #728](https://github.com/xpf0000/QTEnvDev/issues/728) [Issue #729](https://github.com/xpf0000/QTEnvDev/issues/729)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.15.4] - 2026-06-15
 
-# **FlyEnv v4.15.4 Update Release Notes**
+# **QTEnvDev v4.15.4 Update Release Notes**
 
 ## **🛠️ Improvements & Bug Fixes**
 
 ### **1. Improved Service Startup on Windows**
 
-Reworked how FlyEnv launches its services on Windows to reduce the chance of false positives from antivirus software. Services now start through a cleaner launch path, so security tools are less likely to flag normal FlyEnv operations.
+Reworked how QTEnvDev launches its services on Windows to reduce the chance of false positives from antivirus software. Services now start through a cleaner launch path, so security tools are less likely to flag normal QTEnvDev operations.
 
 ---
 
 ### **2. Improved Service Startup on macOS**
 
-Reworked how FlyEnv launches its services on macOS to resolve conflicts with certain terminal applications that modify the system default ZSH configuration. Those conflicts previously prevented FlyEnv-managed services from starting; services now launch reliably regardless of the host shell setup.
+Reworked how QTEnvDev launches its services on macOS to resolve conflicts with certain terminal applications that modify the system default ZSH configuration. Those conflicts previously prevented QTEnvDev-managed services from starting; services now launch reliably regardless of the host shell setup.
 
 ---
 
 ### **3. Fixed Startup-on-Boot for Paths Containing Spaces**
 
-Fixed the auto-start-on-boot logic on Windows and Linux so it works correctly when FlyEnv is installed in a folder whose path contains spaces. Boot startup is now registered correctly in these cases instead of failing silently.
+Fixed the auto-start-on-boot logic on Windows and Linux so it works correctly when QTEnvDev is installed in a folder whose path contains spaces. Boot startup is now registered correctly in these cases instead of failing silently.
 
 ---
 
 ### **4. Fixed Mailpit Version Detection**
 
-Fixed an issue where FlyEnv could not correctly read the version number for newer Mailpit releases. Mailpit version detection now works as expected.
+Fixed an issue where QTEnvDev could not correctly read the version number for newer Mailpit releases. Mailpit version detection now works as expected.
 
 ---
 
@@ -862,43 +862,43 @@ Fixed an issue where the RabbitMQ management plugin could not be enabled, which 
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.15.3] - 2026-06-03
 
-# **FlyEnv v4.15.3 Update Release Notes**
+# **QTEnvDev v4.15.3 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added RoadRunner Module**
 
-FlyEnv now includes a dedicated **RoadRunner** module for PHP application server workflows. You can install, detect, configure, and run RoadRunner directly from FlyEnv, then bind RoadRunner-backed projects into the standard project service experience.
+QTEnvDev now includes a dedicated **RoadRunner** module for PHP application server workflows. You can install, detect, configure, and run RoadRunner directly from QTEnvDev, then bind RoadRunner-backed projects into the standard project service experience.
 
 This integration provides:
 - **RoadRunner Version Management**: Discover, install, and manage RoadRunner releases from the Version Manager
 - **Standalone Service Mode**: Start RoadRunner with a generated `.rr.yaml` fileserver configuration for quick local testing
 - **PHP Project Services**: Manage RoadRunner projects from the project service view with start/stop, port, environment, log, and config workflows
 - **Project Presets**: Quickly configure PHP Worker, Existing Config, Laravel Octane, Fileserver, or Custom command projects
-- **PHP Runtime Binding**: Select a FlyEnv-managed PHP runtime for RoadRunner PHP Worker and Laravel Octane projects
+- **PHP Runtime Binding**: Select a QTEnvDev-managed PHP runtime for RoadRunner PHP Worker and Laravel Octane projects
 - **Config File Sync**: Generate `.rr.yaml` files, detect existing RoadRunner configs, and keep project ports synchronized
 
 ---
 
 ### **2. Added Swoole CLI Module**
 
-FlyEnv now supports **Swoole CLI** as a first-class PHP runtime and project service module. You can install Swoole CLI versions, initialize the runtime files FlyEnv needs, and run Swoole-based PHP projects with purpose-built presets.
+QTEnvDev now supports **Swoole CLI** as a first-class PHP runtime and project service module. You can install Swoole CLI versions, initialize the runtime files QTEnvDev needs, and run Swoole-based PHP projects with purpose-built presets.
 
 This integration provides:
 - **Swoole CLI Version Management**: Discover, install, and manage Swoole CLI binaries across supported platforms
-- **Runtime Bootstrap**: Prepare `php.ini`, `php-fpm.conf`, Composer, and CA certificate files for FlyEnv-managed Swoole CLI runtimes
+- **Runtime Bootstrap**: Prepare `php.ini`, `php-fpm.conf`, Composer, and CA certificate files for QTEnvDev-managed Swoole CLI runtimes
 - **Project Presets**: Run Native Swoole, Hyperf, EasySwoole, Laravel Octane, PHP Script, or Custom command projects
 - **Config Detection**: Automatically detect common framework config files such as Hyperf server/routes, EasySwoole configs, Laravel Octane config, and `server.php`
 - **Project Service Workflow**: Configure ports, startup commands, environment variables, config files, logs, and service lifecycle from the same project UI
@@ -913,24 +913,24 @@ This update makes PHP deployment workflows easier to understand:
 - **PHP-FPM Module**: Manage PHP-FPM services and PHP runtime versions separately
 - **PHP Project Services**: Start and stop PHP projects through the common project service workflow
 - **Cleaner Navigation**: Keep PHP runtime/service management separate from PHP project deployment
-- **Complete PHP Deployment Coverage**: FlyEnv now covers PHP, PHP-FPM, FrankenPHP, RoadRunner, and Swoole CLI deployment shapes in one desktop app
+- **Complete PHP Deployment Coverage**: QTEnvDev now covers PHP, PHP-FPM, FrankenPHP, RoadRunner, and Swoole CLI deployment shapes in one desktop app
 
-Thanks to [@chunbo007](https://github.com/chunbo007) for the discussion! [Discussion #694](https://github.com/xpf0000/FlyEnv/discussions/694)
+Thanks to [@chunbo007](https://github.com/chunbo007) for the discussion! [Discussion #694](https://github.com/xpf0000/QTEnvDev/discussions/694)
 
 ---
 
 ### **4. Added ZincSearch Module**
 
-FlyEnv now includes a dedicated **ZincSearch** module for running the lightweight search engine locally. You can install ZincSearch, manage the service lifecycle, edit environment configuration, inspect logs, and open the ZincSearch UI directly from FlyEnv.
+QTEnvDev now includes a dedicated **ZincSearch** module for running the lightweight search engine locally. You can install ZincSearch, manage the service lifecycle, edit environment configuration, inspect logs, and open the ZincSearch UI directly from QTEnvDev.
 
 This integration provides:
-- **Service Management**: Start and stop ZincSearch through the standard FlyEnv service workflow
+- **Service Management**: Start and stop ZincSearch through the standard QTEnvDev service workflow
 - **Version Management**: Install and manage ZincSearch releases from GitHub
 - **Environment Configuration**: Configure admin credentials, data path, bind address, port, and log level through `zincsearch.env`
 - **Log Access**: View standard and error logs directly in the ZincSearch module
 - **Quick UI Access**: Open the ZincSearch web UI using the configured host and port when the service is running
 
-Thanks to [@zzdboy](https://github.com/zzdboy) for the feature request! [Issue #440](https://github.com/xpf0000/FlyEnv/issues/440)
+Thanks to [@zzdboy](https://github.com/zzdboy) for the feature request! [Issue #440](https://github.com/xpf0000/QTEnvDev/issues/440)
 
 ---
 
@@ -942,13 +942,13 @@ Installed version lists now include a **Remark** column, making it easier to lab
 
 This helps prevent accidental deletion or confusion when multiple versions of the same runtime are installed for different projects.
 
-Thanks to [@Y0n3er](https://github.com/Y0n3er) for the feature request! [Issue #543](https://github.com/xpf0000/FlyEnv/issues/543)
+Thanks to [@Y0n3er](https://github.com/Y0n3er) for the feature request! [Issue #543](https://github.com/xpf0000/QTEnvDev/issues/543)
 
 ---
 
 ### **6. Fixed MariaDB 11.4+ / 12+ Startup Issue on Windows**
 
-Resolved a Windows startup failure affecting newer MariaDB builds that require PEM files for zero-configuration SSL and authentication key handling. FlyEnv now generates and supplies the required `ca.pem`, `server-cert.pem`, `server-key.pem`, `private_key.pem`, and `public_key.pem` files when needed, preventing MariaDB 12+ from failing to start because those files are missing.
+Resolved a Windows startup failure affecting newer MariaDB builds that require PEM files for zero-configuration SSL and authentication key handling. QTEnvDev now generates and supplies the required `ca.pem`, `server-cert.pem`, `server-key.pem`, `private_key.pem`, and `public_key.pem` files when needed, preventing MariaDB 12+ from failing to start because those files are missing.
 
 ---
 
@@ -966,42 +966,42 @@ Resolved an issue on macOS where a service could remain stuck in the "starting" 
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 
 ## [4.15.2] - 2026-05-24
 
-# **FlyEnv v4.15.2 Update Release Notes**
+# **QTEnvDev v4.15.2 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added .NET Module**
 
-FlyEnv now includes a dedicated **.NET** module for managing .NET development environments directly from the app. You can now discover, install, and manage .NET SDK versions alongside your other language runtimes and services.
+QTEnvDev now includes a dedicated **.NET** module for managing .NET development environments directly from the app. You can now discover, install, and manage .NET SDK versions alongside your other language runtimes and services.
 
 This integration provides:
 - **Project Management**: Browse and manage .NET projects from the language project view
-- **VS Code Integration**: Open .NET projects directly in VS Code from FlyEnv
-- **Service Management**: Start and stop .NET services through the standard FlyEnv service workflow
+- **VS Code Integration**: Open .NET projects directly in VS Code from QTEnvDev
+- **Service Management**: Start and stop .NET services through the standard QTEnvDev service workflow
 - **Version Management**: Detect local .NET SDK installations and install platform-specific SDK packages from Microsoft release metadata
 - **Cross-Platform Support**: Works across Windows, macOS, and Linux with architecture-aware downloads
 - **Package Manager Support**: Includes Homebrew discovery support for macOS users
 
-Thanks to [@sky22333](https://github.com/sky22333) for the feature request! [Issue #662](https://github.com/xpf0000/FlyEnv/issues/662)
+Thanks to [@sky22333](https://github.com/sky22333) for the feature request! [Issue #662](https://github.com/xpf0000/QTEnvDev/issues/662)
 
 ---
 
 ### **2. Added Cron Jobs Module**
 
-FlyEnv now provides a full **Cron Jobs** module for scheduling and monitoring recurring commands from the desktop UI. You can create global jobs or bind jobs to specific sites, then let FlyEnv register them with the native system scheduler.
+QTEnvDev now provides a full **Cron Jobs** module for scheduling and monitoring recurring commands from the desktop UI. You can create global jobs or bind jobs to specific sites, then let QTEnvDev register them with the native system scheduler.
 
 This integration allows you to:
 - **Global & Site-Scoped Jobs**: Create scheduled commands globally or for a specific project/site
@@ -1009,18 +1009,18 @@ This integration allows you to:
 - **Cron Expression Helper**: Build and validate portable five-field cron expressions with presets and live previews
 - **Command Testing**: Run commands manually before saving and inspect exit code, duration, stdout, and stderr
 - **Run History**: Track last run time, next run time, output, errors, and execution status
-- **System Task View**: Browse FlyEnv-created tasks and existing system scheduled tasks in one place
+- **System Task View**: Browse QTEnvDev-created tasks and existing system scheduled tasks in one place
 - **Command Templates**: Quickly insert common PHP, Node.js, Python, and shell command patterns
 
-Thanks to [@ibraimfarag](https://github.com/ibraimfarag) for the PR! [PR #674](https://github.com/xpf0000/FlyEnv/pull/674)
+Thanks to [@ibraimfarag](https://github.com/ibraimfarag) for the PR! [PR #674](https://github.com/xpf0000/QTEnvDev/pull/674)
 
 ---
 
 ### **3. Added Korean Translation**
 
-FlyEnv now supports **Korean** as an application language. The translation covers the core app interface, setup pages, service modules, toolbox entries, Cron Jobs, Flutter, and other module-specific text.
+QTEnvDev now supports **Korean** as an application language. The translation covers the core app interface, setup pages, service modules, toolbox entries, Cron Jobs, Flutter, and other module-specific text.
 
-Thanks to [@vendeeglobe](https://github.com/vendeeglobe) for the PR! [PR #676](https://github.com/xpf0000/FlyEnv/pull/676)
+Thanks to [@vendeeglobe](https://github.com/vendeeglobe) for the PR! [PR #676](https://github.com/xpf0000/QTEnvDev/pull/676)
 
 ---
 
@@ -1030,40 +1030,40 @@ Thanks to [@vendeeglobe](https://github.com/vendeeglobe) for the PR! [PR #676](h
 
 Resolved an issue where MongoDB could fail to start on macOS. The MongoDB startup flow now uses the platform-appropriate service launch path with generated configuration, log, PID, and data directory handling, improving startup reliability on macOS.
 
-Thanks to [@leafspace](https://github.com/leafspace) for reporting this issue! [Issue #679](https://github.com/xpf0000/FlyEnv/issues/679)
+Thanks to [@leafspace](https://github.com/leafspace) for reporting this issue! [Issue #679](https://github.com/xpf0000/QTEnvDev/issues/679)
 
 ---
 
 ### **5. Fixed Flutter Installation Failure**
 
-Resolved an issue where Flutter SDK installation could fail after extraction. FlyEnv now normalizes the extracted SDK directory and initializes the installed Flutter SDK as a Git repository, preventing Flutter commands from failing with repository-related errors after installation.
+Resolved an issue where Flutter SDK installation could fail after extraction. QTEnvDev now normalizes the extracted SDK directory and initializes the installed Flutter SDK as a Git repository, preventing Flutter commands from failing with repository-related errors after installation.
 
-Thanks to [@yljphp](https://github.com/yljphp) for reporting this issue! [Issue #682](https://github.com/xpf0000/FlyEnv/issues/682)
+Thanks to [@yljphp](https://github.com/yljphp) for reporting this issue! [Issue #682](https://github.com/xpf0000/QTEnvDev/issues/682)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 
 ## [4.15.1] - 2026-05-15
 
-# **FlyEnv v4.15.1 Update Release Notes**
+# **QTEnvDev v4.15.1 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added Flutter Module**
 
-FlyEnv now integrates **Flutter** support directly into your development environment! You can now easily manage Flutter SDK installations and perform common Flutter operations right from the FlyEnv UI.
+QTEnvDev now integrates **Flutter** support directly into your development environment! You can now easily manage Flutter SDK installations and perform common Flutter operations right from the QTEnvDev UI.
 
 This integration allows you to:
 - **SDK Management**: Install and manage Flutter SDK versions seamlessly
@@ -1074,13 +1074,13 @@ This integration allows you to:
 - **Advanced Commands**: Execute doctor, upgrade, channel switching, pub commands (get, upgrade, outdated, deps), clean, analyze, test, format, and platform-specific builds (web, Windows, APK release/debug)
 - **SDK Info**: View detailed Flutter and Dart version information, engine revision, and build date
 
-Thanks to [@ibraimfarag](https://github.com/ibraimfarag) for the PR! [PR #649](https://github.com/xpf0000/FlyEnv/pull/649)
+Thanks to [@ibraimfarag](https://github.com/ibraimfarag) for the PR! [PR #649](https://github.com/xpf0000/QTEnvDev/pull/649)
 
 ---
 
 ### **2. Added Git Module**
 
-FlyEnv now includes a dedicated **Git** module for managing your Git installation and environment. You can easily install, verify, and manage your Git setup directly from the FlyEnv interface.
+QTEnvDev now includes a dedicated **Git** module for managing your Git installation and environment. You can easily install, verify, and manage your Git setup directly from the QTEnvDev interface.
 
 This integration provides:
 - **One-Click Installation**: Install Git automatically using platform-native package managers — winget on Windows, Homebrew/MacPorts/xcode-select on macOS, and apt/yum/dnf/pacman on Linux
@@ -1088,7 +1088,7 @@ This integration provides:
 - **Environment Diagnostics**: Check Git path, SSH availability, and Git LFS status
 - **Cross-Platform Support**: Works on Windows, macOS, and Linux with platform-aware checks
 
-Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #664](https://github.com/xpf0000/FlyEnv/pull/664)
+Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #664](https://github.com/xpf0000/QTEnvDev/pull/664)
 
 ---
 
@@ -1103,13 +1103,13 @@ Features include:
 - Sample data loading for quick testing
 - Swap and clear actions for efficient workflow
 
-Thanks to [@Heyiki](https://github.com/Heyiki) and [@qaydt20250317](https://github.com/qaydt20250317) for the PRs! [PR #651](https://github.com/xpf0000/FlyEnv/pull/651) [PR #670](https://github.com/xpf0000/FlyEnv/pull/670)
+Thanks to [@Heyiki](https://github.com/Heyiki) and [@qaydt20250317](https://github.com/qaydt20250317) for the PRs! [PR #651](https://github.com/xpf0000/QTEnvDev/pull/651) [PR #670](https://github.com/xpf0000/QTEnvDev/pull/670)
 
 ---
 
 ### **4. Added WebSocket / SSE Tool to Toolbox**
 
-The Toolbox now features a **WebSocket and Server-Sent Events (SSE) testing tool**. You can now easily test and debug real-time connections directly within FlyEnv.
+The Toolbox now features a **WebSocket and Server-Sent Events (SSE) testing tool**. You can now easily test and debug real-time connections directly within QTEnvDev.
 
 This tool provides:
 - **Protocol Support**: Switch between WebSocket and SSE protocols
@@ -1118,7 +1118,7 @@ This tool provides:
 - **Message Exchange**: Send messages and view received messages in a clean, organized interface
 - **Auto-Reconnect**: Automatically reconnect WebSocket connections when disconnected
 
-Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #657](https://github.com/xpf0000/FlyEnv/pull/657)
+Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #657](https://github.com/xpf0000/QTEnvDev/pull/657)
 
 ---
 
@@ -1132,52 +1132,52 @@ Optimized the Windows version to improve the stability and reliability of servic
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 
 ## [4.15.0] - 2026-05-04
 
-# **FlyEnv v4.15.0 Update Release Notes**
+# **QTEnvDev v4.15.0 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added CliProxyAPI Module**
 
-FlyEnv now integrates **[CliProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — a lightweight CLI proxy API solution — directly into your development environment. You can now install, configure, and manage CliProxyAPI with just a few clicks from the FlyEnv UI.
+QTEnvDev now integrates **[CliProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — a lightweight CLI proxy API solution — directly into your development environment. You can now install, configure, and manage CliProxyAPI with just a few clicks from the QTEnvDev UI.
 
-Thanks to [@diinggos](https://github.com/diinggos) for the feature request! [Issue #640](https://github.com/xpf0000/FlyEnv/issues/640)
+Thanks to [@diinggos](https://github.com/diinggos) for the feature request! [Issue #640](https://github.com/xpf0000/QTEnvDev/issues/640)
 
 ---
 
 ### **2. Added Numa Module**
 
-Introducing **[Numa](https://numa.rs/)** support to FlyEnv! Numa is a powerful framework that you can now easily install and manage directly from the FlyEnv interface.
+Introducing **[Numa](https://numa.rs/)** support to QTEnvDev! Numa is a powerful framework that you can now easily install and manage directly from the QTEnvDev interface.
 
-Thanks to [@batcom](https://github.com/batcom) for the feature request! [Issue #616](https://github.com/xpf0000/FlyEnv/issues/616)
+Thanks to [@batcom](https://github.com/batcom) for the feature request! [Issue #616](https://github.com/xpf0000/QTEnvDev/issues/616)
 
 ---
 
 ### **3. Added Rnacos Module**
 
-FlyEnv now supports **[r-nacos](https://r-nacos.github.io/docs/intro/)** — a Rust implementation of the Nacos service discovery and configuration management platform. You can now install and manage Rnacos directly from the FlyEnv UI.
+QTEnvDev now supports **[r-nacos](https://r-nacos.github.io/docs/intro/)** — a Rust implementation of the Nacos service discovery and configuration management platform. You can now install and manage Rnacos directly from the QTEnvDev UI.
 
-Thanks to [@achunchunya](https://github.com/achunchunya) for the feature request! [Issue #641](https://github.com/xpf0000/FlyEnv/issues/641)
+Thanks to [@achunchunya](https://github.com/achunchunya) for the feature request! [Issue #641](https://github.com/xpf0000/QTEnvDev/issues/641)
 
 ---
 
 ### **4. Added FrankenPHP Module**
 
-We are excited to bring **[FrankenPHP](https://frankenphp.dev/)** to FlyEnv! FrankenPHP is a modern PHP application server written in Go. You can now easily install, configure, and run FrankenPHP directly from the FlyEnv interface.
+We are excited to bring **[FrankenPHP](https://frankenphp.dev/)** to QTEnvDev! FrankenPHP is a modern PHP application server written in Go. You can now easily install, configure, and run FrankenPHP directly from the QTEnvDev interface.
 
-Thanks to [@eqwt](https://github.com/eqwt) for the feature request! [Issue #642](https://github.com/xpf0000/FlyEnv/issues/642)
+Thanks to [@eqwt](https://github.com/eqwt) for the feature request! [Issue #642](https://github.com/xpf0000/QTEnvDev/issues/642)
 
 ---
 
@@ -1185,15 +1185,15 @@ Thanks to [@eqwt](https://github.com/eqwt) for the feature request! [Issue #642]
 
 Enhanced the Ollama module with hardware-based availability detection for online models. Models are now displayed with a color-coded indicator (red/yellow/green) based on your local hardware capabilities, helping you quickly identify which models are suitable for your machine.
 
-Thanks to [@ibraimfarag](https://github.com/ibraimfarag) for the PR! [PR #635](https://github.com/xpf0000/FlyEnv/pull/635)
+Thanks to [@ibraimfarag](https://github.com/ibraimfarag) for the PR! [PR #635](https://github.com/xpf0000/QTEnvDev/pull/635)
 
 ---
 
 ### **6. Added JWT Encoding & Decoding Tool to Toolbox**
 
-The Toolbox now includes a convenient **JWT encoding and decoding tool**. You can easily encode and decode JSON Web Tokens directly within FlyEnv, making it simpler to debug and work with JWT-based authentication during development.
+The Toolbox now includes a convenient **JWT encoding and decoding tool**. You can easily encode and decode JSON Web Tokens directly within QTEnvDev, making it simpler to debug and work with JWT-based authentication during development.
 
-Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #643](https://github.com/xpf0000/FlyEnv/pull/643)
+Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #643](https://github.com/xpf0000/QTEnvDev/pull/643)
 
 ---
 
@@ -1201,7 +1201,7 @@ Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #643](https://git
 
 The Toolbox now also features a **Cron expression parser and runtime calculator**. Enter any cron expression to see a human-readable description and calculate the next scheduled run times, streamlining your workflow when working with scheduled tasks.
 
-Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #645](https://github.com/xpf0000/FlyEnv/pull/645)
+Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #645](https://github.com/xpf0000/QTEnvDev/pull/645)
 
 ---
 
@@ -1211,32 +1211,32 @@ Thanks to [@Heyiki](https://github.com/Heyiki) for the PR! [PR #645](https://git
 
 Resolved an issue where Auto HTTPS certificate generation would fail when the current username contained a dot (`.`) character. Certificates will now be generated correctly regardless of special characters in the system username.
 
-Thanks to [@dkoychev](https://github.com/dkoychev) for reporting this issue! [Issue #639](https://github.com/xpf0000/FlyEnv/issues/639)
+Thanks to [@dkoychev](https://github.com/dkoychev) for reporting this issue! [Issue #639](https://github.com/xpf0000/QTEnvDev/issues/639)
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 
 ## [4.14.2] - 2026-04-23
 
-# **FlyEnv v4.14.2 Update Release Notes**
+# **QTEnvDev v4.14.2 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added Hermes Agent Module**
 
-FlyEnv now integrates **[Hermes Agent](https://hermes-agent.nousresearch.com/)** — a powerful AI agent framework from Nous Research — directly into your development environment! You can now install, configure, and manage Hermes Agent with just a few clicks from the FlyEnv UI.
+QTEnvDev now integrates **[Hermes Agent](https://hermes-agent.nousresearch.com/)** — a powerful AI agent framework from Nous Research — directly into your development environment! You can now install, configure, and manage Hermes Agent with just a few clicks from the QTEnvDev UI.
 
 This integration allows you to:
 - **One-Click Installation**: Install Hermes Agent seamlessly using the built-in installer
@@ -1262,26 +1262,26 @@ Resolved a critical issue where exiting the application from the system tray was
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 
 ## [4.14.1] - 2026-04-11
 
-# **FlyEnv v4.14.1 Update Release Notes**
+# **QTEnvDev v4.14.1 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added MkCert Module**
 
-You can now easily generate locally-trusted development certificates with MkCert directly from FlyEnv! MkCert is a simple tool for making locally-trusted development certificates. It automatically installs a local CA in the system root store, and generates locally-trusted certificates.
+You can now easily generate locally-trusted development certificates with MkCert directly from QTEnvDev! MkCert is a simple tool for making locally-trusted development certificates. It automatically installs a local CA in the system root store, and generates locally-trusted certificates.
 
 This integration allows you to:
 - Generate trusted SSL/TLS certificates for local development with a single click
@@ -1299,32 +1299,32 @@ This integration allows you to:
 
 ### **2. Fixed PostgreSQL Shutdown Issue**
 
-Resolved a critical issue where PostgreSQL could not be properly stopped after starting. The service will now shut down gracefully when you stop it from the FlyEnv interface.
+Resolved a critical issue where PostgreSQL could not be properly stopped after starting. The service will now shut down gracefully when you stop it from the QTEnvDev interface.
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 
 ## [4.14.0] - 2026-04-02
 
-# **FlyEnv v4.14.0 Update Release Notes**
+# **QTEnvDev v4.14.0 Update Release Notes**
 
 ## **🚀 New Features**
 
 ### **1. Added RustFS Module**
 
-Introducing RustFS support to FlyEnv! RustFS is a high-performance, distributed object storage system written in Rust. You can now easily install, configure, and manage RustFS directly from the FlyEnv interface, making it simple to set up your own S3-compatible storage service for development and testing.
+Introducing RustFS support to QTEnvDev! RustFS is a high-performance, distributed object storage system written in Rust. You can now easily install, configure, and manage RustFS directly from the QTEnvDev interface, making it simple to set up your own S3-compatible storage service for development and testing.
 
 <img width="2534" height="1736" alt="image" src="https://github.com/user-attachments/assets/9944de88-446a-4667-a76e-7f1b1567e1a0" />
 
@@ -1334,7 +1334,7 @@ Introducing RustFS support to FlyEnv! RustFS is a high-performance, distributed 
 
 ### **2. Added SDKMAN Support**
 
-FlyEnv now integrates with SDKMAN!, the Software Development Kit Manager. This allows you to easily manage multiple SDK versions for Java, Kotlin, Scala, Groovy, and many other JVM-based languages. Switch between different SDK versions seamlessly within your development environment.
+QTEnvDev now integrates with SDKMAN!, the Software Development Kit Manager. This allows you to easily manage multiple SDK versions for Java, Kotlin, Scala, Groovy, and many other JVM-based languages. Switch between different SDK versions seamlessly within your development environment.
 
 <img width="2534" height="1736" alt="image" src="https://github.com/user-attachments/assets/b7180a2b-2067-465b-8aa8-d6a52f57648f" />
 
@@ -1346,7 +1346,7 @@ You can now customize the application interface font according to your preferenc
 
 - Choose from system-installed fonts
 - Adjust font size for better readability
-- Personalize your FlyEnv workspace for optimal comfort during long development sessions
+- Personalize your QTEnvDev workspace for optimal comfort during long development sessions
 
 <img width="2534" height="1736" alt="image" src="https://github.com/user-attachments/assets/63512cb2-4c11-43b4-9847-abc97069df28" />
 
@@ -1381,26 +1381,26 @@ Resolved an issue on Linux where changing directory (CD) to a project directory 
 
 ### **6. Fixed DNS Service Wildcard Domain Support**
 
-Fixed critical DNS service issues with wildcard domain resolution. FlyEnv's DNS service can now correctly resolve wildcard domains (e.g., `*.example.test`), making it much easier to work with multi-tenant applications and dynamic subdomain routing during local development.
+Fixed critical DNS service issues with wildcard domain resolution. QTEnvDev's DNS service can now correctly resolve wildcard domains (e.g., `*.example.test`), making it much easier to work with multi-tenant applications and dynamic subdomain routing during local development.
 
 ---
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+- **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 
 ## [4.13.6] - 2026-03-20
 
-# **FlyEnv v4.13.6 Update Release Notes**
+# **QTEnvDev v4.13.6 Update Release Notes**
 
 ## **🚀 New Features**
 
@@ -1412,9 +1412,9 @@ the n8n service with just a single click directly from the UI.
 Thanks to [@ibraimfarag](https://github.com/ibraimfarag) for the contribution! [PR #584](https://github.com/xpf0000/Fl
 yEnv/pull/584)
 
-<img width="2586" height="1778" alt="flyenv-capturer-1774008386" src="https://github.com/user-attachments/assets/3fc39d4b-1182-4959-acc2-c0d5300687ff" />
-<img width="2586" height="1778" alt="flyenv-capturer-1774008402" src="https://github.com/user-attachments/assets/70e8b94b-682d-41b8-8aad-e6ceb9c6ca0f" />
-<img width="2586" height="1778" alt="flyenv-capturer-1774013135" src="https://github.com/user-attachments/assets/cbc39d7d-145f-45f7-8c18-2b03289f7745" />
+<img width="2586" height="1778" alt="qtenvdev-capturer-1774008386" src="https://github.com/user-attachments/assets/3fc39d4b-1182-4959-acc2-c0d5300687ff" />
+<img width="2586" height="1778" alt="qtenvdev-capturer-1774008402" src="https://github.com/user-attachments/assets/70e8b94b-682d-41b8-8aad-e6ceb9c6ca0f" />
+<img width="2586" height="1778" alt="qtenvdev-capturer-1774013135" src="https://github.com/user-attachments/assets/cbc39d7d-145f-45f7-8c18-2b03289f7745" />
 
   ---
 
@@ -1427,8 +1427,8 @@ y within the UI, making it easier to customize your OpenClaw setup.
 #### **2.2 Quick Command Shortcuts**
 Added quick access shortcuts for all OpenClaw commands, streamlining your workflow and improving productivity.
 
-<img width="2586" height="1778" alt="flyenv-capturer-1774013359" src="https://github.com/user-attachments/assets/e93fd474-612f-492f-87d5-0da3628a1051" />
-<img width="2586" height="1778" alt="flyenv-capturer-1774013332" src="https://github.com/user-attachments/assets/a8f340a3-3772-438f-8292-fdd2bba8a682" />
+<img width="2586" height="1778" alt="qtenvdev-capturer-1774013359" src="https://github.com/user-attachments/assets/e93fd474-612f-492f-87d5-0da3628a1051" />
+<img width="2586" height="1778" alt="qtenvdev-capturer-1774013332" src="https://github.com/user-attachments/assets/a8f340a3-3772-438f-8292-fdd2bba8a682" />
 
   ---
 
@@ -1437,7 +1437,7 @@ Added quick access shortcuts for all OpenClaw commands, streamlining your workfl
 ### **3. Fixed fnm & nvm Issues**
 
 Resolved critical issues where fnm and nvm were not functioning properly. You can now use these Node version managers
-seamlessly within FlyEnv.
+seamlessly within QTEnvDev.
 
 ### **4. General Bug Fixes & Stability**
 
@@ -1448,20 +1448,20 @@ seamlessly within FlyEnv.
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)**. You
+All QTEnvDev installation packages are built using **[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)**. You
 can verify the build process and download the artifacts directly from the following links:
 
-* **Global Build History:** [GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)
+* **Global Build History:** [GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)
 
   ---
 
-We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**
 
 ## [4.13.4] - 2026-03-03
 
-# **FlyEnv v4.13.4 Update Release Notes**
+# **QTEnvDev v4.13.4 Update Release Notes**
 
 ## **🚀 New Features**
 
@@ -1487,12 +1487,12 @@ Resolved a critical issue in the Linux version where environment isolation was f
 
 ## **📦 Build & Transparency**
 
-All FlyEnv installation packages are built using **[[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)](https://github.com/xpf0000/FlyEnv/actions)**. You can verify the build process and download the artifacts directly from the following links:
+All QTEnvDev installation packages are built using **[[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)](https://github.com/xpf0000/QTEnvDev/actions)**. You can verify the build process and download the artifacts directly from the following links:
 
-* **Global Build History:** [[GitHub Actions](https://github.com/xpf0000/FlyEnv/actions)](https://github.com/xpf0000/FlyEnv/actions)
+* **Global Build History:** [[GitHub Actions](https://github.com/xpf0000/QTEnvDev/actions)](https://github.com/xpf0000/QTEnvDev/actions)
 
 ---
 
-We welcome your continued feedback and bug reports via [[[GitHub Issues](https://github.com/xpf0000/FlyEnv/issues)](https://github.com/xpf0000/FlyEnv/issues)](https://github.com/xpf0000/FlyEnv/issues)
+We welcome your continued feedback and bug reports via [[[GitHub Issues](https://github.com/xpf0000/QTEnvDev/issues)](https://github.com/xpf0000/QTEnvDev/issues)](https://github.com/xpf0000/QTEnvDev/issues)
 
 **Enjoy the update!**

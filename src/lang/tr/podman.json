@@ -2,7 +2,7 @@
   "podmanInstall": "Podman'ı Kur",
   "installPodmanByHomebrew": "Podman'ı Homebrew ile Kur",
   "noPodmanFound": "<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a> bulunamadı.\nPodman'ı kurmak için kurulum düğmesine tıklayabilirsiniz.\nAyrıca şu bağlantıya da tıklayabilirsiniz:\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nve belgelere göre el ile kurulum yapabilirsiniz.",
-  "podmanErrorTips": "{bin} konumunda bir Podman yürütülebilir dosyası algılandı.\nAncak FlyEnv bunu çağıramıyor. Hata mesajı:\n{error}",
+  "podmanErrorTips": "{bin} konumunda bir Podman yürütülebilir dosyası algılandı.\nAncak QTEnvDev bunu çağıramıyor. Hata mesajı:\n{error}",
   "removeContainerTips": "Bu kapsayıcıyı kaldırmak istediğinizden emin misiniz?",
   "removeMachineTips": "Bu sanal makineyi kaldırmak istediğinizden emin misiniz?",
   "removeImageTips": "Bu görüntüyü kaldırmak istediğinizden emin misiniz?",

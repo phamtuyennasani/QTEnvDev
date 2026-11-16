@@ -7,7 +7,7 @@
     "en": "Dameng DM8 for x64 Windows and Ubuntu 22.04. Official downloads, database initialization and native service management.",
     "zh": "适用于 x64 Windows 和 Ubuntu 22.04 的达梦 DM8 插件。官方源下载、数据库初始化及原生服务管理。"
   },
-  "author": "FlyEnv",
+  "author": "QTEnvDev",
   "module": {
     "typeFlag": "dameng",
     "moduleType": "dataBaseServer",

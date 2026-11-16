@@ -39,7 +39,7 @@ function Open-PowerShellWithCommand {
     $processedCommand = Get-Content -Path $CommandFile -Raw -Encoding UTF8
     
     # Always use temp file for reliable execution (similar to Linux version)
-    $tempFile = Join-Path $env:TEMP ("flyenv-cmd-{0:yyyyMMddHHmmssfff}.ps1" -f (Get-Date))
+    $tempFile = Join-Path $env:TEMP ("qtenvdev-cmd-{0:yyyyMMddHHmmssfff}.ps1" -f (Get-Date))
     
     # Build the wait/completion block
     $waitBlock = ""
@@ -63,13 +63,13 @@ Write-Host "Press any key to close..." -ForegroundColor Cyan
     $encodedCommand = [Convert]::ToBase64String($commandBytes)
     
     $scriptContent = @"
-`# Auto-generated temporary script by FlyEnv
+`# Auto-generated temporary script by QTEnvDev
 `$ErrorActionPreference = 'Continue'
 `$Host.UI.RawUI.BackgroundColor = 'Black'
 Clear-Host
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "FlyEnv Command Execution" -ForegroundColor Cyan
+Write-Host "QTEnvDev Command Execution" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

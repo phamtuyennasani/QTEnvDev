@@ -9,7 +9,7 @@
 
 ## Overview
 
-Podman 模块在 FlyEnv 中定位为**无守护进程的容器运行时管理器**。它不同于 Nginx/MySQL 等传统服务模块，不通过 `_startServer`/`_stopService` 基类模板管理常驻进程，而是通过独立的 Fork 进程直接调用 `podman` CLI 命令，实现对 Podman Machine（macOS/Windows 虚拟机层）、Container、Image 以及 Docker Compose 项目的全生命周期控制。模块核心依赖底层 `podman` 二进制和 `docker-compose` 插件，前端通过 `XTermExec` 终端执行模式与 IPC 静默模式混合交互。
+Podman 模块在 QTEnvDev 中定位为**无守护进程的容器运行时管理器**。它不同于 Nginx/MySQL 等传统服务模块，不通过 `_startServer`/`_stopService` 基类模板管理常驻进程，而是通过独立的 Fork 进程直接调用 `podman` CLI 命令，实现对 Podman Machine（macOS/Windows 虚拟机层）、Container、Image 以及 Docker Compose 项目的全生命周期控制。模块核心依赖底层 `podman` 二进制和 `docker-compose` 插件，前端通过 `XTermExec` 终端执行模式与 IPC 静默模式混合交互。
 
 Sources: `src/render/components/Podman/Module.ts:1-12`, `src/fork/module/Podman/index.ts:1-15`
 
@@ -276,9 +276,9 @@ images = json.map((img: any) => ({
 - 覆盖 Web 服务器 (`nginx`, `apache`, `caddy`)、数据库 (`mysql`, `postgres`, `mongo`)、语言运行时 (`node`, `php`, `python`, `java`, `go`, `ruby`, `rust`, `bun`, `deno`)、队列/缓存 (`redis`, `rabbitmq`, `memcached`, `etcd`)、搜索引擎 (`elasticsearch`, `meilisearch`, `typesense`) 等
 
 **镜像标签缓存与获取**:
-- `PodmanManager.initImageVersion()` (`class/Podman.ts:35-55`) 尝试从 `StorageGetAsync('flyenv-podman-image-version')` 读取本地缓存（3 天 TTL）
+- `PodmanManager.initImageVersion()` (`class/Podman.ts:35-55`) 尝试从 `StorageGetAsync('qtenvdev-podman-image-version')` 读取本地缓存（3 天 TTL）
 - 缓存未命中时发起 `IPC.send('app-fork:podman', 'fetchImagesVersion')`
-- Fork: `fetchImagesVersion()` (`src/fork/module/Podman/index.ts:428-438`) 从 `https://flyenv.com/static/podman/allImagesTags.json` 获取全量标签数据
+- Fork: `fetchImagesVersion()` (`src/fork/module/Podman/index.ts:428-438`) 从 `https://qtenvdev.com/static/podman/allImagesTags.json` 获取全量标签数据
 
 **前端拉取流程**:
 - `image/imageAdd.vue:162-203` 的 `doSubmit()`
@@ -318,7 +318,7 @@ Podman 模块通过 `docker-compose` CLI 管理多容器项目。在 macOS/Linux
 
 #### Compose 列表管理
 
-1. **加载**: `PodmanManager.loadComposeList()` (`class/Podman.ts:103-126`) 从 `StorageGetAsync('flyenv-podman-compose-list')` 读取持久化列表
+1. **加载**: `PodmanManager.loadComposeList()` (`class/Podman.ts:103-126`) 从 `StorageGetAsync('qtenvdev-podman-compose-list')` 读取持久化列表
 2. **添加/编辑**: `compose/composeAdd.vue:191-232` 的 `doSubmit()` 调用 `PodmanManager.addCompose(data)` 或直接修改 `find.paths` 后 `saveComposeList()`
 3. **持久化**: `saveComposeList()` 将 `JSON.parse(JSON.stringify(this.compose))` 写入 Storage
 
@@ -395,7 +395,7 @@ Podman 模块大量采用 `XTermExec` 终端执行模式，原因是容器操作
 | Compose 启动(终端) | compose.vue | `Compose.startWithTerminal()` | `export DOCKER_HOST=...; docker-compose -f ... up -d` | `this.id` |
 | Compose 停止(终端) | compose.vue | `Compose.stopWithTerminal()` | `export DOCKER_HOST=...; docker-compose -f ... down` | `this.id` |
 | Compose 日志 | compose.vue | `Compose.showLogsWithTerminal()` | `export DOCKER_HOST=...; docker-compose -f ... logs -f` | `logs-${this.id}` |
-| 容器创建 | containerCreate.vue | `doSubmit()` | `export DOCKER_HOST=...; docker-compose -f ... up -d` | `FlyEnv-Podman-Container-Create` |
+| 容器创建 | containerCreate.vue | `doSubmit()` | `export DOCKER_HOST=...; docker-compose -f ... up -d` | `QTEnvDev-Podman-Container-Create` |
 | DockerCompose 安装 | Index.vue / compose.vue | `PodmanManager.installDockerCompose()` | `brew install docker-compose` | `App-Podman-DockerCompose-Install` |
 | Podman 安装 | Index.vue | `installByHomebrew()` | `brew-cmd.sh ${arch} install podman` | 内联 XTerm 实例 |
 
@@ -528,7 +528,7 @@ Sources: `src/fork/module/Podman/image.ts:1-151`, `src/fork/module/Podman/index.
 | `app-fork:podman:imagePull` | `machineName: string, imageName: string, tag?: string` | `boolean` | `src/fork/module/Podman/index.ts:358` | `podman pull ${imageName}:${tag}` | 无 |
 | `app-fork:podman:imageRemove` | `machineName: string, imageId: string` | `boolean` | `src/fork/module/Podman/index.ts:372` | `podman rmi -f ${imageId}` | 无 |
 | `app-fork:podman:fetchMachineInfo` | `machineName: string` | `{ info, container, images }` | `src/fork/module/Podman/index.ts:386` | `podman machine inspect` + `fetchContainerList` + `fetchImageList` | 获取 Dashboard 数据 |
-| `app-fork:podman:fetchImagesVersion` | — | `Record<string, string[]>` | `src/fork/module/Podman/index.ts:428` | HTTP GET `flyenv.com/static/podman/allImagesTags.json` | 无 |
+| `app-fork:podman:fetchImagesVersion` | — | `Record<string, string[]>` | `src/fork/module/Podman/index.ts:428` | HTTP GET `qtenvdev.com/static/podman/allImagesTags.json` | 无 |
 | `app-fork:podman:composeStart` | `paths: string[], projectName: string, socket?: string` | `boolean` | `src/fork/module/Podman/index.ts:440` | `docker-compose -f ... up -d` | 无 |
 | `app-fork:podman:composeStop` | `paths: string[], projectName: string, socket?: string` | `boolean` | `src/fork/module/Podman/index.ts:460` | `docker-compose -f ... down` | 无 |
 | `app-fork:podman:checkIsComposeExists` | — | `boolean` | `src/fork/module/Podman/index.ts:480` | `docker-compose --version` | 无 |
@@ -575,7 +575,7 @@ Sources: `src/fork/module/Podman/index.ts:90-92`, `src/fork/module/Podman/index.
 ### 数据来源
 
 1. **UI 输入**: Machine 创建表单 (`machineAdd.vue`)、Compose 添加表单 (`composeAdd.vue`)、容器创建表单 (`containerCreate.vue`)、镜像拉取表单 (`imageAdd.vue`)
-2. **配置文件/缓存**: `StorageGetAsync('flyenv-podman-compose-list')`、`StorageGetAsync('flyenv-podman-image-version')`
+2. **配置文件/缓存**: `StorageGetAsync('qtenvdev-podman-compose-list')`、`StorageGetAsync('qtenvdev-podman-image-version')`
 3. **Shell 输出**: `podman` 和 `docker-compose` 命令的 JSON/文本输出
 
 ### 数据转换流程

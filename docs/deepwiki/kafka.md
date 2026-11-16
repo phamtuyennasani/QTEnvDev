@@ -1,6 +1,6 @@
 # Apache Kafka 集成调研
 
-> **调研主题**: Kafka 是否可集成进 FlyEnv
+> **调研主题**: Kafka 是否可集成进 QTEnvDev
 > **调研日期**: 2026-09-16
 > **Kafka 参考版本**: 4.3.1
 > **结论**: 可行，建议先支持单节点 KRaft，再逐步扩展管理能力
@@ -87,7 +87,7 @@ Windows 官方脚本目录同时提供 `kafka-storage.bat`、`kafka-server-start
 
 ## 默认单节点配置
 
-FlyEnv 不能直接使用发行包中指向安装目录的数据路径，应生成模块专属配置，将数据和日志放在 FlyEnv 的服务目录中。
+QTEnvDev 不能直接使用发行包中指向安装目录的数据路径，应生成模块专属配置，将数据和日志放在 QTEnvDev 的服务目录中。
 
 建议配置：
 
@@ -98,7 +98,7 @@ controller.quorum.voters=1@127.0.0.1:9093
 listeners=PLAINTEXT://127.0.0.1:9092,CONTROLLER://127.0.0.1:9093
 advertised.listeners=PLAINTEXT://127.0.0.1:9092
 controller.listener.names=CONTROLLER
-log.dirs=<FlyEnv Kafka data directory>
+log.dirs=<QTEnvDev Kafka data directory>
 ```
 
 建议默认目录：
@@ -116,9 +116,9 @@ server/kafka/
 
 ---
 
-## FlyEnv 集成可行性
+## QTEnvDev 集成可行性
 
-FlyEnv 已有可复用的基础设施：
+QTEnvDev 已有可复用的基础设施：
 
 - `cacheAndQueue` 模块分类可容纳 Kafka。
 - RabbitMQ 已提供服务启动、停止、配置、日志、版本安装和 Windows 进程处理参考。
@@ -171,13 +171,13 @@ FlyEnv 已有可复用的基础设施：
 
 ## 风险与注意事项
 
-- Kafka 是 JVM 服务，默认内存开销高于 Redis 和 Memcached，应在 FlyEnv 中设置适合开发机的堆内存。
+- Kafka 是 JVM 服务，默认内存开销高于 Redis 和 Memcached，应在 QTEnvDev 中设置适合开发机的堆内存。
 - KRaft cluster ID 和数据目录必须持久化，不能每次启动重新生成或 format。
 - Kafka 版本升级不能简单覆盖正在使用的数据目录，需要明确兼容性和 metadata version 策略。
 - Windows 需要验证 `.bat` 脚本、Java 路径、路径空格和进程退出行为。
-- FlyEnv 的进程存活状态应以受控进程和 PID/进程树检测为准，而不是仅以 Renderer 状态为准。
+- QTEnvDev 的进程存活状态应以受控进程和 PID/进程树检测为准，而不是仅以 Renderer 状态为准。
 - Kafka 没有 RabbitMQ Management 那样的内置完整 Web 管理界面，第一版可先依赖 Kafka CLI。
 
 ## 最终判断
 
-Kafka 具备 Windows、macOS、Linux 三平台直接运行能力，FlyEnv 可以基于同一个 Kafka JVM 发行包实现跨平台模块；从工程实现角度可行性较高，最大工作量集中在 Java 依赖绑定、KRaft 首次初始化、持久化数据保护和 Windows 进程生命周期管理。
+Kafka 具备 Windows、macOS、Linux 三平台直接运行能力，QTEnvDev 可以基于同一个 Kafka JVM 发行包实现跨平台模块；从工程实现角度可行性较高，最大工作量集中在 Java 依赖绑定、KRaft 首次初始化、持久化数据保护和 Windows 进程生命周期管理。

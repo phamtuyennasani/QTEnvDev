@@ -5,8 +5,8 @@
   "envTips": "Yol, ortam değişkenine eklendi mi?",
   "aliasTips": "Terminalde kullanılacak takma ad",
   "useSysPHP": "Varsayılan PHP sürümünü kullan",
-  "setByApp": "FlyEnv tarafından ayarlanmış ortam değişkenleri",
-  "setByNoApp": "FlyEnv tarafından ayarlanmamış ortam değişkenleri",
+  "setByApp": "QTEnvDev tarafından ayarlanmış ortam değişkenleri",
+  "setByNoApp": "QTEnvDev tarafından ayarlanmamış ortam değişkenleri",
   "bundleinVersionDelTips": "Bu sürüm yerleşik bir sürümdür, görüntülenmediğini doğruluyor musunuz?",
   "customDirVersionDelTips": "Bu sürüm özel bir yol sürümüdür, görüntülenmediğini doğruluyor musunuz?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Bu yükseltilmiş yetki gerektiren görevi elle başlatın ve yetkilendirmeyi terminalde tamamlayın; macOS/Linux arka planda otomatik sudo işlemini desteklemez.",
-  "linuxFtpUnmanagedRoot": "Bu root yetkili FTP işlemi, FlyEnv'in yönettiği hizmet tarafından başlatılmadı. Yeniden başlatmadan önce yönetici haklarıyla durdurun.",
+  "linuxFtpUnmanagedRoot": "Bu root yetkili FTP işlemi, QTEnvDev'in yönettiği hizmet tarafından başlatılmadı. Yeniden başlatmadan önce yönetici haklarıyla durdurun.",
   "linuxFtpUsersRefreshFailed": "FTP hesap değişiklikleri kaydedildi, ancak çalışan hizmet bunları uygulayamadı: {error}",
   "pathSavedRefreshFailed": "Ortam değişkenleri kaydedildi ancak liste yenilenemedi: {error}"
 }

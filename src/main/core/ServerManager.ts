@@ -101,8 +101,8 @@ export default class ServerManager {
     const hosts = await timeServiceStopBoundary('quit.hosts-read', { file }, () =>
       readFileFixed(file)
     )
-    // 删除全部完整的 FlyEnv 托管块，保留块外内容；没有变化时不能写入或请求 UAC。
-    // 没有完整标记对时不截断文件；块的范围仍沿用既有 FlyEnv 标记协议。
+    // 删除全部完整的 QTEnvDev 托管块，保留块外内容；没有变化时不能写入或请求 UAC。
+    // 没有完整标记对时不截断文件；块的范围仍沿用既有 QTEnvDev 标记协议。
     const cleaned = hosts.replace(/(#X-HOSTS-BEGIN#)([\s\S]*?)(#X-HOSTS-END#)/g, '')
     if (cleaned === hosts) {
       logServiceStopBoundary('quit.hosts-skipped', { file, reason: 'no-managed-block-change' })

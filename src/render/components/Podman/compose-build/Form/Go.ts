@@ -36,17 +36,17 @@ const Go = reactive({
       image: `${mirror}golang:${Go.version}`,
       ports: Go.ports.map((p) => `${p.out}:${p.in}`),
       environment,
-      networks: ['flyenv-network'],
+      networks: ['qtenvdev-network'],
       working_dir: '/app',
       command: Go.command
     }
 
     const volumes: any[] = []
 
-    const flyenvGoDir = join(dirname(base.dir), 'flyenv-docker-compose/go')
-    await fs.mkdirp(flyenvGoDir)
+    const qtenvdevGoDir = join(dirname(base.dir), 'qtenvdev-docker-compose/go')
+    await fs.mkdirp(qtenvdevGoDir)
 
-    const goCacheHostPath = join(flyenvGoDir, 'cache')
+    const goCacheHostPath = join(qtenvdevGoDir, 'cache')
     await fs.mkdirp(goCacheHostPath)
 
     volumes.push({

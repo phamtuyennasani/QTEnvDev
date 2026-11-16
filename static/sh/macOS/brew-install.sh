@@ -18,7 +18,7 @@ hasBrew=$(which brew)
 if ! [[ "$hasBrew" == "brew not found" ]]; then
     echo -n "${tty_green}
     检测到brew已安装, 安装脚本自动退出${tty_reset}"
-    echo "FlyEnv-Homebrew安装结束"
+    echo "QTEnvDev-Homebrew安装结束"
     exit 0
 fi
 
@@ -66,7 +66,7 @@ echo "--> 脚本开始执行"
 *)
 echo "你输入了 $MY_Del_Old ，安装退出, 如果继续运行脚本应该输入Y或者y
 "
-echo "FlyEnv-Homebrew安装结束"
+echo "QTEnvDev-Homebrew安装结束"
 exit 0
 ;;
 esac
@@ -80,4 +80,4 @@ case $MY_DOWN_NUM in
   /bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"
 ;;
 esac
-echo "FlyEnv-Homebrew安装结束"
+echo "QTEnvDev-Homebrew安装结束"

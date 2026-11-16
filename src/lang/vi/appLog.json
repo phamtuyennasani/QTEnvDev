@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Khởi tạo thư mục dữ liệu thành công. Đường dẫn: {dir}",
   "initDBDataDirFail": "Khởi tạo thư mục dữ liệu thất bại. Lý do: {error}",
   "newProjectFail": "Không thể tạo dự án mới.",
-  "processListFail": "Không thể lấy danh sách tiến trình. Vui lòng cài đặt FlyEnv Helper."
+  "processListFail": "Không thể lấy danh sách tiến trình. Vui lòng cài đặt QTEnvDev Helper."
 }

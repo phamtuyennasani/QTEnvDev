@@ -7,7 +7,7 @@ const helperDir = path.join(repoRoot, 'src/helper-go')
 const bundledWindowsGo = 'D:\\Program Files\\PhpWebStudy-Data\\app\\static-go-1.25.0\\bin\\go.exe'
 
 function findGoBinary() {
-  if (process.env.FLYENV_GO) return process.env.FLYENV_GO
+  if (process.env.QTENVDEV_GO) return process.env.QTENVDEV_GO
   if (process.platform === 'win32' && fs.existsSync(bundledWindowsGo)) return bundledWindowsGo
   return 'go'
 }

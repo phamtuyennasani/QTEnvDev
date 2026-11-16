@@ -121,7 +121,7 @@ export function updateExtensionIni(
   if (!enabled) {
     let text = updated.join(newline)
     if (name === 'xdebug')
-      text = text.replace(/;\[FlyEnv-xdebug-ini-begin\][\s\S]*?;\[FlyEnv-xdebug-ini-end\]/g, '')
+      text = text.replace(/;\[QTEnvDev-xdebug-ini-begin\][\s\S]*?;\[QTEnvDev-xdebug-ini-end\]/g, '')
     return bom + text.trimEnd() + newline
   }
   if (!anchor) {
@@ -173,9 +173,9 @@ export function updateExtensionIni(
       updated.splice(
         position,
         0,
-        ';[FlyEnv-xdebug-ini-begin]',
+        ';[QTEnvDev-xdebug-ini-begin]',
         ...missing,
-        ';[FlyEnv-xdebug-ini-end]'
+        ';[QTEnvDev-xdebug-ini-end]'
       )
     }
   }

@@ -7,8 +7,8 @@
   "bundleinVersionDelTips": "Ez egy beépített verzió, biztosan ne jelenjen meg?",
   "customDirVersionDelTips": "Ez egy egyéni útvonalú verzió, biztosan ne jelenjen meg?",
   "useSysPHP": "Alapértelmezett PHP verzió használata",
-  "setByApp": "A FlyEnv által beállított környezeti változók",
-  "setByNoApp": "Nem a FlyEnv által beállított környezeti változók",
+  "setByApp": "A QTEnvDev által beállított környezeti változók",
+  "setByNoApp": "Nem a QTEnvDev által beállított környezeti változók",
   "ErrorTips": {
     "VCRuntime": {
       "title": "A rendszerből hiányzik a Visual C++ Redistributable (DLL-ek), amelyek szükségesek ennek a verziónak a futtatásához. Kérjük, kattintson az alábbi linkre a VC Runtime letöltéséhez és telepítéséhez a Microsoft hivatalos weboldaláról.",
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Indítsa el kézzel ezt a magasabb jogosultságot igénylő feladatot, és végezze el az engedélyezést a terminálban; macOS/Linux rendszeren az automatikus háttérbeli sudo nem támogatott.",
-  "linuxFtpUnmanagedRoot": "Ezt a root jogosultságú FTP-folyamatot nem a FlyEnv által kezelt szolgáltatás indította el. Az újraindítás előtt állítsa le rendszergazdai jogosultsággal.",
+  "linuxFtpUnmanagedRoot": "Ezt a root jogosultságú FTP-folyamatot nem a QTEnvDev által kezelt szolgáltatás indította el. Az újraindítás előtt állítsa le rendszergazdai jogosultsággal.",
   "linuxFtpUsersRefreshFailed": "Az FTP-fiókok módosításait elmentettük, de a futó szolgáltatás nem tudta alkalmazni őket: {error}",
   "pathSavedRefreshFailed": "A környezeti változók mentése megtörtént, de a lista frissítése sikertelen: {error}"
 }

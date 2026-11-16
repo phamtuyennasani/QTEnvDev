@@ -9,15 +9,15 @@
 
 ## Overview
 
-Tomcat 模块为 FlyEnv 提供 Apache Tomcat Servlet 容器管理功能，支持 Java Web 应用的部署与运行。模块完整实现了 Tomcat 服务的生命周期管理、版本管理、虚拟主机配置以及 SSL/TLS 支持。
+Tomcat 模块为 QTEnvDev 提供 Apache Tomcat Servlet 容器管理功能，支持 Java Web 应用的部署与运行。模块完整实现了 Tomcat 服务的生命周期管理、版本管理、虚拟主机配置以及 SSL/TLS 支持。
 
 ## Managed Tomcat Sites
 
-Tomcat 项目在 **Hosts → Tomcat Projects** 中配置。一个站点可以定义零个或多个应用映射；`root` 是 Tomcat Host 的 `appBase`，每个映射独立指定 Context 路径和 `docBase`。选择 appBase 后，FlyEnv 会扫描其直接子目录和 WAR 文件并补充映射：`portal` 对应 `/portal`，`ROOT` 对应 `/`，WAR 使用去掉 `.war` 后的同一规则。
+Tomcat 项目在 **Hosts → Tomcat Projects** 中配置。一个站点可以定义零个或多个应用映射；`root` 是 Tomcat Host 的 `appBase`，每个映射独立指定 Context 路径和 `docBase`。选择 appBase 后，QTEnvDev 会扫描其直接子目录和 WAR 文件并补充映射：`portal` 对应 `/portal`，`ROOT` 对应 `/`，WAR 使用去掉 `.war` 后的同一规则。
 
-这类 appBase 内、名称与 Context 路径完全一致的直接子应用由 Tomcat 自动部署，FlyEnv 不生成 Context descriptor，避免重复部署。外部目录/WAR 或自定义 Context 路径仍由 FlyEnv 写入标准 descriptor。appBase 本身、嵌套子目录，以及名称与 Context 路径不一致的 appBase 内映射会被拒绝。
+这类 appBase 内、名称与 Context 路径完全一致的直接子应用由 Tomcat 自动部署，QTEnvDev 不生成 Context descriptor，避免重复部署。外部目录/WAR 或自定义 Context 路径仍由 QTEnvDev 写入标准 descriptor。appBase 本身、嵌套子目录，以及名称与 Context 路径不一致的 appBase 内映射会被拒绝。
 
-FlyEnv 将 Context 写为 Tomcat 标准 descriptor，而不是把 Context 写进 `server.xml`：
+QTEnvDev 将 Context 写为 Tomcat 标准 descriptor，而不是把 Context 写进 `server.xml`：
 
 ```text
 <CATALINA_BASE>/conf/Catalina/<host>/
@@ -27,11 +27,11 @@ FlyEnv 将 Context 写为 Tomcat 标准 descriptor，而不是把 Context 写进
 └── rewrite.config    # host-level RewriteValve configuration
 ```
 
-每个 Tomcat 站点只使用其主域名对应的 descriptor 目录。Host 保持 `unpackWARs="true"`、`deployOnStartup="true"` 和 `autoDeploy="true"`，因此 Tomcat 会自动部署 appBase 的自然应用并加载上述标准部署描述符。FlyEnv 只更新包含 FlyEnv 标识的 descriptor、`rewrite.config`、Valve、Connector 与 SNI 条目；手写文件或 XML 不会被覆盖。启用 rewrite 时，FlyEnv 在 Host 上添加标记的 `RewriteValve` 并写入 `rewrite.config`；若该位置已有未标记的 rewrite 文件，保存会明确报冲突。
+每个 Tomcat 站点只使用其主域名对应的 descriptor 目录。Host 保持 `unpackWARs="true"`、`deployOnStartup="true"` 和 `autoDeploy="true"`，因此 Tomcat 会自动部署 appBase 的自然应用并加载上述标准部署描述符。QTEnvDev 只更新包含 QTEnvDev 标识的 descriptor、`rewrite.config`、Valve、Connector 与 SNI 条目；手写文件或 XML 不会被覆盖。启用 rewrite 时，QTEnvDev 在 Host 上添加标记的 `RewriteValve` 并写入 `rewrite.config`；若该位置已有未标记的 rewrite 文件，保存会明确报冲突。
 
 SSL Connector 会显式设置 `SSLEnabled="true"`、`scheme="https"`、`secure="true"` 和 `defaultSSLHostConfigName="_default_"`。同一 HTTPS 端口的每个站点主域名都有自己的标记 SNI 配置，默认配置按主域名字典序稳定选择。保存时会刷新已有 SNI 的证书路径，解决旧证书继续生效的问题。
 
-保存站点会先协调当前版本的 CATALINA_BASE，再同步 hosts 文件。Tomcat 原本运行时，FlyEnv 使用标准 `ModuleInstalledItem.restart()` 重启一次；原本停止时只保存配置，不会启动服务。
+保存站点会先协调当前版本的 CATALINA_BASE，再同步 hosts 文件。Tomcat 原本运行时，QTEnvDev 使用标准 `ModuleInstalledItem.restart()` 重启一次；原本停止时只保存配置，不会启动服务。
 
 相关文档链接:
 
@@ -276,7 +276,7 @@ CATALINA_BASE/
 
 ### server.xml Generation
 
-The `makeTomcatServerXML()` function dynamically modifies server.xml based on FlyEnv Host configuration:
+The `makeTomcatServerXML()` function dynamically modifies server.xml based on QTEnvDev Host configuration:
 
 | Host Property     | XML Element     | Attribute          |
 | ----------------- | --------------- | ------------------ |
@@ -289,13 +289,13 @@ The `makeTomcatServerXML()` function dynamically modifies server.xml based on Fl
 **Connector Configuration:**
 
 ```xml
-<Connector appFlag="FlyEnv" port="8080" protocol="HTTP/1.1" connectionTimeout="60000"/>
+<Connector appFlag="QTEnvDev" port="8080" protocol="HTTP/1.1" connectionTimeout="60000"/>
 ```
 
 **SSL Connector:**
 
 ```xml
-<Connector appFlag="FlyEnv" port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+<Connector appFlag="QTEnvDev" port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
            maxThreads="150" SSLEnabled="true" scheme="https">
     <SSLHostConfig sslProtocol="TLS" certificateVerification="false">
         <Certificate certificateFile="/path/to/cert.pem"
@@ -308,7 +308,7 @@ The `makeTomcatServerXML()` function dynamically modifies server.xml based on Fl
 **Virtual Host:**
 
 ```xml
-<Host name="example.com" appBase="/path/to/webapp" appFlag="FlyEnv"
+<Host name="example.com" appBase="/path/to/webapp" appFlag="QTEnvDev"
       unpackWARs="true" autoDeploy="true">
     <Context path="" docBase=""></Context>
     <Valve className="org.apache.catalina.valves.AccessLogValve"
@@ -405,8 +405,8 @@ Sources: src/fork/module/Tomcat/index.ts:177-199
 
 | Platform | Install Path                     | Example                                         |
 | -------- | -------------------------------- | ----------------------------------------------- |
-| Windows  | `AppDir/tomcat-{version}`        | `C:\FlyEnv\app\tomcat-9.0.82`                   |
-| Unix     | `AppDir/static-tomcat-{version}` | `/Applications/FlyEnv/app/static-tomcat-9.0.82` |
+| Windows  | `AppDir/tomcat-{version}`        | `C:\QTEnvDev\app\tomcat-9.0.82`                   |
+| Unix     | `AppDir/static-tomcat-{version}` | `/Applications/QTEnvDev/app/static-tomcat-9.0.82` |
 
 Sources: src/fork/module/Tomcat/index.ts:44-73, 253-309
 

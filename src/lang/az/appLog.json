@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Məlumat qovluğu uğurla yaradıldı, qovluq yolu: {dir}",
   "initDBDataDirFail": "Məlumat qovluğu yaradıla bilmədi, səbəb: {error}",
   "newProjectFail": "Yeni layihə yaradıla bilmədi",
-  "processListFail": "Prosess siyahısının əldə edilməsi uğursuz oldu. Zəhmət olmasa FlyEnv Helper-i quraşdırın"
+  "processListFail": "Prosess siyahısının əldə edilməsi uğursuz oldu. Zəhmət olmasa QTEnvDev Helper-i quraşdırın"
 }

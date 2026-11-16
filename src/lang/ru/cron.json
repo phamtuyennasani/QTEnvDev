@@ -101,7 +101,7 @@
   "allTasks": "Все задачи",
   "systemTasks": "Системные задачи",
   "systemTask": "Системная задача",
-  "flyenvTask": "Задача FlyEnv",
+  "qtenvdevTask": "Задача QTEnvDev",
   "otherTask": "Другая задача",
   "taskTrigger": "Триггер",
   "deleteSystemTaskTips": "Удалить эту системную запланированную задачу?",

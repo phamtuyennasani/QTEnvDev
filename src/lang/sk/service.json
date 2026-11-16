@@ -1,7 +1,7 @@
 {
   "pathSavedRefreshFailed": "Premenné prostredia boli uložené, ale zoznam sa nepodarilo obnoviť: {error}",
   "linuxSudoRequiresTerminal": "Túto úlohu s oprávneniami spustite interaktívne v termináli; sudo na pozadí nie je dostupné.",
-  "linuxFtpUnmanagedRoot": "Tento proces FTP s právami root nespustila spravovaná služba FlyEnv. Pred ďalším spustením ho zastavte s právami správcu.",
+  "linuxFtpUnmanagedRoot": "Tento proces FTP s právami root nespustila spravovaná služba QTEnvDev. Pred ďalším spustením ho zastavte s právami správcu.",
   "linuxFtpUsersRefreshFailed": "Zmeny FTP účtov boli uložené, ale spustená služba ich nemohla použiť: {error}",
   "setaliase": "Nastaviť alias",
   "env": "Prostredie",
@@ -9,8 +9,8 @@
   "envTips": "Bola cesta pridaná do premennej prostredia",
   "aliasTips": "Alias použitý v termináli",
   "useSysPHP": "Použiť predvolenú verziu PHP",
-  "setByApp": "Premenné prostredia nastavené aplikáciou FlyEnv",
-  "setByNoApp": "Premenné prostredia nenastavené aplikáciou FlyEnv",
+  "setByApp": "Premenné prostredia nastavené aplikáciou QTEnvDev",
+  "setByNoApp": "Premenné prostredia nenastavené aplikáciou QTEnvDev",
   "bundleinVersionDelTips": "Táto verzia je vstavaná. Potvrdiť skrytie?",
   "customDirVersionDelTips": "Táto verzia je z vlastnej cesty. Potvrdiť skrytie?",
   "ErrorTips": {

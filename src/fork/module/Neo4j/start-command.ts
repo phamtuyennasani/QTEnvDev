@@ -59,7 +59,7 @@ export function neo4jStartCommand(
 
   return {
     bin: 'cmd.exe',
-    execArgs: ['/d', '/s', '/c', '"%FLYENV_NEO4J_BIN%" console'],
-    execEnv: { FLYENV_NEO4J_BIN: version.bin }
+    execArgs: ['/d', '/s', '/c', '"%QTENVDEV_NEO4J_BIN%" console'],
+    execEnv: { QTENVDEV_NEO4J_BIN: version.bin }
   }
 }

@@ -13,7 +13,7 @@ export const Etcd = reactive({
   volumes: [
     {
       type: 'bind',
-      source: './flyenv-docker-compose/etcd/data',
+      source: './qtenvdev-docker-compose/etcd/data',
       target: '/var/lib/etcd'
     }
   ],
@@ -35,13 +35,13 @@ export const Etcd = reactive({
       image: `${mirror}${image}:${Etcd.version}`,
       ports: Etcd.ports.map((p) => `${p.out}:${p.in}`),
       environment: Etcd.environment,
-      networks: ['flyenv-network'],
+      networks: ['qtenvdev-network'],
       command: ['etcd']
     }
 
     if (Etcd.persistence) {
       etcd.volumes = Etcd.volumes
-      await fs.mkdirp(join(dirname(base.dir), 'flyenv-docker-compose/etcd/data'))
+      await fs.mkdirp(join(dirname(base.dir), 'qtenvdev-docker-compose/etcd/data'))
     }
 
     return { etcd }

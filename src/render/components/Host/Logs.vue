@@ -143,12 +143,12 @@
     type.value = t
     const logFile: { [key: string]: string } = logfile.value
     filepath.value = logFile[t] ?? ''
-    localStorage.setItem('FlyEnv-Host-Log-Type', t)
+    localStorage.setItem('QTEnvDev-Host-Log-Type', t)
     await doRefresh()
   }
 
   init()
-  const saveType = localStorage.getItem('FlyEnv-Host-Log-Type') ?? 'nginx-access'
+  const saveType = localStorage.getItem('QTEnvDev-Host-Log-Type') ?? 'nginx-access'
   const find = types.value.find((t) => t.value === saveType && t.show)
   if (find) {
     initType(saveType)

@@ -30,9 +30,9 @@ export class SudoKillTask extends XTermExec {
     const success = I18nT('base.success').replace(/'/g, "'\\''")
     this.command = [
       `/usr/bin/sudo /bin/kill -9 -- ${valid.join(' ')}`,
-      'flyenv_kill_exit_code=$?',
-      `if [ "$flyenv_kill_exit_code" -eq 0 ]; then printf '\\033[32m%s\\033[0m\\n' '${success}'; fi`,
-      'exit "$flyenv_kill_exit_code"'
+      'qtenvdev_kill_exit_code=$?',
+      `if [ "$qtenvdev_kill_exit_code" -eq 0 ]; then printf '\\033[32m%s\\033[0m\\n' '${success}'; fi`,
+      'exit "$qtenvdev_kill_exit_code"'
     ]
     this.completion = new Promise((resolve, reject) => {
       this.resolveResult = resolve

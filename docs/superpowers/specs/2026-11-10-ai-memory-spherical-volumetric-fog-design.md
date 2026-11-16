@@ -16,7 +16,7 @@
 
 ### 参考资料
 
-- 原始任务：[flyenv-ai-mem-star-map.md](../../task/flyenv-ai-mem-star-map.md)。
+- 原始任务：[qtenvdev-ai-mem-star-map.md](../../task/qtenvdev-ai-mem-star-map.md)。
 - 前一轮结构方案：[全息记忆体问题分析与优化方案](2026-11-10-ai-memory-holographic-refinement-design.md)。
 - 前一轮光感方案：[光感与结构细节优化方案](2026-11-10-ai-memory-holographic-lighting-detail-design.md)。
 - 视频：`/Users/x/Desktop/Kapture 2026-11-09 at 21.57.41.mp4`；[本地连续帧](../../../tmp/neural-visual-analysis/reference-contact.png)。
@@ -170,7 +170,7 @@ Points 可将当前点中心作为采样终点的近似；大 Sprite 应使用�
 
 ## 10. 建议文件分工
 
-以下新增文件只放在预览目录，不写入 FlyEnv shared 工具：
+以下新增文件只放在预览目录，不写入 QTEnvDev shared 工具：
 
 - `volume-model.ts`：确定性密度数据、球边界、参数约束及解析射线球交；与 WebGL 无关的部分便于独立验证。
 - `volume-shader.ts`：共用坐标转换、密度采样、消光和局部照明函数；明确线性输入与归一化长度约定。

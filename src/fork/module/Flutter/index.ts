@@ -74,7 +74,7 @@ class Flutter extends Base {
 
   private async _resolveFlutterBinInfo(setup?: any): Promise<{
     bin: string
-    source: 'path' | 'default' | 'custom' | 'flyenv' | 'unknown'
+    source: 'path' | 'default' | 'custom' | 'qtenvdev' | 'unknown'
     searchDirs: string[]
   }> {
     try {
@@ -135,7 +135,7 @@ class Flutter extends Base {
       ) {
         return {
           bin: resolved,
-          source: 'flyenv',
+          source: 'qtenvdev',
           searchDirs
         }
       }
@@ -205,7 +205,7 @@ class Flutter extends Base {
         return
       }
 
-      const targetDevice = process.env.FLYENV_FLUTTER_TARGET_DEVICE ?? ''
+      const targetDevice = process.env.QTENVDEV_FLUTTER_TARGET_DEVICE ?? ''
       let command = ''
       if (action === 'run') {
         const deviceArg = targetDevice ? ` -d "${targetDevice}"` : ''

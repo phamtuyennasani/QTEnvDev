@@ -50,7 +50,7 @@ func TestLinuxFTPInstalledExecutable(t *testing.T) {
 }
 
 func TestLinuxFTPRootService(t *testing.T) {
-	source := os.Getenv("FLYENV_TEST_FTP_SOURCE")
+	source := os.Getenv("QTENVDEV_TEST_FTP_SOURCE")
 	if os.Geteuid() != 0 || source == "" {
 		t.Skip("requires root, systemd and compiled Pure-Ftpd fixture")
 	}
@@ -68,7 +68,7 @@ func TestLinuxFTPRootService(t *testing.T) {
 	if status["LoadState"] != "not-found" {
 		t.Fatal("fixture unit already exists")
 	}
-	dir, err := os.MkdirTemp("/opt", ".flyenv-ftp-test-")
+	dir, err := os.MkdirTemp("/opt", ".qtenvdev-ftp-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func TestLinuxFTPRootService(t *testing.T) {
 	pw := filepath.Join(dir, "bin/pure-pw")
 	addUser := func(name string) {
 		cmd := exec.Command(pw, "useradd", name, "-u", strconv.Itoa(p.UID), "-g", strconv.Itoa(p.GID), "-d", filepath.Join(dir, "uploads"), "-f", passwd)
-		cmd.Stdin = strings.NewReader("flyenv-fixture-password\nflyenv-fixture-password\n")
+		cmd.Stdin = strings.NewReader("qtenvdev-fixture-password\nqtenvdev-fixture-password\n")
 		if output, err := cmd.CombinedOutput(); err != nil {
 			t.Fatalf("pure-pw: %v %s", err, output)
 		}
@@ -169,7 +169,7 @@ func TestLinuxFTPRootService(t *testing.T) {
 		login := func(name string) {
 			code := `import ftplib,io,sys
 f=ftplib.FTP(); f.connect('127.0.0.1',int(sys.argv[1]),timeout=5)
-f.login(sys.argv[2],'flyenv-fixture-password'); f.storbinary('STOR '+sys.argv[2]+'.txt',io.BytesIO(b'fixture-upload')); f.quit()`
+f.login(sys.argv[2],'qtenvdev-fixture-password'); f.storbinary('STOR '+sys.argv[2]+'.txt',io.BytesIO(b'fixture-upload')); f.quit()`
 			output, err := exec.Command("/usr/bin/python3", "-c", code, strconv.Itoa(listenPort), name).CombinedOutput()
 			if err != nil {
 				t.Fatalf("FTP login/upload: %v %s", err, output)
@@ -196,7 +196,7 @@ f.login(sys.argv[2],'flyenv-fixture-password'); f.storbinary('STOR '+sys.argv[2]
 			}
 			code := `import ftplib,sys
 f=ftplib.FTP();f.connect('127.0.0.1',int(sys.argv[1]),timeout=10)
-try:f.login('bob','flyenv-fixture-password')
+try:f.login('bob','qtenvdev-fixture-password')
 except ftplib.error_perm:sys.exit(0)
 sys.exit(1)`
 			if output, err := exec.Command("/usr/bin/python3", "-c", code, strconv.Itoa(listenPort)).CombinedOutput(); err != nil {
@@ -217,7 +217,7 @@ sys.exit(1)`
 		if _, _, err = client.ReadResponse(331); err != nil {
 			t.Fatal(err)
 		}
-		client.PrintfLine("PASS flyenv-fixture-password")
+		client.PrintfLine("PASS qtenvdev-fixture-password")
 		if _, _, err = client.ReadResponse(230); err != nil {
 			t.Fatal(err)
 		}
@@ -247,7 +247,7 @@ sys.exit(1)`
 }
 
 func TestLinuxFTPMissingUnit(t *testing.T) {
-	if os.Getenv("FLYENV_TEST_SYSTEMD") != "1" {
+	if os.Getenv("QTENVDEV_TEST_SYSTEMD") != "1" {
 		t.Skip("requires systemd integration environment")
 	}
 	status, err := linuxFTPStatus(linuxPolicy{UID: 90001})

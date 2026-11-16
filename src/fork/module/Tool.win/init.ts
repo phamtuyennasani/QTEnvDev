@@ -25,7 +25,7 @@ type PowerShellProfile = {
 
 type GitBashIntegrationState = 'updated' | 'unchanged' | 'failed'
 
-export type FlyEnvShellInitResult = {
+export type QTEnvDevShellInitResult = {
   status: 'ready' | 'degraded'
   scriptPath: string
   scriptState: 'updated' | 'unchanged'
@@ -39,11 +39,11 @@ type ProfileCandidate = {
   path: string
 }
 
-let initFlyEnvSHInFlight: ForkPromise<FlyEnvShellInitResult> | undefined
+let initQTEnvDevSHInFlight: ForkPromise<QTEnvDevShellInitResult> | undefined
 let executionPolicyRepairInFlight: Promise<void> | undefined
 
 const logShellInitTiming = (details: Record<string, unknown>) => {
-  void writePerformanceLog(appDebugLog, '[Tool.win][initFlyEnvSH][timing]', details)
+  void writePerformanceLog(appDebugLog, '[Tool.win][initQTEnvDevSH][timing]', details)
 }
 
 const measureShellInitStep = async <T>(
@@ -112,7 +112,7 @@ export function initAllowDir(json: string) {
       !Array.isArray(allowedDirectories) ||
       allowedDirectories.some((item) => typeof item !== 'string')
     ) {
-      throw new Error('FlyEnv shell directory list must be an array of paths')
+      throw new Error('QTEnvDev shell directory list must be an array of paths')
     }
     resolve(
       await syncShellDirectories(join(dirname(global.Server.AppDir!), 'bin'), allowedDirectories)
@@ -120,16 +120,16 @@ export function initAllowDir(json: string) {
   })
 }
 
-export function initFlyEnvSH(): ForkPromise<FlyEnvShellInitResult> {
-  if (initFlyEnvSHInFlight) return initFlyEnvSHInFlight
+export function initQTEnvDevSH(): ForkPromise<QTEnvDevShellInitResult> {
+  if (initQTEnvDevSHInFlight) return initQTEnvDevSHInFlight
 
-  const operation = new ForkPromise<FlyEnvShellInitResult>(async (resolve, reject, on) => {
+  const operation = new ForkPromise<QTEnvDevShellInitResult>(async (resolve, reject, on) => {
     const timings: Record<string, number> = {}
     const startedAt = performanceDiagnosticNow()
     let currentStep = 'preparing'
     try {
-      on('Preparing FlyEnv PowerShell integration')
-      const flyenvScriptPath = join(dirname(global.Server.AppDir!), 'bin/flyenv.ps1')
+      on('Preparing QTEnvDev PowerShell integration')
+      const qtenvdevScriptPath = join(dirname(global.Server.AppDir!), 'bin/qtenvdev.ps1')
       const warnings: string[] = []
       currentStep = 'env-sync'
       await measureShellInitStep(timings, currentStep, async () => {
@@ -147,15 +147,15 @@ export function initFlyEnvSH(): ForkPromise<FlyEnvShellInitResult> {
       })
       currentStep = 'read-runtime-script'
       const scriptContent = await measureShellInitStep(timings, currentStep, () =>
-        readFile(join(global.Server.Static!, 'sh/fly-env.ps1'))
+        readFile(join(global.Server.Static!, 'sh/qt-env-dev.ps1'))
       )
-      const gitBashScriptPath = join(dirname(global.Server.AppDir!), 'bin/fly-env.sh')
+      const gitBashScriptPath = join(dirname(global.Server.AppDir!), 'bin/qt-env-dev.sh')
       let gitBashState: GitBashIntegrationState = 'failed'
       try {
         const gitBashScriptContent = await measureShellInitStep(
           timings,
           'read-git-bash-script',
-          () => readFile(join(global.Server.Static!, 'sh/fly-env.sh'))
+          () => readFile(join(global.Server.Static!, 'sh/qt-env-dev.sh'))
         )
         gitBashState = await measureShellInitStep(timings, 'install-git-bash-hook', () =>
           installGitBashIntegration(
@@ -189,11 +189,11 @@ export function initFlyEnvSH(): ForkPromise<FlyEnvShellInitResult> {
         throw new Error('No supported PowerShell profile could be discovered')
       }
 
-      on('Installing FlyEnv shell hook with Helper or UAC fallback')
+      on('Installing QTEnvDev shell hook with Helper or UAC fallback')
       currentStep = 'install-shell-hook'
       const integration: any = await measureShellInitStep(timings, currentStep, () =>
-        Helper.send('tools', 'installFlyEnvPowerShellIntegration', {
-          scriptPath: flyenvScriptPath,
+        Helper.send('tools', 'installQTEnvDevPowerShellIntegration', {
+          scriptPath: qtenvdevScriptPath,
           scriptBase64: Buffer.from(scriptContent).toString('base64'),
           profiles: writableProfiles.map((profile) => ({
             edition: profile.edition,
@@ -203,7 +203,7 @@ export function initFlyEnvSH(): ForkPromise<FlyEnvShellInitResult> {
       )
       const resultProfiles = Array.isArray(integration?.profiles) ? integration.profiles : []
       if (integration?.scriptState !== 'updated' && integration?.scriptState !== 'unchanged') {
-        throw new Error('FlyEnv PowerShell integration did not return a script result')
+        throw new Error('QTEnvDev PowerShell integration did not return a script result')
       }
       for (const profile of profiles) {
         const installed = resultProfiles.find((item: any) => item?.edition === profile.edition)
@@ -211,7 +211,7 @@ export function initFlyEnvSH(): ForkPromise<FlyEnvShellInitResult> {
           profile.state = installed.state
         } else if (profile.path) {
           throw new Error(
-            `FlyEnv PowerShell integration did not return a result for ${profile.edition}`
+            `QTEnvDev PowerShell integration did not return a result for ${profile.edition}`
           )
         }
       }
@@ -222,9 +222,9 @@ export function initFlyEnvSH(): ForkPromise<FlyEnvShellInitResult> {
           .map((profile) => `${profile.edition}: ${profile.reason ?? `profile ${profile.state}`}`)
       )
 
-      const result: FlyEnvShellInitResult = {
+      const result: QTEnvDevShellInitResult = {
         status: warnings.length > 0 ? 'degraded' : 'ready',
-        scriptPath: flyenvScriptPath,
+        scriptPath: qtenvdevScriptPath,
         scriptState: integration.scriptState,
         gitBashState,
         profiles,
@@ -248,13 +248,13 @@ export function initFlyEnvSH(): ForkPromise<FlyEnvShellInitResult> {
       reject(error)
     }
   })
-  initFlyEnvSHInFlight = operation
+  initQTEnvDevSHInFlight = operation
   operation
     .then(() => {
-      if (initFlyEnvSHInFlight === operation) initFlyEnvSHInFlight = undefined
+      if (initQTEnvDevSHInFlight === operation) initQTEnvDevSHInFlight = undefined
     })
     .catch(() => {
-      if (initFlyEnvSHInFlight === operation) initFlyEnvSHInFlight = undefined
+      if (initQTEnvDevSHInFlight === operation) initQTEnvDevSHInFlight = undefined
     })
   return operation
 }

@@ -21,7 +21,7 @@ $Host.UI.RawUI.BackgroundColor = 'Black'
 Clear-Host
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "FlyEnv Command Execution" -ForegroundColor Cyan
+Write-Host "QTEnvDev Command Execution" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

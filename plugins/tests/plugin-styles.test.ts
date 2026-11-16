@@ -53,10 +53,10 @@ app.whenReady().then(async () => {
         PluginStyles.syncPluginStyles([{id:'mysql-cluster',css:css.replace('13px','17px')}])
         result.updated = columns()
         result.updatedPadding = getComputedStyle(extra).paddingTop
-        result.styleCount = document.querySelectorAll('style[data-flyenv-plugin]').length
+        result.styleCount = document.querySelectorAll('style[data-qtenvdev-plugin]').length
         PluginStyles.syncPluginStyles([])
         result.removed = columns()
-        result.removedCount = document.querySelectorAll('style[data-flyenv-plugin]').length
+        result.removedCount = document.querySelectorAll('style[data-qtenvdev-plugin]').length
         PluginStyles.syncPluginStyles([{id:'mysql-cluster',css},{id:'mariadb-cluster',css}])
         result.reenabled = columns()
         return result

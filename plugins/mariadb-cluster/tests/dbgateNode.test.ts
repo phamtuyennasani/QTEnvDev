@@ -37,7 +37,7 @@ async function fixture() {
           b.onLoad({ filter: /.*/, namespace: 'fixture' }, (a) => {
             const code: Record<string, string> = {
               '@/store/brew': `export const BrewStore=()=>({currentVersion(){throw Error('Must not change selected runtime')},module(flag){if(flag!=='node')throw Error(flag);return {get installed(){return globalThis.__dbgateNode.installed},async fetchInstalled(){const s=globalThis.__dbgateNode;s.loads++;if(s.fail)return false;if(s.wait)await s.wait;s.installed=s.versions??[{bin:'/node24',path:'/preferred',version:'24',enable:true}];return true}}}})`,
-              '@/store/app': `export const AppStore=()=>{const s=globalThis.__dbgateNode;s.storeReads++;if(!s.ready)throw Error('FlyEnv plugin AppStore is not initialized');return {config:{server:{node:{get current(){return s.selected}}}}}}`,
+              '@/store/app': `export const AppStore=()=>{const s=globalThis.__dbgateNode;s.storeReads++;if(!s.ready)throw Error('QTEnvDev plugin AppStore is not initialized');return {config:{server:{node:{get current(){return s.selected}}}}}}`,
               '@/util/NodeFn': 'export const shell={openExternal:async()=>{}}',
               '@lang/index': `export const I18nT=x=>x`,
               './manager': `export const MariadbClusterManager={snapshots:{a:{state:'running'}},allBusy:false,operations:{}}`,

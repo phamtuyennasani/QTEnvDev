@@ -4,10 +4,10 @@
 
 AI Memory 的 MCP 调用同时产生两类记录：
 
-1. FlyEnv MCP 的 `mcp/audit.log` 持久化简版审计，便于统一查看客户端调用。
+1. QTEnvDev MCP 的 `mcp/audit.log` 持久化简版审计，便于统一查看客户端调用。
 2. AI Memory 新增「调用记录」顶级 Tab，展示详细的内存日志，用于搜索优化、调试和结果验证。
 
-详细日志保留搜索词和记忆摘要，但完整记忆正文 `content` 必须排除。详细日志不持久化，FlyEnv 退出后清空。
+详细日志保留搜索词和记忆摘要，但完整记忆正文 `content` 必须排除。详细日志不持久化，QTEnvDev 退出后清空。
 
 ## 架构与归属
 
@@ -32,7 +32,7 @@ AI Memory 的 MCP 调用同时产生两类记录：
 
 ## 详细调用记录
 
-覆盖 `flyenv_memory_search`、`get`、`store`、`update` 和 `forget` 的全部调用终态。
+覆盖 `qtenvdev_memory_search`、`get`、`store`、`update` 和 `forget` 的全部调用终态。
 
 通用字段包括时间、工具名、插件 ID、客户端、耗时、结果、错误码，以及安全的结果元数据。
 
@@ -61,7 +61,7 @@ AI Memory 的 MCP 调用同时产生两类记录：
 - 表格展示时间、操作、客户端、结果、耗时和命中数。
 - 每行可展开查看结构化详情，搜索词、过滤条件、结果摘要和错误码应可直接检查。
 - 进入 Tab 时加载，支持手动刷新。
-- 明确提示日志仅在本次 FlyEnv 运行期间保留。
+- 明确提示日志仅在本次 QTEnvDev 运行期间保留。
 - 删除维护页旧「最近诊断」区域，保留并复用 `plugin:diagnostics` IPC 作为新 Tab 的数据源。
 
 不增加自动刷新定时器、持久化、导出或独立清理流程。

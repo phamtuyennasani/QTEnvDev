@@ -4,7 +4,7 @@
   "inputTips": "//Εισαγωγή JSON, JavaScript Αντικείμενο/Array, PHP Array, URL, XML, YAML, PList. Αυτόματη μετατροπή σε επιλεγμένη μορφή",
   "parseFailTips": "Αποτυχία ανάλυσης",
   "inputCheckFailTips": "Απροσδιόριστο",
-  "systemProxyCheck": "Εντοπίστηκε ότι το δίκτυο χρησιμοποιεί έναν διαμεσολαβητή, είναι FlyEnv set to use this proxy?",
+  "systemProxyCheck": "Εντοπίστηκε ότι το δίκτυο χρησιμοποιεί έναν διαμεσολαβητή, είναι QTEnvDev set to use this proxy?",
   "systemProxyUsed": "Επιτυχής ρύθμιση. Αν θέλετε να την τροποποιήσετε, παρακαλώ κάντε το στις Ρυθμίσεις->Ρυθμίσεις Διαμεσολαβητή.",
   "windowCount": "Αρίθμηση Παραθύρου",
   "codemake": "Δημιουργία Κώδικα",

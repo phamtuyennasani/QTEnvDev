@@ -30,7 +30,7 @@
       <div class="flex-1 flex h-full overflow-hidden">
         <ASideVM />
         <div class="flex-1 h-full overflow-hidden flex flex-col">
-          <template v-if="AISetup.tab === 'flyenv'">
+          <template v-if="AISetup.tab === 'qtenvdev'">
             <Main />
             <Tool ref="toolRef" />
           </template>
@@ -98,7 +98,7 @@
   }
 
   const doClean = () => {
-    if (AISetup.tab === 'flyenv') {
+    if (AISetup.tab === 'qtenvdev') {
       aiStore.chatList.splice(0)
     } else {
       currentChat?.value?.chatList?.splice(0)

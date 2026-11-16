@@ -378,7 +378,7 @@ X-GNOME-Autostart-enabled=true`
   private async windowsAutoLaunch(autoLaunch: boolean) {
     const exePath = app.getPath('exe')
     console.log('exePath: ', exePath)
-    const taskName = 'FlyEnvStartup'
+    const taskName = 'QTEnvDevStartup'
     // 关闭自启动也可能被策略拒绝；保留错误，不能仅因目标值是 false 就报告成功。
     await Helper.send('tools', 'setAutoStartWin', autoLaunch, taskName, exePath)
     return true

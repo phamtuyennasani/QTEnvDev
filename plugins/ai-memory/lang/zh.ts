@@ -162,7 +162,7 @@ export default {
   connectAddMcp: '添加 MCP 连接',
   connectTransport: '连接方式',
   connectHttpHelp: '在客户端的用户级（全局）MCP 设置中添加服务并粘贴配置；字段名称以客户端为准。',
-  connectStdioHelp: '适用于仅支持 stdio 的客户端，需要本机 Node.js 和 FlyEnv 桥接文件。',
+  connectStdioHelp: '适用于仅支持 stdio 的客户端，需要本机 Node.js 和 QTEnvDev 桥接文件。',
   connectKeepRunning: '配置包含访问令牌，请勿公开分享。',
   connectAddRules: '添加记忆规则',
   connectGenericRulesHelp: '优先追加到客户端的全局指令文件；不支持时再使用项目指令文件。',
@@ -258,7 +258,7 @@ export default {
   setup: '接入与维护',
   mcpSettings: '打开 MCP 设置',
   setupHelp:
-    '打开 MCP 设置，启动 HTTP 服务，启用五个 flyenv_memory 记忆工具并选择审批方式，然后返回这里检查状态。',
+    '打开 MCP 设置，启动 HTTP 服务，启用五个 qtenvdev_memory 记忆工具并选择审批方式，然后返回这里检查状态。',
   configureCodex: '配置 Codex',
   configureKimi: '配置 Kimi',
   configured: '客户端配置已写入，请重连并验证工具。',
@@ -271,7 +271,7 @@ export default {
   actionFailed: '此操作失败，其他已完成操作不受影响。',
   calls: '调用记录',
   callsHelp:
-    '详细记录记忆工具调用、搜索词、过滤条件和命中摘要，用于调试与验证。完整正文不会记录；日志仅保留在内存中，退出 FlyEnv 后清空。',
+    '详细记录记忆工具调用、搜索词、过滤条件和命中摘要，用于调试与验证。完整正文不会记录；日志仅保留在内存中，退出 QTEnvDev 后清空。',
   duration: '耗时',
   request: '请求参数',
   response: '返回结果',
@@ -283,7 +283,7 @@ export default {
   backupHelp:
     '先在插件管理中停用本插件，等待停用完成（worker 必须实际退出）。复制整个数据目录，包含 projects.json、projects.previous.json、global 和 projects。恢复前先保留当前目录副本，保持停用状态，恢复一份完整且一致的备份。若只修复映射，先校验 projects.previous.json，再明确将其复制为 projects.json；重新启用后检查未映射的项目 ID。不要猜测映射或删除未匹配目录。',
   lifecycleHelp:
-    '项目搬家后按新项目处理，旧项目仍可按 ID 管理。记忆工具需要 FlyEnv 运行。删除不会清除外部备份。',
+    '项目搬家后按新项目处理，旧项目仍可按 ID 管理。记忆工具需要 QTEnvDev 运行。删除不会清除外部备份。',
   record_not_found: '找不到记忆',
   project_unregistered: '项目尚未登记',
   invalid_input: '请检查必填字段、长度和时间格式。',
@@ -319,7 +319,7 @@ export default {
   contentHelp: '填写需要保留的事实、决策或经验，支持 Markdown。',
   reasonHelp: '说明本次修改了什么、为什么修改。',
   topicHelp: '留空时使用标题。',
-  manualSource: '用户在 FlyEnv 中手动录入。',
+  manualSource: '用户在 QTEnvDev 中手动录入。',
   bodyTooLarge: '正文超过 16 KiB，请缩短后保存。',
   reloadLatest: '读取最新版本（替换当前草稿）',
   connectIntro: '让 Codex 和 Kimi 共享项目记忆。为需要使用的客户端完成以下接入步骤。',
@@ -347,7 +347,7 @@ export default {
   downloadFailed: '文件保存失败，请更换位置后重试。',
   verifyStep: '4. 在 Agent 中验证',
   verificationPrompt:
-    '请使用 FlyEnv 记忆工具，为当前项目记住“这是一条连接测试”。保存后再读回这条记忆，告诉我实际返回的记忆 ID 和版本。如果无法确定项目根目录，请先向我确认。',
+    '请使用 QTEnvDev 记忆工具，为当前项目记住“这是一条连接测试”。保存后再读回这条记忆，告诉我实际返回的记忆 ID 和版本。如果无法确定项目根目录，请先向我确认。',
   verificationHelp:
     '复制以下请求，在项目中的新 Codex 或 Kimi 会话发送。成功保存并读回，才能确认该会话可以使用记忆。',
   copyVerification: '复制测试请求',
@@ -359,7 +359,7 @@ export default {
   client: '客户端',
   result: '结果',
   hits: '命中数',
-  noCalls: '本次 FlyEnv 运行尚未观测到调用，请在 Agent 中使用记忆工具后刷新。',
+  noCalls: '本次 QTEnvDev 运行尚未观测到调用，请在 Agent 中使用记忆工具后刷新。',
   backupStop: '在插件管理中停用 AI 记忆，等待停用完成。',
   backupCopy: '打开数据目录，将整个目录复制到备份位置。',
   backupRestore:

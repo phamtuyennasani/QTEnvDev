@@ -2,7 +2,7 @@
   "podmanInstall": "Instaliraj Podman",
   "installPodmanByHomebrew": "Instaliraj Podman putem Homebrewa",
   "noPodmanFound": "Nije detektiran <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a>.\nZa instalaciju Podmana, možete kliknuti gumb za instalaciju.\nMožete i kliknuti na ovu vezu\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\ni slijediti dokumentaciju za ručnu instalaciju.",
-  "podmanErrorTips": "Na lokaciji {bin}, detektirana je Podman izvršna datoteka.\nAli FlyEnv ne može je pozvati. Poruka greške:\n{error}",
+  "podmanErrorTips": "Na lokaciji {bin}, detektirana je Podman izvršna datoteka.\nAli QTEnvDev ne može je pozvati. Poruka greške:\n{error}",
   "removeContainerTips": "Jeste li sigurni da želite ukloniti ovaj kontejner?",
   "removeMachineTips": "Jeste li sigurni da želite ukloniti ovaj virtualni stroj?",
   "removeImageTips": "Jeste li sigurni da želite ukloniti ovu sliku?",

@@ -34,7 +34,7 @@ const (
 	// v34：服务请求携带完整有序 PID 和后代创建身份，用原句柄父先子后结束，取消 /T。
 	// v35：完整 PID 集合一次停止请求，移除逐 PID 的阻塞等待，保留原身份/句柄预检。
 	// v36：系统环境写入后非阻塞安排后台广播，合并待处理通知，不等待窗口响应。
-	// v37：取消 Helper 内提前通知，由 FlyEnv 环境业务结算后统一广播，避免重复通知。
+	// v37：取消 Helper 内提前通知，由 QTEnvDev 环境业务结算后统一广播，避免重复通知。
 	// v43: Unix operations no longer constrain user-managed system directory permissions.
 	// v44: CA lookup/import is independent of Helper installation and health.
 	// v45: Unix FTP consumes ordinary-account input snapshots and preserves supplementary groups.
@@ -44,13 +44,13 @@ const (
 	// v49: Unix directories accept user-managed ownership, modes and ACLs.
 	// v50: Windows environment values accept junctions and preserve literal percent paths.
 	Helper_Version   = 50
-	Role_Path        = "/tmp/flyenv.role"
-	Role_Path_Back   = "/usr/local/share/FlyEnv/flyenv.role"
-	Key_Path_Unix    = "/usr/local/share/FlyEnv/flyenv-helper.key"
+	Role_Path        = "/tmp/qtenvdev.role"
+	Role_Path_Back   = "/usr/local/share/QTEnvDev/qtenvdev.role"
+	Key_Path_Unix    = "/usr/local/share/QTEnvDev/qtenvdev-helper.key"
 	READ_BUFFER_SIZE = 4096 // Buffer size for reading from socket
 )
 
-var SOCKET_PATH = "/tmp/flyenv-helper.sock"
+var SOCKET_PATH = "/tmp/qtenvdev-helper.sock"
 var rolePattern = regexp.MustCompile(`^([0-9]+):([0-9]+)$`)
 
 type helperRuntimeConfig struct {
@@ -62,7 +62,7 @@ type helperRuntimeConfig struct {
 var runtimeConfig helperRuntimeConfig
 
 func parseHelperRuntimeConfig(args []string) (helperRuntimeConfig, error) {
-	flags := flag.NewFlagSet("flyenv-helper", flag.ContinueOnError)
+	flags := flag.NewFlagSet("qtenvdev-helper", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	config := helperRuntimeConfig{}
 	flags.StringVar(&config.InstanceID, "instance-id", "", "target helper instance ID")
@@ -274,7 +274,7 @@ func readAllowedRole() (roleInfo, error) {
 		}
 		fmt.Printf("Warning: ignoring invalid primary role file '%s': %v\n", Role_Path, err)
 	}
-	return roleInfo{}, fmt.Errorf("no valid FlyEnv role file found")
+	return roleInfo{}, fmt.Errorf("no valid QTEnvDev role file found")
 }
 
 func ensureSecureDir(path string) error {
@@ -693,7 +693,7 @@ func (a *AppHelper) setupUnixPermissions() {
 	if err != nil {
 		fmt.Printf("Warning: failed to read valid role for socket permissions: %v\n", err)
 	} else {
-		fmt.Printf("Read FlyEnv role: '%s'\n", role.Raw)
+		fmt.Printf("Read QTEnvDev role: '%s'\n", role.Raw)
 		if err := writeFileNoSymlink(Role_Path_Back, []byte(role.Raw), 0644); err != nil {
 			fmt.Printf("Warning: failed to write role file backup '%s': %v\n", Role_Path_Back, err)
 		}
@@ -894,33 +894,33 @@ func (a *AppHelper) handleClient(conn net.Conn) {
 					} else {
 						execErr = fmt.Errorf("writeBufferBase64ByRoot expects 2 arguments, got %d", len(info.Args))
 					}
-				case "installFlyEnvPowerShellIntegration":
+				case "installQTEnvDevPowerShellIntegration":
 					if len(info.Args) != 1 {
-						execErr = fmt.Errorf("installFlyEnvPowerShellIntegration expects 1 argument, got %d", len(info.Args))
+						execErr = fmt.Errorf("installQTEnvDevPowerShellIntegration expects 1 argument, got %d", len(info.Args))
 						break
 					}
 					payload, marshalErr := json.Marshal(info.Args[0])
 					if marshalErr != nil {
-						execErr = fmt.Errorf("installFlyEnvPowerShellIntegration: invalid payload: %w", marshalErr)
+						execErr = fmt.Errorf("installQTEnvDevPowerShellIntegration: invalid payload: %w", marshalErr)
 						break
 					}
-					var request module.FlyEnvPowerShellIntegrationRequest
+					var request module.QTEnvDevPowerShellIntegrationRequest
 					if unmarshalErr := json.Unmarshal(payload, &request); unmarshalErr != nil {
-						execErr = fmt.Errorf("installFlyEnvPowerShellIntegration: invalid request: %w", unmarshalErr)
+						execErr = fmt.Errorf("installQTEnvDevPowerShellIntegration: invalid request: %w", unmarshalErr)
 						break
 					}
-					result, execErr = a.Tool.InstallFlyEnvPowerShellIntegration(request)
-				case "ensureFlyEnvDataDirectory":
+					result, execErr = a.Tool.InstallQTEnvDevPowerShellIntegration(request)
+				case "ensureQTEnvDevDataDirectory":
 					if len(info.Args) != 1 {
-						execErr = fmt.Errorf("ensureFlyEnvDataDirectory expects 1 argument, got %d", len(info.Args))
+						execErr = fmt.Errorf("ensureQTEnvDevDataDirectory expects 1 argument, got %d", len(info.Args))
 						break
 					}
 					dataDirectory, ok := info.Args[0].(string)
 					if !ok {
-						execErr = fmt.Errorf("ensureFlyEnvDataDirectory: arg[0] must be a string, got %T", info.Args[0])
+						execErr = fmt.Errorf("ensureQTEnvDevDataDirectory: arg[0] must be a string, got %T", info.Args[0])
 						break
 					}
-					result, execErr = a.Tool.EnsureFlyEnvDataDirectory(dataDirectory)
+					result, execErr = a.Tool.EnsureQTEnvDevDataDirectory(dataDirectory)
 				case "readFileByRoot":
 					if len(info.Args) == 1 {
 						if file, ok := info.Args[0].(string); ok {

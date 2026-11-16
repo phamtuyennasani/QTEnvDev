@@ -18,7 +18,7 @@
   "sourcePath": "Đường dẫn hệ thống (PATH)",
   "sourceDefault": "Vị trí SDK mặc định",
   "sourceCustom": "Đường dẫn tùy chỉnh đã cấu hình",
-  "sourceFlyenv": "SDK được quản lý bởi FlyEnv",
+  "sourceQTEnvDev": "SDK được quản lý bởi QTEnvDev",
   "sourceUnknown": "Không xác định",
   "createProjectTitle": "Tạo dự án Flutter",
   "create": "Tạo",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Một module Flutter để nhúng vào ứng dụng Android/iOS hiện có.",
   "templateSkeletonDesc": "Một ứng dụng Flutter dạng danh sách/chi tiết với Material 3 và Navigation 2.0.",
   "androidSdkNotDetected": "Không phát hiện Android SDK",
-  "androidSdkInstallHint": "FlyEnv không tự động cài đặt Android SDK. Hãy cài SDK bằng Android Studio hoặc bộ công cụ dòng lệnh chính thức của Android.",
+  "androidSdkInstallHint": "QTEnvDev không tự động cài đặt Android SDK. Hãy cài SDK bằng Android Studio hoặc bộ công cụ dòng lệnh chính thức của Android.",
   "installAndroidStudio": "Cài đặt Android Studio",
   "androidCommandLineTools": "Công cụ dòng lệnh Android",
-  "androidSdkAfterInstall": "Sau khi cài SDK, quay lại FlyEnv, nhấp Làm mới rồi dùng tính năng tự động sửa lỗi (Auto-fix) để cấu hình môi trường."
+  "androidSdkAfterInstall": "Sau khi cài SDK, quay lại QTEnvDev, nhấp Làm mới rồi dùng tính năng tự động sửa lỗi (Auto-fix) để cấu hình môi trường."
 }

@@ -53,5 +53,5 @@ const tools = new MCPTools(
   { getConfig: () => false } as any
 )
 
-await assert.rejects(() => tools.startService('bun'), /not a lifecycle-managed FlyEnv service/i)
-await assert.rejects(() => tools.getServiceExecInfo('dns'), /not a version-managed FlyEnv module/i)
+await assert.rejects(() => tools.startService('bun'), /not a lifecycle-managed QTEnvDev service/i)
+await assert.rejects(() => tools.getServiceExecInfo('dns'), /not a version-managed QTEnvDev module/i)

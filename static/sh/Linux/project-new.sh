@@ -23,19 +23,19 @@ if ! command -v composer &> /dev/null; then
     fi
 
     cd "$projectdir" || exit 1
-    "$cachedir"/composer.phar create-project --prefer-dist "$frameworkname" "flyenv-created-project" "$version"
+    "$cachedir"/composer.phar create-project --prefer-dist "$frameworkname" "qtenvdev-created-project" "$version"
 else
     #command exists
     echo "composer exists"
     composer self-update
     cd "$projectdir" || exit 1
-    composer create-project --prefer-dist "$frameworkname" "flyenv-created-project" "$version"
+    composer create-project --prefer-dist "$frameworkname" "qtenvdev-created-project" "$version"
 fi
 
-cd flyenv-created-project || exit 1
+cd qtenvdev-created-project || exit 1
 for item in ./* ./.[!.]* ./..?*; do
   [ -e "$item" ] || [ -L "$item" ] || continue
   mv "$item" ../ || exit 1
 done
 cd ../ || exit 1
-rm -rf flyenv-created-project
+rm -rf qtenvdev-created-project

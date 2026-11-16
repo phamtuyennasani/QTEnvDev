@@ -62,7 +62,7 @@ const withoutContent = (value: any): any => {
 }
 
 const requestFields: Record<string, string[]> = {
-  flyenv_memory_search: [
+  qtenvdev_memory_search: [
     'scope',
     'project_path',
     'queries',
@@ -75,8 +75,8 @@ const requestFields: Record<string, string[]> = {
     'limit',
     'cursor'
   ],
-  flyenv_memory_get: ['scope', 'project_path', 'id', 'revision'],
-  flyenv_memory_store: [
+  qtenvdev_memory_get: ['scope', 'project_path', 'id', 'revision'],
+  qtenvdev_memory_store: [
     'scope',
     'project_path',
     'type',
@@ -92,7 +92,7 @@ const requestFields: Record<string, string[]> = {
     'request_id',
     'create_project'
   ],
-  flyenv_memory_update: [
+  qtenvdev_memory_update: [
     'scope',
     'project_path',
     'id',
@@ -101,7 +101,7 @@ const requestFields: Record<string, string[]> = {
     'reason',
     'changes'
   ],
-  flyenv_memory_forget: ['scope', 'project_path', 'id', 'expected_revision', 'request_id']
+  qtenvdev_memory_forget: ['scope', 'project_path', 'id', 'expected_revision', 'request_id']
 }
 
 const requestSnapshot = (tool: string, args: any) => {
@@ -110,7 +110,7 @@ const requestSnapshot = (tool: string, args: any) => {
       .filter((key) => key !== 'cursor' && args?.[key] !== undefined)
       .map((key) => [key, withoutContent(args[key])])
   )
-  if (tool === 'flyenv_memory_search' && args?.cursor !== undefined) snapshot.cursor_provided = true
+  if (tool === 'qtenvdev_memory_search' && args?.cursor !== undefined) snapshot.cursor_provided = true
   return snapshot
 }
 
@@ -130,7 +130,7 @@ const responseSnapshot = (tool: string, result: any) => {
     ...(detailed && result?.warnings !== undefined ? { warnings: result.warnings } : {}),
     ...(result?.isError !== undefined ? { isError: result.isError === true } : {})
   })
-  if (tool === 'flyenv_memory_search' && snapshot.data?.next_cursor !== undefined) {
+  if (tool === 'qtenvdev_memory_search' && snapshot.data?.next_cursor !== undefined) {
     snapshot.data.has_next_cursor = true
     delete snapshot.data.next_cursor
   }
@@ -179,7 +179,7 @@ export class PluginMCPAudit {
         ? result.error_code
         : 'operation_failed'
     if (input.client) {
-      const name = ['codex', 'kimi', 'claude', 'claude-code', 'flyenv'].includes(
+      const name = ['codex', 'kimi', 'claude', 'claude-code', 'qtenvdev'].includes(
         input.client.name?.toLowerCase() ?? ''
       )
         ? input.client.name!.toLowerCase()

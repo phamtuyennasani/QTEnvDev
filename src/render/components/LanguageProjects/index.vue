@@ -450,7 +450,7 @@
   })
 
   const toLicense = () => {
-    setupStore.tab = 'licenses'
+    setupStore.tab = 'module'
     appStore.currentPage = '/setup'
     Router.push({
       path: '/setup'
@@ -502,7 +502,7 @@
 
   const showConfig = (item: ProjectItem) => {
     AsyncComponentShow(ConfigVM, {
-      file: join(item.path, '.flyenv'),
+      file: join(item.path, '.qtenvdev'),
       fileExt: 'ps1',
       typeFlag: props.typeFlag
     }).then()

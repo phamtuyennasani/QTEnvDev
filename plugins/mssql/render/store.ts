@@ -8,7 +8,7 @@ import { MssqlT } from './lang'
 import { isStrongSaPassword } from '../fork/Mssql/version'
 import { canRepairWindowsPermissions } from '../fork/Mssql/Permissions'
 
-const storageKey = 'flyenv-mssql-settings'
+const storageKey = 'qtenvdev-mssql-settings'
 
 export type MssqlSettings = {
   saPassword: string

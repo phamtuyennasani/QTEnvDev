@@ -26,7 +26,7 @@ const compiled =
     .replace(/^export\s+/gm, '') + '\nthis.androidMethods = androidMethods;'
 
 async function fixture(macOS: boolean) {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-flutter-android-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-flutter-android-'))
   const home = join(root, 'home')
   const sdkDir = join(root, 'Android', 'Sdk')
   const platformToolsDir = join(sdkDir, 'platform-tools')

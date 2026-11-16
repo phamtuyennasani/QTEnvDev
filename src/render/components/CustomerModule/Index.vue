@@ -1,5 +1,5 @@
 <template>
-  <div class="soft-index-panel main-right-panel">
+  <div class="soft-index-panel main-right-panel app-workbench-page">
     <el-radio-group v-model="tab" class="mt-3">
       <template v-for="(item, _index) in tabs" :key="_index">
         <el-radio-button :label="item.label" :value="_index"></el-radio-button>

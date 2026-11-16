@@ -34,15 +34,15 @@ export const DBGATE_PACKAGE = 'dbgate-serve'
 export const DBGATE_DEFAULT_PORT = 3000
 export const DBGATE_PORT_SCAN_COUNT = 20
 export const DBGATE_MAX_PORT = 65535
-export const DBGATE_LOGIN = 'flyenv'
+export const DBGATE_LOGIN = 'qtenvdev'
 const DBGATE_STARTUP_LOG_TAIL_LENGTH = 4_000
-const DBGATE_UPSTREAM_DEBUG_MARKER = 'FLYENV_DBGATE_UPSTREAM_DEBUG_V1'
+const DBGATE_UPSTREAM_DEBUG_MARKER = 'QTENVDEV_DBGATE_UPSTREAM_DEBUG_V1'
 const DBGATE_HEALTH_ATTEMPTS = 30
 const DBGATE_HEALTH_INTERVAL_MILLISECONDS = 1000
 
 export function dbGateInstallManifest() {
   return {
-    name: 'flyenv-dbgate',
+    name: 'qtenvdev-dbgate',
     private: true,
     dependencies: { [DBGATE_PACKAGE]: 'latest' },
     overrides: { 'dbgate-pg-dumper': '1.0.0' }
@@ -225,19 +225,19 @@ export class DbGateRuntime {
     const apiDir = join(paths.root, 'node_modules', 'dbgate-api', 'src')
     const serveEntry = paths.entry
     const debugFile = join(paths.log, 'dbgate.upstream.debug.log')
-    const debugModule = join(apiDir, 'flyenvDebug.js')
+    const debugModule = join(apiDir, 'qtenvdevDebug.js')
     const debugSource = `/* ${DBGATE_UPSTREAM_DEBUG_MARKER} */
 const fs = require('fs');
 const path = require('path');
-const debugPath = process.env.DBGATE_FLYENV_DEBUG_FILE;
+const debugPath = process.env.DBGATE_QTENVDEV_DEBUG_FILE;
 function errorData(error) {
   if (!error) return error;
   return { name: error.name, code: error.code, message: error.message, stack: error.stack };
 }
 function debug(stage, details) {
-  if (process.env.DBGATE_FLYENV_DEBUG !== '1') return;
+  if (process.env.DBGATE_QTENVDEV_DEBUG !== '1') return;
   const record = { time: Date.now(), pid: process.pid, stage, details };
-  const line = '[DbGateFlyEnv] ' + stage + ' ' + JSON.stringify(record);
+  const line = '[DbGateQTEnvDev] ' + stage + ' ' + JSON.stringify(record);
   try { console.log(line); } catch {}
   if (debugPath) {
     try {
@@ -247,7 +247,7 @@ function debug(stage, details) {
   }
 }
 debug.errorData = errorData;
-global.__FLYENV_DBGATE_DEBUG = debug;
+global.__QTENVDEV_DBGATE_DEBUG = debug;
 process.on('uncaughtExceptionMonitor', error => debug('process.uncaughtException', errorData(error)));
 process.on('unhandledRejection', reason => debug('process.unhandledRejection', errorData(reason)));
 process.on('beforeExit', code => debug('process.beforeExit', { code }));
@@ -256,12 +256,12 @@ debug('process.loaded', { cwd: process.cwd(), argv: process.argv.slice(1), node:
 `
     await mkdirp(paths.log)
     await writeFile(debugModule, debugSource)
-    await writeFile(join(dirname(serveEntry), 'flyenvDebug.js'), debugSource)
+    await writeFile(join(dirname(serveEntry), 'qtenvdevDebug.js'), debugSource)
 
     const patchFile = async (
       file: string,
       replacements: Array<[string, string]>,
-      debugRequire = './flyenvDebug'
+      debugRequire = './qtenvdevDebug'
     ) => {
       if (!existsSync(file)) return
       let source = await readFile(file, 'utf8')
@@ -286,45 +286,45 @@ debug('process.loaded', { cwd: process.cwd(), argv: process.argv.slice(1), node:
     await patchFile(join(apiDir, 'index.js'), [
       [
         'if (processArgs.listenApi) {\\n  configureLogger();',
-        "if (processArgs.listenApi) {\\n  global.__FLYENV_DBGATE_DEBUG?.('api.configureLogger.begin');\\n  configureLogger();\\n  global.__FLYENV_DBGATE_DEBUG?.('api.configureLogger.done');"
+        "if (processArgs.listenApi) {\\n  global.__QTENVDEV_DBGATE_DEBUG?.('api.configureLogger.begin');\\n  configureLogger();\\n  global.__QTENVDEV_DBGATE_DEBUG?.('api.configureLogger.done');"
       ],
       [
         '  main.start();',
-        "  global.__FLYENV_DBGATE_DEBUG?.('api.main.start.begin');\\n  main.start();\\n  global.__FLYENV_DBGATE_DEBUG?.('api.main.start.returned');"
+        "  global.__QTENVDEV_DBGATE_DEBUG?.('api.main.start.begin');\\n  main.start();\\n  global.__QTENVDEV_DBGATE_DEBUG?.('api.main.start.returned');"
       ]
     ])
     await patchFile(join(apiDir, 'main.js'), [
       [
         "function start() {\\n  // console.log('process.argv', process.argv);",
-        "function start() {\\n  global.__FLYENV_DBGATE_DEBUG?.('main.start.begin', { cwd: process.cwd(), workspace: process.env.WORKSPACE_DIR, requestedPort: process.env.PORT });\\n  // console.log('process.argv', process.argv);"
+        "function start() {\\n  global.__QTENVDEV_DBGATE_DEBUG?.('main.start.begin', { cwd: process.cwd(), workspace: process.env.WORKSPACE_DIR, requestedPort: process.env.PORT });\\n  // console.log('process.argv', process.argv);"
       ],
       [
         '  const app = express();',
-        "  const app = express();\\n  global.__FLYENV_DBGATE_DEBUG?.('main.express.created');"
+        "  const app = express();\\n  global.__QTENVDEV_DBGATE_DEBUG?.('main.express.created');"
       ],
       [
         '  const server = http.createServer(app);',
-        "  const server = http.createServer(app);\\n  server.on('error', error => global.__FLYENV_DBGATE_DEBUG?.('main.server.error', global.__FLYENV_DBGATE_DEBUG.errorData(error)));\\n  server.on('listening', () => global.__FLYENV_DBGATE_DEBUG?.('main.server.listening.event', server.address()));\\n  server.on('close', () => global.__FLYENV_DBGATE_DEBUG?.('main.server.close'));"
+        "  const server = http.createServer(app);\\n  server.on('error', error => global.__QTENVDEV_DBGATE_DEBUG?.('main.server.error', global.__QTENVDEV_DBGATE_DEBUG.errorData(error)));\\n  server.on('listening', () => global.__QTENVDEV_DBGATE_DEBUG?.('main.server.listening.event', server.address()));\\n  server.on('close', () => global.__QTENVDEV_DBGATE_DEBUG?.('main.server.close'));"
       ],
       [
         '  useAllControllers(app, null);',
-        "  global.__FLYENV_DBGATE_DEBUG?.('main.controllers.register.begin');\\n  useAllControllers(app, null);\\n  global.__FLYENV_DBGATE_DEBUG?.('main.controllers.register.done');"
+        "  global.__QTENVDEV_DBGATE_DEBUG?.('main.controllers.register.begin');\\n  useAllControllers(app, null);\\n  global.__QTENVDEV_DBGATE_DEBUG?.('main.controllers.register.done');"
       ],
       [
         '  } else if (platformInfo.isNpmDist) {\\n    getPort({',
-        "  } else if (platformInfo.isNpmDist) {\\n    global.__FLYENV_DBGATE_DEBUG?.('main.port.resolve.begin', { requestedPort: process.env.PORT });\\n    getPort({"
+        "  } else if (platformInfo.isNpmDist) {\\n    global.__QTENVDEV_DBGATE_DEBUG?.('main.port.resolve.begin', { requestedPort: process.env.PORT });\\n    getPort({"
       ],
       [
         '    }).then(port => {\\n      server.listen(port, () => {',
-        "    }).then(port => {\\n      global.__FLYENV_DBGATE_DEBUG?.('main.port.resolve.done', { port });\\n      server.listen(port, () => {"
+        "    }).then(port => {\\n      global.__QTENVDEV_DBGATE_DEBUG?.('main.port.resolve.done', { port });\\n      server.listen(port, () => {"
       ],
       [
         '        logger.info(`DBGM-00031 DbGate API listening on port ${port} (NPM build)`);',
-        "        logger.info(`DBGM-00031 DbGate API listening on port ${port} (NPM build)`);\\n        global.__FLYENV_DBGATE_DEBUG?.('main.server.listen.callback', { port, address: server.address() });"
+        "        logger.info(`DBGM-00031 DbGate API listening on port ${port} (NPM build)`);\\n        global.__QTENVDEV_DBGATE_DEBUG?.('main.server.listen.callback', { port, address: server.address() });"
       ],
       [
         '  startCloudFiles();',
-        "  global.__FLYENV_DBGATE_DEBUG?.('main.cloudFiles.begin');\\n  const cloudFilesResult = startCloudFiles();\\n  if (cloudFilesResult && typeof cloudFilesResult.catch === 'function') cloudFilesResult.catch(error => global.__FLYENV_DBGATE_DEBUG?.('main.cloudFiles.error', global.__FLYENV_DBGATE_DEBUG.errorData(error)));\\n  global.__FLYENV_DBGATE_DEBUG?.('main.cloudFiles.returned');"
+        "  global.__QTENVDEV_DBGATE_DEBUG?.('main.cloudFiles.begin');\\n  const cloudFilesResult = startCloudFiles();\\n  if (cloudFilesResult && typeof cloudFilesResult.catch === 'function') cloudFilesResult.catch(error => global.__QTENVDEV_DBGATE_DEBUG?.('main.cloudFiles.error', global.__QTENVDEV_DBGATE_DEBUG.errorData(error)));\\n  global.__QTENVDEV_DBGATE_DEBUG?.('main.cloudFiles.returned');"
       ]
     ])
     await patchFile(
@@ -332,22 +332,22 @@ debug('process.loaded', { cwd: process.cwd(), argv: process.argv.slice(1), node:
       [
         [
           '      controller._init();',
-          "      const initResult = controller._init();\\n      global.__FLYENV_DBGATE_DEBUG?.('controller.init.returned', { route, thenable: !!initResult && typeof initResult.then === 'function' });\\n      if (initResult && typeof initResult.then === 'function') {\\n        initResult.then(() => global.__FLYENV_DBGATE_DEBUG?.('controller.init.done', { route })).catch(error => {\\n          global.__FLYENV_DBGATE_DEBUG?.('controller.init.error', { route, error: global.__FLYENV_DBGATE_DEBUG.errorData(error) });\\n          throw error;\\n        });\\n      }"
+          "      const initResult = controller._init();\\n      global.__QTENVDEV_DBGATE_DEBUG?.('controller.init.returned', { route, thenable: !!initResult && typeof initResult.then === 'function' });\\n      if (initResult && typeof initResult.then === 'function') {\\n        initResult.then(() => global.__QTENVDEV_DBGATE_DEBUG?.('controller.init.done', { route })).catch(error => {\\n          global.__QTENVDEV_DBGATE_DEBUG?.('controller.init.error', { route, error: global.__QTENVDEV_DBGATE_DEBUG.errorData(error) });\\n          throw error;\\n        });\\n      }"
         ]
       ],
-      '../flyenvDebug'
+      '../qtenvdevDebug'
     )
     await patchFile(serveEntry, [
       [
         "const dbgateApi = require('dbgate-api');",
-        "global.__FLYENV_DBGATE_DEBUG?.('serve.api.require.begin');\\nconst dbgateApi = require('dbgate-api');\\nglobal.__FLYENV_DBGATE_DEBUG?.('serve.api.require.done');"
+        "global.__QTENVDEV_DBGATE_DEBUG?.('serve.api.require.begin');\\nconst dbgateApi = require('dbgate-api');\\nglobal.__QTENVDEV_DBGATE_DEBUG?.('serve.api.require.done');"
       ],
       [
         'dbgateApi.getMainModule().start();',
-        "global.__FLYENV_DBGATE_DEBUG?.('serve.start.begin');\\ntry {\\n  global.__FLYENV_DBGATE_DEBUG?.('serve.main.require.begin');\\n  const mainModule = dbgateApi.getMainModule();\\n  global.__FLYENV_DBGATE_DEBUG?.('serve.main.require.done');\\n  mainModule.start();\\n  global.__FLYENV_DBGATE_DEBUG?.('serve.start.returned');\\n} catch (error) {\\n  global.__FLYENV_DBGATE_DEBUG?.('serve.start.error', global.__FLYENV_DBGATE_DEBUG.errorData(error));\\n  throw error;\\n}"
+        "global.__QTENVDEV_DBGATE_DEBUG?.('serve.start.begin');\\ntry {\\n  global.__QTENVDEV_DBGATE_DEBUG?.('serve.main.require.begin');\\n  const mainModule = dbgateApi.getMainModule();\\n  global.__QTENVDEV_DBGATE_DEBUG?.('serve.main.require.done');\\n  mainModule.start();\\n  global.__QTENVDEV_DBGATE_DEBUG?.('serve.start.returned');\\n} catch (error) {\\n  global.__QTENVDEV_DBGATE_DEBUG?.('serve.start.error', global.__QTENVDEV_DBGATE_DEBUG.errorData(error));\\n  throw error;\\n}"
       ]
     ])
-    await appendFile(debugFile, `[FlyEnv] instrumented ${new Date().toISOString()}\n`)
+    await appendFile(debugFile, `[QTEnvDev] instrumented ${new Date().toISOString()}\n`)
   }
 
   private async defaultHealth(port: number, credentials: DbGateCredentials): Promise<boolean> {
@@ -459,8 +459,8 @@ debug('process.loaded', { cwd: process.cwd(), argv: process.argv.slice(1), node:
         ...dbGateEnv(paths, port, credentials),
         ...(this.debugUpstream
           ? {
-              DBGATE_FLYENV_DEBUG: '1',
-              DBGATE_FLYENV_DEBUG_FILE: join(paths.log, 'dbgate.upstream.debug.log')
+              DBGATE_QTENVDEV_DEBUG: '1',
+              DBGATE_QTENVDEV_DEBUG_FILE: join(paths.log, 'dbgate.upstream.debug.log')
             }
           : {})
       },

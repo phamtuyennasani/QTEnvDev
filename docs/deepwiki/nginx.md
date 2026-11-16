@@ -9,7 +9,7 @@
 
 ## Overview
 
-Nginx 模块是 FlyEnv 的核心 Web 服务器组件，提供高性能 HTTP/HTTPS 服务托管功能。该模块负责管理 Nginx 服务的全生命周期，包括版本管理、服务启停、配置文件生成和虚拟主机管理。
+Nginx 模块是 QTEnvDev 的核心 Web 服务器组件，提供高性能 HTTP/HTTPS 服务托管功能。该模块负责管理 Nginx 服务的全生命周期，包括版本管理、服务启停、配置文件生成和虚拟主机管理。
 
 相关文档链接:
 - [Apache](./apache.md) - 同类 Web 服务器实现对比
@@ -228,7 +228,7 @@ startService(version) [Base class]
          └──► Execute binary
               ├──► [Windows] serviceStartExecCMD()
               └──► [Unix] serviceStartExec(root: isLinux)
-                   └──► Spawn flyenv-async-exec.sh
+                   └──► Spawn qtenvdev-async-exec.sh
                    └──► Wait for PID file (max 20 retries)
 ```
 
@@ -241,7 +241,7 @@ _stopServer(version) [Base class]
     │
     ├──► Read PID file: {BaseDir}/pid/nginx.pid
     ├──► Search processes by name "nginx"
-    │    └──► Filter by FlyEnv data directories
+    │    └──► Filter by QTEnvDev data directories
     ├──► Collect all PIDs
     │
     ├──► [Windows] ProcessKill('-INT', pids)
@@ -318,7 +318,7 @@ Nginx 配置模板支持以下占位符替换：
 
 | Placeholder | Description | Example |
 |-------------|-------------|---------|
-| `#PREFIX#` | Nginx installation directory | `C:/FlyEnv/Nginx` |
+| `#PREFIX#` | Nginx installation directory | `C:/QTEnvDev/Nginx` |
 | `#VHostPath#` | Virtual host config directory | `{BaseDir}/vhost/nginx` |
 
 Sources: src/fork/module/Nginx/index.ts:114-120
@@ -469,7 +469,7 @@ Sources: src/fork/module/Nginx/index.ts:250-289
 
 ### Online Version Fetching
 
-Versions fetched from FlyEnv API (`https://api.one-env.com/api/version/fetch`):
+Versions fetched from QTEnvDev API (`https://api.one-env.com/api/version/fetch`):
 
 | Platform | Archive Format | Binary Path Pattern |
 |----------|---------------|---------------------|

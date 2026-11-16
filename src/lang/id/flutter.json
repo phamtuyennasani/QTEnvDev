@@ -18,7 +18,7 @@
   "sourcePath": "PATH Sistem",
   "sourceDefault": "Lokasi SDK default",
   "sourceCustom": "Path kustom yang dikonfigurasi",
-  "sourceFlyenv": "SDK yang dikelola FlyEnv",
+  "sourceQTEnvDev": "SDK yang dikelola QTEnvDev",
   "sourceUnknown": "Tidak diketahui",
   "createProjectTitle": "Buat Proyek Flutter",
   "create": "Buat",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Modul Flutter untuk disematkan ke aplikasi Android/iOS yang sudah ada.",
   "templateSkeletonDesc": "Aplikasi Flutter daftar/detail dengan Material 3 dan Navigation 2.0.",
   "androidSdkNotDetected": "Android SDK tidak terdeteksi",
-  "androidSdkInstallHint": "FlyEnv tidak menginstal Android SDK secara otomatis. Instal SDK melalui Android Studio atau alat baris perintah resmi Android.",
+  "androidSdkInstallHint": "QTEnvDev tidak menginstal Android SDK secara otomatis. Instal SDK melalui Android Studio atau alat baris perintah resmi Android.",
   "installAndroidStudio": "Instal Android Studio",
   "androidCommandLineTools": "Alat baris perintah Android",
-  "androidSdkAfterInstall": "Setelah menginstal SDK, kembali ke FlyEnv, klik Segarkan, lalu gunakan Auto-fix untuk mengonfigurasi lingkungan."
+  "androidSdkAfterInstall": "Setelah menginstal SDK, kembali ke QTEnvDev, klik Segarkan, lalu gunakan Auto-fix untuk mengonfigurasi lingkungan."
 }

@@ -76,7 +76,7 @@ test('catalog retains future API requirement so the UI can explain incompatibili
 })
 
 test('isolated package build preserves API 2 capabilities, assets and executable entries', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-api2-build-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-api2-build-'))
   try {
     const source = join(root, 'source')
     const outputRoot = join(root, 'package')
@@ -102,7 +102,7 @@ test('isolated package build preserves API 2 capabilities, assets and executable
 
 test('host rejects unresolved local schema references before activating a plugin', async () => {
   const { default: PluginManager } = await import('../../src/main/plugins/PluginManager')
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-schema-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-schema-'))
   try {
     const manifest = v2()
     manifest.mcp.tools[0].inputSchema = {

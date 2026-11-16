@@ -5,8 +5,8 @@
   "envTips": "Le chemin a-t-il été ajouté à la variable d'environnement",
   "aliasTips": "Alias utilisé dans le terminal",
   "useSysPHP": "Utiliser la version PHP par défaut",
-  "setByApp": "Variables d'environnement définies par FlyEnv",
-  "setByNoApp": "Variables d'environnement non définies par FlyEnv",
+  "setByApp": "Variables d'environnement définies par QTEnvDev",
+  "setByNoApp": "Variables d'environnement non définies par QTEnvDev",
   "bundleinVersionDelTips": "Cette version est une version intégrée, confirmer non affichée ?",
   "customDirVersionDelTips": "Cette version est une version de chemin d'accès personnalisée, confirmez-la non affichée ?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Démarrez manuellement cette tâche nécessitant des privilèges élevés et terminez l’autorisation dans le terminal ; macOS/Linux ne prend pas en charge sudo automatique en arrière-plan.",
-  "linuxFtpUnmanagedRoot": "Ce processus FTP exécuté en tant que root n’a pas été démarré par le service géré par FlyEnv. Arrêtez-le avec les droits administrateur avant de le redémarrer.",
+  "linuxFtpUnmanagedRoot": "Ce processus FTP exécuté en tant que root n’a pas été démarré par le service géré par QTEnvDev. Arrêtez-le avec les droits administrateur avant de le redémarrer.",
   "linuxFtpUsersRefreshFailed": "Les modifications des comptes FTP ont été enregistrées, mais le service en cours d’exécution n’a pas pu les appliquer : {error}",
   "pathSavedRefreshFailed": "Les variables d’environnement ont été enregistrées, mais la liste n’a pas pu être actualisée : {error}"
 }

@@ -9,7 +9,7 @@ import {
   type ServiceSettings,
   type FileFingerprint
 } from '../shared/settings'
-export const SETTINGS_KEY = 'flyenv-llama-cpp-settings-v2'
+export const SETTINGS_KEY = 'qtenvdev-llama-cpp-settings-v2'
 export const readOptionalStorage = async <T>(read: () => Promise<T>): Promise<T | undefined> => {
   try {
     return await read()
@@ -87,7 +87,7 @@ export class ProfilesRepository {
         throw Error('Invalid llama.cpp V2 settings; original data retained')
       this.current = clone(s)
     } else {
-      const legacy = await readOptionalStorage(() => this.storage.get('flyenv-llama-cpp-settings'))
+      const legacy = await readOptionalStorage(() => this.storage.get('qtenvdev-llama-cpp-settings'))
       const s = migrateSettings(legacy, files)
       await this.storage.set(SETTINGS_KEY, clone(s))
       this.current = s

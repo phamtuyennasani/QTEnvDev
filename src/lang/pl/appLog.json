@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Inicjalizacja folderu danych powiodła się, ścieżka folderu danych: {dir}",
   "initDBDataDirFail": "Inicjalizacja folderu danych nie powiodła się, powód: {error}",
   "newProjectFail": "Nie udało się utworzyć nowego projektu",
-  "processListFail": "Pobieranie listy procesów nie powiodło się. Proszę zainstalować pomocnika FlyEnv"
+  "processListFail": "Pobieranie listy procesów nie powiodło się. Proszę zainstalować pomocnika QTEnvDev"
 }

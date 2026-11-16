@@ -1,6 +1,6 @@
 # llama.cpp 集成调研
 
-> **调研主题**: llama.cpp 是否可集成进 FlyEnv  
+> **调研主题**: llama.cpp 是否可集成进 QTEnvDev  
 > **调研日期**: 2026-09-29  
 > **参考项目**: ggml-org/llama.cpp  
 > **结论**: 可行性高。建议将 llama.cpp 作为可选的本地推理后端；先复用现有 OpenAI 兼容 Provider 验证连接，再决定是否新增独立服务模块。不要把它并入 Ollama 的运行时和模型管理流程。
@@ -9,11 +9,11 @@
 
 ## 结论摘要
 
-llama.cpp 是 C/C++ 本地推理引擎，可将 GGUF 模型运行在 CPU、Apple Metal、NVIDIA CUDA、Vulkan 等后端，并提供 `llama serve` / `llama-server` HTTP 服务。服务支持 OpenAI 兼容的 Chat Completions、Responses、Embeddings 等 API，也有健康检查和自带 Web UI，能被 FlyEnv 的本地 AI 服务与 Provider 流程使用。
+llama.cpp 是 C/C++ 本地推理引擎，可将 GGUF 模型运行在 CPU、Apple Metal、NVIDIA CUDA、Vulkan 等后端，并提供 `llama serve` / `llama-server` HTTP 服务。服务支持 OpenAI 兼容的 Chat Completions、Responses、Embeddings 等 API，也有健康检查和自带 Web UI，能被 QTEnvDev 的本地 AI 服务与 Provider 流程使用。
 
 截至本次调研，官方 Releases 页面列出 2026-09-28 发布的 `b11236` 预发布构建及多个操作系统和后端变体。版本迭代很快，版本目录不能把同一个构建号下的 CPU、CUDA、Vulkan 等二进制当作同一个无差异安装包。llama.cpp README 提供的当前快速开始路径也已可以通过 `llama cli -hf ...` 和 `llama serve -hf ...` 从 Hugging Face 获取模型并运行。
 
-FlyEnv 已有 Ollama 服务模块和 OpenAI 兼容 Provider 的设计基础。Ollama 聚焦模型目录、拉取和服务管理；llama.cpp 提供更直接的 GGUF 与推理后端控制。它们可以并存，但各自维护运行时和模型目录。官方项目为 MIT 许可；用户选用的 GGUF 模型仍需单独检查其模型许可与分发条件。
+QTEnvDev 已有 Ollama 服务模块和 OpenAI 兼容 Provider 的设计基础。Ollama 聚焦模型目录、拉取和服务管理；llama.cpp 提供更直接的 GGUF 与推理后端控制。它们可以并存，但各自维护运行时和模型目录。官方项目为 MIT 许可；用户选用的 GGUF 模型仍需单独检查其模型许可与分发条件。
 
 官方资料：
 
@@ -30,7 +30,7 @@ FlyEnv 已有 Ollama 服务模块和 OpenAI 兼容 Provider 的设计基础。Ol
 
 ## 发行方式与支持平台
 
-官方 GitHub Releases 直接提供按 OS、CPU 架构及推理后端区分的可执行包；也可用 Winget、Homebrew、Conda 等包管理器安装。FlyEnv 若需统一版本、目录和生命周期，优先考虑下载并校验官方 Release 资产，而不是调用用户全局的包管理器。
+官方 GitHub Releases 直接提供按 OS、CPU 架构及推理后端区分的可执行包；也可用 Winget、Homebrew、Conda 等包管理器安装。QTEnvDev 若需统一版本、目录和生命周期，优先考虑下载并校验官方 Release 资产，而不是调用用户全局的包管理器。
 
 | 平台 | 官方发布包示例 | 说明 |
 |---|---|---|
@@ -40,7 +40,7 @@ FlyEnv 已有 Ollama 服务模块和 OpenAI 兼容 Provider 的设计基础。Ol
 | macOS Intel | x64 | 官方发布 CPU 构建；可用后端应按具体二进制确认 |
 | Linux x64 / ARM64 | Ubuntu CPU、Vulkan；x64 另有 CUDA、ROCm、OpenVINO、SYCL 等 | 官方 Release 常以 Ubuntu 为构建基线；其他发行版需要验证 glibc 和驱动兼容性 |
 
-上述资产名称、后端和驱动版本随 release 更新。本次页面显示的预发布包已包含 macOS ARM64/x64、Windows x64/ARM64 和 Ubuntu x64/ARM64 CPU 变体，以及若干 GPU 构建；实施时应通过 GitHub Releases/API 获取资产清单，按 FlyEnv 的 OS 与架构筛选，不要硬编码旧构建号里的包名。
+上述资产名称、后端和驱动版本随 release 更新。本次页面显示的预发布包已包含 macOS ARM64/x64、Windows x64/ARM64 和 Ubuntu x64/ARM64 CPU 变体，以及若干 GPU 构建；实施时应通过 GitHub Releases/API 获取资产清单，按 QTEnvDev 的 OS 与架构筛选，不要硬编码旧构建号里的包名。
 
 ### 运行时变体
 
@@ -69,7 +69,7 @@ llama serve -m ./model.gguf -c 4096 -ngl 99 --host 127.0.0.1 --port 8080
 
 `-ngl` / `--n-gpu-layers` 表示最多把多少层放到 GPU 显存；新版还有 `--device` 和 `--list-devices` 用于选择/查看当前构建识别到的设备。CPU 包没有 GPU 后端可供 offload。Vulkan 与 CUDA 包中的设备名称、可用设备、offload 能力和性能选项会随编译后端变化，因此设备选择值不能跨后端照搬。除驱动外，仍需留意 OS 可执行文件扩展名/路径、压缩包布局，以及 CUDA 变体可能附带的特定 CUDA runtime DLL/共享库包；不能把不同包互换或只替换一个可执行文件。
 
-因此，若 FlyEnv 管理官方 Release，建议把 `release + OS + CPU 架构 + backend + CUDA runtime 版本` 作为变体标识；安装时整套解包、校验，并按变体生成启动参数。对普通用户可复用同一个模型路径、上下文长度和服务地址设置，后端相关设备选择则单独呈现，并以所选二进制的 `--help` / `--list-devices` 能力为准。
+因此，若 QTEnvDev 管理官方 Release，建议把 `release + OS + CPU 架构 + backend + CUDA runtime 版本` 作为变体标识；安装时整套解包、校验，并按变体生成启动参数。对普通用户可复用同一个模型路径、上下文长度和服务地址设置，后端相关设备选择则单独呈现，并以所选二进制的 `--help` / `--list-devices` 能力为准。
 
 参考：[官方 Release 构建工作流](https://github.com/ggml-org/llama.cpp/blob/master/.github/workflows/release.yml)、[官方 CLI 参数](https://github.com/ggml-org/llama.cpp/blob/master/tools/cli/README.md)。
 
@@ -92,7 +92,7 @@ llama serve -m /path/to/model.gguf --host 127.0.0.1 --port 8080
 - CPU 线程、上下文长度、GPU offload 层数、设备等启动参数。
 - 内置 Web UI、多用户并行、连续批处理，以及部分模型的多模态能力。
 
-OpenAI 兼容性适合接入现有 AI 客户端，但不是对 OpenAI 所有参数和模型行为的完全等价保证；尤其是 chat template 和模型能力会影响对话、工具调用和结构化输出效果。FlyEnv Provider 应允许用户选择模型 ID 与 Base URL，不应假设所有 GGUF 都有相同功能。
+OpenAI 兼容性适合接入现有 AI 客户端，但不是对 OpenAI 所有参数和模型行为的完全等价保证；尤其是 chat template 和模型能力会影响对话、工具调用和结构化输出效果。QTEnvDev Provider 应允许用户选择模型 ID 与 Base URL，不应假设所有 GGUF 都有相同功能。
 
 默认建议绑定 `127.0.0.1`。如用户选择监听局域网或全部网卡，应明确展示 API 暴露范围与认证设置，避免将无认证的本地推理服务暴露到不可信网络。
 
@@ -128,7 +128,7 @@ LLAMA_ARG_PORT=8080 \
 - API Key 的 `--api-key-file`：每行一个 key，`#` 开头的行为注释。
 - MCP 工具的 `--mcp-servers-config <file.json>`：仅配置 MCP server 定义；内置工具/MCP 属于高权限功能，不应对不可信环境开放。
 
-除 `LLAMA_ARG_*` 映射外，还需留意专用环境变量：`HF_TOKEN` 用于 Hugging Face 访问，`LLAMA_CACHE` 控制 Hub 模型缓存目录，`LLAMA_API_KEY` 设置 API key。不要把这些秘密写进可共享的模型 preset 或日志；FlyEnv 若管理服务，可由模块 controller 组装参数和进程环境，敏感 key 单独安全存储，并优先避免在命令行明文暴露。
+除 `LLAMA_ARG_*` 映射外，还需留意专用环境变量：`HF_TOKEN` 用于 Hugging Face 访问，`LLAMA_CACHE` 控制 Hub 模型缓存目录，`LLAMA_API_KEY` 设置 API key。不要把这些秘密写进可共享的模型 preset 或日志；QTEnvDev 若管理服务，可由模块 controller 组装参数和进程环境，敏感 key 单独安全存储，并优先避免在命令行明文暴露。
 
 官方完整项随版本演进，建议查[Server 参数与环境变量清单](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)；文档标注的映射之外不要凭变量名推断支持情况。环境变量与命令行覆盖规则、Router INI preset 示例也见同一官方文档。
 
@@ -138,7 +138,7 @@ LLAMA_ARG_PORT=8080 \
 
 可以，模型目录由 Hugging Face Hub 等模型仓库提供，llama.cpp 本身不维护类似 Ollama Library 的统一模型商城。Hugging Face Hub 有模型搜索、按下载量排序、仓库文件列表和模型卡；当前官方 `hf` CLI 可按“可由 llama.cpp 运行”筛选，例如：
 
-> `hf` 是 Hugging Face Hub CLI，需单独安装 `huggingface_hub`/`hf`；它不包含在 llama.cpp 的发行包中。FlyEnv 若实现模型浏览，不应要求用户预装 `hf`，可直接调用 Hugging Face Hub API。
+> `hf` 是 Hugging Face Hub CLI，需单独安装 `huggingface_hub`/`hf`；它不包含在 llama.cpp 的发行包中。QTEnvDev 若实现模型浏览，不应要求用户预装 `hf`，可直接调用 Hugging Face Hub API。
 
 ```bash
 hf models ls --apps llama.cpp --sort downloads --limit 20
@@ -148,7 +148,7 @@ hf models ls <owner>/<repo> --tree -h
 
 Hugging Face Hub API / `huggingface_hub` Python 客户端也能查询模型列表，读取仓库 ID、下载量、标签、模型卡元数据和文件信息。UI 可以据此实现远端搜索、作者/任务/许可证筛选，再打开模型卡让用户选 GGUF 量化文件。`--apps llama.cpp` 或 `gguf` 标签只能作为搜索过滤信号；仓库内容、模型卡和许可证信息应再核对，不能把搜索结果等同于官方推荐或质量认证。
 
-要区分两种“模型列表”：远端列表由 Hub 搜索 API 提供；llama.cpp Server Router 的 `/v1/models` 或 models UI 用于本地缓存/目录中的模型和运行实例，不是整个 Hub 的在线目录。Router 可从 `LLAMA_CACHE`、`--models-dir` 或 preset 中发现本地模型。实现 FlyEnv 在线模型页时，需单独接 Hugging Face API；不应把 Server 的 `/v1/models` 当远端搜索接口。
+要区分两种“模型列表”：远端列表由 Hub 搜索 API 提供；llama.cpp Server Router 的 `/v1/models` 或 models UI 用于本地缓存/目录中的模型和运行实例，不是整个 Hub 的在线目录。Router 可从 `LLAMA_CACHE`、`--models-dir` 或 preset 中发现本地模型。实现 QTEnvDev 在线模型页时，需单独接 Hugging Face API；不应把 Server 的 `/v1/models` 当远端搜索接口。
 
 ### Hub API 是否公开、是否需要 token
 
@@ -156,7 +156,7 @@ Hugging Face 将 Hub API endpoint 文档为开放接口。查询公开模型目�
 
 官方速率限制区分 Hub API、文件 Resolver（URL 含 `/resolve/`，包括大文件下载）和网页访问三类额度，并按 5 分钟窗口计算。官方限制页当前展示的基准值标注为 2025 年 9 月：匿名访问每 IP 的 Hub API 约 500 次/5 分钟、Resolver 约 3,000 次/5 分钟；登录 Free 账户分别约 1,000 和 5,000 次/5 分钟。匿名与 Free 档标注为会随平台负载调整，额度不应作为固定 SLA；触发限制会收到 HTTP 429，响应头会提供限额/重置时间信息。
 
-对 FlyEnv 的影响：公开目录浏览无需把全局 HF token 内置到应用中；搜索应分页、去抖并缓存结果，收到 429 时按响应头等待后重试。避免启动时批量扫描整个 Hub。可选地允许用户配置自己的只读 token，用于其 gated/private 仓库访问和个人额度；token 应由用户持有并安全存储，不能在客户端共享硬编码开发者 token。模型列表 API 额度和 GGUF 文件下载额度是分开的，下载模型时应单独处理网络失败、限速和断点续传。
+对 QTEnvDev 的影响：公开目录浏览无需把全局 HF token 内置到应用中；搜索应分页、去抖并缓存结果，收到 429 时按响应头等待后重试。避免启动时批量扫描整个 Hub。可选地允许用户配置自己的只读 token，用于其 gated/private 仓库访问和个人额度；token 应由用户持有并安全存储，不能在客户端共享硬编码开发者 token。模型列表 API 额度和 GGUF 文件下载额度是分开的，下载模型时应单独处理网络失败、限速和断点续传。
 
 参考：[Hub API Endpoints](https://huggingface.co/docs/hub/api)、[Hub Rate Limits](https://huggingface.co/docs/hub/rate-limits)、[User Access Tokens](https://huggingface.co/docs/hub/security-tokens)、[Gated Models](https://huggingface.co/docs/hub/models-gated)。
 
@@ -182,7 +182,7 @@ llama download -mu <GGUF-file-URL> -m <local-filename.gguf>
 
 `-hf` 指向 Hugging Face 仓库，`:Q4_K_M` 这类后缀选择量化；需要精确控制文件时用 `-hff/--hf-file`。带视觉投影文件或多分片模型时，还需确认相关文件是否被一并下载并按 Server 要求放入同一模型子目录。对 gated/private 仓库需先取得访问权限，再通过 `HF_TOKEN` 或 `-hft` 提供令牌。
 
-llama.cpp 的下载器保存到 Hugging Face 风格的缓存目录，默认在用户缓存目录下；可以通过 `LLAMA_CACHE` 指向 FlyEnv 模型缓存。缓存结构按仓库和 snapshot 组织，并不等于一个用户友好的平铺模型目录。下载完可以通过 `llama serve -hf ...` 直接启动，或用 Router 查找缓存；也可以自己把文件组织到目录后传给 `llama serve -m <path>`。
+llama.cpp 的下载器保存到 Hugging Face 风格的缓存目录，默认在用户缓存目录下；可以通过 `LLAMA_CACHE` 指向 QTEnvDev 模型缓存。缓存结构按仓库和 snapshot 组织，并不等于一个用户友好的平铺模型目录。下载完可以通过 `llama serve -hf ...` 直接启动，或用 Router 查找缓存；也可以自己把文件组织到目录后传给 `llama serve -m <path>`。
 
 ### 其他下载方式
 
@@ -240,11 +240,11 @@ llama cli -hf <owner>/<GGUF-repo>:<quant>
 llama serve -hf <owner>/<GGUF-repo>:<quant> --host 127.0.0.1 --port 8080
 ```
 
-老版本独立程序常见参数 `-m`、`-hf`、`-ngl`/`--n-gpu-layers`、`-c`/`--ctx-size`、`-t`/`--threads`、`--port`，但参数别名、`llama` 命令分组和模型缓存选项会随版本变更。FlyEnv 集成应探测或绑定具体 Release 的版本能力，避免跨版本拼接参数。
+老版本独立程序常见参数 `-m`、`-hf`、`-ngl`/`--n-gpu-layers`、`-c`/`--ctx-size`、`-t`/`--threads`、`--port`，但参数别名、`llama` 命令分组和模型缓存选项会随版本变更。QTEnvDev 集成应探测或绑定具体 Release 的版本能力，避免跨版本拼接参数。
 
 ---
 
-## FlyEnv 现有基础与产品边界
+## QTEnvDev 现有基础与产品边界
 
 - [Ollama 模块定义](../../src/render/components/Ollama/Module.ts) 把 Ollama 注册为 `ai` 服务模块，页面已经包含服务启停、版本、模型、配置和日志入口。
 - [Ollama Fork 模块](../../src/fork/module/Ollama/index.ts) 可参考其服务进程管理，但不能复用其专有模型管理协议替代 GGUF/Hugging Face 流程。
@@ -255,9 +255,9 @@ llama serve -hf <owner>/<GGUF-repo>:<quant> --host 127.0.0.1 --port 8080
 
 **第一步：Provider 接入。** 允许现有 OpenAI 兼容客户端连接用户已经运行的 llama.cpp 服务，例如 `http://127.0.0.1:8080/v1`。这能验证模型 ID、流式响应、工具调用等使用场景，几乎不涉及新的安装和进程管理代码。
 
-**第二步：FlyEnv 管理的独立服务。** 若用户需要一键安装与启动，再新增独立的 llama.cpp 模块：负责运行时变体、GGUF 选择、启动参数、日志、PID、端口、健康检查和 API 地址。模型文件放在独立目录；下载/删除 GGUF 不复用 Ollama 模型命令。
+**第二步：QTEnvDev 管理的独立服务。** 若用户需要一键安装与启动，再新增独立的 llama.cpp 模块：负责运行时变体、GGUF 选择、启动参数、日志、PID、端口、健康检查和 API 地址。模型文件放在独立目录；下载/删除 GGUF 不复用 Ollama 模型命令。
 
-两步可以先后上线，也可以只实现第一步。若只是让 AI Coding 或 Hermes 连接本地推理，Provider 已能覆盖主要价值；若 FlyEnv 要管理 GPU 变体和模型运行配置，才需要完整服务模块。
+两步可以先后上线，也可以只实现第一步。若只是让 AI Coding 或 Hermes 连接本地推理，Provider 已能覆盖主要价值；若 QTEnvDev 要管理 GPU 变体和模型运行配置，才需要完整服务模块。
 
 ---
 
@@ -274,7 +274,7 @@ llama serve -hf <owner>/<GGUF-repo>:<quant> --host 127.0.0.1 --port 8080
 
 ## 模型管理、数据和许可
 
-模型输入是 GGUF 文件，可以来自本地文件，也可以按 Hugging Face 仓库/量化选择下载。当前统一 CLI 有 `llama download`，Hub 也有可用于在线目录和指定目录下载的官方 CLI；FlyEnv 若自建模型工作台，仍需自己解决大文件的断点续传、磁盘空间预检查、取消、缓存管理、文件完整性和失败清理。
+模型输入是 GGUF 文件，可以来自本地文件，也可以按 Hugging Face 仓库/量化选择下载。当前统一 CLI 有 `llama download`，Hub 也有可用于在线目录和指定目录下载的官方 CLI；QTEnvDev 若自建模型工作台，仍需自己解决大文件的断点续传、磁盘空间预检查、取消、缓存管理、文件完整性和失败清理。
 
 模型数据与程序运行时应分开保存：
 
@@ -284,9 +284,9 @@ data/llama.cpp/models/                          # GGUF 模型
 server/llama.cpp/<instance>/                    # 实例配置、日志和运行数据
 ```
 
-llama.cpp 仓库使用 MIT 许可，适合以外部开源运行时方式集成；但各 GGUF 模型的许可、商用权和再分发规则由模型方决定，FlyEnv 应保留模型来源信息，并避免默认代用户再分发模型文件。
+llama.cpp 仓库使用 MIT 许可，适合以外部开源运行时方式集成；但各 GGUF 模型的许可、商用权和再分发规则由模型方决定，QTEnvDev 应保留模型来源信息，并避免默认代用户再分发模型文件。
 
-模型发现和在线文件列表可由 FlyEnv 直接调用 Hub API，或在用户自行安装 Hugging Face CLI 时调用 Hub CLI；不要把 `hf` 作为 llama.cpp 已包含的命令。提供来源、仓库链接、模型卡、许可证、量化文件和大小信息，结果应标注为第三方 Hub 内容。仅由 llama.cpp 自带的 `llama download` 下载到缓存即可满足基础体验；用户期望的“下载模型库、搜索、筛选、安装、删除、显示磁盘占用”等 Ollama 风格管理面板，仍需 FlyEnv 提供 UI 与本地模型索引。
+模型发现和在线文件列表可由 QTEnvDev 直接调用 Hub API，或在用户自行安装 Hugging Face CLI 时调用 Hub CLI；不要把 `hf` 作为 llama.cpp 已包含的命令。提供来源、仓库链接、模型卡、许可证、量化文件和大小信息，结果应标注为第三方 Hub 内容。仅由 llama.cpp 自带的 `llama download` 下载到缓存即可满足基础体验；用户期望的“下载模型库、搜索、筛选、安装、删除、显示磁盘占用”等 Ollama 风格管理面板，仍需 QTEnvDev 提供 UI 与本地模型索引。
 
 ---
 
@@ -301,4 +301,4 @@ llama.cpp 仓库使用 MIT 许可，适合以外部开源运行时方式集成�
 
 ## 最终判断
 
-llama.cpp 适合集成到 FlyEnv，且比 TDengine 更贴合现有 AI 服务和 OpenAI Provider 体系。若目标是让现有 AI 客户端使用它，先提供 Provider 连接入口即可；若目标是完整管理推理程序、GPU 后端和 GGUF 模型，则作为独立 `llama.cpp` 服务模块实现，首期支持 CPU 与平台原生 Metal，随后按需求增加 Vulkan/CUDA。Ollama 与 llama.cpp 面向相邻但不同的工作流，应各自拥有运行时和模型生命周期。
+llama.cpp 适合集成到 QTEnvDev，且比 TDengine 更贴合现有 AI 服务和 OpenAI Provider 体系。若目标是让现有 AI 客户端使用它，先提供 Provider 连接入口即可；若目标是完整管理推理程序、GPU 后端和 GGUF 模型，则作为独立 `llama.cpp` 服务模块实现，首期支持 CPU 与平台原生 Metal，随后按需求增加 Vulkan/CUDA。Ollama 与 llama.cpp 面向相邻但不同的工作流，应各自拥有运行时和模型生命周期。

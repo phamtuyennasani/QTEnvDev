@@ -9,7 +9,7 @@
 
 ## Overview
 
-Consul 是 FlyEnv 集成的一个分布式服务网格解决方案，提供服务发现、服务配置和服务分段功能。在 FlyEnv 中，Consul 作为后台服务运行，通过 agent 模式启动，支持 Web UI 进行可视化管理。
+Consul 是 QTEnvDev 集成的一个分布式服务网格解决方案，提供服务发现、服务配置和服务分段功能。在 QTEnvDev 中，Consul 作为后台服务运行，通过 agent 模式启动，支持 Web UI 进行可视化管理。
 
 相关文档链接:
 - [Base Module](./base.md) - 继承的基类，包含通用服务生命周期管理
@@ -64,7 +64,7 @@ Main Process
 
 ### Module Registration
 
-Consul 模块通过 `Module.ts` 注册到 FlyEnv 应用框架：
+Consul 模块通过 `Module.ts` 注册到 QTEnvDev 应用框架：
 
 | Property | Value | Description |
 |----------|-------|-------------|
@@ -514,7 +514,7 @@ consul validate /path/to/consul.json
 consul members
 
 # View logs
-tail -f ~/Library/Application\ Support/FlyEnv/consul/consul.log
+tail -f ~/Library/Application\ Support/QTEnvDev/consul/consul.log
 ```
 
 ---

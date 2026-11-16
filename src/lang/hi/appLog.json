@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "डेटा फ़ोल्डर का प्रारंभ सफल, डेटा फ़ोल्डर पथ: {dir}",
   "initDBDataDirFail": "डेटा फ़ोल्डर का प्रारंभ विफल, कारण: {error}",
   "newProjectFail": "नया प्रोजेक्ट बनाना विफल",
-  "processListFail": "प्रक्रिया सूची प्राप्त करना विफल। कृपया FlyEnv Helper इंस्टॉल करें"
+  "processListFail": "प्रक्रिया सूची प्राप्त करना विफल। कृपया QTEnvDev Helper इंस्टॉल करें"
 }

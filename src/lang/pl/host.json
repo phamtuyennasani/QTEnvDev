@@ -59,7 +59,7 @@
   "samePortTips": "Witryna z ta sama domena i portem nasluchiwania juz istnieje. Uzyj innego portu, aby dodac kolejna witryne z ta sama domena.",
   "composerVersion": "Wersja kompozytora",
   "useSysVersion": "Wersje ustawione przy użyciu zmiennych środowiskowych",
-  "sslTips": "<p>Funkcja automatycznego certyfikatu SSL wymaga dodania certyfikatu o nazwie FlyEnv-Root-CA do pęku kluczy i ustawienia go zawsze zaufać</p>\n<p>normalnie, ta funkcja zostanie automatycznie wykonana. </p>\n<p>Jeśli ta funkcja jest nieprawidłowa. Możesz również skopiować i wykonać polecenia na terminalu. </p>\n<p>Możesz również kliknąć dwukrotnie, aby dodać certyfikat do otwartego folderu i ręcznie ustawić zaufanie, aby zawsze zaufać aplikacji</p>",
+  "sslTips": "<p>Funkcja automatycznego certyfikatu SSL wymaga dodania certyfikatu o nazwie QTEnvDev-Root-CA do pęku kluczy i ustawienia go zawsze zaufać</p>\n<p>normalnie, ta funkcja zostanie automatycznie wykonana. </p>\n<p>Jeśli ta funkcja jest nieprawidłowa. Możesz również skopiować i wykonać polecenia na terminalu. </p>\n<p>Możesz również kliknąć dwukrotnie, aby dodać certyfikat do otwartego folderu i ręcznie ustawić zaufanie, aby zawsze zaufać aplikacji</p>",
   "copyCommand": "Kopiuj polecenie",
   "showFile": "Pokaż plik",
   "sticky": "Przyklejony",

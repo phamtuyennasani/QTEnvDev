@@ -101,7 +101,7 @@
   "allTasks": "सभी कार्य",
   "systemTasks": "सिस्टम कार्य",
   "systemTask": "सिस्टम कार्य",
-  "flyenvTask": "FlyEnv कार्य",
+  "qtenvdevTask": "QTEnvDev कार्य",
   "otherTask": "अन्य कार्य",
   "taskTrigger": "ट्रिगर",
   "deleteSystemTaskTips": "यह सिस्टम शेड्यूल किया गया कार्य हटाएं?",

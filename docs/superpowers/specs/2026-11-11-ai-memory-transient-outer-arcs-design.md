@@ -166,7 +166,7 @@ Three.js 的 [BufferAttribute](https://threejs.org/docs/pages/BufferAttribute.ht
 
 当前 `scene.ts` 的 renderer 级 `onShaderError` 会对任何程序编译错误关闭体积雾。接入动态外围层时必须调整该路由，不能新增另一个覆盖全局回调的处理器。
 
-外围层使用独立材质，不能与核心共用同一材质实例；在其 `defines` 中加入唯一的层标记，例如 `FLYENV_OUTER_ARC_LAYER=1`，并保留原 `customProgramCacheKey` 和雾补丁链。该标记进入实际 Shader 源码并形成独立程序变体，不能仅依靠对象名判断编译程序的归属。
+外围层使用独立材质，不能与核心共用同一材质实例；在其 `defines` 中加入唯一的层标记，例如 `QTENVDEV_OUTER_ARC_LAYER=1`，并保留原 `customProgramCacheKey` 和雾补丁链。该标记进入实际 Shader 源码并形成独立程序变体，不能仅依靠对象名判断编译程序的归属。
 
 唯一的全局错误入口通过回调提供的 `gl` 和 Shader 句柄读取 Shader 源码，检查该标记：明确属于外围程序时记录日志、标记该层失败，并在下一帧更新前关闭外围对象与缓冲写入；不把该错误直接路由为全局关雾。不在编译回调内销毁正在使用的 GPU 资源，也不因下一个事件出生而自动重启失败层。
 

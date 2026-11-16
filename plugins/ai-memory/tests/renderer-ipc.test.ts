@@ -4,7 +4,7 @@ import { test } from 'node:test'
 test('sensitive replies remain redacted after timeout cleanup and after duplicate terminal replies', async () => {
   let receive!: (...args: any[]) => void
   ;(globalThis as any).window = {
-    FlyEnvNodeAPI: {
+    QTEnvDevNodeAPI: {
       ipcReceiveFromMain: (cb: (...args: any[]) => void) => {
         receive = cb
       },

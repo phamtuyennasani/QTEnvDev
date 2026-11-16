@@ -291,7 +291,7 @@ const generateCertificatePair = () => {
   caCert.validity.notBefore = new Date()
   caCert.validity.notAfter = new Date()
   caCert.validity.notAfter.setFullYear(caCert.validity.notBefore.getFullYear() + 10)
-  const caAttrs = [{ name: 'commonName', value: 'FlyEnv MariaDB Local CA' }]
+  const caAttrs = [{ name: 'commonName', value: 'QTEnvDev MariaDB Local CA' }]
   caCert.setSubject(caAttrs)
   caCert.setIssuer(caAttrs)
   caCert.setExtensions([
@@ -616,7 +616,7 @@ class Manager extends Base {
          */
         if (port !== undefined) {
           try {
-            // 配置端口的唯一监听者必须属于本次 FlyEnv 目标；外部或共享监听不接收关闭请求。
+            // 配置端口的唯一监听者必须属于本次 QTEnvDev 目标；外部或共享监听不接收关闭请求。
             // 原生关闭核验监听者，不把通用端口查询的 TIME_WAIT/出站连接混入授权目标。
             const listenerPids = [...new Set(await fetchLoopbackListeningPids(`${port}`))]
             if (listenerPids.length === 1 && killPids.has(listenerPids[0])) {

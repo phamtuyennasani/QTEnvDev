@@ -8,7 +8,7 @@ const token = 'a0ceac704e86426d918c0f8784687afe'
 async function test() {
   console.log('ClaudeCode addMcp...')
   try {
-    await ClaudeCode.addMcp('flyenv', 'http', url, token).on(() => {})
+    await ClaudeCode.addMcp('qtenvdev', 'http', url, token).on(() => {})
     console.log('ClaudeCode OK')
   } catch (e: any) {
     console.log('ClaudeCode FAIL:', e?.message || e)
@@ -16,7 +16,7 @@ async function test() {
 
   console.log('Codex addMcp...')
   try {
-    await Codex.addMcp('flyenv', 'http', url, token).on(() => {})
+    await Codex.addMcp('qtenvdev', 'http', url, token).on(() => {})
     console.log('Codex OK')
   } catch (e: any) {
     console.log('Codex FAIL:', e?.message || e)
@@ -24,7 +24,7 @@ async function test() {
 
   console.log('OpenCode addMcp...')
   try {
-    await OpenCode.addMcp('flyenv', 'remote', url, token).on(() => {})
+    await OpenCode.addMcp('qtenvdev', 'remote', url, token).on(() => {})
     console.log('OpenCode OK')
   } catch (e: any) {
     console.log('OpenCode FAIL:', e?.message || e)

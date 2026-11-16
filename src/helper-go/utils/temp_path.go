@@ -10,8 +10,8 @@ import (
 func WindowsHelperKeyPath() string {
 	localAppData := os.Getenv("LOCALAPPDATA")
 	if localAppData == "" {
-		localAppData = filepath.Join(os.TempDir(), "FlyEnv")
-		return filepath.Join(localAppData, "flyenv-helper.key")
+		localAppData = filepath.Join(os.TempDir(), "QTEnvDev")
+		return filepath.Join(localAppData, "qtenvdev-helper.key")
 	}
-	return filepath.Join(localAppData, "FlyEnv", "flyenv-helper.key")
+	return filepath.Join(localAppData, "QTEnvDev", "qtenvdev-helper.key")
 }

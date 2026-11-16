@@ -58,8 +58,8 @@ const child = spawn(command, args, {
   shell,
   env: {
     ...process.env,
-    FLYENV_PLUGIN_PATH: outputRoot,
-    FLYENV_PLUGIN_MODE: mode
+    QTENVDEV_PLUGIN_PATH: outputRoot,
+    QTENVDEV_PLUGIN_MODE: mode
   }
 })
 

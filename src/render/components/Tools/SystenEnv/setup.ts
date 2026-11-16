@@ -15,7 +15,7 @@ type EnvPathListing = {
 }
 
 const SYSTEM_PATH_CHANGED_MESSAGE =
-  'The system PATH changed outside FlyEnv. It has been reloaded; review and save again.'
+  'The system PATH changed outside QTEnvDev. It has been reloaded; review and save again.'
 
 const isSystemPathChangedMessage = (message: unknown): boolean =>
   typeof message === 'string' && message.includes('system_path_changed')

@@ -115,7 +115,7 @@ export const ProcessIdentityListByPidsStrict = async (
   const literals = [...new Set(pids)].join(', ')
   const command = `$ErrorActionPreference = 'Stop'; [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $requestedPids = @(${literals})
-$global:FlyEnvIdentityResult = @(foreach ($requestedPid in $requestedPids) {
+$global:QTEnvDevIdentityResult = @(foreach ($requestedPid in $requestedPids) {
   $process = Get-CimInstance Win32_Process -Filter ('ProcessId=' + [int]$requestedPid) -ErrorAction Stop
   if ($null -eq $process) { continue }
   if ([string]::IsNullOrWhiteSpace([string]$process.CreationDate) -or [string]::IsNullOrWhiteSpace([string]$process.ExecutablePath)) {
@@ -124,7 +124,7 @@ $global:FlyEnvIdentityResult = @(foreach ($requestedPid in $requestedPids) {
   $created = ([DateTime]$process.CreationDate).ToUniversalTime().ToString('o', [Globalization.CultureInfo]::InvariantCulture)
   @{ pid=[int]$process.ProcessId; created=$created; source='cim'; path=[string]$process.ExecutablePath }
 })
-ConvertTo-Json -InputObject $global:FlyEnvIdentityResult -Compress`
+ConvertTo-Json -InputObject $global:QTEnvDevIdentityResult -Compress`
   const { stdout } = await execFileAsync(
     resolveWindowsPowerShellPath(),
     ['-NoProfile', '-NonInteractive', '-EncodedCommand', encodePowerShellCommand(command)],
@@ -224,8 +224,8 @@ export const fetchProcessPidByPort = async (port: string): Promise<string[]> => 
   // 通用 getPortPids 的语义是查询本地端口的所有 TCP 连接状态，
   // 不把它收窄成监听者；停止监听服务的调用方应使用下面独立的 Listen 查询。
   const command = `${windowsTcpConnectionLookup}
-$global:FlyEnvPortPids = @(Get-FlyEnvTcpConnections ${port} | Select-Object -ExpandProperty OwningProcess | Sort-Object -Unique)
-ConvertTo-Json -InputObject $global:FlyEnvPortPids -Compress`
+$global:QTEnvDevPortPids = @(Get-QTEnvDevTcpConnections ${port} | Select-Object -ExpandProperty OwningProcess | Sort-Object -Unique)
+ConvertTo-Json -InputObject $global:QTEnvDevPortPids -Compress`
   const { stdout } = await execFileAsync(
     resolveWindowsPowerShellPath(),
     ['-NoProfile', '-NonInteractive', '-EncodedCommand', encodePowerShellCommand(command)],
@@ -285,8 +285,8 @@ export const fetchLoopbackListeningPids = async (port: string): Promise<string[]
   // Get-NetTCPConnection 使用枚举 State，不受 Windows 显示语言影响。端口停止
   // 只看 Listen，并保留既有 loopback/wildcard 地址口径；真实查询错误必须传播。
   const command = `${windowsTcpConnectionLookup}
-$global:FlyEnvListenerRows = @(Get-FlyEnvTcpConnections ${port} $true | Where-Object { $_.LocalAddress -in @('127.0.0.1', '0.0.0.0', '::1', '::') } | Select-Object -Property LocalAddress,OwningProcess)
-ConvertTo-Json -InputObject $global:FlyEnvListenerRows -Compress`
+$global:QTEnvDevListenerRows = @(Get-QTEnvDevTcpConnections ${port} $true | Where-Object { $_.LocalAddress -in @('127.0.0.1', '0.0.0.0', '::1', '::') } | Select-Object -Property LocalAddress,OwningProcess)
+ConvertTo-Json -InputObject $global:QTEnvDevListenerRows -Compress`
   const { stdout } = await execFileAsync(
     resolveWindowsPowerShellPath(),
     ['-NoProfile', '-NonInteractive', '-EncodedCommand', encodePowerShellCommand(command)],

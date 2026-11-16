@@ -24,11 +24,11 @@ const draft = (): MemoryInputs['store'] => ({
   source: { kind: 'user_statement', agent: 'fixture', description: 'Constructed choice' }
 })
 
-test('public MCP names retain the approved flyenv_memory prefix', async () => {
+test('public MCP names retain the approved qtenvdev_memory prefix', async () => {
   const manifest = JSON.parse(await readFile(new URL('../plugin.json', import.meta.url), 'utf8'))
   assert.deepEqual(
     manifest.mcp.tools.map((tool: any) => tool.name),
-    ['search', 'get', 'store', 'update', 'forget'].map((method) => `flyenv_memory_${method}`)
+    ['search', 'get', 'store', 'update', 'forget'].map((method) => `qtenvdev_memory_${method}`)
   )
 })
 
@@ -81,7 +81,7 @@ test('accepted large UTF-8 or escaped metadata remains searchable with bounded p
   }
 })
 async function fixture(options: ConstructorParameters<typeof MemoryEngine>[1] = {}) {
-  const temp = await mkdtemp(join(tmpdir(), 'flyenv-api-'))
+  const temp = await mkdtemp(join(tmpdir(), 'qtenvdev-api-'))
   const root = join(temp, 'data')
   const project = join(temp, 'project')
   await mkdir(project)
@@ -356,11 +356,11 @@ test('unknown JSON commit is reported, then reconciled from disk before a depend
 test('manifest exposes exactly five valid schemas and classifies MCP failures without losing machine fields', async () => {
   const manifest = JSON.parse(await readFile(new URL('../plugin.json', import.meta.url), 'utf8'))
   assert.deepEqual(manifest.mcp.tools.map((tool: any) => tool.name).sort(), [
-    'flyenv_memory_forget',
-    'flyenv_memory_get',
-    'flyenv_memory_search',
-    'flyenv_memory_store',
-    'flyenv_memory_update'
+    'qtenvdev_memory_forget',
+    'qtenvdev_memory_get',
+    'qtenvdev_memory_search',
+    'qtenvdev_memory_store',
+    'qtenvdev_memory_update'
   ])
   const valid: Record<MemoryMethod, any> = {
     search: { scope: 'global' },

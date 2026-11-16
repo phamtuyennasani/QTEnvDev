@@ -1,6 +1,6 @@
 # MariaDB Cluster
 
-FlyEnv 独立插件，提供 **MariaDB 实例 / 服务 / 版本** 三个 Tab。
+QTEnvDev 独立插件，提供 **MariaDB 实例 / 服务 / 版本** 三个 Tab。
 
 ## 功能
 
@@ -31,7 +31,7 @@ FlyEnv 独立插件，提供 **MariaDB 实例 / 服务 / 版本** 三个 Tab。
 
 安装、卸载、进度、终端输出、取消及清理由插件本地 singleton 持有，切换 Tab 不终止任务。
 MacPorts 卸载不使用 `--follow-dependents`；有其他依赖时由包管理器拒绝卸载，不连带删除。
-下载包卸载只允许 FlyEnv 安装目录内的版本，拒绝含实例数据或仍被进程使用的目录。
+下载包卸载只允许 QTEnvDev 安装目录内的版本，拒绝含实例数据或仍被进程使用的目录。
 
 插件领域状态始终留在模块本地 singleton，通过 `reactiveBind` 暴露；使用独立
 `StorageGetAsync` / `StorageSetAsync`，不新增 Pinia，不写 `config.setup`。
@@ -41,7 +41,7 @@ MacPorts 卸载不使用 `--follow-dependents`；有其他依赖时由包管理�
 
 - 程序安装目录与实例数据分离，多个实例可共享同一套 mariadbd。
 - Fork 清单、配置、PID 和日志位于 `<MariaDBDir>/mariadb-cluster/`；新建数据默认位于 `<BaseDir>/mariadb-cluster/data/`（即 `server/mariadb-cluster/data/`），逐实例目录可单独指定。
-- renderer Storage key 为 `flyenv-plugin-mariadb-cluster-v1`，按实例隔离备注、备份设置及明确保存的凭据。
+- renderer Storage key 为 `qtenvdev-plugin-mariadb-cluster-v1`，按实例隔离备注、备份设置及明确保存的凭据。
 - 新建时的 Root 密码默认仅保留在当前会话；在数据管理或组凭据窗口中可选择在本机记住。
 - 普通启动、停止和重启不要求 Root 密码，复用公共进程启动检查和实例进程身份判断，不通过 SQL 登录或 TCP 探测判定启动结果。首次启动仍使用创建时的密码设置 Root 账号。
 - 主从实例重启会由 MariaDB 自动续接已保存的复制通道，从节点保持只读。首次创建仍自动配置复制；修改源端口后，可启动所有成员，再点击组头部的“配置 / 恢复复制”应用通道配置。
@@ -80,5 +80,5 @@ MARIADB_CLUSTER_TEST_BIN=/path/to/mariadb-10.11/bin/mariadbd \
 Windows、Linux 与其他 MariaDB 构建的原生验收仍待完成；Windows 测试还需要
 宿主 Helper/进程查询环境，不能把 macOS 的通过结果视为跨平台通过。
 
-构建产物为 `dist/plugins/mariadb-cluster/mariadb-cluster-0.1.0.flyenv-plugin`；
+构建产物为 `dist/plugins/mariadb-cluster/mariadb-cluster-0.1.0.qtenvdev-plugin`；
 构建会生成匹配的 registry SHA-256，空下载 URL 表示尚未发布。

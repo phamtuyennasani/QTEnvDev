@@ -9,7 +9,7 @@
 
 ## Overview
 
-MeiliSearch 是一个开源的、快速的、支持 typo-tolerant 的搜索引擎。FlyEnv 通过模块化架构集成 MeiliSearch，提供服务生命周期管理、版本控制、配置管理和可视化界面。
+MeiliSearch 是一个开源的、快速的、支持 typo-tolerant 的搜索引擎。QTEnvDev 通过模块化架构集成 MeiliSearch，提供服务生命周期管理、版本控制、配置管理和可视化界面。
 
 相关文档链接:
 - [Elasticsearch](./elasticsearch.md) - 同类搜索引擎模块

@@ -29,7 +29,7 @@ const sharedVersion = extractVersion(
 const helperVersion = extractVersion(goSource, /Helper_Version\s*=\s*(\d+)/, 'helper go')
 const macInstallProtocol = extractVersion(
   macBuildSource,
-  /FlyEnvHelperProtocolVersion:\s*(\d+)/,
+  /QTEnvDevHelperProtocolVersion:\s*(\d+)/,
   'signed macOS install protocol'
 )
 

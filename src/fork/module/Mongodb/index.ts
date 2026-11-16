@@ -191,7 +191,7 @@ class Manager extends Base {
           if (!Number.isInteger(port) || port < 1 || port > 65535)
             throw new Error('Invalid MongoDB port')
           const owners = await fetchLoopbackListeningPids(`${port}`)
-          // 多监听者时必须全部属于已确认目标；仅其中一个属于 FlyEnv 不能证明
+          // 多监听者时必须全部属于已确认目标；仅其中一个属于 QTEnvDev 不能证明
           // 本次连接会落到它，禁止向共享该端口的其他实例发送 shutdownServer。
           if (!owners.length || owners.some((pid) => !targets.pids.includes(pid))) {
             throw new Error('MongoDB listening port does not belong to this service instance')

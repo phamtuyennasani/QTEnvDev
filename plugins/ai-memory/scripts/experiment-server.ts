@@ -13,12 +13,12 @@ const fixtures = JSON.parse(
 const api = createExperimentAPI(fixtures, { writesFail: process.argv.includes('--fail-writes') })
 const methods: MemoryMethod[] = ['search', 'get', 'store', 'update', 'forget']
 const server = new Server(
-  { name: 'flyenv-memory-effect-experiment', version: '0.0.0' },
+  { name: 'qtenvdev-memory-effect-experiment', version: '0.0.0' },
   { capabilities: { tools: {} } }
 )
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: methods.map((method) => ({
-    name: `flyenv_memory_${method}`,
+    name: `qtenvdev_memory_${method}`,
     description: `${method} local project/global memory. Store requires type, topic, title, summary, tags, content (Markdown string), source, request_id (UUID), scope, and project_path for project scope. Evaluation uses volatile synthetic data only.`,
     inputSchema: memoryInputSchema(method),
     annotations: {
@@ -29,7 +29,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   }))
 }))
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const method = request.params.name.replace(/^flyenv_memory_/, '') as MemoryMethod
+  const method = request.params.name.replace(/^qtenvdev_memory_/, '') as MemoryMethod
   const result = await api.call(method, request.params.arguments as never)
   const logIndex = process.argv.indexOf('--evidence')
   if (logIndex >= 0)

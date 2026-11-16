@@ -4,7 +4,7 @@
   "inputTips": "//Input JSON, JavaScript Obt/Array, PHP Array, URL, XML, YAML, PList. Automaattinen muuntaminen valituksi muotoon",
   "parseFailTips": "Jäsennys epäonnistui",
   "inputCheckFailTips": "Tunnistamaton",
-  "systemProxyCheck": "Havaittiin, että verkko käyttää välityspalvelinta, onko FlyEnv asetettu käyttämään tätä välityspalvelinta?",
+  "systemProxyCheck": "Havaittiin, että verkko käyttää välityspalvelinta, onko QTEnvDev asetettu käyttämään tätä välityspalvelinta?",
   "systemProxyUsed": "Asetus onnistui. Jos haluat muokata sitä, tee niin asetukset->Välityspalvelimen asetuksista.",
   "windowCount": "Ikkunan Määrä",
   "codemake": "Koodin Luonti",

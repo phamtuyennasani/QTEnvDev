@@ -233,7 +233,7 @@ export class Project {
 
   saveProject() {
     localForage
-      .setItem(`flyenv-${this.flagType}-projects`, JSON.parse(JSON.stringify(this.project)))
+      .setItem(`qtenvdev-${this.flagType}-projects`, JSON.parse(JSON.stringify(this.project)))
       .then()
       .catch()
   }
@@ -243,7 +243,7 @@ export class Project {
     }
     this.fetching = true
     this.fetchProjectPromise = localForage
-      .getItem(`flyenv-${this.flagType}-projects`)
+      .getItem(`qtenvdev-${this.flagType}-projects`)
       .then((res: ProjectItem[]) => {
         if (res) {
           this.project.splice(0)
@@ -298,7 +298,7 @@ export class Project {
     }
     let dirs: string[] | null
     try {
-      dirs = await localForage.getItem<string[]>('flyenv-projects-dirs')
+      dirs = await localForage.getItem<string[]>('qtenvdev-projects-dirs')
     } catch {
       this.allDirs = []
       return false
@@ -314,7 +314,7 @@ export class Project {
     }
   }
   saveDirs(): Promise<any> {
-    return localForage.setItem('flyenv-projects-dirs', JSON.parse(JSON.stringify(this.allDirs)))
+    return localForage.setItem('qtenvdev-projects-dirs', JSON.parse(JSON.stringify(this.allDirs)))
   }
   delProject(index: number) {
     Base._Confirm(I18nT('base.delAlertContent'), undefined, {
@@ -372,7 +372,7 @@ export class Project {
       await measureSetDirEnvStep(timings, context, currentStep, async () => {
         if (window.Server.isWindows) {
           try {
-            const envFile = join(item.path, '.flyenv')
+            const envFile = join(item.path, '.qtenvdev')
             const exists = await fs.existsSync(envFile)
             if (!exists) {
               if (!item.binVersion) {
@@ -392,19 +392,19 @@ export class Project {
                 if (arr.length) {
                   await fs.writeFile(
                     envFile,
-                    `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n$env:PATH = ${windowsProjectPathLiteral(arr)} + $env:PATH #FlyEnv-ID-${item.id}`
+                    `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n$env:PATH = ${windowsProjectPathLiteral(arr)} + $env:PATH #QTEnvDev-ID-${item.id}`
                   )
                 }
               }
             } else {
-              // 保留用户手写的 .flyenv 内容；读取失败不能当空文件再覆盖。
+              // 保留用户手写的 .qtenvdev 内容；读取失败不能当空文件再覆盖。
               const content = await fs.readFileStrict(envFile)
               const lines = content
                 .trim()
                 .split('\n')
                 .filter((s: string) => {
                   const line = s.trim()
-                  return !!line && !line.includes(`#FlyEnv-ID-${item.id}`)
+                  return !!line && !line.includes(`#QTEnvDev-ID-${item.id}`)
                 })
               if (item.binVersion) {
                 const arr: string[] = []
@@ -420,7 +420,7 @@ export class Project {
                   throw new Error('Selected project version directory is unavailable')
                 if (arr.length) {
                   lines.push(
-                    `$env:PATH = ${windowsProjectPathLiteral(arr)} + $env:PATH #FlyEnv-ID-${item.id}`
+                    `$env:PATH = ${windowsProjectPathLiteral(arr)} + $env:PATH #QTEnvDev-ID-${item.id}`
                   )
                 }
               }
@@ -433,7 +433,7 @@ export class Project {
           }
         } else {
           try {
-            const envFile = join(item.path, '.flyenv')
+            const envFile = join(item.path, '.qtenvdev')
             const exists = await fs.existsSync(envFile)
             if (!exists) {
               if (!item.binVersion) {
@@ -450,7 +450,7 @@ export class Project {
                 if (arr.length) {
                   await fs.writeFile(
                     envFile,
-                    `#!/bin/zsh\nexport PATH="${arr.join(':')}:$PATH" #FlyEnv-ID-${item.id}`
+                    `#!/bin/zsh\nexport PATH="${arr.join(':')}:$PATH" #QTEnvDev-ID-${item.id}`
                   )
                 }
               }
@@ -461,7 +461,7 @@ export class Project {
                 .split('\n')
                 .filter((s: string) => {
                   const line = s.trim()
-                  return !!line && !line.includes(`#FlyEnv-ID-${item.id}`)
+                  return !!line && !line.includes(`#QTEnvDev-ID-${item.id}`)
                 })
               if (item.binVersion) {
                 const arr: string[] = []
@@ -473,7 +473,7 @@ export class Project {
                   }
                 }
                 if (arr.length) {
-                  lines.push(`export PATH="${arr.join(':')}:$PATH" #FlyEnv-ID-${item.id}`)
+                  lines.push(`export PATH="${arr.join(':')}:$PATH" #QTEnvDev-ID-${item.id}`)
                 }
               }
               await fs.writeFile(envFile, lines.join('\n'))

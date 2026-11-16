@@ -166,7 +166,7 @@ export class LlamaCppModule extends Base {
         const installed: SoftInstalled[] = []
         for (const dir of dirs) {
           const path = join(runtimeRoot, dir)
-          const manifest = join(path, 'flyenv-runtime.json')
+          const manifest = join(path, 'qtenvdev-runtime.json')
           if (!this.deps.exists(manifest)) continue
           const variant = JSON.parse(await this.deps.read(manifest)) as RuntimeVariant & {
             executable?: string

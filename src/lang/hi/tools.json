@@ -4,7 +4,7 @@
   "inputTips": "//JSON, JavaScript Object/Array, PHP Array, URL, XML, YAML, PList दर्ज करें। चयनित प्रारूप में स्वचालित रूप से बदलें",
   "parseFailTips": "पार्स विफल",
   "inputCheckFailTips": "अपरिभाषित",
-  "systemProxyCheck": "पता चला कि नेटवर्क प्रॉक्सी का उपयोग कर रहा है, क्या FlyEnv इस प्रॉक्सी का उपयोग करने के लिए सेट है?",
+  "systemProxyCheck": "पता चला कि नेटवर्क प्रॉक्सी का उपयोग कर रहा है, क्या QTEnvDev इस प्रॉक्सी का उपयोग करने के लिए सेट है?",
   "systemProxyUsed": "सेटिंग सफल। यदि आप इसे संशोधित करना चाहते हैं, तो कृपया सेटिंग्स->प्रॉक्सी सेटिंग्स में करें।",
   "windowCount": "विंडो संख्या",
   "codemake": "कोड जनरेशन",

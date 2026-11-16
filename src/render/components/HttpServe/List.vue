@@ -138,7 +138,7 @@
             })
           }
 
-          const paths = dirs.map((f) => window.FlyEnvNodeAPI.showFilePath(f))
+          const paths = dirs.map((f) => window.QTEnvDevNodeAPI.showFilePath(f))
           console.log('paths: ', paths)
 
           if (paths.length === 0) {

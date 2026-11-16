@@ -1,6 +1,6 @@
 # OpenSearch 集成调研
 
-> **调研主题**: OpenSearch 是否可集成为 FlyEnv 内置模块（对应 [issue #880](https://github.com/xpf0000/FlyEnv/issues/880)）
+> **调研主题**: OpenSearch 是否可集成为 QTEnvDev 内置模块（对应 [issue #880](https://github.com/xpf0000/QTEnvDev/issues/880)）
 > **调研日期**: 2026-10-02
 > **参考项目**: opensearch-project/OpenSearch
 > **结论**: 可行性高，**以插件形式集成**（目录 `plugins/opensearch/`，参照现有 `plugins/kafka/` 骨架）。OpenSearch 与现有 Elasticsearch 模块几乎同构（JVM 服务、`config/` + `logs/` 布局、`-p` PID 文件参数），fork 端可参照 Elasticsearch 模块（约 253 行）和 kafka 插件（751 行）实现。做成插件后不受内置模块的版本数据源约束——插件自带版本抓取器，直接抓 `artifacts.opensearch.org`/GitHub tags，无需等 one-env API 加条目。主要缺口仍是 **macOS 无官方发行包**。建议第一期先覆盖 Linux/Windows 静态包安装与安全插件一键关闭，Dashboards 作为第二阶段。
@@ -9,7 +9,7 @@
 
 ## 结论摘要
 
-OpenSearch 是 Elasticsearch 7.10 的 Apache 2.0 分支，官方在 `artifacts.opensearch.org` 提供 Linux x64/arm64 的 tar.gz/deb/rpm 和 Windows x64 的 zip，下载 URL 规则稳定、可直接拼接。它自带 bundled JDK，无需用户预装 Java；启动方式、配置文件布局（`opensearch.yml` / `jvm.options` / `log4j2.properties`）、日志目录、`-p <pid>` 参数都与 Elasticsearch 一致，正好是 FlyEnv 现有 Elasticsearch 模块的姊妹实现。
+OpenSearch 是 Elasticsearch 7.10 的 Apache 2.0 分支，官方在 `artifacts.opensearch.org` 提供 Linux x64/arm64 的 tar.gz/deb/rpm 和 Windows x64 的 zip，下载 URL 规则稳定、可直接拼接。它自带 bundled JDK，无需用户预装 Java；启动方式、配置文件布局（`opensearch.yml` / `jvm.options` / `log4j2.properties`）、日志目录、`-p <pid>` 参数都与 Elasticsearch 一致，正好是 QTEnvDev 现有 Elasticsearch 模块的姊妹实现。
 
 issue 作者希望的三点——版本管理、本地开发可关安全插件、可选 Dashboards——都有官方支持路径。安全插件可通过 `opensearch.yml` 中 `plugins.security.disabled: true` 关闭；Dashboards 是独立制品，可后续作为同一模块组下的第二个服务或独立模块提供。
 
@@ -42,7 +42,7 @@ https://artifacts.opensearch.org/releases/bundle/opensearch-dashboards/{version}
 
 每个制品另有同名 `.sig` 签名文件，可用于校验。
 
-| 平台 | 官方制品 | FlyEnv 集成方式 |
+| 平台 | 官方制品 | QTEnvDev 集成方式 |
 |---|---|---|
 | Linux x64 | tar.gz / deb / rpm | 静态 tar.gz 下载，与 ES 模块一致的 `unpack` + `moveChildDirToParent` 流程 |
 | Linux arm64 | tar.gz / deb / rpm | 同上 |
@@ -80,7 +80,7 @@ set "OPENSEARCH_HOME=..." & set "OPENSEARCH_PATH_CONF=..." & bin\opensearch.bat
 
 ### 关闭安全插件（issue 的核心诉求之一）
 
-官方支持多档，建议 FlyEnv 提供"本地开发模式"开关，在首次安装后改写配置：
+官方支持多档，建议 QTEnvDev 提供"本地开发模式"开关，在首次安装后改写配置：
 
 1. **推荐**：`opensearch.yml` 增加 `plugins.security.disabled: true`（[官方文档](https://docs.opensearch.org/latest/security/configuration/disable-enable-security/)）。纯 HTTP、无认证，适合本机开发。
 2. tar.gz 发行包的 `config/opensearch.yml` 默认已带 demo 安全配置（自签名证书、TLS）；关闭安全时应一并移除/注释这些 demo 段，并跳过 demo 安装脚本（Docker 侧对应 `DISABLE_INSTALL_DEMO_CONFIG=true`，tar 包则是不运行 `install_demo_configuration` 相关配置）。
@@ -109,7 +109,7 @@ macOS 走 `brewinfo()`（formula `opensearch`，当前 3.9.0，仅见 Apple Sili
 
 ---
 
-## FlyEnv 现有基础与插件结构
+## QTEnvDev 现有基础与插件结构
 
 整体参照 `plugins/kafka/`（骨架最完整的现有插件），fork 模块本体大量借鉴内置 `src/fork/module/Elasticsearch/index.ts`（253 行）：
 
@@ -136,8 +136,8 @@ plugins/opensearch/
 关键机制（插件路径下**不需要**改动的宿主代码）：
 
 - **fork 分发**：`src/fork/BaseManager.ts:648-655` 内置模块不匹配时兜底走 `PluginLoader.load(module)`，插件默认导出的 Base 子类直接参与调度，无需注册表。render 端照常 `IPC.send('app-fork:opensearch', ...)`。
-- **renderer 加载**：`src/render/core/Plugin.ts` 把 render 产物包成 Blob URL 动态 import 进 `AppModules`；宿主运行时包（vue/element-plus/IPC/ASide/ServiceManager 等）经 `__FLYENV_PLUGIN_HOST__` 桥接。
-- **构建**：`yarn plugin:dev opensearch`（构建到 `tmp/plugins/` 并以 `FLYENV_PLUGIN_PATH` 启动 FlyEnv 调试）、`yarn plugin:build opensearch`（产物 `dist/plugins/opensearch/`，`--archive` 打成 `.flyenv-plugin` 并自动 upsert `plugins/registry.json`）。
+- **renderer 加载**：`src/render/core/Plugin.ts` 把 render 产物包成 Blob URL 动态 import 进 `AppModules`；宿主运行时包（vue/element-plus/IPC/ASide/ServiceManager 等）经 `__QTENVDEV_PLUGIN_HOST__` 桥接。
+- **构建**：`yarn plugin:dev opensearch`（构建到 `tmp/plugins/` 并以 `QTENVDEV_PLUGIN_PATH` 启动 QTEnvDev 调试）、`yarn plugin:build opensearch`（产物 `dist/plugins/opensearch/`，`--archive` 打成 `.qtenvdev-plugin` 并自动 upsert `plugins/registry.json`）。
 - **安装/更新**：Plugin Market 从 registry 条目 `artifact.url` 下载 7z 归档，SHA-256 校验 + installToken 安全门，用户侧无需任何手动目录操作。
 - **typeFlag 唯一性**：PluginManager 拒绝重复 typeFlag；与内置 `elasticsearch` 不冲突，可共存。
 
@@ -153,7 +153,7 @@ plugins/opensearch/
 ## 数据与许可
 
 - OpenSearch 与 OpenSearch Dashboards 均为 **Apache 2.0**，再分发官方制品无许可证障碍。插件需附带 LICENSE 声明（Plugin Market 安装时强制 license 校验，参照 `plugins/README.md` 发布 checklist）。
-- 目录布局沿用 FlyEnv 惯例：`AppDir/opensearch/v{version}/` 为程序目录，`Cache/static-opensearch-{version}.tar.gz`（Win 为 `.zip`）为下载缓存；数据、配置、日志默认在版本目录内（与 ES 模块一致），用户换版本时数据目录隔离，需要在插件页提示。卸载插件默认不清除这些数据。
+- 目录布局沿用 QTEnvDev 惯例：`AppDir/opensearch/v{version}/` 为程序目录，`Cache/static-opensearch-{version}.tar.gz`（Win 为 `.zip`）为下载缓存；数据、配置、日志默认在版本目录内（与 ES 模块一致），用户换版本时数据目录隔离，需要在插件页提示。卸载插件默认不清除这些数据。
 
 ## 主要风险
 
@@ -166,7 +166,7 @@ plugins/opensearch/
 
 ## 最终判断
 
-OpenSearch 适合以**插件**形式集成进 FlyEnv：`plugins/opensearch/`，骨架照抄 kafka，服务逻辑照抄内置 Elasticsearch 模块，版本源自带（GitHub tags + artifacts.opensearch.org 拼接），不依赖 one-env API 加条目，也不动任何内置模块代码。建议分两期：
+OpenSearch 适合以**插件**形式集成进 QTEnvDev：`plugins/opensearch/`，骨架照抄 kafka，服务逻辑照抄内置 Elasticsearch 模块，版本源自带（GitHub tags + artifacts.opensearch.org 拼接），不依赖 one-env API 加条目，也不动任何内置模块代码。建议分两期：
 
 1. **第一期（`plugins/opensearch`）**：Linux x64/arm64 + Windows x64 静态包安装、版本管理、启停、配置/日志 tab、"本地开发模式（关闭安全插件）"开关；macOS 走 Homebrew/本地扫描。
 2. **第二期（`plugins/opensearch-dashboards`，可选）**：Dashboards 独立插件，与安全插件开关联动处理 `securityDashboards` 插件移除。

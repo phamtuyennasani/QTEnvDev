@@ -55,7 +55,7 @@ tty_reset="$(tty_escape 0)"            # Reset color
 # Check if Homebrew is already installed (Linux version)
 if command -v brew &>/dev/null; then
     echo -e "${tty_green}\nDetected that brew is already installed. The installer script will exit automatically.${tty_reset}"
-    echo "FlyEnv-End of Homebrew installation"
+    echo "QTEnvDev-End of Homebrew installation"
     exit 0
 fi
 
@@ -71,7 +71,7 @@ case "$user_input" in
         ;;
     *)
         echo "You entered '$user_input'. Installation aborted. To continue, please type Y or y."
-        echo "FlyEnv-End of Homebrew installation"
+        echo "QTEnvDev-End of Homebrew installation"
         exit 0
         ;;
 esac
@@ -105,4 +105,4 @@ fi
 
 brew install gcc
 
-echo "FlyEnv-End of Homebrew installation"
+echo "QTEnvDev-End of Homebrew installation"

@@ -12,7 +12,7 @@ change and remains the coordinated release version for the combined fixes.
   policy/key loading and installation, socket initialization, FTP startup, FTP
   state reads and Linux FTP account updates. Replace it with a structural-only
   directory open shared by both platforms; remove the narrower Darwin workaround.
-- Linux installation separately rejects `/etc/flyenv-helper` ownership and mode.
+- Linux installation separately rejects `/etc/qtenvdev-helper` ownership and mode.
   Retain only its real-directory/no-symlink condition.
 - The Linux `/home -> /var/home` compatibility exception also requires root-owned
   non-writable ancestor/target directories. Remove those directory permission

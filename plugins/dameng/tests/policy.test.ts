@@ -27,8 +27,8 @@ test('registered custom paths normalize exact Windows and Linux roots without in
   ])
   assert.deepEqual(registeredProgramPaths(undefined), [])
   assert.doesNotThrow(() => assertVendorPath(chosen, true))
-  assert.throws(() => assertVendorPath(String.raw`C:\FlyEnv-Data\app`, true), /unsupported/)
-  assert.doesNotThrow(() => assertDataPath(String.raw`C:\FlyEnv-Data\server`, true))
+  assert.throws(() => assertVendorPath(String.raw`C:\QTEnvDev-Data\app`, true), /unsupported/)
+  assert.doesNotThrow(() => assertDataPath(String.raw`C:\QTEnvDev-Data\server`, true))
   for (const path of [String.raw`C:\data\..\outside`, 'relative', 'C:\\bad"path', 'C:\\bad\npath'])
     assert.throws(() => assertDataPath(path, true))
 })
@@ -53,7 +53,7 @@ test('initialization rejects overwrites, invalid resources and control-file inje
   ]) {
     assert.throws(() => validateInit({ ...p, ...changes }))
   }
-  const control = dminitControl('/tmp/data with space', 'FLYENV123', p)
+  const control = dminitControl('/tmp/data with space', 'QTENVDEV123', p)
   assert.match(control, /AUTO_OVERWRITE = 0/)
   assert.match(control, /LOG_SIZE = 256/)
   assert.match(control, /SYSDBA_PWD = 'Dm_Test123!'/)
@@ -69,8 +69,8 @@ test('initialization rejects overwrites, invalid resources and control-file inje
       control.includes(`/tmp/data with space/DAMENG/${file}`),
       `${file} must be outside program/bin`
     )
-  const windowsRoot = String.raw`C:\Users\x\AppData\Local\Programs\FlyEnv-Data\server\dameng\instances\win20260709`
-  const windowsControl = dminitControl(windowsRoot, 'FLYENV123', p)
+  const windowsRoot = String.raw`C:\Users\x\AppData\Local\Programs\QTEnvDev-Data\server\dameng\instances\win20260709`
+  const windowsControl = dminitControl(windowsRoot, 'QTENVDEV123', p)
   assert.equal(windowsControl.split('\n')[1], `SYSTEM_PATH = '${windowsRoot}'`)
   for (const line of windowsControl.split('\n')) {
     if (/^(SYSTEM_PATH|MAIN|SYSTEM|ROLL|CTL_PATH|LOG_PATH) = /.test(line))
@@ -81,7 +81,7 @@ test('initialization rejects overwrites, invalid resources and control-file inje
       )
   }
   assert.equal(control.split('\n')[1], "SYSTEM_PATH = '/tmp/data with space'")
-  const special = dminitControl("/tmp/O'Brien#one;two", 'FLYENV123', {
+  const special = dminitControl("/tmp/O'Brien#one;two", 'QTENVDEV123', {
     ...p,
     sysdbaPassword: "Strong'Pwd9#;!",
     auditorPassword: 'Audit#Pwd9;!'
@@ -89,14 +89,14 @@ test('initialization rejects overwrites, invalid resources and control-file inje
   assert.equal(special.split('\n')[1], "SYSTEM_PATH = '/tmp/O''Brien#one;two'")
   assert.ok(special.includes("SYSDBA_PWD = 'Strong''Pwd9#;!'\n"))
   assert.ok(special.includes("SYSAUDITOR_PWD = 'Audit#Pwd9;!'\n"))
-  const quotedEdges = dminitControl('/tmp/data', 'FLYENV123', {
+  const quotedEdges = dminitControl('/tmp/data', 'QTENVDEV123', {
     ...p,
     sysdbaPassword: "'Strong_Pwd9#;='",
     auditorPassword: "Audit'Pwd9=!"
   })
   assert.ok(quotedEdges.includes("SYSDBA_PWD = '''Strong_Pwd9#;='''\n"))
   assert.ok(quotedEdges.includes("SYSAUDITOR_PWD = 'Audit''Pwd9=!'\n"))
-  assert.throws(() => dminitControl('/tmp/a\nPATH=/etc', 'FLYENV123', p))
+  assert.throws(() => dminitControl('/tmp/a\nPATH=/etc', 'QTENVDEV123', p))
 })
 
 test('silent XML disables initialization and service startup without passwords', () => {
@@ -117,7 +117,7 @@ test('disql receives credentials over stdin with deterministic failure and readi
     assert.ok(script.includes(`CONNECT SYSDBA/"${password}"@127.0.0.1:5236\n`))
     assert.ok(script.indexOf('SET DEFINE OFF\n') < script.indexOf('CONNECT SYSDBA/'))
   }
-  assert.match(input, /FLYENV_DM_READY/)
+  assert.match(input, /QTENVDEV_DM_READY/)
   assert.match(input, /SET LINESHOW OFF/)
   assert.throws(() => disqlInput('bad"\nSTOP INSTANCE;', 5236, false))
 })
@@ -131,5 +131,5 @@ test('platform gate accepts only exact native x64 targets', () => {
     ['win32', 'x64', '', 'arm64']
   ])
     assert.throws(() => assertPlatform(platform, arch, os, native))
-  assert.equal(parseIni('PORT_NUM = 5237 # port\nINSTANCE_NAME = FLYENV123').PORT_NUM, '5237')
+  assert.equal(parseIni('PORT_NUM = 5237 # port\nINSTANCE_NAME = QTENVDEV123').PORT_NUM, '5237')
 })

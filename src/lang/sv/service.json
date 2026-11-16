@@ -5,8 +5,8 @@
   "envTips": "Har sökvägen lagts till i miljövariabeln",
   "aliasTips": "Alias som används i terminalen",
   "useSysPHP": "Använd standard PHP-version",
-  "setByApp": "Miljövariabler som ställts in av FlyEnv",
-  "setByNoApp": "Miljövariabler som inte ställts in av FlyEnv",
+  "setByApp": "Miljövariabler som ställts in av QTEnvDev",
+  "setByNoApp": "Miljövariabler som inte ställts in av QTEnvDev",
   "bundleinVersionDelTips": "Denna version ar en inbyggd version. Bekrafta att den inte ska visas?",
   "customDirVersionDelTips": "Denna version ar en version med anpassad sokvag. Bekrafta att den inte ska visas?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Starta denna uppgift som kräver utökad behörighet manuellt och slutför auktoriseringen i terminalen; macOS/Linux stöder inte automatiskt sudo i bakgrunden.",
-  "linuxFtpUnmanagedRoot": "Denna FTP-process som körs som root startades inte av FlyEnvs hanterade tjänst. Stoppa den med administratörsbehörighet innan du startar den igen.",
+  "linuxFtpUnmanagedRoot": "Denna FTP-process som körs som root startades inte av QTEnvDevs hanterade tjänst. Stoppa den med administratörsbehörighet innan du startar den igen.",
   "linuxFtpUsersRefreshFailed": "Ändringarna i FTP-kontona sparades, men den körande tjänsten kunde inte tillämpa dem: {error}",
   "pathSavedRefreshFailed": "Miljövariablerna sparades, men listan kunde inte uppdateras: {error}"
 }

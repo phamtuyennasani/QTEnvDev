@@ -1,7 +1,7 @@
 {
-  "description": "FlyEnv-lisensen støtter den videre utviklingen og vedlikeholdet av prosjektet. Den er ikke ment å blokkere kjernefunksjoner for lokal utvikling – kjernemiljøer og funksjoner for miljøadministrasjon vil alltid forbli tilgjengelige. En lisens fjerner prøvebegrensningene for premium-verktøy og bidrar til at FlyEnv vedlikeholdes på macOS, Windows og Linux.",
+  "description": "QTEnvDev-lisensen støtter den videre utviklingen og vedlikeholdet av prosjektet. Den er ikke ment å blokkere kjernefunksjoner for lokal utvikling – kjernemiljøer og funksjoner for miljøadministrasjon vil alltid forbli tilgjengelige. En lisens fjerner prøvebegrensningene for premium-verktøy og bidrar til at QTEnvDev vedlikeholdes på macOS, Windows og Linux.",
   "restrictions": {
-    "title": "FlyEnv forblir funksjonelt uten en lisens, men følgende prøvebegrensninger gjelder:",
+    "title": "QTEnvDev forblir funksjonelt uten en lisens, men følgende prøvebegrensninger gjelder:",
     "items": {
       "0": "Nettstedsadministrasjon er begrenset til maksimalt 3 lokale nettsteder.",
       "1": "AI-assistenten er begrenset til en prøveperiode på 3 dager.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Slik skaffer du en lisens",
-    "description": "FlyEnv tilbyr følgende tre måter å skaffe en lisens på. Lisenser kan ikke utstedes automatisk ennå, så alle forespørsler gjennomgås og utstedes manuelt:",
+    "description": "QTEnvDev tilbyr følgende tre måter å skaffe en lisens på. Lisenser kan ikke utstedes automatisk ennå, så alle forespørsler gjennomgås og utstedes manuelt:",
     "methods": {
       "0": {
         "title": "Kjøp en personlig lisens",
-        "description": "En personlig FlyEnv-lisens koster $10 USD. Den dekker én aktiv enhet (overføring til annen enhet støttes via lisensadministrasjon) og fjerner alle prøvebegrensninger. Betalingen behandles av Paddle. Etter kjøp sender du inn din Paddle-ordre-ID i forespørselskjemaet nedenfor. Kjøpsside:"
+        "description": "En personlig QTEnvDev-lisens koster $10 USD. Den dekker én aktiv enhet (overføring til annen enhet støttes via lisensadministrasjon) og fjerner alle prøvebegrensninger. Betalingen behandles av Paddle. Etter kjøp sender du inn din Paddle-ordre-ID i forespørselskjemaet nedenfor. Kjøpsside:"
       },
       "1": {
         "title": "Bidra til kodebasen",
-        "description": "Send inn en Pull Request på GitHub for å bidra til å forbedre FlyEnv. Alle meningsfulle bidrag teller – fra store funksjoner til enkle dokumentasjonsrettelser."
+        "description": "Send inn en Pull Request på GitHub for å bidra til å forbedre QTEnvDev. Alle meningsfulle bidrag teller – fra store funksjoner til enkle dokumentasjonsrettelser."
       },
       "2": {
         "title": "Spre budskapet",
-        "description": "Del dine erfaringer med FlyEnv på en hvilken som helst plattform og på et hvilket som helst språk – artikler, videoer, blogger eller innlegg. Innholdet må være originalt og autentisk; innhold som ble publisert for mer enn 3 måneder siden, kan ikke lenger være kvalifisert."
+        "description": "Del dine erfaringer med QTEnvDev på en hvilken som helst plattform og på et hvilket som helst språk – artikler, videoer, blogger eller innlegg. Innholdet må være originalt og autentisk; innhold som ble publisert for mer enn 3 måneder siden, kan ikke lenger være kvalifisert."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Autorisasjonskode ikke mottatt",
   "oauthTimeout": "Autorisasjon timeout",
   "oauthSuccessTitle": "Autorisasjon vellykket",
-  "oauthSuccessMessage": "Denne siden kan lukkes. Gå tilbake til FlyEnv for å se lisensinformasjonen.",
+  "oauthSuccessMessage": "Denne siden kan lukkes. Gå tilbake til QTEnvDev for å se lisensinformasjonen.",
   "trialExpiredTitle": "Lisensen er ikke aktivert",
-  "trialExpiredTips": "Du har brukt FlyEnv i {days} dager. Hvis FlyEnv har vært til hjelp for deg, vurder å skaffe en lisens for å støtte prosjektet."
+  "trialExpiredTips": "Du har brukt QTEnvDev i {days} dager. Hvis QTEnvDev har vært til hjelp for deg, vurder å skaffe en lisens for å støtte prosjektet."
 }

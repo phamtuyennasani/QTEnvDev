@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	flyEnvProfileMarkerBegin = "# >>> FlyEnv shell integration >>>"
-	flyEnvProfileMarkerEnd   = "# <<< FlyEnv shell integration <<<"
+	QTEnvDevProfileMarkerBegin = "# >>> QTEnvDev shell integration >>>"
+	QTEnvDevProfileMarkerEnd   = "# <<< QTEnvDev shell integration <<<"
 )
 
-var legacyFlyEnvAutoLoadBlock = regexp.MustCompile(`(?im)^[\t ]*# FlyEnv Auto-Load\r?\n[\t ]*\.[\t ]+["'][^"'\r\n]*[\\/]bin[\\/]flyenv\.ps1["'][\t ]*(?:\r?\n)?`)
+var legacyQTEnvDevAutoLoadBlock = regexp.MustCompile(`(?im)^[\t ]*# QTEnvDev Auto-Load\r?\n[\t ]*\.[\t ]+["'][^"'\r\n]*[\\/]bin[\\/]qtenvdev\.ps1["'][\t ]*(?:\r?\n)?`)
 
 // ToolManager embeds BaseManager, providing various system utility functionalities.
 type ToolManager struct {
@@ -36,34 +36,34 @@ type ExecResult struct {
 	Stderr string `json:"stderr"`
 }
 
-type FlyEnvPowerShellProfileTarget struct {
+type QTEnvDevPowerShellProfileTarget struct {
 	Edition string `json:"edition"`
 	Path    string `json:"path"`
 }
 
-type FlyEnvPowerShellIntegrationRequest struct {
+type QTEnvDevPowerShellIntegrationRequest struct {
 	ScriptPath   string                          `json:"scriptPath"`
 	ScriptBase64 string                          `json:"scriptBase64"`
-	Profiles     []FlyEnvPowerShellProfileTarget `json:"profiles"`
+	Profiles     []QTEnvDevPowerShellProfileTarget `json:"profiles"`
 }
 
-type FlyEnvPowerShellProfileResult struct {
+type QTEnvDevPowerShellProfileResult struct {
 	Edition string `json:"edition"`
 	Path    string `json:"path"`
 	State   string `json:"state"`
 }
 
-type FlyEnvPowerShellIntegrationResult struct {
+type QTEnvDevPowerShellIntegrationResult struct {
 	ScriptState string                          `json:"scriptState"`
-	Profiles    []FlyEnvPowerShellProfileResult `json:"profiles"`
+	Profiles    []QTEnvDevPowerShellProfileResult `json:"profiles"`
 }
 
-type flyEnvAtomicWrite struct {
+type QTEnvDevAtomicWrite struct {
 	Path string
 	Data []byte
 }
 
-type flyEnvAtomicWritePayload struct {
+type QTEnvDevAtomicWritePayload struct {
 	PathBase64 string `json:"pathBase64"`
 	DataBase64 string `json:"dataBase64"`
 }
@@ -108,7 +108,7 @@ func runPowerShellScript(script string) (string, string, error) {
 	return utils.ExecCommand(executable, powerShellEncodedArgs(script), nil)
 }
 
-func flyEnvDataDirectoryRecoveryScript(dataDirectory, userSID string) string {
+func QTEnvDevDataDirectoryRecoveryScript(dataDirectory, userSID string) string {
 	dataDirectoryBase64 := base64.StdEncoding.EncodeToString([]byte(dataDirectory))
 	userSIDBase64 := base64.StdEncoding.EncodeToString([]byte(userSID))
 	return fmt.Sprintf(`
@@ -116,22 +116,22 @@ $ErrorActionPreference = 'Stop'
 $dataPath = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%s'))
 $userSid = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%s'))
 if ([string]::IsNullOrWhiteSpace($dataPath) -or [string]::IsNullOrWhiteSpace($userSid)) {
-  throw 'FlyEnv data-directory recovery arguments are invalid'
+  throw 'QTEnvDev data-directory recovery arguments are invalid'
 }
 if (Test-Path -LiteralPath $dataPath) {
   $item = Get-Item -LiteralPath $dataPath -Force -ErrorAction Stop
   if (-not $item.PSIsContainer) {
-    throw 'FlyEnv data-directory recovery target is not a directory'
+    throw 'QTEnvDev data-directory recovery target is not a directory'
   }
   if (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
-    throw 'FlyEnv data-directory recovery target is a reparse point'
+    throw 'QTEnvDev data-directory recovery target is a reparse point'
   }
 } else {
   [System.IO.Directory]::CreateDirectory($dataPath) | Out-Null
 }
 $item = Get-Item -LiteralPath $dataPath -Force -ErrorAction Stop
 if (-not $item.PSIsContainer -or ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
-  throw 'FlyEnv data-directory recovery target is invalid after creation'
+  throw 'QTEnvDev data-directory recovery target is invalid after creation'
 }
 $acl = Get-Acl -LiteralPath $dataPath -ErrorAction Stop
 $userIdentity = New-Object System.Security.Principal.SecurityIdentifier($userSid)
@@ -141,26 +141,26 @@ Set-Acl -LiteralPath $dataPath -AclObject $acl -ErrorAction Stop
 `, dataDirectoryBase64, userSIDBase64)
 }
 
-// EnsureFlyEnvDataDirectory restores the single data root authorized by the
+// EnsureQTEnvDevDataDirectory restores the single data root authorized by the
 // elevated installer. It is intentionally separate from generic write helpers.
-func (t *ToolManager) EnsureFlyEnvDataDirectory(dataDirectory string) (bool, error) {
+func (t *ToolManager) EnsureQTEnvDevDataDirectory(dataDirectory string) (bool, error) {
 	if runtime.GOOS != "windows" {
-		return false, fmt.Errorf("FlyEnv data-directory recovery is only supported on Windows")
+		return false, fmt.Errorf("QTEnvDev data-directory recovery is only supported on Windows")
 	}
-	cleanDirectory, err := utils.ValidateFlyEnvDataDirectoryRoot(dataDirectory)
+	cleanDirectory, err := utils.ValidateQTEnvDevDataDirectoryRoot(dataDirectory)
 	if err != nil {
-		return false, fmt.Errorf("FlyEnv data-directory recovery target is not allowed: %w", err)
+		return false, fmt.Errorf("QTEnvDev data-directory recovery target is not allowed: %w", err)
 	}
 	userSID := t.TargetUserSID
 	if userSID == "" {
-		return false, fmt.Errorf("missing FlyEnv target user SID")
+		return false, fmt.Errorf("missing QTEnvDev target user SID")
 	}
-	_, _, err = runPowerShellScript(flyEnvDataDirectoryRecoveryScript(cleanDirectory, userSID))
+	_, _, err = runPowerShellScript(QTEnvDevDataDirectoryRecoveryScript(cleanDirectory, userSID))
 	if err != nil {
-		return false, fmt.Errorf("FlyEnv data-directory recovery command failed: %w", err)
+		return false, fmt.Errorf("QTEnvDev data-directory recovery command failed: %w", err)
 	}
-	if _, err := utils.ValidateFlyEnvDataDirectoryRoot(cleanDirectory); err != nil {
-		return false, fmt.Errorf("FlyEnv data-directory recovery validation failed: %w", err)
+	if _, err := utils.ValidateQTEnvDevDataDirectoryRoot(cleanDirectory); err != nil {
+		return false, fmt.Errorf("QTEnvDev data-directory recovery validation failed: %w", err)
 	}
 	return true, nil
 }
@@ -216,18 +216,18 @@ func (t *ToolManager) WriteBufferBase64ByRoot(file string, content string) (bool
 	return true, nil
 }
 
-type flyEnvProfileEncoding uint8
+type QTEnvDevProfileEncoding uint8
 
 const (
-	flyEnvProfileEncodingUTF8 flyEnvProfileEncoding = iota
-	flyEnvProfileEncodingUTF8BOM
-	flyEnvProfileEncodingUTF16LE
-	flyEnvProfileEncodingUTF16BE
+	QTEnvDevProfileEncodingUTF8 QTEnvDevProfileEncoding = iota
+	QTEnvDevProfileEncodingUTF8BOM
+	QTEnvDevProfileEncodingUTF16LE
+	QTEnvDevProfileEncodingUTF16BE
 )
 
-func decodeFlyEnvProfile(data []byte) (string, flyEnvProfileEncoding, error) {
+func decodeQTEnvDevProfile(data []byte) (string, QTEnvDevProfileEncoding, error) {
 	if len(data) >= 3 && data[0] == 0xef && data[1] == 0xbb && data[2] == 0xbf {
-		return string(data[3:]), flyEnvProfileEncodingUTF8BOM, nil
+		return string(data[3:]), QTEnvDevProfileEncodingUTF8BOM, nil
 	}
 	if len(data) >= 2 && data[0] == 0xff && data[1] == 0xfe {
 		if (len(data)-2)%2 != 0 {
@@ -237,7 +237,7 @@ func decodeFlyEnvProfile(data []byte) (string, flyEnvProfileEncoding, error) {
 		for i := range values {
 			values[i] = binary.LittleEndian.Uint16(data[2+i*2:])
 		}
-		return string(utf16.Decode(values)), flyEnvProfileEncodingUTF16LE, nil
+		return string(utf16.Decode(values)), QTEnvDevProfileEncodingUTF16LE, nil
 	}
 	if len(data) >= 2 && data[0] == 0xfe && data[1] == 0xff {
 		if (len(data)-2)%2 != 0 {
@@ -247,19 +247,19 @@ func decodeFlyEnvProfile(data []byte) (string, flyEnvProfileEncoding, error) {
 		for i := range values {
 			values[i] = binary.BigEndian.Uint16(data[2+i*2:])
 		}
-		return string(utf16.Decode(values)), flyEnvProfileEncodingUTF16BE, nil
+		return string(utf16.Decode(values)), QTEnvDevProfileEncodingUTF16BE, nil
 	}
-	return string(data), flyEnvProfileEncodingUTF8, nil
+	return string(data), QTEnvDevProfileEncodingUTF8, nil
 }
 
-func encodeFlyEnvProfile(content string, encoding flyEnvProfileEncoding) []byte {
+func encodeQTEnvDevProfile(content string, encoding QTEnvDevProfileEncoding) []byte {
 	switch encoding {
-	case flyEnvProfileEncodingUTF8BOM:
+	case QTEnvDevProfileEncodingUTF8BOM:
 		return append([]byte{0xef, 0xbb, 0xbf}, []byte(content)...)
-	case flyEnvProfileEncodingUTF16LE, flyEnvProfileEncodingUTF16BE:
+	case QTEnvDevProfileEncodingUTF16LE, QTEnvDevProfileEncodingUTF16BE:
 		values := utf16.Encode([]rune(content))
 		result := make([]byte, 2+len(values)*2)
-		if encoding == flyEnvProfileEncodingUTF16LE {
+		if encoding == QTEnvDevProfileEncodingUTF16LE {
 			result[0], result[1] = 0xff, 0xfe
 			for i, value := range values {
 				binary.LittleEndian.PutUint16(result[2+i*2:], value)
@@ -276,42 +276,42 @@ func encodeFlyEnvProfile(content string, encoding flyEnvProfileEncoding) []byte 
 	}
 }
 
-func flyEnvProfileNewline(content string) string {
+func QTEnvDevProfileNewline(content string) string {
 	if strings.Contains(content, "\r\n") {
 		return "\r\n"
 	}
 	return "\n"
 }
 
-func flyEnvProfileBlock(scriptPath, newline string) string {
+func QTEnvDevProfileBlock(scriptPath, newline string) string {
 	quotedPath := strings.ReplaceAll(scriptPath, "'", "''")
 	return strings.Join([]string{
-		flyEnvProfileMarkerBegin,
-		"$flyenvScript = '" + quotedPath + "'",
-		"if (Test-Path -LiteralPath $flyenvScript) {",
-		"  . $flyenvScript",
+		QTEnvDevProfileMarkerBegin,
+		"$qtenvdevScript = '" + quotedPath + "'",
+		"if (Test-Path -LiteralPath $qtenvdevScript) {",
+		"  . $qtenvdevScript",
 		"}",
-		flyEnvProfileMarkerEnd,
+		QTEnvDevProfileMarkerEnd,
 	}, newline)
 }
 
-func reconcileFlyEnvProfile(content, scriptPath string) (string, bool, error) {
+func reconcileQTEnvDevProfile(content, scriptPath string) (string, bool, error) {
 	original := content
-	content = legacyFlyEnvAutoLoadBlock.ReplaceAllString(content, "")
-	beginCount := strings.Count(content, flyEnvProfileMarkerBegin)
-	endCount := strings.Count(content, flyEnvProfileMarkerEnd)
+	content = legacyQTEnvDevAutoLoadBlock.ReplaceAllString(content, "")
+	beginCount := strings.Count(content, QTEnvDevProfileMarkerBegin)
+	endCount := strings.Count(content, QTEnvDevProfileMarkerEnd)
 	if beginCount != endCount || beginCount > 1 {
-		return "", false, fmt.Errorf("ambiguous FlyEnv PowerShell profile marker blocks")
+		return "", false, fmt.Errorf("ambiguous QTEnvDev PowerShell profile marker blocks")
 	}
-	newline := flyEnvProfileNewline(content)
-	block := flyEnvProfileBlock(scriptPath, newline)
-	start := strings.Index(content, flyEnvProfileMarkerBegin)
-	end := strings.Index(content, flyEnvProfileMarkerEnd)
+	newline := QTEnvDevProfileNewline(content)
+	block := QTEnvDevProfileBlock(scriptPath, newline)
+	start := strings.Index(content, QTEnvDevProfileMarkerBegin)
+	end := strings.Index(content, QTEnvDevProfileMarkerEnd)
 	if start >= 0 || end >= 0 {
 		if start < 0 || end < start {
-			return "", false, fmt.Errorf("incomplete FlyEnv PowerShell profile marker block")
+			return "", false, fmt.Errorf("incomplete QTEnvDev PowerShell profile marker block")
 		}
-		end += len(flyEnvProfileMarkerEnd)
+		end += len(QTEnvDevProfileMarkerEnd)
 		updated := content[:start] + block + content[end:]
 		return updated, updated != original, nil
 	}
@@ -323,15 +323,15 @@ func reconcileFlyEnvProfile(content, scriptPath string) (string, bool, error) {
 	return updated, updated != original, nil
 }
 
-func writeFlyEnvAtomically(path string, data []byte) error {
+func writeQTEnvDevAtomically(path string, data []byte) error {
 	if runtime.GOOS == "windows" {
-		return writeFlyEnvAtomicallyBatchWithPowerShell([]flyEnvAtomicWrite{{Path: path, Data: data}})
+		return writeQTEnvDevAtomicallyBatchWithPowerShell([]QTEnvDevAtomicWrite{{Path: path, Data: data}})
 	}
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
-	temporary, err := os.CreateTemp(dir, ".flyenv-shell-*")
+	temporary, err := os.CreateTemp(dir, ".qtenvdev-shell-*")
 	if err != nil {
 		return err
 	}
@@ -356,11 +356,11 @@ func writeFlyEnvAtomically(path string, data []byte) error {
 // provider's byte stream and Move-Item operations. Send all changed files in
 // one PowerShell process; each file still has its own same-directory atomic
 // replacement.
-func writeFlyEnvAtomicallyBatchWithPowerShell(writes []flyEnvAtomicWrite) error {
+func writeQTEnvDevAtomicallyBatchWithPowerShell(writes []QTEnvDevAtomicWrite) error {
 	if len(writes) == 0 {
 		return nil
 	}
-	payload := make([]flyEnvAtomicWritePayload, 0, len(writes))
+	payload := make([]QTEnvDevAtomicWritePayload, 0, len(writes))
 	for _, write := range writes {
 		// 原业务入口已经验证 runtime/profile 的精确范围；这里在序列化前重查语法
 		// 和路径链。不能按通用 allowed-root 重验 profile，否则重定向 Documents 会被误拒绝。
@@ -372,14 +372,14 @@ func writeFlyEnvAtomicallyBatchWithPowerShell(writes []flyEnvAtomicWrite) error 
 		} else if hasReparse {
 			return fmt.Errorf("PowerShell write path contains a reparse point")
 		}
-		payload = append(payload, flyEnvAtomicWritePayload{
+		payload = append(payload, QTEnvDevAtomicWritePayload{
 			PathBase64: base64.StdEncoding.EncodeToString([]byte(write.Path)),
 			DataBase64: base64.StdEncoding.EncodeToString(write.Data),
 		})
 	}
 	payloadJSON, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("failed to encode FlyEnv PowerShell write payload: %w", err)
+		return fmt.Errorf("failed to encode QTEnvDev PowerShell write payload: %w", err)
 	}
 	payloadBase64 := base64.StdEncoding.EncodeToString(payloadJSON)
 	script := fmt.Sprintf(`$ErrorActionPreference = 'Stop'
@@ -390,7 +390,7 @@ foreach ($write in @($writes)) {
   [byte[]]$bytes = [Convert]::FromBase64String([string]$write.dataBase64)
   $directory = Split-Path -Parent $target
   New-Item -ItemType Directory -Path $directory -Force | Out-Null
-  $temporary = Join-Path $directory ('.flyenv-shell-' + [Guid]::NewGuid().ToString('N') + '.tmp')
+  $temporary = Join-Path $directory ('.qtenvdev-shell-' + [Guid]::NewGuid().ToString('N') + '.tmp')
   try {
     Set-Content -LiteralPath $temporary -Value $bytes -Encoding Byte -Force
     Move-Item -LiteralPath $temporary -Destination $target -Force -ErrorAction Stop
@@ -409,71 +409,71 @@ foreach ($write in @($writes)) {
 	return nil
 }
 
-func writeFlyEnvScript(path string, data []byte) (string, error) {
+func writeQTEnvDevScript(path string, data []byte) (string, error) {
 	if existing, err := os.ReadFile(path); err == nil && string(existing) == string(data) {
 		return "unchanged", nil
 	}
-	if err := writeFlyEnvAtomically(path, data); err != nil {
+	if err := writeQTEnvDevAtomically(path, data); err != nil {
 		return "failed", err
 	}
 	return "updated", nil
 }
 
-func writeFlyEnvProfile(target FlyEnvPowerShellProfileTarget, scriptPath string) (FlyEnvPowerShellProfileResult, error) {
-	result, write, err := prepareFlyEnvProfileWrite(target, scriptPath)
+func writeQTEnvDevProfile(target QTEnvDevPowerShellProfileTarget, scriptPath string) (QTEnvDevPowerShellProfileResult, error) {
+	result, write, err := prepareQTEnvDevProfileWrite(target, scriptPath)
 	if err != nil || write == nil {
 		return result, err
 	}
-	if err := writeFlyEnvAtomically(write.Path, write.Data); err != nil {
-		return FlyEnvPowerShellProfileResult{}, err
+	if err := writeQTEnvDevAtomically(write.Path, write.Data); err != nil {
+		return QTEnvDevPowerShellProfileResult{}, err
 	}
 	return result, nil
 }
 
-func prepareFlyEnvProfileWrite(target FlyEnvPowerShellProfileTarget, scriptPath string) (FlyEnvPowerShellProfileResult, *flyEnvAtomicWrite, error) {
-	cleanPath, err := utils.ValidateFlyEnvPowerShellProfilePath(target.Path, target.Edition)
+func prepareQTEnvDevProfileWrite(target QTEnvDevPowerShellProfileTarget, scriptPath string) (QTEnvDevPowerShellProfileResult, *QTEnvDevAtomicWrite, error) {
+	cleanPath, err := utils.ValidateQTEnvDevPowerShellProfilePath(target.Path, target.Edition)
 	if err != nil {
-		return FlyEnvPowerShellProfileResult{}, nil, err
+		return QTEnvDevPowerShellProfileResult{}, nil, err
 	}
 	original, readErr := os.ReadFile(cleanPath)
 	if readErr != nil && !os.IsNotExist(readErr) {
-		return FlyEnvPowerShellProfileResult{}, nil, readErr
+		return QTEnvDevPowerShellProfileResult{}, nil, readErr
 	}
-	content, encoding := "", flyEnvProfileEncodingUTF8
+	content, encoding := "", QTEnvDevProfileEncodingUTF8
 	if readErr == nil {
-		content, encoding, err = decodeFlyEnvProfile(original)
+		content, encoding, err = decodeQTEnvDevProfile(original)
 		if err != nil {
-			return FlyEnvPowerShellProfileResult{}, nil, err
+			return QTEnvDevPowerShellProfileResult{}, nil, err
 		}
 	}
-	updated, changed, err := reconcileFlyEnvProfile(content, scriptPath)
+	updated, changed, err := reconcileQTEnvDevProfile(content, scriptPath)
 	if err != nil {
-		return FlyEnvPowerShellProfileResult{}, nil, err
+		return QTEnvDevPowerShellProfileResult{}, nil, err
 	}
 	state := "unchanged"
 	if changed {
 		state = "updated"
-		return FlyEnvPowerShellProfileResult{Edition: target.Edition, Path: cleanPath, State: state}, &flyEnvAtomicWrite{
+		return QTEnvDevPowerShellProfileResult{Edition: target.Edition, Path: cleanPath, State: state}, &QTEnvDevAtomicWrite{
 			Path: cleanPath,
-			Data: encodeFlyEnvProfile(updated, encoding),
+			Data: encodeQTEnvDevProfile(updated, encoding),
 		}, nil
 	}
-	return FlyEnvPowerShellProfileResult{Edition: target.Edition, Path: cleanPath, State: state}, nil, nil
+	return QTEnvDevPowerShellProfileResult{Edition: target.Edition, Path: cleanPath, State: state}, nil, nil
 }
 
-// validateFlyEnvPowerShellProfiles deliberately does not consult TargetUserSID.
+// validateQTEnvDevPowerShellProfiles deliberately does not consult TargetUserSID.
 // Electron's Documents known-folder result is the authority for profile
 // placement; ownership is not a requirement for redirected Documents trees.
-func (t *ToolManager) validateFlyEnvPowerShellProfiles(
-	requested []FlyEnvPowerShellProfileTarget,
-) ([]FlyEnvPowerShellProfileTarget, error) {
-	profiles := make([]FlyEnvPowerShellProfileTarget, 0, len(requested))
+func (t *ToolManager) validateQTEnvDevPowerShellProfiles(
+	requested []QTEnvDevPowerShellProfileTarget,
+) ([]QTEnvDevPowerShellProfileTarget, error) {
+	profiles := make([]QTEnvDevPowerShellProfileTarget, 0, len(requested))
 	seenEditions := make(map[string]bool)
 	for _, profile := range requested {
 		if seenEditions[profile.Edition] {
 			return nil, fmt.Errorf("duplicate PowerShell profile edition: %s", profile.Edition)
 		}
-		cleanProfilePath, err := utils.ValidateFlyEnvPowerShellProfilePath(profile.Path, profile.Edition)
+		cleanProfilePath, err := utils.ValidateQTEnvDevPowerShellProfilePath(profile.Path, profile.Edition)
 		if err != nil {
 			return nil, fmt.Errorf("invalid %s profile: %w", profile.Edition, err)
 		}
@@ -481,60 +481,60 @@ func (t *ToolManager) validateFlyEnvPowerShellProfiles(
 		// That known-folder result is authoritative: redirected or restored
 		// Documents trees need not have an ancestor owned by the target SID.
 		seenEditions[profile.Edition] = true
-		profiles = append(profiles, FlyEnvPowerShellProfileTarget{Edition: profile.Edition, Path: cleanProfilePath})
+		profiles = append(profiles, QTEnvDevPowerShellProfileTarget{Edition: profile.Edition, Path: cleanProfilePath})
 	}
 	return profiles, nil
 }
 
-// InstallFlyEnvPowerShellIntegration is deliberately narrower than the
-// generic writeFileByRoot operation. It can only update FlyEnv's runtime
+// InstallQTEnvDevPowerShellIntegration is deliberately narrower than the
+// generic writeFileByRoot operation. It can only update QTEnvDev's runtime
 // script and the two edition-specific standard PowerShell profile locations.
-func (t *ToolManager) InstallFlyEnvPowerShellIntegration(
-	request FlyEnvPowerShellIntegrationRequest,
-) (FlyEnvPowerShellIntegrationResult, error) {
+func (t *ToolManager) InstallQTEnvDevPowerShellIntegration(
+	request QTEnvDevPowerShellIntegrationRequest,
+) (QTEnvDevPowerShellIntegrationResult, error) {
 	if runtime.GOOS != "windows" {
-		return FlyEnvPowerShellIntegrationResult{}, fmt.Errorf("PowerShell integration is only supported on Windows")
+		return QTEnvDevPowerShellIntegrationResult{}, fmt.Errorf("PowerShell integration is only supported on Windows")
 	}
 	if request.ScriptPath == "" || len(request.ScriptBase64) == 0 {
-		return FlyEnvPowerShellIntegrationResult{}, fmt.Errorf("FlyEnv PowerShell integration requires a script path and content")
+		return QTEnvDevPowerShellIntegrationResult{}, fmt.Errorf("QTEnvDev PowerShell integration requires a script path and content")
 	}
-	cleanScriptPath, err := utils.ValidateFlyEnvPowerShellRuntimeScriptPath(request.ScriptPath)
+	cleanScriptPath, err := utils.ValidateQTEnvDevPowerShellRuntimeScriptPath(request.ScriptPath)
 	if err != nil {
-		return FlyEnvPowerShellIntegrationResult{}, fmt.Errorf("runtime script path is not allowed: %w", err)
+		return QTEnvDevPowerShellIntegrationResult{}, fmt.Errorf("runtime script path is not allowed: %w", err)
 	}
 	script, err := base64.StdEncoding.DecodeString(request.ScriptBase64)
 	if err != nil || len(script) == 0 || len(script) > 1024*1024 {
-		return FlyEnvPowerShellIntegrationResult{}, fmt.Errorf("invalid FlyEnv PowerShell runtime script content")
+		return QTEnvDevPowerShellIntegrationResult{}, fmt.Errorf("invalid QTEnvDev PowerShell runtime script content")
 	}
 	if len(request.Profiles) == 0 {
-		return FlyEnvPowerShellIntegrationResult{}, fmt.Errorf("no PowerShell profiles were discovered")
+		return QTEnvDevPowerShellIntegrationResult{}, fmt.Errorf("no PowerShell profiles were discovered")
 	}
-	profiles, err := t.validateFlyEnvPowerShellProfiles(request.Profiles)
+	profiles, err := t.validateQTEnvDevPowerShellProfiles(request.Profiles)
 	if err != nil {
-		return FlyEnvPowerShellIntegrationResult{}, err
+		return QTEnvDevPowerShellIntegrationResult{}, err
 	}
 	scriptState := "updated"
-	writes := make([]flyEnvAtomicWrite, 0, len(profiles)+1)
+	writes := make([]QTEnvDevAtomicWrite, 0, len(profiles)+1)
 	if existing, readErr := os.ReadFile(cleanScriptPath); readErr == nil && string(existing) == string(script) {
 		scriptState = "unchanged"
 	} else if readErr != nil && !os.IsNotExist(readErr) {
-		return FlyEnvPowerShellIntegrationResult{}, fmt.Errorf("failed to read FlyEnv runtime script: %w", readErr)
+		return QTEnvDevPowerShellIntegrationResult{}, fmt.Errorf("failed to read QTEnvDev runtime script: %w", readErr)
 	} else {
-		writes = append(writes, flyEnvAtomicWrite{Path: cleanScriptPath, Data: script})
+		writes = append(writes, QTEnvDevAtomicWrite{Path: cleanScriptPath, Data: script})
 	}
-	result := FlyEnvPowerShellIntegrationResult{ScriptState: scriptState}
+	result := QTEnvDevPowerShellIntegrationResult{ScriptState: scriptState}
 	for _, profile := range profiles {
-		profileResult, write, err := prepareFlyEnvProfileWrite(profile, cleanScriptPath)
+		profileResult, write, err := prepareQTEnvDevProfileWrite(profile, cleanScriptPath)
 		if err != nil {
-			return FlyEnvPowerShellIntegrationResult{}, fmt.Errorf("failed to update %s profile: %w", profile.Edition, err)
+			return QTEnvDevPowerShellIntegrationResult{}, fmt.Errorf("failed to update %s profile: %w", profile.Edition, err)
 		}
 		result.Profiles = append(result.Profiles, profileResult)
 		if write != nil {
 			writes = append(writes, *write)
 		}
 	}
-	if err := writeFlyEnvAtomicallyBatchWithPowerShell(writes); err != nil {
-		return FlyEnvPowerShellIntegrationResult{}, fmt.Errorf("failed to install FlyEnv PowerShell integration: %w", err)
+	if err := writeQTEnvDevAtomicallyBatchWithPowerShell(writes); err != nil {
+		return QTEnvDevPowerShellIntegrationResult{}, fmt.Errorf("failed to install QTEnvDev PowerShell integration: %w", err)
 	}
 	return result, nil
 }
@@ -917,8 +917,8 @@ catch {
   if ($_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound -and $errorId -like 'CmdletizationQuery_NotFound*,Get-NetTCPConnection*') { $connections = @() }
   else { throw }
 }
-$global:FlyEnvTcpProcessIds = @($connections | Select-Object -ExpandProperty OwningProcess | ForEach-Object { [string]$_ } | Sort-Object -Unique)
-ConvertTo-Json -InputObject $global:FlyEnvTcpProcessIds -Compress`, port, state)
+$global:QTEnvDevTcpProcessIds = @($connections | Select-Object -ExpandProperty OwningProcess | ForEach-Object { [string]$_ } | Sort-Object -Unique)
+ConvertTo-Json -InputObject $global:QTEnvDevTcpProcessIds -Compress`, port, state)
 	stdout, stderr, err := runPowerShellScript(script)
 	if err != nil {
 		return nil, fmt.Errorf("Windows TCP port query failed: %w; stderr: %s", err, stderr)
@@ -1077,10 +1077,10 @@ func (t *ToolManager) SetSystemPath(paths []string, otherVars map[string]string,
 		}
 	}
 
-	if err := windowsSetMachineEnv("FLYENV_ENV_FLUSH", "0"); err != nil {
-		return false, fmt.Errorf("failed to set FLYENV_ENV_FLUSH: %w", err)
+	if err := windowsSetMachineEnv("QTENVDEV_ENV_FLUSH", "0"); err != nil {
+		return false, fmt.Errorf("failed to set QTENVDEV_ENV_FLUSH: %w", err)
 	}
-	// 只确认注册表提交；通知由 FlyEnv 实际环境业务 resolve/reject 后统一安排。
+	// 只确认注册表提交；通知由 QTEnvDev 实际环境业务 resolve/reject 后统一安排。
 	// 不在 Helper 提前广播，避免业务仍在刷新列表时启动通知或收到两次通知。
 	return true, nil
 }
@@ -1126,7 +1126,7 @@ func (t *ToolManager) SetAutoStartWin(enabled bool, taskName, exePath string) (b
 	if err := utils.ValidateAutoStartTask(enabled, taskName, exePath); err != nil {
 		return false, err
 	}
-	if taskName != "FlyEnvStartup" || t.TargetUserSID == "" {
+	if taskName != "QTEnvDevStartup" || t.TargetUserSID == "" {
 		return false, fmt.Errorf("helper tasks are installer-owned; app startup requires target SID")
 	}
 
@@ -1152,7 +1152,7 @@ $action.Path = $config.exePath
 $definition.Principal.UserId = $config.sid
 $definition.Principal.LogonType = 3
 $definition.Principal.RunLevel = 0
-$scheduler.GetFolder('\').RegisterTaskDefinition('FlyEnvStartup', $definition, 6, $config.sid, $null, 3) | Out-Null
+$scheduler.GetFolder('\').RegisterTaskDefinition('QTEnvDevStartup', $definition, 6, $config.sid, $null, 3) | Out-Null
 `, base64.StdEncoding.EncodeToString(payload))
 		_, stderr, err := runPowerShellScript(script)
 		if err != nil {
@@ -1178,9 +1178,9 @@ func (t *ToolManager) RemoveLoginItemMac(name string) (bool, error) {
 	if !utils.IsMacOS() {
 		return false, fmt.Errorf("RemoveLoginItemMac is only supported on macOS")
 	}
-	// 只允许删除 FlyEnv 或 Electron 的登录项
-	if name != "FlyEnv" && name != "Electron" {
-		return false, fmt.Errorf("invalid login item name: %s (only FlyEnv or Electron allowed)", name)
+	// 只允许删除 QTEnvDev 或 Electron 的登录项
+	if name != "QTEnvDev" && name != "Electron" {
+		return false, fmt.Errorf("invalid login item name: %s (only QTEnvDev or Electron allowed)", name)
 	}
 	// AppleScript strings escape double quotes by doubling them: " -> ""
 	escapedName := strings.ReplaceAll(name, `"`, `""`)

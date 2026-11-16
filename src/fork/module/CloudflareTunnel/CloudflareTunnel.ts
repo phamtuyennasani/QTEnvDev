@@ -59,7 +59,7 @@ export class CloudflareTunnel {
   }
 
   /**
-   * 获取Tunnel. 查找Tunnel name为 FlyEnv-Tunnel-{md5(apiToken)} 的隧道
+   * 获取Tunnel. 查找Tunnel name为 QTEnvDev-Tunnel-{md5(apiToken)} 的隧道
    * 如果找到了 更新tunnelId和tunnelToken
    * 未找到, 新建隧道
    */
@@ -67,7 +67,7 @@ export class CloudflareTunnel {
     const cfClient = this.client()
     // 取 API Token 的 MD5 前 12 位作为标识，保证同一 Token 下名称固定且不泄露明文
     const tokenHash = crypto.createHash('md5').update(this.apiToken).digest('hex').substring(0, 12)
-    const tunnelName = `FlyEnv-Tunnel-${tokenHash}`
+    const tunnelName = `QTEnvDev-Tunnel-${tokenHash}`
     this.tunnelName = tunnelName
     console.log(`正在查找或创建隧道: ${tunnelName}`)
 

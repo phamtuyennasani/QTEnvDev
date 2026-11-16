@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Write simplified AI Memory MCP calls to FlyEnv's persistent audit file and expose detailed, content-redacted in-memory calls in a dedicated AI Memory tab.
+**Goal:** Write simplified AI Memory MCP calls to QTEnvDev's persistent audit file and expose detailed, content-redacted in-memory calls in a dedicated AI Memory tab.
 
 **Architecture:** `MCPServer` owns the supplementary file-audit call and delegates persistent writes to `MCPAudit.logPlugin()`. `PluginMCPAudit` remains the bounded in-memory owner and adds whitelisted request plus content-redacted response snapshots. The existing `MemoryController` owns call-record IPC; a new view component renders the records.
 
-**Tech Stack:** TypeScript, Vue 3, Element Plus, Node.js test runner, FlyEnv MCP.
+**Tech Stack:** TypeScript, Vue 3, Element Plus, Node.js test runner, QTEnvDev MCP.
 
 ---
 
@@ -39,10 +39,10 @@ Add a search call containing two queries, filters, two result summaries and a ne
 ```ts
 test('detailed calls retain queries and summaries but recursively exclude content', () => {
   const audit = new PluginMCPAudit()
-  audit.register('ai-memory', ['flyenv_memory_search'])
-  audit.log('flyenv_memory_search', {
+  audit.register('ai-memory', ['qtenvdev_memory_search'])
+  audit.log('qtenvdev_memory_search', {
     args: {
-      scope: 'project', project_path: '/work/FlyEnv', queries: ['没有命中', 'MCP'],
+      scope: 'project', project_path: '/work/QTEnvDev', queries: ['没有命中', 'MCP'],
       topic: 'audit', tags: ['mcp'], limit: 8
     },
     result: {
@@ -90,11 +90,11 @@ const withoutContent = (value: any): any => {
 const requestSnapshot = (tool: string, args: any) => {
   const common = ['scope', 'project_path', 'id', 'request_id', 'expected_revision']
   const fields: Record<string, string[]> = {
-    flyenv_memory_search: [...common, 'queries', 'type', 'topic', 'tags', 'include_global', 'status', 'include_expired', 'limit'],
-    flyenv_memory_get: [...common, 'revision'],
-    flyenv_memory_store: [...common, 'type', 'topic', 'title', 'summary', 'tags', 'source', 'status', 'pinned', 'expires_at', 'occurred_at', 'create_project'],
-    flyenv_memory_update: [...common, 'reason', 'changes'],
-    flyenv_memory_forget: common
+    qtenvdev_memory_search: [...common, 'queries', 'type', 'topic', 'tags', 'include_global', 'status', 'include_expired', 'limit'],
+    qtenvdev_memory_get: [...common, 'revision'],
+    qtenvdev_memory_store: [...common, 'type', 'topic', 'title', 'summary', 'tags', 'source', 'status', 'pinned', 'expires_at', 'occurred_at', 'create_project'],
+    qtenvdev_memory_update: [...common, 'reason', 'changes'],
+    qtenvdev_memory_forget: common
   }
   return Object.fromEntries(
     (fields[tool] ?? ['request_id'])
@@ -131,14 +131,14 @@ git commit -m "feat: add detailed AI memory call diagnostics"
 Set `global.Server.BaseDir` to a temporary directory, call `MCPAudit.logPlugin()` with private query, summary and content markers, and read `mcp/audit.log`. Assert one JSON line includes tool, plugin, outcome, UUID, revision, duration and client but none of the private markers.
 
 ```ts
-await MCPAudit.logPlugin('flyenv_memory_store', 'ai-memory', {
+await MCPAudit.logPlugin('qtenvdev_memory_store', 'ai-memory', {
   args: { request_id: id, queries: [secret], summary: secret, content: secret },
   result: { outcome: 'success', data: { id, revision: 1 } },
   durationMs: 7,
   client: { name: 'Codex', version: '0.167.0' }
 })
 const row = JSON.parse((await readFile(join(root, 'mcp/audit.log'), 'utf8')).trim())
-assert.equal(row.tool, 'flyenv_memory_store')
+assert.equal(row.tool, 'qtenvdev_memory_store')
 assert.equal(row.pluginId, 'ai-memory')
 assert.equal(row.id, id)
 assert.equal(row.revision, 1)
@@ -245,7 +245,7 @@ git commit -m "feat: add AI memory call records tab"
 
 **Files:**
 - Modify only if required by existing smoke selectors: `test/fixtures/ai-memory-app-smoke-host.ts`
-- Review: `docs/skills/flyenv-failure-boundaries/SKILL.md`
+- Review: `docs/skills/qtenvdev-failure-boundaries/SKILL.md`
 
 - [ ] **Step 1: Run static checks**
 
@@ -263,7 +263,7 @@ Expected: all tests pass and the production plugin contract succeeds.
 
 - [ ] **Step 3: Exercise real MCP calls and inspect both logs**
 
-Run the existing AI Memory app smoke/acceptance path against the modified host, or perform a real `flyenv_memory_search` through a configured FlyEnv MCP client. Confirm the simplified file row exists without queries/summary/content and the calls tab shows the same search with queries, filters, hit summaries and no content. Verify a no-hit query has `queries` plus `hit_count: 0` and a successful write retains its receipt metadata.
+Run the existing AI Memory app smoke/acceptance path against the modified host, or perform a real `qtenvdev_memory_search` through a configured QTEnvDev MCP client. Confirm the simplified file row exists without queries/summary/content and the calls tab shows the same search with queries, filters, hit summaries and no content. Verify a no-hit query has `queries` plus `hit_count: 0` and a successful write retains its receipt metadata.
 
 - [ ] **Step 4: Review failure boundaries and clean artifacts**
 

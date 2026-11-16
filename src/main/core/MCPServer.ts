@@ -34,7 +34,7 @@ import {
 } from './mcpToolMetadata'
 
 /**
- * MCPServer —— FlyEnv 作为 MCP Server 的宿主（main 进程内）。
+ * MCPServer —— QTEnvDev 作为 MCP Server 的宿主（main 进程内）。
  *
  * 设计要点（见方案 §4）：
  *   - 跑在 main 进程，长期持有 ForkManager 句柄
@@ -363,7 +363,7 @@ export default class MCPServer {
             version: {
               type: 'string',
               description:
-                'Optional installed version string to stop. If omitted, FlyEnv stops every running instance currently tracked for that lifecycle-managed service.'
+                'Optional installed version string to stop. If omitted, QTEnvDev stops every running instance currently tracked for that lifecycle-managed service.'
             }
           },
           required: ['flag']
@@ -403,7 +403,7 @@ export default class MCPServer {
             version: {
               type: 'string',
               description:
-                'Optional installed version string to restart. If omitted, FlyEnv restarts the current enabled version for that lifecycle-managed service.'
+                'Optional installed version string to restart. If omitted, QTEnvDev restarts the current enabled version for that lifecycle-managed service.'
             }
           },
           required: ['flag']
@@ -484,7 +484,7 @@ export default class MCPServer {
           type: 'object',
           properties: {
             siteName: { type: 'string', description: MCP_PARAM_DESCRIPTIONS.siteName },
-            name: { type: 'string', description: 'New primary FlyEnv site domain name.' },
+            name: { type: 'string', description: 'New primary QTEnvDev site domain name.' },
             alias: { type: 'string', description: MCP_PARAM_DESCRIPTIONS.siteAlias },
             mark: { type: 'string', description: MCP_PARAM_DESCRIPTIONS.siteMark },
             bookmark: { type: 'string', description: MCP_PARAM_DESCRIPTIONS.siteBookmark },
@@ -494,7 +494,7 @@ export default class MCPServer {
             phpVersion: { type: 'number', description: MCP_PARAM_DESCRIPTIONS.sitePhpVersion },
             phpVersionFull: {
               type: 'string',
-              description: 'Optional full PHP version string stored with the FlyEnv site.'
+              description: 'Optional full PHP version string stored with the QTEnvDev site.'
             },
             useSSL: { type: 'boolean', description: MCP_PARAM_DESCRIPTIONS.siteUseSsl },
             autoSSL: { type: 'boolean', description: MCP_PARAM_DESCRIPTIONS.siteAutoSsl },
@@ -597,7 +597,7 @@ export default class MCPServer {
   /** 创建一个 MCP Server 实例并注册 handlers（每个连接一个 transport，但 Server 逻辑共享定义） */
   private createMcpServer(): Server {
     const server = new Server(
-      { name: 'flyenv', version: '1.0.0' },
+      { name: 'qtenvdev', version: '1.0.0' },
       { capabilities: { tools: {}, resources: {} } }
     )
 
@@ -701,9 +701,9 @@ export default class MCPServer {
         }
 
         let data: any
-        if (uri === 'flyenv://services') {
+        if (uri === 'qtenvdev://services') {
           data = await this.tools.listServices([...MCP_QUERYABLE_FLAGS])
-        } else if (uri === 'flyenv://sites') {
+        } else if (uri === 'qtenvdev://sites') {
           data = await this.tools.listSites()
         } else {
           throw new Error(`Unknown resource: ${uri}`)
@@ -738,7 +738,7 @@ export default class MCPServer {
         buttons: ['Cancel', 'Confirm'],
         defaultId: 0,
         cancelId: 0,
-        title: 'FlyEnv MCP',
+        title: 'QTEnvDev MCP',
         message: `Allow MCP tool "${name}"?`,
         detail: detail || undefined
       })

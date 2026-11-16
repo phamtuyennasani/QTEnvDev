@@ -52,7 +52,7 @@ class Rnacos extends Base {
 # RNACOS_GRPC_PORT=9848
 # RNACOS_HTTP_CONSOLE_PORT=10848
 
-# === 数据目录 (由 FlyEnv 自动管理) ===
+# === 数据目录 (由 QTEnvDev 自动管理) ===
 # RNACOS_DATA_DIR=${join(baseDir, 'data')}
 
 # === 控制台账号 ===
@@ -70,7 +70,7 @@ class Rnacos extends Base {
 # RNACOS_GRPC_PORT=9848
 # RNACOS_HTTP_CONSOLE_PORT=10848
 
-# === Data Directory (Managed by FlyEnv) ===
+# === Data Directory (Managed by QTEnvDev) ===
 # RNACOS_DATA_DIR=${join(baseDir, 'data')}
 
 # === Console Account ===

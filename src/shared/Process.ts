@@ -115,7 +115,7 @@ const processMatchesOwnedMarker = (item: PItem, markerValue: string) => {
 }
 
 /**
- * 仅当 PID 当前仍归属于 FlyEnv 管理的服务时，才返回可安全回收的进程树。
+ * 仅当 PID 当前仍归属于 QTEnvDev 管理的服务时，才返回可安全回收的进程树。
  * 这里既校验 root PID 精确存在，也要求非空 root 命令行仍匹配服务标记；
  * Windows 仅规范命令文本中的斜杠/大小写。根不可读或短路径无法匹配时返回空集合，
  * 过滤当前候选；已确认父的正常后代直接属于整棵树，不逐 worker 判断归属。
@@ -275,7 +275,7 @@ export const ProcessKillStrict = async (sig: string, pids: string[]) => {
   // 调用方已经从进程列表筛选归属。执行层不重复校验 PID、创建时间和路径，
   // 避免一个候选使整批已确认目标无法发出停止命令；这里只保留顺序并去重。
   if (isWindows()) {
-    // FlyEnv 的 Windows 服务使用当前账户权限启动，停止沿用相同权限即可。
+    // QTEnvDev 的 Windows 服务使用当前账户权限启动，停止沿用相同权限即可。
     // 即使命令非零，也可能是目标自然退出、启动失败或其他执行错误，不能据此
     // 重放 PowerShell 或触发 UAC/Helper。taskkill 自身负责幂等判断和详细日志；
     // 尚未证实成功的失败直接传播，由模块/批量调用方保留错误并继续结算其他服务。

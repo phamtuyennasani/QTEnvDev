@@ -50,7 +50,7 @@ export class VersionDeleteOperation {
           // Check before stopping, then check again in main immediately before removal.
           const current = await this.inspect(snapshot)
           if (!current || current.identity !== expected.identity) {
-            throw new Error('The version directory changed or is not managed by FlyEnv')
+            throw new Error('The version directory changed or is not managed by QTEnvDev')
           }
           const stopped = await this.deps.stop(snapshot)
           if (stopped !== true) throw new Error(String(stopped))

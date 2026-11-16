@@ -50,16 +50,16 @@ func TestValidateScalarInputs(t *testing.T) {
 }
 
 func TestValidateNamesAndUsers(t *testing.T) {
-	if err := ValidateCertificateName("FlyEnv-Root-CA.crt"); err != nil {
+	if err := ValidateCertificateName("QTEnvDev-Root-CA.crt"); err != nil {
 		t.Fatalf("ValidateCertificateName returned error: %v", err)
 	}
-	for _, name := range []string{"../FlyEnv-Root-CA.crt", "FlyEnv.pem", "bad/name.crt"} {
+	for _, name := range []string{"../QTEnvDev-Root-CA.crt", "QTEnvDev.pem", "bad/name.crt"} {
 		if err := ValidateCertificateName(name); err == nil {
 			t.Fatalf("ValidateCertificateName(%q) should fail", name)
 		}
 	}
 
-	if err := ValidateCommonName("FlyEnv-Root-CA"); err != nil {
+	if err := ValidateCommonName("QTEnvDev-Root-CA"); err != nil {
 		t.Fatalf("ValidateCommonName returned error: %v", err)
 	}
 	for _, name := range []string{"bad\nname", strings.Repeat("a", 129)} {
@@ -81,8 +81,8 @@ func TestValidateNamesAndUsers(t *testing.T) {
 }
 
 func TestValidateSystemEnv(t *testing.T) {
-	if err := ValidateSystemEnvKey("FLYENV_ALIAS", false); err != nil {
-		t.Fatalf("FLYENV_ALIAS should be allowed: %v", err)
+	if err := ValidateSystemEnvKey("QTENVDEV_ALIAS", false); err != nil {
+		t.Fatalf("QTENVDEV_ALIAS should be allowed: %v", err)
 	}
 	if err := ValidateSystemEnvKey("JAVA_HOME", true); err != nil {
 		t.Fatalf("JAVA_HOME should be allowed when whitelisted: %v", err)
@@ -97,7 +97,7 @@ func TestValidateSystemEnv(t *testing.T) {
 func TestValidateSystemPathEntry(t *testing.T) {
 	absolutePath := "/usr/local/bin"
 	if runtime.GOOS == "windows" {
-		absolutePath = `C:\FlyEnv\bin`
+		absolutePath = `C:\QTEnvDev\bin`
 	}
 
 	valid := []string{absolutePath, `%SystemRoot%\System32`, `%APPDATA%\Composer\vendor\bin`}
@@ -111,8 +111,8 @@ func TestValidateSystemPathEntry(t *testing.T) {
 		"",
 		`relative\bin`,
 		`$env:SystemRoot\System32`,
-		`C:\FlyEnv;"bad"`,
-		`C:\FlyEnv\..\Windows`,
+		`C:\QTEnvDev;"bad"`,
+		`C:\QTEnvDev\..\Windows`,
 		`%BAD`,
 		`%BAD%\..\Windows`,
 	}
@@ -130,7 +130,7 @@ func TestValidateSystemPathPayload(t *testing.T) {
 		`..\relative`,
 		`$env:SystemRoot\System32`,
 		`\\server\share\bin`,
-		`C:\FlyEnv\..\Windows`,
+		`C:\QTEnvDev\..\Windows`,
 		`日本語\ツール`,
 		``,
 	}
@@ -138,7 +138,7 @@ func TestValidateSystemPathPayload(t *testing.T) {
 		t.Fatalf("ValidateSystemPathPayload(%#v) returned error: %v", valid, err)
 	}
 
-	if err := ValidateSystemPathPayload([]string{"C:\\FlyEnv\x00bin"}); err == nil {
+	if err := ValidateSystemPathPayload([]string{"C:\\QTEnvDev\x00bin"}); err == nil {
 		t.Fatal("ValidateSystemPathPayload should reject embedded NUL")
 	}
 }
@@ -149,7 +149,7 @@ func TestValidateSystemEnvValueKeepsStrictPathValidation(t *testing.T) {
 	}
 }
 
-func TestValidateFlyEnvPowerShellProfilePathAllowsRedirectedDocumentsOutsideHome(t *testing.T) {
+func TestValidateQTEnvDevPowerShellProfilePathAllowsRedirectedDocumentsOutsideHome(t *testing.T) {
 	if runtime.GOOS != "windows" {
 		t.Skip("PowerShell profiles are a Windows-only feature")
 	}
@@ -164,7 +164,7 @@ func TestValidateFlyEnvPowerShellProfilePathAllowsRedirectedDocumentsOutsideHome
 		"Microsoft.PowerShell_profile.ps1",
 	)
 
-	clean, err := ValidateFlyEnvPowerShellProfilePath(profile, "windows-powershell")
+	clean, err := ValidateQTEnvDevPowerShellProfilePath(profile, "windows-powershell")
 	if err != nil {
 		t.Fatalf("redirected Windows PowerShell profile should be allowed: %v", err)
 	}
@@ -173,7 +173,7 @@ func TestValidateFlyEnvPowerShellProfilePathAllowsRedirectedDocumentsOutsideHome
 	}
 
 	invalid := filepath.Join(home, "OneDrive", "文档", "Microsoft.PowerShell_profile.ps1")
-	if _, err := ValidateFlyEnvPowerShellProfilePath(invalid, "windows-powershell"); err == nil {
+	if _, err := ValidateQTEnvDevPowerShellProfilePath(invalid, "windows-powershell"); err == nil {
 		t.Fatal("profile without the WindowsPowerShell directory should be rejected")
 	}
 
@@ -183,7 +183,7 @@ func TestValidateFlyEnvPowerShellProfilePathAllowsRedirectedDocumentsOutsideHome
 		"WindowsPowerShell",
 		"Microsoft.PowerShell_profile.ps1",
 	)
-	clean, err = ValidateFlyEnvPowerShellProfilePath(outsideHome, "windows-powershell")
+	clean, err = ValidateQTEnvDevPowerShellProfilePath(outsideHome, "windows-powershell")
 	if err != nil {
 		t.Fatalf("redirected profile outside the current user home should be allowed: %v", err)
 	}
@@ -199,14 +199,14 @@ func TestAllowedRootsFilePresentDisablesNameFallback(t *testing.T) {
 	}()
 
 	dir := t.TempDir()
-	managedPath := filepath.Join(dir, "FlyEnv-Data", "app")
+	managedPath := filepath.Join(dir, "QTEnvDev-Data", "app")
 
 	allowedRootsFilePathForTesting = filepath.Join(dir, "missing.allowed-roots")
 	if !isBusinessPathAllowed(managedPath) {
 		t.Fatal("missing allowed-roots file should keep managed-name fallback")
 	}
 
-	allowedRootsFilePathForTesting = filepath.Join(dir, "flyenv.allowed-roots")
+	allowedRootsFilePathForTesting = filepath.Join(dir, "qtenvdev.allowed-roots")
 	oversized := strings.Repeat("a", 64*1024+1)
 	if err := os.WriteFile(allowedRootsFilePathForTesting, []byte(oversized), 0600); err != nil {
 		t.Fatal(err)
@@ -216,16 +216,16 @@ func TestAllowedRootsFilePresentDisablesNameFallback(t *testing.T) {
 	}
 }
 
-func TestFlyEnvDataDirectoryRecoveryAllowsOnlyAnExactConfiguredRoot(t *testing.T) {
-	root := filepath.Join(t.TempDir(), "FlyEnv-Data")
-	if !isExactConfiguredFlyEnvDataDirectoryRoot(root, []string{root}) {
-		t.Fatal("the configured FlyEnv data root itself must be accepted")
+func TestQTEnvDevDataDirectoryRecoveryAllowsOnlyAnExactConfiguredRoot(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "QTEnvDev-Data")
+	if !isExactConfiguredQTEnvDevDataDirectoryRoot(root, []string{root}) {
+		t.Fatal("the configured QTEnvDev data root itself must be accepted")
 	}
-	if isExactConfiguredFlyEnvDataDirectoryRoot(filepath.Join(root, "server"), []string{root}) {
+	if isExactConfiguredQTEnvDevDataDirectoryRoot(filepath.Join(root, "server"), []string{root}) {
 		t.Fatal("a child directory must not gain data-root recovery privileges")
 	}
-	if isExactConfiguredFlyEnvDataDirectoryRoot(root, []string{filepath.Join(filepath.Dir(root), "other-root")}) {
-		t.Fatal("an unconfigured FlyEnv-looking directory must be rejected")
+	if isExactConfiguredQTEnvDevDataDirectoryRoot(root, []string{filepath.Join(filepath.Dir(root), "other-root")}) {
+		t.Fatal("an unconfigured QTEnvDev-looking directory must be rejected")
 	}
 }
 
@@ -326,14 +326,14 @@ func TestPathSymlinkWalkerSkipsOnlyTrustedComponent(t *testing.T) {
 	}
 	realHome := filepath.Join(root, "var-home")
 	aliasHome := filepath.Join(root, "home")
-	serviceDir := filepath.Join(realHome, "user", "FlyEnv", "server")
+	serviceDir := filepath.Join(realHome, "user", "QTEnvDev", "server")
 	if err := os.MkdirAll(serviceDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Symlink(realHome, aliasHome); err != nil {
 		t.Fatal(err)
 	}
-	scriptPath := filepath.Join(aliasHome, "user", "FlyEnv", "server", "start-1.sh")
+	scriptPath := filepath.Join(aliasHome, "user", "QTEnvDev", "server", "start-1.sh")
 	trustAlias := func(path string, _ os.FileInfo) bool { return pathEqual(path, aliasHome) }
 	hasSymlink, err := pathHasSymlinkComponent(scriptPath, trustAlias)
 	if err != nil {
@@ -350,7 +350,7 @@ func TestPathSymlinkWalkerSkipsOnlyTrustedComponent(t *testing.T) {
 	if err := os.Symlink(outsideDir, filepath.Join(serviceDir, "nested")); err != nil {
 		t.Fatal(err)
 	}
-	nestedScriptPath := filepath.Join(aliasHome, "user", "FlyEnv", "server", "nested", "start-2.sh")
+	nestedScriptPath := filepath.Join(aliasHome, "user", "QTEnvDev", "server", "nested", "start-2.sh")
 	hasSymlink, err = pathHasSymlinkComponent(nestedScriptPath, trustAlias)
 	if err != nil {
 		t.Fatal(err)

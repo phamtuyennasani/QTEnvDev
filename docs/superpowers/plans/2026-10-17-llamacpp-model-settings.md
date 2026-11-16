@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 让 FlyEnv 按模型保存 mmproj 与推理设置，通过同一预检和命令构建链完成预览、启动及失败报告，解决 #905 的图片输入启动参数缺失。
+**Goal:** 让 QTEnvDev 按模型保存 mmproj 与推理设置，通过同一预检和命令构建链完成预览、启动及失败报告，解决 #905 的图片输入启动参数缺失。
 
 **Architecture:** 插件 controller 管理配置、预检与应用操作；fork 管理文件身份、运行时能力、实际启动与运行快照。继续使用 ModuleInstalledItem 的 start/stop/restart，通过模块 startExtParam 传不可变快照。设置页持有编辑草稿，Storage 保存服务公共配置与每模型配置。
 
@@ -38,7 +38,7 @@
 
 建议当前会话顺序执行；任务 1—7 为阶段 A，8—9 为阶段 B，10—11 为阶段 C，12—13 为阶段 D。任务依赖下列顺序，不在共享工作目录内并发修改 controller、types 或设置页。
 
-实施前读取 `.codex/skills/flyenv-module-boundaries/SKILL.md` 与 `docs/skills/flyenv-failure-boundaries/SKILL.md`；执行器按 using-git-worktrees 检测是否需要隔离。当前计划不创建工作树，不改变分支。
+实施前读取 `.codex/skills/qtenvdev-module-boundaries/SKILL.md` 与 `docs/skills/qtenvdev-failure-boundaries/SKILL.md`；执行器按 using-git-worktrees 检测是否需要隔离。当前计划不创建工作树，不改变分支。
 
 ### 生产文件
 
@@ -114,7 +114,7 @@ assert.deepEqual(repository.current, beforeFailedWrite)
 ```
 
 - [ ] **Step 2 — 运行红测：** `yarn tsx --test plugins/llamacpp/tests/profiles.test.ts`，缺少新导出/持久化语义时 FAIL，记录失败断言；不以工具找不到代替有效红测。
-- [x] **Step 3 — 实现：** 使用新键 `flyenv-llama-cpp-settings-v2`；load 优先有效 V2，否则读取原 settings/models；新键损坏不能吞掉并覆盖，给出恢复错误。全部迁移写成一份 V2，保留旧键。保存队列基于最新 current 合并指定字段；失败不发布，UI 旧 revision 的保存报 stale-draft。默认基础值沿用 8192/4/0，旧数据覆盖它们。
+- [x] **Step 3 — 实现：** 使用新键 `qtenvdev-llama-cpp-settings-v2`；load 优先有效 V2，否则读取原 settings/models；新键损坏不能吞掉并覆盖，给出恢复错误。全部迁移写成一份 V2，保留旧键。保存队列基于最新 current 合并指定字段；失败不发布，UI 旧 revision 的保存报 stale-draft。默认基础值沿用 8192/4/0，旧数据覆盖它们。
 - [ ] **Step 4 — 验证：** 重跑同一文件，验证两个不同模型交错保存均保留、同模型旧草稿拒绝、失败后可重试、相同 SHA 重下载沿用/不同 SHA 要确认，全部 PASS。
 - [ ] **Step 5 — 建议提交点：** `feat(llamacpp): persist per-model settings with v2 migration`，只包含本任务产品与验证文件。
 
@@ -329,7 +329,7 @@ assert.equal(issueForArrayKwargs.severity, 'input')
 
 - [ ] **Step 2 — 运行红测：** `yarn tsx --test plugins/llamacpp/tests/advanced.test.ts plugins/llamacpp/tests/arguments.test.ts plugins/llamacpp/tests/settings.test.ts`。
 - [x] **Step 3 — 实现：** 模板互斥，默认用模型内置；显式 --jinja 在需要的模板参数前编码。思考预算允许 -1/0/正整数，强度和格式根据能力，旧版本无统一接口不自动替换 kwargs。采样 temperature≥0、topP/minP∈[0,1]、topK≥0整数、repeatPenalty>0、presence/frequency 为有限数、seed=-1或uint32、maxTokens=-1或非负整数；当前 runtime 更严格时按其收紧。页面明确“客户端请求可能覆盖采样默认值”。
-- [ ] **Step 4 — 验证：** 关闭 Jinja 的模板依赖冲突、文件缺失、extra 与表单双源冲突、中英文模型/未知模板、思考格式与思考开关独立、request sampling 未被 FlyEnv 重写，全部 PASS；不新增“开启 Cline 工具调用”开关。
+- [ ] **Step 4 — 验证：** 关闭 Jinja 的模板依赖冲突、文件缺失、extra 与表单双源冲突、中英文模型/未知模板、思考格式与思考开关独立、request sampling 未被 QTEnvDev 重写，全部 PASS；不新增“开启 Cline 工具调用”开关。
 - [ ] **Step 5 — 建议提交点：** `feat(llamacpp): configure chat templates reasoning and sampling defaults`。
 
 ## 阶段 D：投机解码、观察与发布验收
@@ -363,9 +363,9 @@ assert.equal(startResultAfterObservationFailure.ok, true)
 
 - [x] **Step 1 — 运行聚焦集合：** `yarn tsx --test plugins/llamacpp/tests/*.test.ts`，预期全部 PASS，无挂起测试/残留探测子进程；此前每个核心缺陷已记录有效红测，不在最终临时补一批只镜像实现的断言。
 - [x] **Step 2 — 运行必要仓库检查：** `yarn test:renderer-operation-boundaries`、`yarn plugin:test llamacpp`；`yarn eslint plugins/llamacpp scripts/renderer-operation-boundaries-test.ts` 检查本次范围，并核对 `git diff -- src` 为空。记录 `yarn vue-tsc --noEmit` 的结果，逐项区分执行前基线和本次新增错误，本次文件不得增加诊断；不能把已有错误当通过。不重复跑无关数据库/Helper 测试。
-- [x] **Step 3 — 构建插件包：** `yarn plugin:build llamacpp`，预期生成 `dist/plugins/llamacpp/llama-cpp-0.2.0.flyenv-plugin` 及 builder 对应元数据；核对 manifest/version、包大小与 SHA-256，并检查 `plugins/registry.json` 仅 llama-cpp 条目的生成信息改变、artifact.url 保持原值，记录该元数据尚未发布。普通 plugin contract/build 不代表真实模型能运行。
-- [ ] **Step 4 — 在临时 FlyEnv 数据根的目标环境验收：** 至少一套 GPU 多模态环境、CPU 基础环境及一套缺少新参数的旧 runtime；优先用户 issue 的 Windows x64/CUDA12.4/b10549/Qwen3.5-9B+mmproj，并记录实际驱动/build/文件指纹。真实数据库/其他服务不参与操作，用户现存模型文件不移动覆盖。
-- [ ] **Step 5 — 执行并记录用户流程：** 下载或选择已下载文件→候选确认关联→保存→预览单一 mmproj→启动→最小文字与图片请求→停启→重开 FlyEnv→切另一个模型再切回；再验证 Cline 的 Base URL/别名/图片请求。记录服务器最小请求和 Cline 结果，避免把客户端格式问题混入启动结论。
+- [x] **Step 3 — 构建插件包：** `yarn plugin:build llamacpp`，预期生成 `dist/plugins/llamacpp/llama-cpp-0.2.0.qtenvdev-plugin` 及 builder 对应元数据；核对 manifest/version、包大小与 SHA-256，并检查 `plugins/registry.json` 仅 llama-cpp 条目的生成信息改变、artifact.url 保持原值，记录该元数据尚未发布。普通 plugin contract/build 不代表真实模型能运行。
+- [ ] **Step 4 — 在临时 QTEnvDev 数据根的目标环境验收：** 至少一套 GPU 多模态环境、CPU 基础环境及一套缺少新参数的旧 runtime；优先用户 issue 的 Windows x64/CUDA12.4/b10549/Qwen3.5-9B+mmproj，并记录实际驱动/build/文件指纹。真实数据库/其他服务不参与操作，用户现存模型文件不移动覆盖。
+- [ ] **Step 5 — 执行并记录用户流程：** 下载或选择已下载文件→候选确认关联→保存→预览单一 mmproj→启动→最小文字与图片请求→停启→重开 QTEnvDev→切另一个模型再切回；再验证 Cline 的 Base URL/别名/图片请求。记录服务器最小请求和 Cline 结果，避免把客户端格式问题混入启动结论。
 - [ ] **Step 6 — UI 与失败验收：** 亮/暗色、窄窗、长中文路径、dirty 离页、默认/unsupported、保存成功但停止失败、缺失投影、丢运行快照、重复点击/离页重入分别记录。无相应硬件/模型时标“未验证”，不伪称所有 GPU/模态/MTP 都已支持；未获真实执行授权时保留该步骤待验收，不擅自操作用户正在运行的服务。
 - [x] **Step 7 — 文档与建议提交点：** README 写配置归属、关联/额外参数规则、默认值、兼容与已验证矩阵、partial/unknown说明；`feat(llamacpp): release model settings and multimodal configuration`。仅记录包产物，不自动提交发布或激活插件。
 
@@ -402,7 +402,7 @@ assert.equal(startResultAfterObservationFailure.ok, true)
 - `vue-tsc --noEmit` 退出 2：基线 55 项，当前 53 项既有诊断，本次新增 0；修正 aside 原有的两项签名诊断，未修改 logs/runtime 中其他既有问题。全插件 ESLint 退出 1：120 项均为未修改 config/release/runtime 三文件的既有 Prettier 诊断，没有顺手重排无关文件。
 - 补充 Fork 回归：进程退出清除当前依赖、保留上次成功；PID 被其他程序复用时不能冒充当前运行快照。复用同一进程列表和已记录 PID，不重复执行查询或添加停止流程。
 
-- 最终产物：`dist/plugins/llamacpp/llama-cpp-0.2.0.flyenv-plugin`，346604 字节，SHA-256 `74489d2aebe85ba225cb5a19a678cd1552e016b31bba90a5c1d076f114b7b344`。7z 完整性、解包 manifest apiVersion=1/id/version、README/render/fork 与构建目录逐字节一致，registry SHA 匹配。registry 仅 llama-cpp version/SHA 改变，发布 URL 保持空值；未提交、合并、上传、安装或激活。
+- 最终产物：`dist/plugins/llamacpp/llama-cpp-0.2.0.qtenvdev-plugin`，346604 字节，SHA-256 `74489d2aebe85ba225cb5a19a678cd1552e016b31bba90a5c1d076f114b7b344`。7z 完整性、解包 manifest apiVersion=1/id/version、README/render/fork 与构建目录逐字节一致，registry SHA 匹配。registry 仅 llama-cpp version/SHA 改变，发布 URL 保持空值；未提交、合并、上传、安装或激活。
 
 
 ## 本地合并授权
@@ -418,7 +418,7 @@ assert.equal(startResultAfterObservationFailure.ok, true)
 - 回归覆盖真实读取契约：旧配置迁移、新装默认值及重开、过期记录、真实读取故障无写入/恢复后重试、损坏 V2 不覆盖。只修插件存储适配，不修改宿主 Storage.ts。
 
 - 修复验证：新增 5 项使用真实宿主读取函数的回归；修复前 3 项以 `no found` 复现，修复后全部通过，全插件聚焦集合 41/41 PASS，renderer 边界、0.2.1 插件契约、修改文件 ESLint、diff 检查通过。类型检查仍为 53 项既有诊断，本次新增 0。
-- 0.2.1 产物 `/Users/x/Desktop/WorkSpace/GitHub/FlyEnv/dist/plugins/llamacpp/llama-cpp-0.2.1.flyenv-plugin`，346881 字节，SHA-256 `dc7d9eeec1a5aa8de1d80a7760e32c3a39cf105d4fd5dfaead24e754b96cc18d`；7z 完整性、解包内容和 registry 校验匹配，发布 URL 保持空值。本次修复在 master 工作区，未提交、发布或自动替换用户正在使用的插件。
+- 0.2.1 产物 `/Users/x/Desktop/WorkSpace/GitHub/QTEnvDev/dist/plugins/llamacpp/llama-cpp-0.2.1.qtenvdev-plugin`，346881 字节，SHA-256 `dc7d9eeec1a5aa8de1d80a7760e32c3a39cf105d4fd5dfaead24e754b96cc18d`；7z 完整性、解包内容和 registry 校验匹配，发布 URL 保持空值。本次修复在 master 工作区，未提交、发布或自动替换用户正在使用的插件。
 
 
 ## 0.2.2：帮助续行覆盖参数定义
@@ -454,7 +454,7 @@ assert.equal(startResultAfterObservationFailure.ok, true)
 回归验证：start/restart 返回 true 时，运行记录缺失/不同且状态查询不可用仍直接成功、只执行一次启停；启动不为配置确认采样进程或写凭据；原有预检失败不停止服务、保存后启停失败保留部分完成、依赖删除保护继续验证。包版本 0.2.4；不操作当前运行服务，不提交发布。
 
 - 完成验证：应用不查配置、启动不采样/写凭据两项回归先失败后通过；全部 44/44 PASS，renderer 边界、0.2.4 插件契约、修改文件 ESLint、diff 检查通过。全仓类型仍为 53 项既有诊断，新增 0，宿主 src 无改动。
-- 产物：dist/plugins/llamacpp/llama-cpp-0.2.4.flyenv-plugin，346692 字节，SHA-256 `d16f11f8248176a1018cce1e726b969e8783648eecfd728bbc03536dd21dbd29`；7z 完整性/解包 manifest、确认代码与文案移除、registry SHA 核验通过，URL 保持空值。未提交发布/激活或操作已有服务。
+- 产物：dist/plugins/llamacpp/llama-cpp-0.2.4.qtenvdev-plugin，346692 字节，SHA-256 `d16f11f8248176a1018cce1e726b969e8783648eecfd728bbc03536dd21dbd29`；7z 完整性/解包 manifest、确认代码与文案移除、registry SHA 核验通过，URL 保持空值。未提交发布/激活或操作已有服务。
 
 ### 0.2.5：服务与模型设置表单布局
 
@@ -463,7 +463,7 @@ assert.equal(startResultAfterObservationFailure.ok, true)
 - 投影限制已核对用户 b10545 --help 和同 tag common/arg.cpp：--mmproj FILE 写入单个 params.mmproj.path；每个实例选择一个文件，不添加多选假支持。
 
 - 验证：44/44 聚焦测试、renderer 边界、0.2.5 插件契约、修改文件 ESLint/diff 检查通过；全仓类型 53 项既有诊断，新增 0，src 无改动。真实组件 + Element Plus 独立浏览器检查服务/模型、深浅色、560px 窄窗和长中文外部路径，viewport/document 均 560px，浏览器异常 0；截图在 /tmp/llamacpp-layout-shots，不等同 Electron 内整体验收。独立预览/浏览器已退出，未操作运行服务。
-- 包 dist/plugins/llamacpp/llama-cpp-0.2.5.flyenv-plugin，347776 字节，SHA-256 `5bb51787430bd3dfa9ed53a4609528bff68beaef9d8f9c9039b82d8d9f32e38e`；7z 完整性、解包 manifest/样式/README 与 registry 校验通过，URL 保持空值，未提交发布激活。
+- 包 dist/plugins/llamacpp/llama-cpp-0.2.5.qtenvdev-plugin，347776 字节，SHA-256 `5bb51787430bd3dfa9ed53a4609528bff68beaef9d8f9c9039b82d8d9f32e38e`；7z 完整性、解包 manifest/样式/README 与 registry 校验通过，URL 保持空值，未提交发布激活。
 
 ### 0.2.6：设置区域自适应双列
 

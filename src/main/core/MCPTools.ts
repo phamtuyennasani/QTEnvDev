@@ -14,7 +14,7 @@ import {
 
 /**
  * 单实例服务（isOnlyRunOne）：同一时刻只跑一个版本，启动某版本即「切到该版本」。
- * 对应 FlyEnv 渲染层 onItemStart 行为。语言运行时（php/node/python...）是多实例，不在此列。
+ * 对应 QTEnvDev 渲染层 onItemStart 行为。语言运行时（php/node/python...）是多实例，不在此列。
  */
 const SINGLE_INSTANCE_SERVICES = new Set<string>([
   'nginx',
@@ -30,12 +30,12 @@ const SINGLE_INSTANCE_SERVICES = new Set<string>([
 ])
 
 /**
- * MCPTools —— MCP 协议层与 FlyEnv 能力层之间的映射。
+ * MCPTools —— MCP 协议层与 QTEnvDev 能力层之间的映射。
  *
  * 它做三件事：
  *   1. 把 MCP 的 tools/call、resources/read 翻译成 ForkManager.send(module, fn, ...args)
  *   2. 把 fork 返回结果翻译回 MCP 响应（文本/JSON）
- *   3. 出站字段白名单/脱敏：FlyEnv 是本地开发工具，bin/path/凭据默认返回给 AI 代理用于执行命令；
+ *   3. 出站字段白名单/脱敏：QTEnvDev 是本地开发工具，bin/path/凭据默认返回给 AI 代理用于执行命令；
  *      仅在用户开启 maskSecrets 时才会对 rootPassword、SSL 私钥等做脱敏。
  *
  * 注意：这里不直接 import 渲染层类型（@/...），只用 main 进程可达的依赖。
@@ -78,7 +78,7 @@ function callFork(
 }
 
 /**
- * 版本对象序列化。FlyEnv 是本地开发工具，bin/path/version 是 AI 代理执行任务
+ * 版本对象序列化。QTEnvDev 是本地开发工具，bin/path/version 是 AI 代理执行任务
  * （如「用 PHP 7.3 跑某文件」「用 mysql.exe 连本地库」）的必需材料，默认全部返回。
  * 仅在用户显式开启 maskSecrets 时，才剔除 rootPassword 等凭据字段。
  */
@@ -285,7 +285,7 @@ export class MCPTools {
       return
     }
     throw new Error(
-      `${flag} is not a lifecycle-managed FlyEnv service and cannot be ${action}ed via MCP. ` +
+      `${flag} is not a lifecycle-managed QTEnvDev service and cannot be ${action}ed via MCP. ` +
         'Use list_online_versions plus install_service for installable runtimes/toolchains such as bun, ' +
         'and manage project execution outside these service lifecycle tools.'
     )
@@ -296,7 +296,7 @@ export class MCPTools {
       return
     }
     throw new Error(
-      `${flag} does not support version download/install via FlyEnv MCP. ` +
+      `${flag} does not support version download/install via QTEnvDev MCP. ` +
         'Use an installable module flag from list_online_versions instead.'
     )
   }
@@ -306,7 +306,7 @@ export class MCPTools {
       return
     }
     throw new Error(
-      `${flag} is not a version-managed FlyEnv module for this MCP tool. ` +
+      `${flag} is not a version-managed QTEnvDev module for this MCP tool. ` +
         'Use supported module flags such as bun, node, php, nginx, mysql, python, golang, redis, or pure-ftpd.'
     )
   }
@@ -546,7 +546,7 @@ export class MCPTools {
     this.assertLifecycleFlag(flag, 'start')
     const v = selected ?? (await this.pickVersion(flag, version))
     // 单实例服务（nginx/mysql/redis... isOnlyRunOne）：启动某版本即「切到该版本」——
-    // 与 FlyEnv UI 的 onItemStart 行为对齐，先停掉其它正在运行的版本。
+    // 与 QTEnvDev UI 的 onItemStart 行为对齐，先停掉其它正在运行的版本。
     // 多实例运行时（php/node/python... 语言类）：多版本可并存，不停其它。
     if (SINGLE_INSTANCE_SERVICES.has(flag)) {
       const running = ServiceProcessManager.statusOf(flag).instances.filter((instance) => {
@@ -723,7 +723,7 @@ export class MCPTools {
 
   /**
    * list_log_files：返回某服务的日志文件清单（name + path + exists）。
-   * 不返回内容——FlyEnv 是本地工具，AI 代理拿到 path 自行读文件（日志可能很大）。
+   * 不返回内容——QTEnvDev 是本地工具，AI 代理拿到 path 自行读文件（日志可能很大）。
    * 各模块在 fork 侧 getLogFiles 覆写自己的路径，新模块自带，单点维护。
    */
   async listLogFiles(flag: string, version?: string): Promise<any[]> {

@@ -150,7 +150,7 @@ export default class Application extends EventEmitter {
       stopPluginServices: (moduleId) => this.stopPluginServices(moduleId),
       recoverPluginRuntime: (moduleId) =>
         this.forkManager?.reopenPluginWorker(moduleId) ?? Promise.resolve(),
-      licenseCheck: process.env.FLYENV_PLUGIN_SMOKE === '1' ? async () => true : undefined,
+      licenseCheck: process.env.QTENVDEV_PLUGIN_SMOKE === '1' ? async () => true : undefined,
       // OS account keychain (Keychain / DPAPI / system keyring) encryption for
       // the plugin install secret, so copying the secret file to another
       // machine yields undecryptable ciphertext. Falls back to plain storage
@@ -213,7 +213,7 @@ export default class Application extends EventEmitter {
     for (const diagnostic of this.pluginManager.getDiagnostics()) {
       logger.warn('[PluginManager] plugin skipped at startup', diagnostic)
     }
-    if (process.env.FLYENV_PLUGIN_SMOKE === '1') {
+    if (process.env.QTENVDEV_PLUGIN_SMOKE === '1') {
       await this.preparePluginRuntimeSmoke()
     }
     ;(global.Server as any).Plugins = this.pluginManager.getForkSnapshot()
@@ -253,7 +253,7 @@ export default class Application extends EventEmitter {
     this.initFontAccessPermission()
     this.initAppHelper()
     this.initForkManager()
-    if (process.env.FLYENV_PLUGIN_SMOKE === '1') {
+    if (process.env.QTENVDEV_PLUGIN_SMOKE === '1') {
       void this.runPluginRuntimeSmoke()
     }
 
@@ -340,8 +340,8 @@ export default class Application extends EventEmitter {
   }
 
   private async preparePluginRuntimeSmoke() {
-    if (process.env.FLYENV_PLUGIN_SMOKE_PHASE !== 'install') return
-    const resultPath = process.env.FLYENV_PLUGIN_SMOKE_RESULT
+    if (process.env.QTENVDEV_PLUGIN_SMOKE_PHASE !== 'install') return
+    const resultPath = process.env.QTENVDEV_PLUGIN_SMOKE_RESULT
     try {
       const item = (await this.pluginManager.listCatalog()).find(
         (candidate) => candidate.id === 'runtime-smoke-plugin'
@@ -376,8 +376,8 @@ export default class Application extends EventEmitter {
   }
 
   private async runPluginRuntimeSmoke() {
-    if (process.env.FLYENV_PLUGIN_SMOKE_PHASE !== 'verify') return
-    const resultPath = process.env.FLYENV_PLUGIN_SMOKE_RESULT
+    if (process.env.QTENVDEV_PLUGIN_SMOKE_PHASE !== 'verify') return
+    const resultPath = process.env.QTENVDEV_PLUGIN_SMOKE_RESULT
     const checkpoints: string[] = ['install', 'relaunch']
     try {
       await new Promise<void>((resolveReady) => {
@@ -389,7 +389,7 @@ export default class Application extends EventEmitter {
         setTimeout(resolveReady, 30_000)
       })
       const routeResult = await this.mainWindow?.webContents.executeJavaScript(
-        `(async () => { let routes = []; for (let i = 0; i < 40; i += 1) { const router = window.__FLYENV_PLUGIN_ROUTER__; routes = router?.getRoutes?.().map((item) => item.path) ?? []; if (routes.includes('/runtime-smoke-plugin')) break; await new Promise((r) => setTimeout(r, 250)); } const route = routes.includes('/runtime-smoke-plugin'); location.hash = '#/runtime-smoke-plugin'; return { hash: location.hash, ready: route === true, routes } })()`,
+        `(async () => { let routes = []; for (let i = 0; i < 40; i += 1) { const router = window.__QTENVDEV_PLUGIN_ROUTER__; routes = router?.getRoutes?.().map((item) => item.path) ?? []; if (routes.includes('/runtime-smoke-plugin')) break; await new Promise((r) => setTimeout(r, 250)); } const route = routes.includes('/runtime-smoke-plugin'); location.hash = '#/runtime-smoke-plugin'; return { hash: location.hash, ready: route === true, routes } })()`,
         true
       )
       if (!routeResult?.ready || !String(routeResult.hash).includes('runtime-smoke-plugin')) {
@@ -562,7 +562,7 @@ export default class Application extends EventEmitter {
 
   private async expectPluginSmokeRoute(expectPresent: boolean) {
     const result = await this.mainWindow?.webContents.executeJavaScript(
-      `(async () => { for (let i = 0; i < 40; i += 1) { const router = window.__FLYENV_PLUGIN_ROUTER__; const routes = router?.getRoutes?.().map((item) => item.path) ?? []; if (routes.includes('/runtime-smoke-plugin') === ${expectPresent}) return { ok: true }; await new Promise((r) => setTimeout(r, 250)); } const router = window.__FLYENV_PLUGIN_ROUTER__; return { ok: false, routes: router?.getRoutes?.().map((item) => item.path) ?? [] } })()`,
+      `(async () => { for (let i = 0; i < 40; i += 1) { const router = window.__QTENVDEV_PLUGIN_ROUTER__; const routes = router?.getRoutes?.().map((item) => item.path) ?? []; if (routes.includes('/runtime-smoke-plugin') === ${expectPresent}) return { ok: true }; await new Promise((r) => setTimeout(r, 250)); } const router = window.__QTENVDEV_PLUGIN_ROUTER__; return { ok: false, routes: router?.getRoutes?.().map((item) => item.path) ?? [] } })()`,
       true
     )
     if (!result?.ok) {
@@ -583,7 +583,7 @@ export default class Application extends EventEmitter {
       `(async () => {
         try {
           localStorage.removeItem('fetchVerion-runtime-smoke-plugin')
-          const storeFn = window.__FLYENV_PLUGIN_BREW_STORE__
+          const storeFn = window.__QTENVDEV_PLUGIN_BREW_STORE__
           if (!storeFn) return { ok: false, error: 'BrewStore global missing' }
           const brewStore = storeFn()
           const mod = brewStore.module('runtime-smoke-plugin')
@@ -617,7 +617,7 @@ export default class Application extends EventEmitter {
     const result = await this.mainWindow?.webContents.executeJavaScript(
       `(async () => {
         try {
-          const storeFn = window.__FLYENV_PLUGIN_BREW_STORE__
+          const storeFn = window.__QTENVDEV_PLUGIN_BREW_STORE__
           if (!storeFn) return { ok: false, error: 'BrewStore global missing' }
           const mod = storeFn().module('runtime-smoke-plugin')
           return { ok: mod.isPlugin === false, isPlugin: mod.isPlugin }
@@ -641,7 +641,7 @@ export default class Application extends EventEmitter {
     const result = await this.mainWindow?.webContents.executeJavaScript(
       `(async () => {
         try {
-          const storeFn = window.__FLYENV_PLUGIN_BREW_STORE__
+          const storeFn = window.__QTENVDEV_PLUGIN_BREW_STORE__
           if (!storeFn) return { ok: false, error: 'BrewStore global missing' }
           const mod = storeFn().module('runtime-smoke-plugin')
           if (!mod.isPlugin) {
@@ -677,7 +677,7 @@ export default class Application extends EventEmitter {
   }
 
   /**
-   * 初始化 FlyEnv Helper
+   * 初始化 QTEnvDev Helper
    */
   private initAppHelper() {
     Helper.appHelper = AppHelper
@@ -798,7 +798,7 @@ export default class Application extends EventEmitter {
       return
     }
 
-    const key = 'APP-FlyEnv-Helper-Notice'
+    const key = 'APP-QTEnvDev-Helper-Notice'
     const messages: Record<string, { code: number; msg: string; status?: string }> = {
       needInstall: { code: 1, msg: I18nT('menu.needInstallHelper') },
       installed: { code: 2, msg: I18nT('menu.waitHelper') },
@@ -836,7 +836,7 @@ export default class Application extends EventEmitter {
         return
       }
       // 旧初始化请求只能作用于已确认 Helper 的 Windows 用户，未选择/UAC 不提示安装。
-      if (key === 'App-Need-Init-FlyEnv-Helper') {
+      if (key === 'App-Need-Init-QTEnvDev-Helper') {
         if (
           !isWindows() ||
           (global.Server.WindowsElevationChoiceVersion === WINDOWS_ELEVATION_CHOICE_VERSION &&
@@ -1215,7 +1215,7 @@ export default class Application extends EventEmitter {
     const quitStarted = performanceDiagnosticNow()
     const quitData = { quitId }
     logServiceStopBoundary('quit.begin', quitData)
-    logger.info('[FlyEnv] application stop !!!')
+    logger.info('[QTEnvDev] application stop !!!')
     // 菜单退出、app.quit 和 relaunch 共用此顺序；已确认授权在并行清理期间继续有效。
     this.windowManager?.setWillQuit(true)
     // Node 函数的旧异步回调直接发送 IPC，退出时解除其 UI 响应目标。
@@ -1314,7 +1314,7 @@ export default class Application extends EventEmitter {
               )
             } catch (error) {
               // UAC 取消、拒绝或未知结果仍记录真实失败并继续退出，不自动重放写入。
-              logger.warn('[FlyEnv][quit][hosts-cleanup]', error)
+              logger.warn('[QTEnvDev][quit][hosts-cleanup]', error)
             }
           })()
         ])

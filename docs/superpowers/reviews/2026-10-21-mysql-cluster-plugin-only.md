@@ -42,7 +42,7 @@ hide during admitted startup and removal of deleted snapshots.
   election, rejoin and full-stop recovery. Temporary test roots/processes were cleaned.
 - ESLint: no errors or warnings. Original renderer boundary audit and plugin-local view audit pass.
 - Full vue-tsc with 8 GiB heap: exact same 53 baseline diagnostics, no new diagnostics.
-- Plugin build succeeds. Package: `dist/plugins/mysql-cluster/mysql-cluster-0.1.1.flyenv-plugin`,
+- Plugin build succeeds. Package: `dist/plugins/mysql-cluster/mysql-cluster-0.1.1.qtenvdev-plugin`,
   588089 bytes; SHA-256 `fdcb38d42347461d1d5817bb36a8c1ccc4916304e182df27a86a872e895f7ec0`.
   Registry hash, single manifest/version and render/fork/CSS payload verified by unpacking.
   Bundled Fork module loads; both host scan and empty local descriptor query return empty arrays.

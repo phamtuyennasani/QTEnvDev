@@ -79,7 +79,7 @@ class Worker implements PluginWorker {
   }
 }
 async function fixture() {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-worker-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-worker-'))
   const snapshot: ForkPluginSnapshot = {
     sample: {
       id: 'sample',

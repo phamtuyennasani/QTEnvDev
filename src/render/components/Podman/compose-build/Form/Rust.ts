@@ -48,7 +48,7 @@ const Rust = reactive({
       image: `${mirror}rust:${Rust.version}`,
       ports: Rust.ports.map((p) => `${p.out}:${p.in}`),
       environment,
-      networks: ['flyenv-network'],
+      networks: ['qtenvdev-network'],
       // 容器内 Rust 项目的默认工作目录
       working_dir: '/app',
       command: Rust.command
@@ -56,11 +56,11 @@ const Rust = reactive({
 
     const volumes: any[] = []
 
-    const flyenvRustDir = join(dirname(base.dir), 'flyenv-docker-compose/rust')
-    await fs.mkdirp(flyenvRustDir)
+    const qtenvdevRustDir = join(dirname(base.dir), 'qtenvdev-docker-compose/rust')
+    await fs.mkdirp(qtenvdevRustDir)
 
     // 1. 挂载 Cargo Home 目录 (CARGO_HOME)
-    const rustCacheHostPath = join(flyenvRustDir, 'cargo_home')
+    const rustCacheHostPath = join(qtenvdevRustDir, 'cargo_home')
     await fs.mkdirp(rustCacheHostPath)
 
     volumes.push({

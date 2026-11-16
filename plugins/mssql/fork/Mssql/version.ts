@@ -333,7 +333,7 @@ export const mssqlMajorOfVersion = (version: string): string => {
   return match?.[1] ?? ''
 }
 
-/** Catalog entries install one fixed FlyEnv instance; other installations are independent. */
+/** Catalog entries install one fixed QTEnvDev instance; other installations are independent. */
 export const windowsInstallerMatchesInstance = (
   installer: MssqlWindowsInstaller,
   instance: { version: string; instanceName?: string; edition?: string }
@@ -344,7 +344,7 @@ export const windowsInstallerMatchesInstance = (
   return !!(
     expectedMajor &&
     mssqlMajorOfVersion(instance.version) === expectedMajor &&
-    instance.instanceName?.toUpperCase() === `FLYENV${installer.version}` &&
+    instance.instanceName?.toUpperCase() === `QTENVDEV${installer.version}` &&
     edition.toLowerCase() === installer.edition.toLowerCase()
   )
 }

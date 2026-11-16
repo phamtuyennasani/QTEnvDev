@@ -39,7 +39,7 @@ export const PromptSetup = reactive<PromptSetupType>({
     if (PromptSetup.lang) {
       return
     }
-    const data = StorageGet('flyenv-ai-custom-prompt')
+    const data = StorageGet('qtenvdev-ai-custom-prompt')
     if (data) {
       PromptSetup.lang = data.lang
       PromptSetup.customPrompts = reactive(data.customPrompts)
@@ -76,7 +76,7 @@ export const PromptSetup = reactive<PromptSetupType>({
   },
   save() {
     StorageSet(
-      'flyenv-ai-custom-prompt',
+      'qtenvdev-ai-custom-prompt',
       {
         lang: PromptSetup.lang,
         customPrompts: PromptSetup.customPrompts

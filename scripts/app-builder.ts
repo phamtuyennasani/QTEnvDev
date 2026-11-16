@@ -11,10 +11,10 @@ import { isLinux, isMacOS, isWindows } from '../src/shared/utils'
 import { buildLanguageAssets } from './build-language-assets'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const windowsBuildStage = process.env.FLYENV_WINDOWS_BUILD_STAGE
+const windowsBuildStage = process.env.QTENVDEV_WINDOWS_BUILD_STAGE
 
 if (windowsBuildStage && !['app', 'installers'].includes(windowsBuildStage)) {
-  throw new Error(`Unsupported FLYENV_WINDOWS_BUILD_STAGE: ${windowsBuildStage}`)
+  throw new Error(`Unsupported QTENVDEV_WINDOWS_BUILD_STAGE: ${windowsBuildStage}`)
 }
 
 async function packMain() {
@@ -58,9 +58,9 @@ async function packElectron() {
       // The disposable outer executable is overwritten by the final installer stage.
       options.targets = Platform.WINDOWS.createTarget('portable', Arch.x64)
     } else if (windowsBuildStage === 'installers') {
-      const prepackaged = process.env.FLYENV_PREPACKAGED_APP_DIR
+      const prepackaged = process.env.QTENVDEV_PREPACKAGED_APP_DIR
       if (!prepackaged) {
-        throw new Error('FLYENV_PREPACKAGED_APP_DIR is required for the installers stage')
+        throw new Error('QTENVDEV_PREPACKAGED_APP_DIR is required for the installers stage')
       }
       const prepackagedPath = path.resolve(prepackaged)
       if (!existsSync(prepackagedPath)) {

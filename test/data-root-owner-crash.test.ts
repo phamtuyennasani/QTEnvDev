@@ -9,7 +9,7 @@ import { setTimeout as delay } from 'node:timers/promises'
 import { DataRootLease } from '../src/fork/runtime/DataRootLease'
 
 test('a surviving child retains its kernel lease after the owner host dies', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-orphan-test-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-orphan-test-'))
   const host = fork(
     fileURLToPath(new URL('./fixtures/plugin-memory-orphan.ts', import.meta.url)),
     [root],

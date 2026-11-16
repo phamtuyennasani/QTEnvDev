@@ -13,7 +13,7 @@ import { waitForServiceProcessExit } from '../src/shared/ServiceStop'
 import type { SoftInstalled } from '../src/shared/app'
 
 if (process.platform !== 'win32') process.exit(0)
-const root = await mkdtemp(join(tmpdir(), "FlyEnv Numa 测试 ' "))
+const root = await mkdtemp(join(tmpdir(), "QTEnvDev Numa 测试 ' "))
 const previousServer = global.Server
 const previousEnv = EnvSync.AppEnv
 const previousCwd = process.cwd()
@@ -101,13 +101,13 @@ try {
   await unlink(appPidFile)
   console.log(`Numa process identity/failure regression: ${count + 2} cases passed`)
 
-  if (process.env.FLYENV_NUMA_TEST_BIN) {
+  if (process.env.QTENVDEV_NUMA_TEST_BIN) {
     EnvSync.AppEnv = Object.fromEntries(
       Object.entries(process.env).filter(
         (entry): entry is [string, string] => entry[1] !== undefined
       )
     )
-    const installed = version(resolve(process.env.FLYENV_NUMA_TEST_BIN))
+    const installed = version(resolve(process.env.QTENVDEV_NUMA_TEST_BIN))
     const listeners = [createServer(), createServer()]
     const ports: number[] = []
     for (const listener of listeners) {
@@ -225,6 +225,6 @@ try {
   numa.pidPath = previousPidPath
   EnvSync.AppEnv = previousEnv
   global.Server = previousServer
-  assert.ok(root.startsWith(join(tmpdir(), "FlyEnv Numa 测试 ' ")))
+  assert.ok(root.startsWith(join(tmpdir(), "QTEnvDev Numa 测试 ' ")))
   await rm(root, { recursive: true, force: true })
 }

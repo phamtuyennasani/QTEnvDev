@@ -24,7 +24,7 @@
 - [x] Add failing tests for six global/project instruction paths, env overrides, append preservation, duplicate writes, invalid/malformed files, and Codex override/size handling; implement fork installer and internal RPC (not MCP tools).
 - [x] Implement operation controller/adapter and real HTTP/stdio snippets from existing shared builders. Terminal progress is nonterminal; actual IPC error/timeouts remain explicit.
 - [x] Port the approved layout into `MemoryConnect.vue`, keep `MemorySetup.vue` maintenance behavior, add EN/ZH copy and operation-boundary checks.
-- [x] Run focused and full plugin tests, lint, component types, plugin build/contract and renderer boundaries. Review failure propagation with flyenv-failure-boundaries again.
+- [x] Run focused and full plugin tests, lint, component types, plugin build/contract and renderer boundaries. Review failure propagation with qtenvdev-failure-boundaries again.
 - [x] Native UI verification in isolated app profile and isolated client homes; verify actual config/rule files and no duplicate blocks, page reentry and generic state. Synchronize task files only and rerun relevant checks in primary checkout.
 
 ## Review focus
@@ -49,7 +49,7 @@ Primary checkout: 154 plugin tests passed; focused Vue/controller/fork types pas
 
 ## Approved follow-up — 2026-11-14
 
-- Match memory management's 12px outer corner radius; remove the 1120px width cap, use 20px outer/panel padding and normal FlyEnv MCP typography (14px text, 12px secondary/code). Center the global connection icon vertically with the text group. Consolidate preview CSS rather than stacking conflicting overrides.
+- Match memory management's 12px outer corner radius; remove the 1120px width cap, use 20px outer/panel padding and normal QTEnvDev MCP typography (14px text, 12px secondary/code). Center the global connection icon vertically with the text group. Consolidate preview CSS rather than stacking conflicting overrides.
 - Generic config display is a passive module-controller operation: load existing MCP settings/bridge snippets automatically when selected; never start the MCP listener, enable tools, write client configuration or install rules. Duplicate reads coalesce; HTTP and stdio outcomes remain independent; failed reads clear stale snippets. Copy only copies an already displayed snippet, with failure feedback independent of service/config results. Keep explicit one-click client operations unchanged.
 - Use the host's existing AppModuleTab record for the memory page's named tabs through a module-local typed mapping. No new persistence/store/shared configuration exception. Verify a second page binding sees the previous tab and invalid saved indices fall back to memories.
 - Add focused controller/navigation tests, run types/lint/plugin build and native UI checks for generic display/copy without service start, module round trips, and normal/short content widths.

@@ -18,7 +18,7 @@
   "sourcePath": "Systém PATH",
   "sourceDefault": "Výchozí umístění SDK",
   "sourceCustom": "Nastavená vlastní cesta",
-  "sourceFlyenv": "FlyEnv spravovaný SDK",
+  "sourceQTEnvDev": "QTEnvDev spravovaný SDK",
   "sourceUnknown": "Neznámý",
   "createProjectTitle": "Vytvořit projekt Flutter",
   "create": "Vytvořit",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Modul Flutter pro vložení do existující aplikace Android/iOS.",
   "templateSkeletonDesc": "Aplikace Flutter typu seznam/detail s Material 3 a Navigation 2.0.",
   "androidSdkNotDetected": "Android SDK nebylo zjištěno",
-  "androidSdkInstallHint": "FlyEnv neinstaluje Android SDK automaticky. Nainstalujte SDK pomocí Android Studio nebo oficiálních nástrojů příkazového řádku pro Android.",
+  "androidSdkInstallHint": "QTEnvDev neinstaluje Android SDK automaticky. Nainstalujte SDK pomocí Android Studio nebo oficiálních nástrojů příkazového řádku pro Android.",
   "installAndroidStudio": "Nainstalovat Android Studio",
   "androidCommandLineTools": "Nástroje příkazového řádku pro Android",
-  "androidSdkAfterInstall": "Po instalaci SDK se vraťte do FlyEnv, klikněte na Obnovit (Refresh) a potom pomocí Auto-fix nastavte prostředí."
+  "androidSdkAfterInstall": "Po instalaci SDK se vraťte do QTEnvDev, klikněte na Obnovit (Refresh) a potom pomocí Auto-fix nastavte prostředí."
 }

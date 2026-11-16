@@ -1,8 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
-const markerBegin = '# >>> FlyEnv Git Bash integration >>>'
-const markerEnd = '# <<< FlyEnv Git Bash integration <<<'
+const markerBegin = '# >>> QTEnvDev Git Bash integration >>>'
+const markerEnd = '# <<< QTEnvDev Git Bash integration <<<'
 
 /** PowerShell is required; the companion Bash list reports only its own failure. */
 export async function syncShellDirectories(directory: string, directories: string[]) {
@@ -13,9 +13,9 @@ export async function syncShellDirectories(directory: string, directories: strin
     return false
   })
   await mkdir(directory, { recursive: true })
-  await writeFile(join(directory, '.flyenv.dir'), JSON.stringify(allowed))
+  await writeFile(join(directory, '.qtenvdev.dir'), JSON.stringify(allowed))
   try {
-    await writeFile(join(directory, '.flyenv-bash.dir'), `${allowed.join('\n')}\n`)
+    await writeFile(join(directory, '.qtenvdev-bash.dir'), `${allowed.join('\n')}\n`)
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error)
     warnings.push(`Git Bash directory sync failed: ${reason}`)
@@ -42,7 +42,7 @@ const managedProfile = (original: string, block: string): string => {
         original.indexOf(markerBegin, start + markerBegin.length) >= 0 ||
         original.indexOf(markerEnd, finish + markerEnd.length) >= 0))
   ) {
-    throw new Error('Git Bash profile contains an invalid FlyEnv integration block')
+    throw new Error('Git Bash profile contains an invalid QTEnvDev integration block')
   }
   if (start >= 0) {
     return original.slice(0, start) + block + original.slice(finish + markerEnd.length)

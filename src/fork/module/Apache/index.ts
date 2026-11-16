@@ -306,11 +306,11 @@ IncludeOptional "${vhost}"`
 
     confContent = confContent
       .replace(/#PhpWebStudy-Apache-Listen-Begin#([\s\S]*?)#PhpWebStudy-Apache-Listen-End#/g, '')
-      .replace(/#FlyEnv-Apache-Listen-Begin#([\s\S]*?)#FlyEnv-Apache-Listen-End#/g, '')
+      .replace(/#QTEnvDev-Apache-Listen-Begin#([\s\S]*?)#QTEnvDev-Apache-Listen-End#/g, '')
       .replace(/\n+/g, '\n')
       .trim()
     const txts: Array<string> = Array.from(allNeedPort).map((s) => `Listen ${s}`)
-    txts.unshift('#FlyEnv-Apache-Listen-Begin#')
+    txts.unshift('#QTEnvDev-Apache-Listen-Begin#')
     if (!isWindows()) {
       let lsal: any = await execPromise(`ls -al`, {
         cwd: global.Server.BaseDir
@@ -329,7 +329,7 @@ IncludeOptional "${vhost}"`
       txts.push(`User ${user}`)
       txts.push(`Group ${group}`)
     }
-    txts.push('#FlyEnv-Apache-Listen-End#')
+    txts.push('#QTEnvDev-Apache-Listen-End#')
     confContent = txts.join('\n') + '\n' + confContent
 
     await writeFile(configpath, confContent)

@@ -101,7 +101,7 @@
   "allTasks": "Semua tugas",
   "systemTasks": "Tugas Sistem",
   "systemTask": "Tugas Sistem",
-  "flyenvTask": "Tugas FlyEnv",
+  "qtenvdevTask": "Tugas QTEnvDev",
   "otherTask": "Tugas Lainnya",
   "taskTrigger": "Pemicu",
   "deleteSystemTaskTips": "Hapus tugas terjadwal sistem ini?",

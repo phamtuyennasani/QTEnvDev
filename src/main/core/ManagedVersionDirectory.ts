@@ -43,7 +43,7 @@ export async function inspectManagedVersionDirectory(
     !isStrictDescendant(logicalRoot, target.path) ||
     !isStrictDescendant(target.path, target.bin)
   ) {
-    throw new Error('The version directory is not managed by FlyEnv')
+    throw new Error('The version directory is not managed by QTEnvDev')
   }
 
   const directory = path.resolve(target.path)
@@ -60,7 +60,7 @@ export async function inspectManagedVersionDirectory(
   const resolved = await realpath(directory)
   const bin = await realpath(target.bin)
   if (!isStrictDescendant(root, resolved) || !isStrictDescendant(resolved, bin)) {
-    throw new Error('The version directory is not managed by FlyEnv')
+    throw new Error('The version directory is not managed by QTEnvDev')
   }
   const [rootInfo, directoryInfo, binInfo] = await Promise.all([
     stat(root),

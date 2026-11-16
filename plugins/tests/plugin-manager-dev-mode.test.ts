@@ -11,7 +11,7 @@ const manifest = {
   name: 'Dev Fixture',
   version: '0.0.1',
   description: 'dev-mode regression fixture',
-  author: 'FlyEnv',
+  author: 'QTEnvDev',
   module: {
     typeFlag: 'dev-fixture',
     moduleType: 'other',
@@ -30,11 +30,11 @@ const manifest = {
 /**
  * Layout mirroring the real shared data directory: installed-plugin records
  * carry install tokens and the secret is safeStorage-encrypted by a different
- * build identity (production FlyEnv.app vs the unsigned dev Electron), so
+ * build identity (production QTEnvDev.app vs the unsigned dev Electron), so
  * THIS instance cannot decrypt it.
  */
 async function makeFixture() {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-plugin-manager-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-plugin-manager-'))
   const pluginsRoot = join(root, 'plugins')
   await mkdir(pluginsRoot, { recursive: true })
   await writeFile(
@@ -58,7 +58,7 @@ async function makeFixture() {
 
 test('development mode does not require the install secret', async () => {
   const fixture = await makeFixture()
-  process.env.FLYENV_PLUGIN_PATH = fixture.dev
+  process.env.QTENVDEV_PLUGIN_PATH = fixture.dev
   try {
     const manager = new PluginManager({
       pluginsRoot: fixture.pluginsRoot,
@@ -70,13 +70,13 @@ test('development mode does not require the install secret', async () => {
     assert.equal(rendererPlugins.length, 1)
     assert.equal(rendererPlugins[0].id, 'dev-fixture')
   } finally {
-    delete process.env.FLYENV_PLUGIN_PATH
+    delete process.env.QTENVDEV_PLUGIN_PATH
   }
 })
 
 test('installed mode still fails closed when the install secret cannot be decrypted', async () => {
   const fixture = await makeFixture()
-  delete process.env.FLYENV_PLUGIN_PATH
+  delete process.env.QTENVDEV_PLUGIN_PATH
   const manager = new PluginManager({
     pluginsRoot: fixture.pluginsRoot,
     statePath: fixture.statePath,

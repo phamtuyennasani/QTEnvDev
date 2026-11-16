@@ -9,7 +9,7 @@
 
 ## Overview
 
-MariaDB 模块为 FlyEnv 提供 MariaDB 数据库服务器的全生命周期管理，包括版本安装、服务启停、数据库管理、用户权限控制和数据备份等功能。与 MySQL 模块共享前端管理界面，但在后端拥有独立的服务管理实现。
+MariaDB 模块为 QTEnvDev 提供 MariaDB 数据库服务器的全生命周期管理，包括版本安装、服务启停、数据库管理、用户权限控制和数据备份等功能。与 MySQL 模块共享前端管理界面，但在后端拥有独立的服务管理实现。
 
 相关文档链接:
 - [MySQL 深度分析](./mysql.md) - 共享数据库管理 UI 的姊妹模块
@@ -499,7 +499,7 @@ Sources: src/fork/module/Mariadb/index.ts778-819
 | Dump binary | `mariadb-dump` | `mariadb-dump.exe` | `mariadb-dump` | Backup utility |
 | Install db | `mariadb-install-db` / `mysql_install_db` | `mariadb-install-db.exe` | Same as macOS | Fallback to legacy name |
 | Socket | Unix socket `/tmp/mysql.sock` | Named pipe | Unix socket | Windows uses --protocol=pipe |
-| Config path | `~/Library/Application Support/FlyEnv-Data/...` | `%ProgramFiles%/FlyEnv-Data/...` | `~/.config/FlyEnv-Data/...` | Platform-specific base dir |
+| Config path | `~/Library/Application Support/QTEnvDev-Data/...` | `%ProgramFiles%/QTEnvDev-Data/...` | `~/.config/QTEnvDev-Data/...` | Platform-specific base dir |
 | Shutdown | TERM signal | mysqladmin shutdown | TERM signal | Windows uses graceful first |
 | Version sources | Brew, MacPorts, local | Local only | Local only | macOS has most sources |
 
@@ -561,7 +561,7 @@ Sources: src/fork/module/Mariadb/index.ts398-449
 
 ### Online Versions
 
-Fetches from FlyEnv API:
+Fetches from QTEnvDev API:
 ```typescript
 POST https://api.one-env.com/api/version/fetch
 {

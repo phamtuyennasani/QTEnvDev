@@ -13,12 +13,12 @@ export default {
   registrationSaveTimeout: 'Saving the custom-version directory timed out',
   settings: 'Session credentials / initialization defaults',
   sessionNotice:
-    'Passwords stay in this FlyEnv session only. Enter the current SYSDBA password again after restarting FlyEnv or changing it in the database. These fields do not change existing accounts.',
+    'Passwords stay in this QTEnvDev session only. Enter the current SYSDBA password again after restarting QTEnvDev or changing it in the database. These fields do not change existing accounts.',
   initialSysdbaPassword: 'Initial SYSDBA password',
   initialSysdbaHelp:
-    'Set the login password for SYSDBA, the built-in database administrator created during initialization. FlyEnv uses this password to check startup and query instance information; it stays in this session only.',
+    'Set the login password for SYSDBA, the built-in database administrator created during initialization. QTEnvDev uses this password to check startup and query instance information; it stays in this session only.',
   currentSysdbaHelp:
-    'Enter the existing database administrator SYSDBA login password. For a database created by FlyEnv, this is the initial SYSDBA password you set, unless you changed it in the database. This field does not reset the password.',
+    'Enter the existing database administrator SYSDBA login password. For a database created by QTEnvDev, this is the initial SYSDBA password you set, unless you changed it in the database. This field does not reset the password.',
   auditorHelp:
     'Set the login password for SYSAUDITOR, the built-in audit account. This is a separate account from SYSDBA and its password is also required for initialization.',
   generatePassword: 'Generate',
@@ -72,7 +72,7 @@ export default {
   operationTimeout:
     'The operation timed out; its result is unknown. Check the installation and logs. This operation cannot be replayed during this session.',
   outcomeUnknown:
-    'This installation has an unknown or incomplete operation outcome. Check its files and logs before restarting FlyEnv; do not reinstall over existing files.',
+    'This installation has an unknown or incomplete operation outcome. Check its files and logs before restarting QTEnvDev; do not reinstall over existing files.',
   rescanFailed:
     'The operation completed, but the installed list could not be refreshed. Refresh the Service page.',
   installComplete:

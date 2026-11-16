@@ -12,7 +12,7 @@ func TestWindowsHelperKeyPathUsesStableLocalAppDataLocation(t *testing.T) {
 	t.Setenv("LOCALAPPDATA", localAppData)
 	t.Setenv("TEMP", tempDir)
 
-	want := filepath.Join(localAppData, "FlyEnv", "flyenv-helper.key")
+	want := filepath.Join(localAppData, "QTEnvDev", "qtenvdev-helper.key")
 	if got := WindowsHelperKeyPath(); got != want {
 		t.Fatalf("WindowsHelperKeyPath() = %q, want %q", got, want)
 	}

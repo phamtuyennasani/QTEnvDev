@@ -101,7 +101,7 @@
   "allTasks": "Alla uppgifter",
   "systemTasks": "Systemuppgifter",
   "systemTask": "Systemuppgift",
-  "flyenvTask": "FlyEnv-uppgift",
+  "qtenvdevTask": "QTEnvDev-uppgift",
   "otherTask": "Annan uppgift",
   "taskTrigger": "Utlösare",
   "deleteSystemTaskTips": "Ta bort den här schemalagda systemuppgiften?",

@@ -407,7 +407,7 @@ class Manager extends Base {
 
         const reconcilePgAdminServer = async () => {
           if (!serverIdentity) {
-            throw new Error('pgAdmin FlyEnv PostgreSQL server identity was not found')
+            throw new Error('pgAdmin QTEnvDev PostgreSQL server identity was not found')
           }
           await writeFile(paths.reconciliation, pgAdminDesktopServerReconciliationContent())
           await spawnPromiseWithEnv(

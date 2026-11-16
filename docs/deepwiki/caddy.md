@@ -9,7 +9,7 @@
 
 ## Overview
 
-Caddy 模块是 FlyEnv 的现代 Web 服务器组件，提供自动 HTTPS、HTTP/2 和简洁配置的服务托管功能。与 Nginx/Apache 不同，Caddy 使用 Caddyfile 作为配置格式，并内置自动 SSL 证书管理功能。
+Caddy 模块是 QTEnvDev 的现代 Web 服务器组件，提供自动 HTTPS、HTTP/2 和简洁配置的服务托管功能。与 Nginx/Apache 不同，Caddy 使用 Caddyfile 作为配置格式，并内置自动 SSL 证书管理功能。
 
 相关文档链接:
 - [Nginx](./nginx.md) - 同类 Web 服务器实现对比
@@ -64,7 +64,7 @@ Main Process
              │
              ├──► [Windows] serviceStartExecCMD()
              └──► [Unix] serviceStartExec(root: isLinux)
-                  └──► Spawn flyenv-async-exec.sh
+                  └──► Spawn qtenvdev-async-exec.sh
                   └──► Wait for PID file
    │
    ▼
@@ -239,7 +239,7 @@ _stopServer(version) [Base class]
     │
     ├──► Read PID file: {BaseDir}/pid/caddy.pid
     ├──► Search processes by name "caddy"
-    │    └──► Filter by FlyEnv data directories
+    │    └──► Filter by QTEnvDev data directories
     ├──► Collect all PIDs
     │
     ├──► [Windows] ProcessKill('-INT', pids)
@@ -326,9 +326,9 @@ Caddy 配置模板支持以下占位符替换：
 
 | Placeholder | Description | Example |
 |-------------|-------------|---------|
-| `##SSL_ROOT##` | SSL certificates directory | `/Users/xxx/FlyEnv/caddy/ssl` |
-| `##LOG_FILE##` | Main log file path | `/Users/xxx/FlyEnv/caddy/caddy.log` |
-| `##VHOST-DIR##` | Virtual host configs directory | `/Users/xxx/FlyEnv/vhost/caddy` |
+| `##SSL_ROOT##` | SSL certificates directory | `/Users/xxx/QTEnvDev/caddy/ssl` |
+| `##LOG_FILE##` | Main log file path | `/Users/xxx/QTEnvDev/caddy/caddy.log` |
+| `##VHOST-DIR##` | Virtual host configs directory | `/Users/xxx/QTEnvDev/vhost/caddy` |
 
 Sources: src/fork/module/Caddy/index.ts:53-56
 
@@ -460,7 +460,7 @@ Sources: src/fork/module/Caddy/index.ts:239-241
 
 ### Online Version Fetching
 
-Versions fetched from FlyEnv API (`https://api.one-env.com/api/version/fetch`):
+Versions fetched from QTEnvDev API (`https://api.one-env.com/api/version/fetch`):
 
 | Platform | Archive Format | Binary Path Pattern |
 |----------|---------------|---------------------|

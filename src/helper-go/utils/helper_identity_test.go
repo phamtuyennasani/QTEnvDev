@@ -41,11 +41,11 @@ func TestWindowsHelperInstanceIdentity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantRoot := filepath.Join(`C:\ProgramData`, "FlyEnv", "Helper", "users", instanceID)
+	wantRoot := filepath.Join(`C:\ProgramData`, "QTEnvDev", "Helper", "users", instanceID)
 	if paths.InstanceRoot != wantRoot {
 		t.Fatalf("instance root = %q, want %q", paths.InstanceRoot, wantRoot)
 	}
-	if paths.Executable != filepath.Join(wantRoot, "bin", "flyenv-helper.exe") {
+	if paths.Executable != filepath.Join(wantRoot, "bin", "qtenvdev-helper.exe") {
 		t.Fatalf("unexpected executable: %q", paths.Executable)
 	}
 	if paths.KeyPath != filepath.Join(wantRoot, "helper.key") {
@@ -57,7 +57,7 @@ func TestWindowsHelperInstanceIdentity(t *testing.T) {
 	if paths.InstanceConfigPath != filepath.Join(wantRoot, "instance.json") {
 		t.Fatalf("unexpected instance config path: %q", paths.InstanceConfigPath)
 	}
-	if paths.PipeName != "FlyEnv.Helper."+instanceID {
+	if paths.PipeName != "QTEnvDev.Helper."+instanceID {
 		t.Fatalf("unexpected pipe name: %q", paths.PipeName)
 	}
 	if got := GetPipeNameFromSocketPath(paths.PipeName); got != paths.PipeName {

@@ -8,7 +8,7 @@ import {
 } from '../src/fork/module/Neo4j/startup'
 
 const home = 'D:/Program Files/Neo4j/2026.07.0'
-const config = "D:/Program Files/FlyEnv/user's instance/conf"
+const config = "D:/Program Files/QTEnvDev/user's instance/conf"
 const rootCommand = `powershell.exe -File "${home}/bin/neo4j.ps1" console`
 const row = (
   PID: string,

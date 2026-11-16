@@ -101,7 +101,7 @@
   "allTasks": "كل المهام",
   "systemTasks": "مهام النظام",
   "systemTask": "مهمة نظام",
-  "flyenvTask": "مهمة FlyEnv",
+  "qtenvdevTask": "مهمة QTEnvDev",
   "otherTask": "مهمة أخرى",
   "taskTrigger": "المشغّل",
   "deleteSystemTaskTips": "هل تريد حذف مهمة النظام المجدولة هذه؟",

@@ -1,14 +1,14 @@
-# FlyEnv UI 交互与功能详解指南
+# QTEnvDev UI 交互与功能详解指南
 
-> 本指南按照你使用 FlyEnv 的自然顺序展开，帮助你发现界面中那些"看不见"的高效功能。
+> 本指南按照你使用 QTEnvDev 的自然顺序展开，帮助你发现界面中那些"看不见"的高效功能。
 
 ---
 
-## 第一章：初见 FlyEnv —— 界面与交互语言
+## 第一章：初见 QTEnvDev —— 界面与交互语言
 
 ### 1.1 主界面布局
 
-FlyEnv 采用经典的三栏布局：
+QTEnvDev 采用经典的三栏布局：
 
 - **左侧边栏**：模块导航、全局控制、设置入口
 - **顶部标题栏**：当前模块的名称与快捷操作
@@ -37,7 +37,7 @@ FlyEnv 采用经典的三栏布局：
 
 ### 1.3 通用交互习惯（交互黑话表）
 
-FlyEnv 有一套贯穿全软件的交互语言。掌握以下 6 个习惯后，可快速上手任何模块。
+QTEnvDev 有一套贯穿全软件的交互语言。掌握以下 6 个习惯后，可快速上手任何模块。
 
 | 习惯 | 用户动作 | 典型出现位置 |
 |---|---|---|
@@ -107,7 +107,7 @@ FlyEnv 有一套贯穿全软件的交互语言。掌握以下 6 个习惯后，�
 
 ### 3.1 版本管理通用模式
 
-FlyEnv 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、PostgreSQL、MongoDB 等）复用同一套 UI 架构。理解以下通用模式后，可快速上手任何新模块。
+QTEnvDev 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、PostgreSQL、MongoDB 等）复用同一套 UI 架构。理解以下通用模式后，可快速上手任何新模块。
 
 <!-- [UI截图占位: 某个标准服务模块（如 Nginx）的主界面全貌] -->
 
@@ -123,8 +123,8 @@ FlyEnv 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、P
 - **快速启动过滤**：仅在当前被选中的版本行显示一个特殊图标，点击可决定该版本是否参与边栏的"一键启停"。
 
 #### 环境变量状态（Env 列）
-- **蓝色图标**：由 FlyEnv 设置的环境变量
-- **黄色图标**：系统中已存在该环境变量，但不是由 FlyEnv 设置的
+- **蓝色图标**：由 QTEnvDev 设置的环境变量
+- **黄色图标**：系统中已存在该环境变量，但不是由 QTEnvDev 设置的
 - **灰色/隐藏**：未加入 PATH
 - 当版本未加入 PATH 时，一个设置按钮默认隐藏，仅悬停在该行时才会浮现（参见 1.3 节交互习惯）。
 
@@ -143,7 +143,7 @@ FlyEnv 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、P
   - macOS：Static / Homebrew / MacPorts / SDKMAN
   - Windows：仅 Static
   - Linux：Static / Homebrew / SDKMAN
-- **自定义版本目录**：卡片标题右侧的文件夹加号图标，悬停片刻显示说明；点击后可添加自定义扫描目录，FlyEnv 会额外扫描这些目录下的已安装版本。
+- **自定义版本目录**：卡片标题右侧的文件夹加号图标，悬停片刻显示说明；点击后可添加自定义扫描目录，QTEnvDev 会额外扫描这些目录下的已安装版本。
 
 #### 配置编辑器
 操作路径：`某服务模块 -> 点击 Config 按钮`
@@ -169,7 +169,7 @@ FlyEnv 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、P
 操作路径：`PHP 模块 -> 点击 Extension 按钮`
 
 - 以抽屉形式打开。
-- **平台感知 Tab**：macOS 显示 Homebrew / MacPorts / Flyenv / Default；Windows 显示 Local / Lib。不同平台看到的入口不同。
+- **平台感知 Tab**：macOS 显示 Homebrew / MacPorts / QTEnvDev / Default；Windows 显示 Local / Lib。不同平台看到的入口不同。
 
 ### 3.4 Node.js 项目管理
 
@@ -241,7 +241,7 @@ FlyEnv 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、P
 - **Zone 自动获取**：在 ApiToken 输入框中输入有效令牌后，系统会自动向 Cloudflare 拉取 Zone 列表。
 - **级联填充**：选择 Zone 后，Zone Name 和 Account ID 会自动填充。
 - **重复校验**：在线域名会进行全局唯一性校验，若已存在则标红提示。
-- **本地主机自动补全**：Local Host 输入框支持从 FlyEnv 已有的站点和别名中自动补全。
+- **本地主机自动补全**：Local Host 输入框支持从 QTEnvDev 已有的站点和别名中自动补全。
 
 <!-- [UI截图占位: Cloudflare Tunnel 新增对话框，展示 Zone 下拉和级联自动填充] -->
 
@@ -262,7 +262,7 @@ FlyEnv 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、P
 操作路径：`MkCert 模块 -> Certificates 标签页`
 
 - 证书路径和密钥路径支持点击打开所在文件夹，悬停时文字变为黄色（参见 1.3 节交互习惯）。
-- 若站点没有显式配置 SSL 证书，列表会展示 FlyEnv 自动计算的默认证书路径。
+- 若站点没有显式配置 SSL 证书，列表会展示 QTEnvDev 自动计算的默认证书路径。
 - 顶部可选择使用哪个 mkcert 二进制版本来管理证书。
 
 #### CA 根证书安装
@@ -315,7 +315,7 @@ FlyEnv 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、P
 #### 截图工具（Capturer）
 - **条件快捷键捕获**：仅当鼠标悬停在截图工具卡片上时，才会监听键盘快捷键；鼠标移出后自动停止监听，避免全局冲突。
 - 支持捕获组合键（Meta / Shift / Control / Alt + 任意键）。
-- 两种截图模式：直接截图 / 隐藏 FlyEnv 窗口后截图（避免窗口遮挡目标区域）。
+- 两种截图模式：直接截图 / 隐藏 QTEnvDev 窗口后截图（避免窗口遮挡目标区域）。
 - 文件名规则支持插入变量：`{index}`、`{timestamp}`、`{datetime}`、`{uuid}`。
 
 #### 图片压缩（Image Compress）
@@ -328,7 +328,7 @@ FlyEnv 的大部分标准服务模块（Nginx、Apache、PHP、MySQL、Redis、P
 
 操作路径：`主界面 -> 点击右下角 AI 悬浮按钮 -> 打开 AI 聊天面板`
 
-AI 面板以抽屉形式打开，分为 **FlyEnv**（任务型）和 **Ollama**（对话型）两种模式。
+AI 面板以抽屉形式打开，分为 **QTEnvDev**（任务型）和 **Ollama**（对话型）两种模式。
 
 #### 聊天列表
 - 悬停在历史会话列表项上，右侧浮现渐变遮罩和三点菜单（编辑标题 / 复制会话 / 删除）。
@@ -356,22 +356,22 @@ AI 面板以抽屉形式打开，分为 **FlyEnv**（任务型）和 **Ollama**�
 #### Prompt 管理器
 操作路径：`AI 面板 -> 点击输入框旁的 Prompt 按钮`
 
-- 点击触发（非悬停），弹出气泡面板，分 **Custom**（自定义）和 **FlyEnv**（预设）两栏。
+- 点击触发（非悬停），弹出气泡面板，分 **Custom**（自定义）和 **QTEnvDev**（预设）两栏。
 - 悬停在任意 Prompt 单元格上，右上角浮现更多菜单（编辑 / 复制 / 删除 / 另存为自定义）。
-- 顶部语言筛选器可按语言过滤 FlyEnv 预设 Prompt 列表。
+- 顶部语言筛选器可按语言过滤 QTEnvDev 预设 Prompt 列表。
 
-#### FlyEnv 任务模式
+#### QTEnvDev 任务模式
 - AI 直接在聊天流中嵌入交互组件（如文件夹选择器、站点选择器、故障排查按钮），无需跳出面板即可完成操作。
 - 当任务需要等待用户输入时，输入框会暂停发送，直到你提供所需信息。
 
-<!-- [UI截图占位: FlyEnv 任务型聊天中嵌入自定义交互组件的示例] -->
+<!-- [UI截图占位: QTEnvDev 任务型聊天中嵌入自定义交互组件的示例] -->
 
 
 ---
 
 ## 第四章：站点管理（Host）
 
-站点管理是 FlyEnv 交互密度最高的区域，也是大多数用户的日常核心工作流。
+站点管理是 QTEnvDev 交互密度最高的区域，也是大多数用户的日常核心工作流。
 
 <!-- [UI截图占位: Host 模块顶部工具栏全貌] -->
 
@@ -397,7 +397,7 @@ AI 面板以抽屉形式打开，分为 **FlyEnv**（任务型）和 **Ollama**�
     - 悬停在 "New Project" 上片刻，会弹出气泡说明该功能的作用。
 
 #### Hosts 文件写入控制
-- **Enable 开关**：控制是否将 FlyEnv 管理的站点自动写入系统 hosts 文件。悬停片刻显示说明气泡。
+- **Enable 开关**：控制是否将 QTEnvDev 管理的站点自动写入系统 hosts 文件。悬停片刻显示说明气泡。
 - **IPv6 开关**：仅当 Enable 开启后才会出现。控制写入 hosts 时是否同时生成 IPv6 映射条目。
 
 #### 打开系统 Hosts 编辑器
@@ -500,7 +500,7 @@ AI 面板以抽屉形式打开，分为 **FlyEnv**（任务型）和 **Ollama**�
 
 #### SSL / HTTPS
 - **SSL 总开关**：开启后才显示下方的证书配置。
-- **Auto SSL**：开启后，FlyEnv 自动使用内置 mkcert 根证书为该站点签发本地信任证书，无需手动填写证书路径。
+- **Auto SSL**：开启后，QTEnvDev 自动使用内置 mkcert 根证书为该站点签发本地信任证书，无需手动填写证书路径。
 - **手动证书**：关闭 Auto SSL 后，需手动填写 Cert 和 Cert Key 路径。输入框右侧的文件夹图标可调用系统文件选择对话框（此处选择的是文件，而非目录）。
 - **SSL Port**：开启 SSL 后，显示 Nginx/Caddy/Apache 的 HTTPS 端口配置（默认 443）。
 
@@ -595,4 +595,4 @@ AI 面板以抽屉形式打开，分为 **FlyEnv**（任务型）和 **Ollama**�
 
 ---
 
-*文档版本：与 FlyEnv 源码同步生成*
+*文档版本：与 QTEnvDev 源码同步生成*

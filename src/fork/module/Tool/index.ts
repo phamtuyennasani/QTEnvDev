@@ -16,7 +16,7 @@ import { killPorts, killPids, getPortPids, getPidsByKey } from './process'
 import { fetchEnvPath, fetchPATH, handleUpdatePath, updatePATH, removePATH } from './path'
 import { setAlias, cleanAlias } from './alias'
 import { runInTerminal, openPathByApp } from './terminal'
-import { initAllowDir, initFlyEnvSH } from './init'
+import { initAllowDir, initQTEnvDevSH } from './init'
 import type { SoftInstalled } from '@shared/app'
 import { isWindows } from '@shared/utils'
 
@@ -169,7 +169,7 @@ class Manager extends Base {
   openPathByApp = openPathByApp
 
   initAllowDir = initAllowDir
-  initFlyEnvSH = initFlyEnvSH
+  initQTEnvDevSH = initQTEnvDevSH
 
   getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
     // Tool 是通用工具模块，不管理具体服务，没有固定的配置文件

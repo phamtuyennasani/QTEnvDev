@@ -2,7 +2,7 @@
   <el-card>
     <template #header>
       <div class="flex items-baseline gap-3">
-        <span class="text-2xl">FlyEnv</span>
+        <span class="text-2xl">QTEnvDev</span>
         <span>Version {{ version }}</span>
         <el-button type="primary" size="small" @click.stop="checkUpdate">{{
           I18nT('update.checkForUpdates')
@@ -16,7 +16,7 @@
         </div>
         <div class="mt-5">
           <a target="_blank" href="javascript:" rel="noopener noreferrer" @click="toHome($event)">
-            FlyEnv - https://flyenv.com
+            QTEnvDev - https://qtenvdev.com
           </a>
         </div>
       </div>
@@ -33,9 +33,9 @@
             target="_blank"
             href="javascript:"
             rel="noopener noreferrer"
-            @click="openUrl($event, 'https://github.com/xpf0000/FlyEnv')"
+            @click="openUrl($event, 'https://github.com/xpf0000/QTEnvDev')"
           >
-            https://github.com/xpf0000/FlyEnv
+            https://github.com/xpf0000/QTEnvDev
           </a>
         </el-col>
         <el-col style="margin-top: 12px">
@@ -44,9 +44,9 @@
             target="_blank"
             href="javascript:"
             rel="noopener noreferrer"
-            @click="openUrl($event, 'https://flyenv.com/license.html')"
+            @click="openUrl($event, 'https://qtenvdev.com/license.html')"
           >
-            https://flyenv.com/license.html
+            https://qtenvdev.com/license.html
           </a>
         </el-col>
       </el-row>
@@ -78,7 +78,7 @@
 
   const toHome = (e: Event) => {
     e.preventDefault()
-    shell.openExternal('https://flyenv.com')
+    shell.openExternal('https://qtenvdev.com')
   }
 
   const checkUpdate = () => {

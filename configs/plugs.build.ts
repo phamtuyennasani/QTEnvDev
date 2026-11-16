@@ -62,8 +62,8 @@ export const BuildPlugin: () => Plugin = () => {
           try {
             await esbuildBuild({
               platform: 'node',
-              entryPoints: [pathResolve(__dirname, '../static/mcp/flyenv-mcp-stdio.mjs')],
-              outfile: join(base, 'mcp/flyenv-mcp-stdio.mjs'),
+              entryPoints: [pathResolve(__dirname, '../static/mcp/qtenvdev-mcp-stdio.mjs')],
+              outfile: join(base, 'mcp/qtenvdev-mcp-stdio.mjs'),
               bundle: true,
               packages: 'bundle',
               format: 'esm',

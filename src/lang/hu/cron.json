@@ -101,7 +101,7 @@
   "allTasks": "Minden feladat",
   "systemTasks": "Rendszerfeladatok",
   "systemTask": "Rendszerfeladat",
-  "flyenvTask": "FlyEnv-feladat",
+  "qtenvdevTask": "QTEnvDev-feladat",
   "otherTask": "Egyéb feladat",
   "taskTrigger": "Indító",
   "deleteSystemTaskTips": "Törli ezt a rendszerütemezett feladatot?",

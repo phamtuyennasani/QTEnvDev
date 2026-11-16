@@ -5,8 +5,8 @@
   "envTips": "Are calea adăugată la variabila de mediu",
   "aliasTips": "Aliasul folosit în terminal",
   "useSysPHP": "Foloseste versiunea implicita PHP",
-  "setByApp": "Variabile de mediu setate de FlyEnv",
-  "setByNoApp": "Variabilele de mediu nu sunt setate de FlyEnv",
+  "setByApp": "Variabile de mediu setate de QTEnvDev",
+  "setByNoApp": "Variabilele de mediu nu sunt setate de QTEnvDev",
   "bundleinVersionDelTips": "Această versiune este o versiune încorporată, confirmați că nu este afișată?",
   "customDirVersionDelTips": "Această versiune este o versiune de cale personalizată, confirmați că nu este afișată?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Porniți manual această sarcină cu privilegii ridicate și finalizați autorizarea în terminal; macOS/Linux nu acceptă sudo automat în fundal.",
-  "linuxFtpUnmanagedRoot": "Acest proces FTP cu privilegii root nu a fost pornit de serviciul gestionat de FlyEnv. Opriți-l cu drepturi de administrator înainte de a-l porni din nou.",
+  "linuxFtpUnmanagedRoot": "Acest proces FTP cu privilegii root nu a fost pornit de serviciul gestionat de QTEnvDev. Opriți-l cu drepturi de administrator înainte de a-l porni din nou.",
   "linuxFtpUsersRefreshFailed": "Modificările conturilor FTP au fost salvate, dar serviciul în execuție nu le-a putut aplica: {error}",
   "pathSavedRefreshFailed": "Variabilele de mediu au fost salvate, dar lista nu a putut fi reîmprospătată: {error}"
 }

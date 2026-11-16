@@ -43,7 +43,7 @@ func installLinuxCA(snapshot, dir, tool string) error {
 	if err != nil {
 		return err
 	}
-	temp, err := os.CreateTemp(dir, ".flyenv-ca-*.crt")
+	temp, err := os.CreateTemp(dir, ".qtenvdev-ca-*.crt")
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func installLinuxCA(snapshot, dir, tool string) error {
 		return err
 	}
 	if err = runSystemTool(tool); err != nil {
-		return fmt.Errorf("FlyEnv CA copied but trust update failed: %w", err)
+		return fmt.Errorf("QTEnvDev CA copied but trust update failed: %w", err)
 	}
 	return nil
 }

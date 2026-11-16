@@ -17,8 +17,8 @@ export const buildWindowsHelperProcessStopScript = (target: HelperProcessTarget)
   $sidArg = '--?expected-user-sid(?:=|\s+)(?:"' + $sidValue + '"|' + $sidValue + ')'
   # 完整参数匹配，不以 SID/实例 ID 子串或程序名证明归属；共享程序也可供其他 SID 使用。
   $helperCommandPattern = '^(?:"[^"]+"|[^\s"]+)\s+(?:' + $instanceArg + '\s+' + $sidArg + '|' + $sidArg + '\s+' + $instanceArg + ')\s*$'
-  function Get-FlyEnvTargetHelperProcesses {
-    foreach ($candidate in @(Get-CimInstance Win32_Process -Filter "Name LIKE 'flyenv-helper%'" -ErrorAction Stop)) {
+  function Get-QTEnvDevTargetHelperProcesses {
+    foreach ($candidate in @(Get-CimInstance Win32_Process -Filter "Name LIKE 'qtenvdev-helper%'" -ErrorAction Stop)) {
       if ([string]::IsNullOrWhiteSpace($candidate.ExecutablePath)) { continue }
       $candidatePath = [IO.Path]::GetFullPath([string]$candidate.ExecutablePath)
       if ($helperStopPaths -notcontains $candidatePath) { continue }
@@ -30,7 +30,7 @@ export const buildWindowsHelperProcessStopScript = (target: HelperProcessTarget)
     }
   }
   $stopFailures = New-Object 'Collections.Generic.List[string]'
-  foreach ($candidate in @(Get-FlyEnvTargetHelperProcesses)) {
+  foreach ($candidate in @(Get-QTEnvDevTargetHelperProcesses)) {
     $ownedProcess = $null
     try {
       try { $ownedProcess = [Diagnostics.Process]::GetProcessById([int]$candidate.ProcessId) }
@@ -56,7 +56,7 @@ export const buildWindowsHelperProcessStopScript = (target: HelperProcessTarget)
       if ($null -ne $ownedProcess) { $ownedProcess.Dispose() }
     }
   }
-  $remaining = @(Get-FlyEnvTargetHelperProcesses)
+  $remaining = @(Get-QTEnvDevTargetHelperProcesses)
   if ($remaining.Count -gt 0 -or $stopFailures.Count -gt 0) {
     throw ("Target SID Helper shutdown is incomplete. Remaining PIDs: " + (($remaining | ForEach-Object { $_.ProcessId }) -join ', ') + "; " + ($stopFailures -join '; '))
   }

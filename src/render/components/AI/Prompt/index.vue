@@ -75,7 +75,7 @@
             <div
               class="flex justify-center items-center w-[120px] border-b-2 border-blue-500 border-solid py-2"
             >
-              FlyEnv
+              QTEnvDev
             </div>
             <el-select v-model="PromptSetup.lang" :teleported="false" class="w-32 max-w-32">
               <template v-for="(item, _index) in PromptSetup.langs" :key="_index">

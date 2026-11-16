@@ -39,18 +39,18 @@ const Ruby = reactive({
       image: `${mirror}ruby:${Ruby.version}`,
       ports: Ruby.ports.map((p) => `${p.out}:${p.in}`),
       environment,
-      networks: ['flyenv-network'],
+      networks: ['qtenvdev-network'],
       working_dir: '/app',
       command: Ruby.command
     }
 
     const volumes: any[] = []
 
-    const flyenvRubyDir = join(dirname(base.dir), 'flyenv-docker-compose/ruby')
-    await fs.mkdirp(flyenvRubyDir)
+    const qtenvdevRubyDir = join(dirname(base.dir), 'qtenvdev-docker-compose/ruby')
+    await fs.mkdirp(qtenvdevRubyDir)
 
     // 1. 挂载 Bundler Gems 目录 (BUNDLE_PATH)
-    const rubyGemsHostPath = join(flyenvRubyDir, 'gems_bundle')
+    const rubyGemsHostPath = join(qtenvdevRubyDir, 'gems_bundle')
     await fs.mkdirp(rubyGemsHostPath)
 
     volumes.push({

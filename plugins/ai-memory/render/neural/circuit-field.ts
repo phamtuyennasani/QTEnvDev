@@ -184,7 +184,7 @@ export class CircuitField {
     })
     geometry.setAttribute('aFieldPhase', new THREE.Float32BufferAttribute(phases, 1))
     const material = createRibbonMaterial(1.15, 0.76, 1.75, 'flow')
-    material.defines.FLYENV_CIRCUIT_FIELD_LAYER = 1
+    material.defines.QTENVDEV_CIRCUIT_FIELD_LAYER = 1
     material.vertexShader = material.vertexShader
       .replace(
         'varying vec3 vColor;',
@@ -228,7 +228,7 @@ export class CircuitField {
     glintGeometry.setAttribute('position', new THREE.Float32BufferAttribute(glintPositions, 3))
     glintGeometry.setAttribute('aPhase', new THREE.Float32BufferAttribute(glintPhases, 1))
     this.glintMaterial = new THREE.ShaderMaterial({
-      defines: { FLYENV_CIRCUIT_FIELD_LAYER: 1 },
+      defines: { QTENVDEV_CIRCUIT_FIELD_LAYER: 1 },
       uniforms: { uTime: { value: 0 }, uAlpha: { value: 0.7 }, uPixelRatio: { value: 1 } },
       vertexShader: `attribute float aPhase; uniform float uTime; uniform float uPixelRatio; varying float vLight;
         void main(){vec4 p=modelViewMatrix*vec4(position,1.0); gl_Position=projectionMatrix*p;

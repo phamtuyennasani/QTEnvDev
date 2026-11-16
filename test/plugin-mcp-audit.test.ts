@@ -10,7 +10,7 @@ import { ForkItem } from '../src/main/core/ForkItem'
 
 const secret = 'PRIVATE_MEMORY_正文_QUERY_report'
 test('private, removed and unknown tool paths never persist arguments or error content', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-audit-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-audit-'))
   const previous = global.Server
   try {
     ;(global as any).Server = { BaseDir: root }
@@ -58,7 +58,7 @@ test('volatile diagnostics validate metadata, evict oldest at 201, and restart e
   assert.equal(new PluginMCPAudit().list('fixture').length, 0)
 })
 test('dedicated worker native error report is excluded from fork.error.txt', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-fork-audit-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-fork-audit-'))
   const previous = global.Server
   try {
     ;(global as any).Server = { BaseDir: root }
@@ -117,11 +117,11 @@ test('nested receipts and result-list counts survive metadata projection without
 test('detailed search calls retain queries, filters and summaries without content', () => {
   const audit = new PluginMCPAudit()
   const id = '123e4567-e89b-42d3-a456-426614174010'
-  audit.register('ai-memory', ['flyenv_memory_search'])
-  audit.log('flyenv_memory_search', {
+  audit.register('ai-memory', ['qtenvdev_memory_search'])
+  audit.log('qtenvdev_memory_search', {
     args: {
       scope: 'project',
-      project_path: '/work/FlyEnv',
+      project_path: '/work/QTEnvDev',
       queries: ['没有命中', 'MCP'],
       topic: 'audit',
       tags: ['mcp'],
@@ -151,8 +151,8 @@ test('detailed search calls retain queries, filters and summaries without conten
 
 test('detailed mutation calls exclude nested request and response content', () => {
   const audit = new PluginMCPAudit()
-  audit.register('ai-memory', ['flyenv_memory_update'])
-  audit.log('flyenv_memory_update', {
+  audit.register('ai-memory', ['qtenvdev_memory_update'])
+  audit.log('qtenvdev_memory_update', {
     args: {
       scope: 'global',
       id: '123e4567-e89b-42d3-a456-426614174011',
@@ -174,20 +174,20 @@ test('detailed mutation calls exclude nested request and response content', () =
 })
 
 test('plugin MCP file audit persists only simplified validated metadata', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-plugin-file-audit-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-plugin-file-audit-'))
   const previous = global.Server
   const id = '123e4567-e89b-42d3-a456-426614174020'
   const requestId = '123e4567-e89b-42d3-a456-426614174021'
   try {
     ;(global as any).Server = { BaseDir: root }
-    ;(MCPAudit as any).logPlugin('flyenv_memory_store', 'ai-memory', {
+    ;(MCPAudit as any).logPlugin('qtenvdev_memory_store', 'ai-memory', {
       args: { request_id: requestId, queries: [secret], summary: secret, content: secret },
       result: { outcome: 'success', data: { id, revision: 1, summary: secret, content: secret } },
       durationMs: 7.4,
       client: { name: 'Codex', version: '0.167.0' }
     })
     const row = JSON.parse((await readFile(join(root, 'mcp/audit.log'), 'utf8')).trim())
-    assert.equal(row.tool, 'flyenv_memory_store')
+    assert.equal(row.tool, 'qtenvdev_memory_store')
     assert.equal(row.pluginId, 'ai-memory')
     assert.equal(row.id, id)
     assert.equal(row.request_id, requestId)
@@ -216,9 +216,9 @@ test('redirected volatile audit failure remains supplementary', () => {
 
 test('call records have stable unique row identifiers', () => {
   const audit = new PluginMCPAudit()
-  audit.register('ai-memory', ['flyenv_memory_search'])
-  audit.log('flyenv_memory_search', { result: { outcome: 'success' } })
-  audit.log('flyenv_memory_search', { result: { outcome: 'success' } })
+  audit.register('ai-memory', ['qtenvdev_memory_search'])
+  audit.log('qtenvdev_memory_search', { result: { outcome: 'success' } })
+  audit.log('qtenvdev_memory_search', { result: { outcome: 'success' } })
   const rows = audit.list('ai-memory') as any[]
   assert.equal(typeof rows[0].call_id, 'number')
   assert.equal(new Set(rows.map((row) => row.call_id)).size, 2)

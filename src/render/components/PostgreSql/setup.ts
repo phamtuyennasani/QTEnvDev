@@ -14,7 +14,7 @@ export const PostgreSqlSetup: {
       return initPromise
     }
     initPromise = localForage
-      .getItem<Record<string, string>>('flyenv-postgresql-storage-dir')
+      .getItem<Record<string, string>>('qtenvdev-postgresql-storage-dir')
       .then((res) => {
         if (res) {
           PostgreSqlSetup.dir = reactive(res)
@@ -25,7 +25,7 @@ export const PostgreSqlSetup: {
   },
   save() {
     localForage
-      .setItem('flyenv-postgresql-storage-dir', JSON.parse(JSON.stringify(PostgreSqlSetup.dir)))
+      .setItem('qtenvdev-postgresql-storage-dir', JSON.parse(JSON.stringify(PostgreSqlSetup.dir)))
       .then()
       .catch()
   }

@@ -4,7 +4,7 @@
   "inputTips": "//Input JSON, JavaScript Object/Array, PHP Array, URL, XML, YAML, PList. Automatische conversie naar geselecteerde indeling",
   "parseFailTips": "Parsen mislukt",
   "inputCheckFailTips": "Onbekend",
-  "systemProxyCheck": "Gedetecteerd dat het netwerk een proxy gebruikt, is FlyEnv ingesteld om deze proxy te gebruiken?",
+  "systemProxyCheck": "Gedetecteerd dat het netwerk een proxy gebruikt, is QTEnvDev ingesteld om deze proxy te gebruiken?",
   "systemProxyUsed": "Instelling succesvol. Als u het wilt wijzigen, doe dit dan in Instellingen->Proxy Instellingen.",
   "windowCount": "Aantal vensters",
   "codemake": "Code generatie",

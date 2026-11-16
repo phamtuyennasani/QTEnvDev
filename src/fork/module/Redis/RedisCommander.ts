@@ -34,8 +34,8 @@ export const REDIS_COMMANDER_PACKAGE = 'redis-commander'
 export const REDIS_COMMANDER_DEFAULT_PORT = 8081
 export const REDIS_COMMANDER_PORT_SCAN_COUNT = 20
 export const REDIS_COMMANDER_MAX_PORT = 65535
-export const REDIS_COMMANDER_LOGIN = 'flyenv'
-export const REDIS_COMMANDER_SSO_ISSUER = 'FlyEnv'
+export const REDIS_COMMANDER_LOGIN = 'qtenvdev'
+export const REDIS_COMMANDER_SSO_ISSUER = 'QTEnvDev'
 const REDIS_COMMANDER_SSO_TOKEN_TTL_SECONDS = 60
 const REDIS_COMMANDER_STARTUP_LOG_TAIL_LENGTH = 4_000
 const REDIS_COMMANDER_HEALTH_ATTEMPTS = 30
@@ -132,7 +132,7 @@ export function redisCommanderPaths(baseDir: string, windows: boolean): RedisCom
 
 export function redisCommanderInstallManifest() {
   return {
-    name: 'flyenv-redis-commander',
+    name: 'qtenvdev-redis-commander',
     private: true,
     dependencies: { [REDIS_COMMANDER_PACKAGE]: 'latest' }
   }

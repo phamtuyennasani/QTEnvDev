@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import {
   validatePluginManifest,
-  type FlyEnvPluginCatalog,
-  type FlyEnvPluginCatalogItem,
-  type FlyEnvPluginManifest
+  type QTEnvDevPluginCatalog,
+  type QTEnvDevPluginCatalogItem,
+  type QTEnvDevPluginManifest
 } from '../src/shared/plugin/PluginManifest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -40,27 +40,27 @@ export async function createHostRuntimePlugin(): Promise<VitePlugin> {
     exportNames.set(packageName, Object.keys(runtime).filter(validExportName))
   }
   const bridgeModules: Record<string, string> = {
-    '@/util/IPC': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.ipc`,
-    '@/components/MCP/setup': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const MCPSetup = host?.mcp`,
-    '@/router': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.router`,
-    '@/router/index': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.router`,
-    '@/store/app': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const AppStore = (...args) => host?.stores?.AppStore?.(...args)`,
-    '@/core/ASide': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const AsideSetup = host?.aside?.AsideSetup\nexport const AppServiceModule = host?.aside?.AppServiceModule`,
-    '@/core/Module': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const AppModuleSetup = host?.coreModule?.AppModuleSetup\nexport const AppModuleTab = host?.coreModule?.AppModuleTab\nexport const AppCustomerModule = host?.coreModule?.AppCustomerModule`,
-    '@/store/brew': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const BrewStore = (...args) => host?.stores?.BrewStore?.(...args)`,
-    '@/core/VueExtend': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const VueExtend = host?.vueExtend`,
-    '@/core/App': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const AppModules = host?.appModules`,
-    '@/core/AppModules': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const AppModules = host?.appModules`,
-    '@/components/ServiceManager/index.vue': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.components?.ServiceManager`,
-    '@/components/VersionManager/index.vue': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.components?.VersionManager`,
-    '@/components/Conf/index.vue': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.components?.Conf`,
-    '@/components/Conf/common.vue': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.components?.ConfCommon`,
-    '@/components/Log/index.vue': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.components?.Log`,
-    '@/components/Log/tool.vue': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.components?.LogTool`,
-    '@lang/index': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const AppAllLang = host?.lang?.AppAllLang\nexport const BuiltInLocaleCatalog = host?.lang?.BuiltInLocaleCatalog\nexport const FALLBACK_LOCALE = host?.lang?.FALLBACK_LOCALE\nexport const normalizeLocale = host?.lang?.normalizeLocale\nexport const AppI18n = host?.lang?.AppI18n\nexport const I18nT = host?.lang?.I18nT\nexport const applyLanguagePayload = host?.lang?.applyLanguagePayload\nexport const getActiveLocale = host?.lang?.getActiveLocale\nexport const releaseLocalePayload = host?.lang?.releaseLocalePayload`,
-    'flyenv:ipc': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.ipc`,
-    'flyenv:router': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport default host?.router`,
-    'flyenv:app-store': `const host = globalThis.__FLYENV_PLUGIN_HOST__\nexport const AppStore = (...args) => host?.stores?.AppStore?.(...args)`
+    '@/util/IPC': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.ipc`,
+    '@/components/MCP/setup': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const MCPSetup = host?.mcp`,
+    '@/router': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.router`,
+    '@/router/index': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.router`,
+    '@/store/app': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const AppStore = (...args) => host?.stores?.AppStore?.(...args)`,
+    '@/core/ASide': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const AsideSetup = host?.aside?.AsideSetup\nexport const AppServiceModule = host?.aside?.AppServiceModule`,
+    '@/core/Module': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const AppModuleSetup = host?.coreModule?.AppModuleSetup\nexport const AppModuleTab = host?.coreModule?.AppModuleTab\nexport const AppCustomerModule = host?.coreModule?.AppCustomerModule`,
+    '@/store/brew': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const BrewStore = (...args) => host?.stores?.BrewStore?.(...args)`,
+    '@/core/VueExtend': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const VueExtend = host?.vueExtend`,
+    '@/core/App': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const AppModules = host?.appModules`,
+    '@/core/AppModules': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const AppModules = host?.appModules`,
+    '@/components/ServiceManager/index.vue': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.components?.ServiceManager`,
+    '@/components/VersionManager/index.vue': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.components?.VersionManager`,
+    '@/components/Conf/index.vue': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.components?.Conf`,
+    '@/components/Conf/common.vue': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.components?.ConfCommon`,
+    '@/components/Log/index.vue': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.components?.Log`,
+    '@/components/Log/tool.vue': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.components?.LogTool`,
+    '@lang/index': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const AppAllLang = host?.lang?.AppAllLang\nexport const BuiltInLocaleCatalog = host?.lang?.BuiltInLocaleCatalog\nexport const FALLBACK_LOCALE = host?.lang?.FALLBACK_LOCALE\nexport const normalizeLocale = host?.lang?.normalizeLocale\nexport const AppI18n = host?.lang?.AppI18n\nexport const I18nT = host?.lang?.I18nT\nexport const applyLanguagePayload = host?.lang?.applyLanguagePayload\nexport const getActiveLocale = host?.lang?.getActiveLocale\nexport const releaseLocalePayload = host?.lang?.releaseLocalePayload`,
+    'qtenvdev:ipc': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.ipc`,
+    'qtenvdev:router': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport default host?.router`,
+    'qtenvdev:app-store': `const host = globalThis.__QTENVDEV_PLUGIN_HOST__\nexport const AppStore = (...args) => host?.stores?.AppStore?.(...args)`
   }
 
   // Vite applies resolve.alias before user pre-plugins, so resolveId may receive
@@ -94,35 +94,35 @@ export async function createHostRuntimePlugin(): Promise<VitePlugin> {
   }
 
   return {
-    name: 'flyenv-plugin-host-runtime',
+    name: 'qtenvdev-plugin-host-runtime',
     enforce: 'pre',
     resolveId(id, importer) {
       const bridgeId = bridgeModules[id] ? id : normalizeBridgeId(id, importer)
-      if (bridgeModules[bridgeId]) return '\0flyenv-plugin-bridge:' + bridgeId
+      if (bridgeModules[bridgeId]) return '\0qtenvdev-plugin-bridge:' + bridgeId
       if (id.endsWith('json_typegen_wasm_bg.wasm')) {
-        return '\0flyenv-plugin-wasm-stub'
+        return '\0qtenvdev-plugin-wasm-stub'
       }
       if (HOST_RUNTIME_PACKAGES.includes(id as any)) {
-        return '\0flyenv-plugin-host-runtime:' + id
+        return '\0qtenvdev-plugin-host-runtime:' + id
       }
       return undefined
     },
     load(id) {
-      if (id === '\0flyenv-plugin-wasm-stub') {
+      if (id === '\0qtenvdev-plugin-wasm-stub') {
         return 'export default {}; export const memory = new WebAssembly.Memory({ initial: 1 })'
       }
-      const bridgePrefix = '\0flyenv-plugin-bridge:'
+      const bridgePrefix = '\0qtenvdev-plugin-bridge:'
       if (id.startsWith(bridgePrefix)) {
         return bridgeModules[id.slice(bridgePrefix.length)]
       }
-      const prefix = '\0flyenv-plugin-host-runtime:'
+      const prefix = '\0qtenvdev-plugin-host-runtime:'
       if (!id.startsWith(prefix)) return undefined
       const packageName = id.slice(prefix.length)
       const names = exportNames.get(packageName) ?? []
       const lines = [
-        'const runtime = globalThis.__FLYENV_PLUGIN_HOST__?.[' + JSON.stringify(packageName) + ']',
+        'const runtime = globalThis.__QTENVDEV_PLUGIN_HOST__?.[' + JSON.stringify(packageName) + ']',
         'if (!runtime) throw new Error(' +
-          JSON.stringify('FlyEnv plugin host runtime unavailable: ' + packageName) +
+          JSON.stringify('QTEnvDev plugin host runtime unavailable: ' + packageName) +
           ')',
         ...names.map((name) => 'export const ' + name + ' = runtime[' + JSON.stringify(name) + ']'),
         'export default runtime'
@@ -139,9 +139,9 @@ export type BuildPluginOptions = {
   archivePath?: string
 }
 
-async function updateOfficialRegistry(manifest: FlyEnvPluginManifest, archivePath: string) {
+async function updateOfficialRegistry(manifest: QTEnvDevPluginManifest, archivePath: string) {
   const registryPath = path.resolve(root, 'plugins/registry.json')
-  let registry: FlyEnvPluginCatalog = { schemaVersion: 1, plugins: [] }
+  let registry: QTEnvDevPluginCatalog = { schemaVersion: 1, plugins: [] }
   if (await fs.pathExists(registryPath)) {
     registry = await fs.readJson(registryPath)
   }
@@ -154,7 +154,7 @@ async function updateOfficialRegistry(manifest: FlyEnvPluginManifest, archivePat
     .digest('hex')
 
   const existing = registry.plugins.find((item) => item.id === manifest.id)
-  const entry: FlyEnvPluginCatalogItem = {
+  const entry: QTEnvDevPluginCatalogItem = {
     apiVersion: manifest.apiVersion,
     id: manifest.id,
     name: manifest.name,
@@ -276,20 +276,20 @@ export async function buildPlugin(name: string, options: BuildPluginOptions = {}
     // directory, which has no node_modules. import.meta.url remains the
     // fallback before the server broadcast arrives.
     const forkBanner = [
-      "import { createRequire as __flyenvPluginCreateRequire } from 'node:module';",
-      "import { pathToFileURL as __flyenvPluginPathToFileURL } from 'node:url';",
-      'const __flyenvPluginRequireAnchor = (fallbackUrl) => {',
+      "import { createRequire as __qtenvdevPluginCreateRequire } from 'node:module';",
+      "import { pathToFileURL as __qtenvdevPluginPathToFileURL } from 'node:url';",
+      'const __qtenvdevPluginRequireAnchor = (fallbackUrl) => {',
       '  const anchor = globalThis.Server?.Static;',
-      "  return anchor ? __flyenvPluginPathToFileURL(anchor + '/index.js') : fallbackUrl;",
+      "  return anchor ? __qtenvdevPluginPathToFileURL(anchor + '/index.js') : fallbackUrl;",
       '};',
-      'let __flyenvPluginRequire;',
+      'let __qtenvdevPluginRequire;',
       'const require = (id) => {',
-      '  if (!__flyenvPluginRequire) {',
-      '    __flyenvPluginRequire = __flyenvPluginCreateRequire(',
-      '      __flyenvPluginRequireAnchor(import.meta.url)',
+      '  if (!__qtenvdevPluginRequire) {',
+      '    __qtenvdevPluginRequire = __qtenvdevPluginCreateRequire(',
+      '      __qtenvdevPluginRequireAnchor(import.meta.url)',
       '    );',
       '  }',
-      '  return __flyenvPluginRequire(id);',
+      '  return __qtenvdevPluginRequire(id);',
       '};'
     ].join('\n')
     const forkOutput = path.join(outputRoot, 'fork', 'index.mjs')
@@ -312,20 +312,20 @@ export async function buildPlugin(name: string, options: BuildPluginOptions = {}
       },
       plugins: [
         {
-          name: 'flyenv-plugin-host-lang',
+          name: 'qtenvdev-plugin-host-lang',
           setup(build) {
             // Fork plugin bundles must share the fork process's live i18n
             // instance (a bundled copy never receives language payloads and is
             // stuck on the fallback locale). The fork process exposes it on
-            // `globalThis.__FLYENV_PLUGIN_HOST__.lang` (src/fork/runtime.ts);
+            // `globalThis.__QTENVDEV_PLUGIN_HOST__.lang` (src/fork/runtime.ts);
             // rewrite every `@lang/runtime` import to read from that bridge.
             build.onResolve({ filter: /^@lang\/runtime$/ }, () => ({
               path: '@lang/runtime',
-              namespace: 'flyenv-plugin-host-lang'
+              namespace: 'qtenvdev-plugin-host-lang'
             }))
-            build.onLoad({ filter: /.*/, namespace: 'flyenv-plugin-host-lang' }, () => ({
+            build.onLoad({ filter: /.*/, namespace: 'qtenvdev-plugin-host-lang' }, () => ({
               contents: [
-                'const host = globalThis.__FLYENV_PLUGIN_HOST__',
+                'const host = globalThis.__QTENVDEV_PLUGIN_HOST__',
                 'export const AppI18n = host?.lang?.AppI18n',
                 'export const FALLBACK_LOCALE = host?.lang?.FALLBACK_LOCALE',
                 'export const getActiveLocale = host?.lang?.getActiveLocale',
@@ -336,7 +336,7 @@ export async function buildPlugin(name: string, options: BuildPluginOptions = {}
           }
         },
         {
-          name: 'flyenv-plugin-require-anchor',
+          name: 'qtenvdev-plugin-require-anchor',
           setup(build) {
             // Fork sources hold their own `createRequire(import.meta.url)`
             // bindings (Zip.ts, DNS, Host, ...). esbuild inlines them into the
@@ -349,7 +349,7 @@ export async function buildPlugin(name: string, options: BuildPluginOptions = {}
               return {
                 contents: contents.replaceAll(
                   'createRequire(import.meta.url)',
-                  'createRequire(__flyenvPluginRequireAnchor(import.meta.url))'
+                  'createRequire(__qtenvdevPluginRequireAnchor(import.meta.url))'
                 ),
                 loader: 'ts'
               }
@@ -373,7 +373,7 @@ export async function buildPlugin(name: string, options: BuildPluginOptions = {}
   if (options.archive) {
     const archivePath =
       options.archivePath ??
-      path.join(pluginDistRoot, `${sourceManifest.id}-${sourceManifest.version}.flyenv-plugin`)
+      path.join(pluginDistRoot, `${sourceManifest.id}-${sourceManifest.version}.qtenvdev-plugin`)
     await packPlugin(outputRoot, archivePath)
     console.log(`Plugin package: ${archivePath}`)
     await updateOfficialRegistry(sourceManifest, archivePath)

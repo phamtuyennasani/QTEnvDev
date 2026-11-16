@@ -5,7 +5,7 @@ import type { SoftInstalled } from '@shared/app'
 import { resolveConfDir } from './homebrew'
 
 const DISABLED_KEY = 'plugins.security.disabled'
-const COMMENT_MARK = '# flyenv-dev-mode:'
+const COMMENT_MARK = '# qtenvdev-dev-mode:'
 const DISABLED_TRUE_REG = /^plugins\.security\.disabled\s*:\s*true\s*(#.*)?$/
 
 const configFile = (version: SoftInstalled) => join(resolveConfDir(version.path), 'opensearch.yml')

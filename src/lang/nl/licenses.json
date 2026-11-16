@@ -1,7 +1,7 @@
 {
-  "description": "De FlyEnv-licentie ondersteunt de doorlopende ontwikkeling en het onderhoud van het project. Ze is niet bedoeld om lokale kernontwikkeling te blokkeren — kernruntimes en functies voor omgevingsbeheer blijven altijd toegankelijk. Een licentie verwijdert de evaluatiebeperkingen van premiumtools en helpt FlyEnv onderhouden te blijven op macOS, Windows en Linux.",
+  "description": "De QTEnvDev-licentie ondersteunt de doorlopende ontwikkeling en het onderhoud van het project. Ze is niet bedoeld om lokale kernontwikkeling te blokkeren — kernruntimes en functies voor omgevingsbeheer blijven altijd toegankelijk. Een licentie verwijdert de evaluatiebeperkingen van premiumtools en helpt QTEnvDev onderhouden te blijven op macOS, Windows en Linux.",
   "restrictions": {
-    "title": "FlyEnv blijft functioneel zonder licentie, maar de volgende evaluatiebeperkingen zijn van toepassing:",
+    "title": "QTEnvDev blijft functioneel zonder licentie, maar de volgende evaluatiebeperkingen zijn van toepassing:",
     "items": {
       "0": "Sitebeheer is beperkt tot maximaal 3 lokale sites.",
       "1": "De AI-assistent is beperkt tot een proefperiode van 3 dagen.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Hoe een licentie verkrijgen",
-    "description": "FlyEnv biedt de volgende drie manieren om een licentie te verkrijgen. Licenties kunnen nog niet automatisch worden uitgegeven, dus alle aanvragen worden handmatig beoordeeld en uitgegeven:",
+    "description": "QTEnvDev biedt de volgende drie manieren om een licentie te verkrijgen. Licenties kunnen nog niet automatisch worden uitgegeven, dus alle aanvragen worden handmatig beoordeeld en uitgegeven:",
     "methods": {
       "0": {
         "title": "Koop een persoonlijke licentie",
-        "description": "Een persoonlijke FlyEnv-licentie kost $10 USD. Ze dekt één actief apparaat (overdracht naar een ander apparaat wordt ondersteund via licentiebeheer) en verwijdert alle evaluatiebeperkingen. De afrekening wordt verwerkt door Paddle. Dien na aankoop uw Paddle-order-ID in via het onderstaande aanvraagformulier. Aankooppagina:"
+        "description": "Een persoonlijke QTEnvDev-licentie kost $10 USD. Ze dekt één actief apparaat (overdracht naar een ander apparaat wordt ondersteund via licentiebeheer) en verwijdert alle evaluatiebeperkingen. De afrekening wordt verwerkt door Paddle. Dien na aankoop uw Paddle-order-ID in via het onderstaande aanvraagformulier. Aankooppagina:"
       },
       "1": {
         "title": "Draag bij aan de codebase",
-        "description": "Dien een Pull Request in op GitHub om FlyEnv te helpen verbeteren. Elke betekenisvolle bijdrage telt — van grote functies tot eenvoudige documentatiecorrecties."
+        "description": "Dien een Pull Request in op GitHub om QTEnvDev te helpen verbeteren. Elke betekenisvolle bijdrage telt — van grote functies tot eenvoudige documentatiecorrecties."
       },
       "2": {
         "title": "Verspreid het woord",
-        "description": "Deel uw FlyEnv-ervaring op elk platform in elke taal — artikelen, video's, blogs of berichten. De inhoud moet origineel en authentiek zijn; inhoud die meer dan 3 maanden geleden is gepubliceerd, komt mogelijk niet meer in aanmerking."
+        "description": "Deel uw QTEnvDev-ervaring op elk platform in elke taal — artikelen, video's, blogs of berichten. De inhoud moet origineel en authentiek zijn; inhoud die meer dan 3 maanden geleden is gepubliceerd, komt mogelijk niet meer in aanmerking."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Autorisatiecode niet ontvangen",
   "oauthTimeout": "Autorisatietime-out",
   "oauthSuccessTitle": "Autorisatie geslaagd",
-  "oauthSuccessMessage": "Deze pagina kan worden gesloten. Ga alstublieft terug naar FlyEnv om de licentiegegevens te bekijken.",
+  "oauthSuccessMessage": "Deze pagina kan worden gesloten. Ga alstublieft terug naar QTEnvDev om de licentiegegevens te bekijken.",
   "trialExpiredTitle": "Licentie niet geactiveerd",
-  "trialExpiredTips": "Je gebruikt FlyEnv al {days} dagen. Als FlyEnv nuttig voor je is geweest, overweeg dan een licentie te verkrijgen om het project te ondersteunen."
+  "trialExpiredTips": "Je gebruikt QTEnvDev al {days} dagen. Als QTEnvDev nuttig voor je is geweest, overweeg dan een licentie te verkrijgen om het project te ondersteunen."
 }

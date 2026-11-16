@@ -25,7 +25,7 @@ export default {
   nativeInUse: 'The built-in MariaDB service is using this installation. Stop it first.',
   downloads: 'Downloads',
   packageManagerRequired:
-    'Install the selected package manager in FlyEnv before installing MariaDB.',
+    'Install the selected package manager in QTEnvDev before installing MariaDB.',
   installed: 'Installed',
   install: 'Install',
   uninstall: 'Uninstall',

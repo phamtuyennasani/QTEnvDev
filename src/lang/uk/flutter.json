@@ -18,7 +18,7 @@
   "sourcePath": "Системний PATH",
   "sourceDefault": "SDK розташування за замовчуванням",
   "sourceCustom": "Налаштований спеціальний шлях",
-  "sourceFlyenv": "SDK керування FlyEnv",
+  "sourceQTEnvDev": "SDK керування QTEnvDev",
   "sourceUnknown": "Не вказано",
   "createProjectTitle": "Створити проект флатера",
   "create": "Створити",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Модуль Flutter для вставки в існуючу програму Android/iOS.",
   "templateSkeletonDesc": "Перелік / деталь блимання програми з Матеріалом 3 та навігацією 2.0.",
   "androidSdkNotDetected": "Android SDK не виявлено",
-  "androidSdkInstallHint": "FlyEnv не встановлює Android SDK автоматично. Встановіть SDK за допомогою Android Studio або офіційних інструментів командного рядка Android.",
+  "androidSdkInstallHint": "QTEnvDev не встановлює Android SDK автоматично. Встановіть SDK за допомогою Android Studio або офіційних інструментів командного рядка Android.",
   "installAndroidStudio": "Встановити Android Studio",
   "androidCommandLineTools": "Інструменти командного рядка Android",
-  "androidSdkAfterInstall": "Після встановлення SDK поверніться до FlyEnv, натисніть «Оновити», а потім скористайтеся автоматичним виправленням (Auto-fix), щоб налаштувати середовище."
+  "androidSdkAfterInstall": "Після встановлення SDK поверніться до QTEnvDev, натисніть «Оновити», а потім скористайтеся автоматичним виправленням (Auto-fix), щоб налаштувати середовище."
 }

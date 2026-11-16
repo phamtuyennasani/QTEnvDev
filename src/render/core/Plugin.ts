@@ -29,8 +29,8 @@ const lazyRouter = new Proxy(
   {},
   {
     get(_target, property) {
-      const router = (globalThis as any).__FLYENV_PLUGIN_ROUTER__
-      if (!router) throw new Error('FlyEnv plugin router is not initialized')
+      const router = (globalThis as any).__QTENVDEV_PLUGIN_ROUTER__
+      if (!router) throw new Error('QTEnvDev plugin router is not initialized')
       const value = router[property]
       return typeof value === 'function' ? value.bind(router) : value
     }
@@ -68,8 +68,8 @@ const pluginHost: Record<string, any> = {
   },
   stores: {
     AppStore: (...args: any[]) => {
-      const appStore = (globalThis as any).__FLYENV_PLUGIN_APP_STORE__
-      if (!appStore) throw new Error('FlyEnv plugin AppStore is not initialized')
+      const appStore = (globalThis as any).__QTENVDEV_PLUGIN_APP_STORE__
+      if (!appStore) throw new Error('QTEnvDev plugin AppStore is not initialized')
       return appStore(...args)
     },
     BrewStore: (...args: any[]) => BrewStore(...args)
@@ -96,7 +96,7 @@ const pluginHost: Record<string, any> = {
     return VueExtend
   }
 }
-;(globalThis as any).__FLYENV_PLUGIN_HOST__ = pluginHost
+;(globalThis as any).__QTENVDEV_PLUGIN_HOST__ = pluginHost
 
 type RendererPluginPayload = {
   id: string

@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import type { EventEmitter } from 'node:events'
 import WindowPresentation from '../../src/main/ui/WindowPresentation'
 
-const profile = mkdtempSync(join(tmpdir(), 'flyenv-window-smoke-'))
+const profile = mkdtempSync(join(tmpdir(), 'qtenvdev-window-smoke-'))
 app.setPath('userData', profile)
 app.commandLine.appendSwitch('disable-gpu')
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -50,7 +50,7 @@ app
     })
     try {
       await win.loadURL(
-        'data:text/html,<title>FlyEnv window validation</title><body style="font:20px system-ui;padding:40px">FlyEnv window presentation validation</body>'
+        'data:text/html,<title>QTEnvDev window validation</title><body style="font:20px system-ui;padding:40px">QTEnvDev window presentation validation</body>'
       )
       const initial = win.getBounds()
       await owner.show(win, true)

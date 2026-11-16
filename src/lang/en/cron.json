@@ -101,7 +101,7 @@
   "allTasks": "All Tasks",
   "systemTasks": "System Tasks",
   "systemTask": "System Task",
-  "flyenvTask": "FlyEnv Task",
+  "qtenvdevTask": "QTEnvDev Task",
   "otherTask": "Other Task",
   "taskTrigger": "Trigger",
   "deleteSystemTaskTips": "Delete this system scheduled task?",

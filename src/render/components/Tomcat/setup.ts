@@ -14,7 +14,7 @@ export const TomcatSetup: {
   init() {
     if (!initPromise) {
       initPromise = localForage
-        .getItem<Record<string, string>>('flyenv-tomcat-server-root')
+        .getItem<Record<string, string>>('qtenvdev-tomcat-server-root')
         .then((value) => {
           if (value) {
             TomcatSetup.CATALINA_BASE = reactive(value)
@@ -26,7 +26,7 @@ export const TomcatSetup: {
   },
   save() {
     localForage
-      .setItem('flyenv-tomcat-server-root', JSON.parse(JSON.stringify(TomcatSetup.CATALINA_BASE)))
+      .setItem('qtenvdev-tomcat-server-root', JSON.parse(JSON.stringify(TomcatSetup.CATALINA_BASE)))
       .then()
       .catch()
   }

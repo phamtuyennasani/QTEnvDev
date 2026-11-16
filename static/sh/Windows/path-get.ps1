@@ -8,9 +8,9 @@ try {
             $rawValue = $subKey.GetValue("Path", $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
             $subKey.Close()
 		          $regKey.Close()
-		          Write-Host "##FlyEnv-PATH-GET"
+		          Write-Host "##QTEnvDev-PATH-GET"
             $rawValue
-            Write-Host "FlyEnv-PATH-GET##"
+            Write-Host "QTEnvDev-PATH-GET##"
         } else {
             $regKey.Close()
             exit 1

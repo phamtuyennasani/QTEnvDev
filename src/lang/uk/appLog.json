@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Ініціалізація папки даних успішна, шлях до папки даних: {dir}",
   "initDBDataDirFail": "Ініціалізація папки даних не вдалася, причина: {error}",
   "newProjectFail": "Не вдалося створити новий проект",
-  "processListFail": "Процес отримання списку невдалий. Будь ласка, встановіть FlyEnv Helper"
+  "processListFail": "Процес отримання списку невдалий. Будь ласка, встановіть QTEnvDev Helper"
 }

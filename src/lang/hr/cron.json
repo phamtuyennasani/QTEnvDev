@@ -101,7 +101,7 @@
   "allTasks": "Svi zadaci",
   "systemTasks": "Sistemski zadaci",
   "systemTask": "Sistemski zadatak",
-  "flyenvTask": "FlyEnv zadatak",
+  "qtenvdevTask": "QTEnvDev zadatak",
   "otherTask": "Drugi zadatak",
   "taskTrigger": "Okidač",
   "deleteSystemTaskTips": "Izbrisati ovaj sistemski zakazani zadatak?",

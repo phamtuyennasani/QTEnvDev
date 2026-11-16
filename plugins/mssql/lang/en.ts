@@ -20,9 +20,9 @@ export default {
   windowsServiceUnknown:
     'The Windows service state could not be confirmed. Refresh and check services.msc before retrying.',
   windowsServiceAlreadyRunning:
-    'This SQL Server service is already running outside FlyEnv. Stop it in services.msc before starting it here.',
+    'This SQL Server service is already running outside QTEnvDev. Stop it in services.msc before starting it here.',
   windowsServiceNotOwned:
-    'The SQL Server service PID no longer matches the instance started by FlyEnv. The external service was left untouched.',
+    'The SQL Server service PID no longer matches the instance started by QTEnvDev. The external service was left untouched.',
   mediaInvalid:
     'The SQL Server download did not produce a complete, unambiguous installation media with setup.exe.',
   checksumMissing:
@@ -32,9 +32,9 @@ export default {
   installDirectoryExists:
     'The SQL Server installation directory already exists. Refresh the installed list before retrying.',
   bubblewrapRequired:
-    'SQL Server on Linux requires Bubblewrap to keep its system files in the FlyEnv data directory. Install it with sudo apt install bubblewrap, then retry. The system must allow unprivileged user namespaces.',
+    'SQL Server on Linux requires Bubblewrap to keep its system files in the QTEnvDev data directory. Install it with sudo apt install bubblewrap, then retry. The system must allow unprivileged user namespaces.',
   linuxRuntimeNotice:
-    'Linux requires Bubblewrap (sudo apt install bubblewrap) and unprivileged user namespaces. Database files stay in the FlyEnv data directory.',
+    'Linux requires Bubblewrap (sudo apt install bubblewrap) and unprivileged user namespaces. Database files stay in the QTEnvDev data directory.',
   initialPasswordNotice:
     'This password is used for first initialization; changing this setting does not reset an existing sa account.',
   saPassword: 'sa Password',
@@ -52,9 +52,9 @@ export default {
   windowsOperationUnknown:
     'SQL Server external process result is unknown. Check Setup logs and services.msc before retrying.',
   windowsInstallHandoffFailed:
-    'SQL Server was installed, but its new service could not be prepared for FlyEnv: {error}. Check services.msc; do not reinstall.',
+    'SQL Server was installed, but its new service could not be prepared for QTEnvDev: {error}. Check services.msc; do not reinstall.',
   windowsRestartRequired:
-    'SQL Server was installed and its service stopped. Restart Windows before starting it in FlyEnv.',
+    'SQL Server was installed and its service stopped. Restart Windows before starting it in QTEnvDev.',
   distroUnsupported:
     'Only Ubuntu 22.04/24.04 (x64) repositories are supported by this version of the plugin; other distributions return an empty list (rpm support is planned).',
   repoProbeFailed: 'Failed to fetch the Microsoft package repository index: {error}',
@@ -69,7 +69,7 @@ export default {
   serviceNameUnknown:
     'The SQL Server Windows service name is unknown for this instance. Refresh the installed list and try again.',
   startFailDiagnostics: 'sqlservr exited during startup. Recent output:\n{log}',
-  manifestInvalid: 'Invalid flyenv-runtime.json in {dir}: {error}',
+  manifestInvalid: 'Invalid qtenvdev-runtime.json in {dir}: {error}',
   installConfirmTitle: 'Install SQL Server',
   editSettings: 'Initial sa password / port',
   uninstallConfirm: 'Remove the unpacked SQL Server {version} files from {path}?'

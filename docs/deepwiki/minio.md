@@ -9,7 +9,7 @@
 
 ## Overview
 
-MinIO 模块为 FlyEnv 提供高性能对象存储服务管理能力。MinIO 是一个与 Amazon S3 API 兼容的开源对象存储服务器，适用于存储非结构化数据（图片、视频、日志文件、备份等）。
+MinIO 模块为 QTEnvDev 提供高性能对象存储服务管理能力。MinIO 是一个与 Amazon S3 API 兼容的开源对象存储服务器，适用于存储非结构化数据（图片、视频、日志文件、备份等）。
 
 相关文档链接:
 - [Base 模块](./base.md) - 服务基类，MinIO 继承自此模块

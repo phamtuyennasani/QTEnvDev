@@ -15,9 +15,9 @@ const count = Number(arg('--records', '1000'))
 if (!Number.isSafeInteger(count) || count < 1 || count > 10000)
   throw new Error('records must be 1..10000')
 const reportPath = resolve(
-  arg('--report', 'docs/superpowers/reports/2026-11-03-flyenv-ai-memory-capacity.md')
+  arg('--report', 'docs/superpowers/reports/2026-11-03-qtenvdev-ai-memory-capacity.md')
 )
-const root = await realpath(await mkdtemp(join(tmpdir(), 'flyenv-capacity-')))
+const root = await realpath(await mkdtemp(join(tmpdir(), 'qtenvdev-capacity-')))
 const results: any[] = []
 const samples = JSON.parse(
   await readFile('plugins/ai-memory/tests/fixtures/memories.json', 'utf8')

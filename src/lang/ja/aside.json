@@ -11,7 +11,7 @@
   "aiCoding": "AIコーディング",
   "ai": "AI",
   "objectStorage": "オブジェクトストレージ",
-  "appExit": "起動中のすべてのサービスを停止してFlyEnvを終了します",
+  "appExit": "起動中のすべてのサービスを停止してQTEnvDevを終了します",
   "groupStart": "パネルに表示されている利用可能なすべてのサービスをワンクリックで起動",
   "networkTunnel": "ネットワークトンネル",
   "cacheAndQueue": "キャッシュとメッセージキュー",

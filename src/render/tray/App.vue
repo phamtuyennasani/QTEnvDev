@@ -226,7 +226,7 @@
 
         .tray-menu-separator {
           margin: 4px 18px;
-          border-top: 1px solid var(--flyenv-sidebar-divider-color);
+          border-top: 1px solid var(--qtenvdev-sidebar-divider-color);
         }
 
         > .bottom-tool {
@@ -337,16 +337,16 @@
   html.light {
     #app {
       .popper-arrow {
-        background: var(--flyenv-light-sidebar);
-        border: 1px solid var(--flyenv-light-sidebar);
+        background: var(--qtenvdev-light-sidebar);
+        border: 1px solid var(--qtenvdev-light-sidebar);
       }
     }
     .tray-aside-inner {
-      background: var(--flyenv-light-sidebar);
-      color: var(--flyenv-light-text);
+      background: var(--qtenvdev-light-sidebar);
+      color: var(--qtenvdev-light-text);
 
       > .top-tool {
-        border-bottom: 1px solid var(--flyenv-light-border);
+        border-bottom: 1px solid var(--qtenvdev-light-border);
         > li {
           &:hover {
             background: var(--base-bg-color-2);
@@ -356,7 +356,7 @@
       }
 
       .menu {
-        color: var(--flyenv-light-text);
+        color: var(--qtenvdev-light-text);
 
         li {
           &:hover {
@@ -365,16 +365,16 @@
         }
 
         svg {
-          color: var(--flyenv-light-text);
+          color: var(--qtenvdev-light-text);
         }
       }
 
       > .bottom-tool {
-        border-top: 1px solid var(--flyenv-light-border);
-        color: var(--flyenv-light-text);
+        border-top: 1px solid var(--qtenvdev-light-border);
+        color: var(--qtenvdev-light-text);
 
         > li:hover {
-          color: var(--flyenv-light-primary);
+          color: var(--qtenvdev-light-primary);
         }
       }
     }

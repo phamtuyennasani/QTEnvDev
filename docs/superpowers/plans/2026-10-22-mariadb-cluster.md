@@ -11,9 +11,9 @@
 ## Global Constraints
 
 - 设计文档：`docs/superpowers/specs/2026-10-22-mariadb-cluster-design.md`（身份/命名/端口/目录的唯一事实来源）
-- 插件 id/flag：`mariadb-cluster`；fork IPC `app-fork:mariadb-cluster`；进度事件 `APP-Mariadb-Cluster-Progress`；存储键 `flyenv-plugin-mariadb-cluster-v1`
+- 插件 id/flag：`mariadb-cluster`；fork IPC `app-fork:mariadb-cluster`；进度事件 `APP-Mariadb-Cluster-Progress`；存储键 `qtenvdev-plugin-mariadb-cluster-v1`
 - 目录：`<MariaDBDir>/mariadb-cluster`、`<BaseDir>/mariadb-cluster/data`；PID 文件 `mariadb.pid`；配置文件仍 `my.cnf`
-- 端口基准 13307；管道前缀 `FlyEnvMDBC_`；Unix socket `/tmp/flyenv-mdbc-`；asideIndex 28；图标 `@/svg/mariaDB.svg?raw`；路由 `/mariadb-cluster`
+- 端口基准 13307；管道前缀 `QTEnvDevMDBC_`；Unix socket `/tmp/qtenvdev-mdbc-`；asideIndex 28；图标 `@/svg/mariaDB.svg?raw`；路由 `/mariadb-cluster`
 - MariaDB 版本下限 10.4；模式仅 `standalone` | `replication`
 - **禁止改名**：宿主 `I18nT('mysql.*')` 键、`@/components/Mysql/*` 与 `MySQLManage` 宿主类名、`mysql2` 驱动包名、DbGate 的 `dbgate-mysql-dumper` pin
 - 保留 mysql-cluster 最近的 Windows 修复（services.ts 分隔符归一、InstanceDialog busy 守卫、runtime.ts detached:false + leader 折叠）——复制当前源码即自带，不得回退
@@ -45,14 +45,14 @@ FILES=$(grep -rl --exclude-dir=node_modules . -e 'mysql' -e 'MySQL' -e 'Mysql' -
 for f in $FILES; do
   sed -i \
     -e 's/APP-Mysql-Cluster-Progress/APP-Mariadb-Cluster-Progress/g' \
-    -e 's/flyenv-plugin-mysql-cluster-v1/flyenv-plugin-mariadb-cluster-v1/g' \
+    -e 's/qtenvdev-plugin-mysql-cluster-v1/qtenvdev-plugin-mariadb-cluster-v1/g' \
     -e 's/MYSQL_CLUSTER_DBGATE_/MARIADB_CLUSTER_DBGATE_/g' \
     -e 's/MYSQL_CLUSTER_TEST_BIN/MARIADB_CLUSTER_TEST_BIN/g' \
     -e 's/mysql-cluster/mariadb-cluster/g' \
     -e 's/MysqlCluster/MariadbCluster/g' \
     -e 's/mysqlCluster/mariadbCluster/g' \
-    -e 's/FlyEnvMC_/FlyEnvMDBC_/g' \
-    -e 's/flyenv-mc-/flyenv-mdbc-/g' \
+    -e 's/QTEnvDevMC_/QTEnvDevMDBC_/g' \
+    -e 's/qtenvdev-mc-/qtenvdev-mdbc-/g' \
     -e 's/window\.Server\.MysqlDir/window.Server.MariaDBDir/g' \
     -e 's/global\.Server\.MysqlDir/global.Server.MariaDBDir/g' \
     -e 's/MySQL Cluster/MariaDB Cluster/g' \
@@ -295,7 +295,7 @@ const resolveInstallDbBin = async (enginePath: string, windows: boolean): Promis
 - Modify: `plugins/mariadb-cluster/tests/**`（约 29 个文件）
 
 - [ ] **Step 1: 全量运行** `node --import tsx --test plugins/mariadb-cluster/tests/*.test.ts`，收集失败清单。
-- [ ] **Step 2: 逐文件适配**：env 变量改名断言（ui.test.ts 的 `FlyEnvMDBC_abc_1`、端口 13307）、native.test.ts（`MARIADB_CLUSTER_TEST_BIN` 指向 mariadbd、install-db 流程、删 GR 场景、`/Ver (\d+\.\d+\.\d+)/` 版本解析保留）、transport/startup 测试的 `MariaDBDir`、dbgateInstall.test.ts 保留 dumper pin 断言。
+- [ ] **Step 2: 逐文件适配**：env 变量改名断言（ui.test.ts 的 `QTEnvDevMDBC_abc_1`、端口 13307）、native.test.ts（`MARIADB_CLUSTER_TEST_BIN` 指向 mariadbd、install-db 流程、删 GR 场景、`/Ver (\d+\.\d+\.\d+)/` 版本解析保留）、transport/startup 测试的 `MariaDBDir`、dbgateInstall.test.ts 保留 dumper pin 断言。
 - [ ] **Step 3: 全绿** `node --import tsx --test plugins/mariadb-cluster/tests/*.test.ts` → 0 fail。
 
 ---

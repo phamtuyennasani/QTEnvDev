@@ -4,7 +4,7 @@
   "inputTips": "//JSON, JavaScript 객체/배열, PHP 배열, URL, XML, YAML, PList 입력. 선택된 형식으로 자동 변환",
   "parseFailTips": "파싱 실패",
   "inputCheckFailTips": "식별할 수 없음",
-  "systemProxyCheck": "네트워크에서 프록시가 감지되었습니다. FlyEnv가 이 프록시를 사용하도록 설정되어 있나요?",
+  "systemProxyCheck": "네트워크에서 프록시가 감지되었습니다. QTEnvDev가 이 프록시를 사용하도록 설정되어 있나요?",
   "systemProxyUsed": "설정이 성공적으로 적용되었습니다. 수정하려면 설정 -> 프록시 설정에서 변경하세요.",
   "windowCount": "창 수",
   "codemake": "코드 생성",

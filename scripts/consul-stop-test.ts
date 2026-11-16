@@ -15,7 +15,7 @@ if (process.platform === 'win32') {
   process.exit(0)
 }
 
-const root = await mkdtemp(join(tmpdir(), 'flyenv-consul-stop-'))
+const root = await mkdtemp(join(tmpdir(), 'qtenvdev-consul-stop-'))
 const previousServer = global.Server
 const previousPidPath = consul.pidPath
 const originalNow = Date.now

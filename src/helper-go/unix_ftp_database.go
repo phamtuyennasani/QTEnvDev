@@ -26,7 +26,7 @@ func generateUnixFTPDatabase(p unixPolicy, pw, users string) ([]byte, error) {
 		return nil, err
 	}
 	defer parent.Close()
-	stage, err := os.MkdirTemp(tempRoot, "flyenv-ftp-users-")
+	stage, err := os.MkdirTemp(tempRoot, "qtenvdev-ftp-users-")
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { DataRootLease } from '../src/fork/runtime/DataRootLease'
 
 test('fixed directory lock rejects concurrent descriptors including realpath aliases', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-lease-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-lease-'))
   t.after(() => rm(root, { recursive: true, force: true }))
   const data = join(root, 'data')
   const owner = await DataRootLease.acquire(data)

@@ -101,7 +101,7 @@
   "allTasks": "Toate sarcinile",
   "systemTasks": "Sarcini de sistem",
   "systemTask": "Sarcină de sistem",
-  "flyenvTask": "Sarcină FlyEnv",
+  "qtenvdevTask": "Sarcină QTEnvDev",
   "otherTask": "Altă sarcină",
   "taskTrigger": "Declanșator",
   "deleteSystemTaskTips": "Ștergeți această sarcină programată de sistem?",

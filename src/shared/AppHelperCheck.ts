@@ -13,11 +13,11 @@ import {
   type WindowsHelperIdentity
 } from './WindowsHelperIdentity'
 
-const DARWIN_SOCKET_PATH = '/private/var/run/flyenv-helper/helper.sock'
-const DARWIN_KEY_PATH = '/Library/Application Support/FlyEnv/Helper/client.key'
-const LINUX_SOCKET_PATH = '/run/flyenv-helper/helper.sock'
-const LINUX_KEY_PATH = '/etc/flyenv-helper/client.key'
-const WINDOWS_HELPER_FILE = 'flyenv-helper-windows-amd64-v1.exe'
+const DARWIN_SOCKET_PATH = '/private/var/run/qtenvdev-helper/helper.sock'
+const DARWIN_KEY_PATH = '/Library/Application Support/QTEnvDev/Helper/client.key'
+const LINUX_SOCKET_PATH = '/run/qtenvdev-helper/helper.sock'
+const LINUX_KEY_PATH = '/etc/qtenvdev-helper/client.key'
+const WINDOWS_HELPER_FILE = 'qtenvdev-helper-windows-amd64-v1.exe'
 const Helper_Check_Timeout = 3000
 
 // 与 src/helper-go/main.go 的 Helper_Version 同步：Go 源码变更必须升级发布版本。
@@ -168,7 +168,7 @@ export const getWindowsHelperBinaryPath = (): string => {
     return ''
   }
   if (is.production()) {
-    return join(pathResolve(staticPath, '../../../../'), 'helper/flyenv-helper.exe')
+    return join(pathResolve(staticPath, '../../../../'), 'helper/qtenvdev-helper.exe')
   }
   const buildDir = pathResolve(staticPath, '../../../build/')
   return pathResolve(buildDir, `../src/helper-go/dist/${WINDOWS_HELPER_FILE}`)
@@ -185,7 +185,7 @@ export const windowsHelperBinaryExists = (): boolean => {
 export const getWindowsHelperValidationBinaryPath = (): string => {
   const primary = getWindowsHelperBinaryPath()
   if (!primary) return ''
-  const backup = join(dirname(primary), 'flyenv-helper-backup.exe')
+  const backup = join(dirname(primary), 'qtenvdev-helper-backup.exe')
   return is.production() && existsSync(backup) ? backup : primary
 }
 
@@ -226,7 +226,7 @@ export const createAppHelperChecker = (deps: Partial<AppHelperCheckDeps> = {}) =
 
   const request = (fn: 'version' | 'health', helperKey: Buffer | null, pipePath: string) =>
     new Promise<HelperResponse>((resolve, reject) => {
-      const key = `flyenv-helper-${fn}-check`
+      const key = `qtenvdev-helper-${fn}-check`
       const buffer: Buffer[] = []
       let settled = false
       let client: ReturnType<typeof createConnection> | undefined
@@ -386,7 +386,7 @@ export const createAppHelperChecker = (deps: Partial<AppHelperCheckDeps> = {}) =
     }
     const version = await request('version', helperKey, pipePath)
     if (version.data !== HelperVersion) {
-      throw new AppHelperError('helper_version_mismatch', 'Helper version does not match FlyEnv')
+      throw new AppHelperError('helper_version_mismatch', 'Helper version does not match QTEnvDev')
     }
     if (!runtime.isWindows()) {
       if (runtime.isLinux()) return true
@@ -427,7 +427,7 @@ export const createAppHelperChecker = (deps: Partial<AppHelperCheckDeps> = {}) =
     if (result.sid !== expectedSid || result.instanceId !== expectedInstanceId) {
       throw new AppHelperError(
         'helper_health_invalid',
-        'Helper instance identity does not match the FlyEnv user'
+        'Helper instance identity does not match the QTEnvDev user'
       )
     }
     return {

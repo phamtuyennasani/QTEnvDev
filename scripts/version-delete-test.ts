@@ -32,7 +32,7 @@ const check = async (name: string, fn: () => void | Promise<void>) => {
   checks++
   console.log(`PASS ${name}`)
 }
-const temporary = await realpath(await mkdtemp(join(tmpdir(), 'flyenv-version-delete-')))
+const temporary = await realpath(await mkdtemp(join(tmpdir(), 'qtenvdev-version-delete-')))
 const app = join(temporary, 'app')
 const laragon = join(temporary, 'laragon')
 const executable = async (directory: string) => {
@@ -76,15 +76,15 @@ try {
   })
   await check('Windows drive, UNC, mixed separator and prefix boundaries', () => {
     for (const target of [
-      'C:\\FlyEnv\\app',
-      'C:\\FlyEnv\\app-other\\php',
-      'D:\\FlyEnv\\app\\php',
+      'C:\\QTEnvDev\\app',
+      'C:\\QTEnvDev\\app-other\\php',
+      'D:\\QTEnvDev\\app\\php',
       'php',
-      'C:\\FlyEnv\\app\\..\\laragon'
+      'C:\\QTEnvDev\\app\\..\\laragon'
     ]) {
-      assert.equal(isStrictDescendant('C:\\FlyEnv\\app', target, true), false, target)
+      assert.equal(isStrictDescendant('C:\\QTEnvDev\\app', target, true), false, target)
     }
-    assert.equal(isStrictDescendant('C:\\FlyEnv\\app', 'c:/flyenv/app/php-8.3', true), true)
+    assert.equal(isStrictDescendant('C:\\QTEnvDev\\app', 'c:/qtenvdev/app/php-8.3', true), true)
     assert.equal(
       isStrictDescendant('\\\\host\\share\\app', '\\\\host\\share\\app\\php', true),
       true
@@ -220,7 +220,7 @@ try {
       false
     )
     assert.deepEqual(events, [
-      'error:The version directory changed or is not managed by FlyEnv',
+      'error:The version directory changed or is not managed by QTEnvDev',
       'done'
     ])
   })

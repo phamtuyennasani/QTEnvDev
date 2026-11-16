@@ -10,8 +10,8 @@ export default {
   configurationManagerNotFound:
     '未找到 SQL Server Configuration Manager：{path}。请修复此版本的 SQL Server 安装后重试。',
   windowsServiceAlreadyRunning:
-    '此 SQL Server 服务已在 FlyEnv 外部运行，请先在 services.msc 中停止，再通过 FlyEnv 启动。',
-  windowsServiceNotOwned: 'SQL Server 服务 PID 与 FlyEnv 启动的实例不符，未操作外部服务。',
+    '此 SQL Server 服务已在 QTEnvDev 外部运行，请先在 services.msc 中停止，再通过 QTEnvDev 启动。',
+  windowsServiceNotOwned: 'SQL Server 服务 PID 与 QTEnvDev 启动的实例不符，未操作外部服务。',
   settings: '设置',
   unsupportedArchitecture: 'SQL Server 仅支持 x64 Windows 或 Linux，不支持 ARM64。',
   operationTimeout: 'SQL Server 操作超时，请检查日志并刷新状态后再重试。',
@@ -24,9 +24,9 @@ export default {
   ownedInstallRequired: '此操作仅适用于由本插件管理的 SQL Server 安装目录。',
   installDirectoryExists: 'SQL Server 安装目录已存在，请刷新已安装列表后再重试。',
   bubblewrapRequired:
-    'Linux 上的 SQL Server 需要 Bubblewrap 将系统文件保存在 FlyEnv 数据目录中。请运行 sudo apt install bubblewrap 后重试；系统必须允许普通用户创建用户命名空间。',
+    'Linux 上的 SQL Server 需要 Bubblewrap 将系统文件保存在 QTEnvDev 数据目录中。请运行 sudo apt install bubblewrap 后重试；系统必须允许普通用户创建用户命名空间。',
   linuxRuntimeNotice:
-    'Linux 需要 Bubblewrap（sudo apt install bubblewrap）及普通用户命名空间支持，数据库文件保存在 FlyEnv 数据目录中。',
+    'Linux 需要 Bubblewrap（sudo apt install bubblewrap）及普通用户命名空间支持，数据库文件保存在 QTEnvDev 数据目录中。',
   initialPasswordNotice: '此密码仅用于首次初始化，修改此设置不会重置已有 sa 账户的密码。',
   saPassword: 'sa 密码',
   saPasswordPlaceholder: '内置 sa 账户的密码',
@@ -38,8 +38,8 @@ export default {
   memoryNotice: 'SQL Server 启动至少需要 2 GB 内存，磁盘占用约 6 GB。',
   windowsOperationUnknown: 'SQL Server 外部进程结果未知，请检查安装日志和 services.msc 后再重试。',
   windowsInstallHandoffFailed:
-    'SQL Server 已安装，但未能将新服务准备为 FlyEnv 可启动的状态：{error}。请检查 services.msc，不要重复安装。',
-  windowsRestartRequired: 'SQL Server 已安装且服务已停止，请重启 Windows 后再通过 FlyEnv 启动。',
+    'SQL Server 已安装，但未能将新服务准备为 QTEnvDev 可启动的状态：{error}。请检查 services.msc，不要重复安装。',
+  windowsRestartRequired: 'SQL Server 已安装且服务已停止，请重启 Windows 后再通过 QTEnvDev 启动。',
   distroUnsupported:
     '当前版本的插件仅支持 Ubuntu 22.04/24.04（x64）仓库；其他发行版返回空列表（rpm 支持在规划中）。',
   repoProbeFailed: '获取微软软件仓库索引失败：{error}',
@@ -51,7 +51,7 @@ export default {
   windowsServiceTimeout: '等待 Windows 服务 {service} 进入 {state} 状态超时',
   serviceNameUnknown: '无法确定该实例的 SQL Server Windows 服务名，请刷新已安装列表后重试。',
   startFailDiagnostics: 'sqlservr 在启动过程中退出，最近的输出：\n{log}',
-  manifestInvalid: '{dir} 下的 flyenv-runtime.json 无效：{error}',
+  manifestInvalid: '{dir} 下的 qtenvdev-runtime.json 无效：{error}',
   installConfirmTitle: '安装 SQL Server',
   editSettings: '首次初始化 sa 密码 / 端口',
   uninstallConfirm: '确定删除 {path} 下解包的 SQL Server {version} 文件吗？'

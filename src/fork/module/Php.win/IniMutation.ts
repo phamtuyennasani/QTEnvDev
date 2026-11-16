@@ -20,7 +20,7 @@ export async function withPhpIniMutation<T>(
 }
 
 export async function replaceIniIfUnchanged(path: string, expected: Buffer, next: Buffer) {
-  const temporary = `${path}.flyenv-${randomUUID()}.tmp`
+  const temporary = `${path}.qtenvdev-${randomUUID()}.tmp`
   try {
     await writeFile(temporary, next, { flag: 'wx' })
     if (!(await readFile(path)).equals(expected))

@@ -42,11 +42,11 @@ const isWindowsPathContainedBy = (candidate: string, root: string): boolean => {
 }
 
 /**
- * Returns whether an absolute PATH entry belongs to a FlyEnv-managed root.
+ * Returns whether an absolute PATH entry belongs to a QTEnvDev-managed root.
  * Existing paths are resolved together so junction targets are compared only
  * when both sides can be resolved safely.
  */
-export const isFlyEnvManagedPathEntry = (entry: string, root: string): boolean => {
+export const isQTEnvDevManagedPathEntry = (entry: string, root: string): boolean => {
   if (!win32.isAbsolute(entry) || !win32.isAbsolute(root)) {
     return false
   }
@@ -62,8 +62,8 @@ export const isFlyEnvManagedPathEntry = (entry: string, root: string): boolean =
 
 /**
  * On Windows, lstat marks both directory junctions and symbolic links as
- * symbolic links. Plain directories under FlyEnv's env directory are not
- * FlyEnv-managed PATH roots.
+ * symbolic links. Plain directories under QTEnvDev's env directory are not
+ * QTEnvDev-managed PATH roots.
  */
 export const isWindowsJunctionOrSymlink = (
   stats: Pick<Stats, 'isSymbolicLink'>,
@@ -125,21 +125,21 @@ export function fetchPATH(): ForkPromise<any> {
   })
 }
 
-type FlyEnvJunction = {
+type QTEnvDevJunction = {
   name: string
   root: string
   isJunction: true
   resolvedRoot?: string
 }
 
-export type FlyEnvPreferredRoot = {
+export type QTEnvDevPreferredRoot = {
   name: string
   root: string
   isJunction: boolean
   resolvedRoot?: string
 }
 
-const compareRootNames = (a: FlyEnvPreferredRoot, b: FlyEnvPreferredRoot): number => {
+const compareRootNames = (a: QTEnvDevPreferredRoot, b: QTEnvDevPreferredRoot): number => {
   const aName = a.name.toLowerCase()
   const bName = b.name.toLowerCase()
   if (aName < bName) {
@@ -151,16 +151,16 @@ const compareRootNames = (a: FlyEnvPreferredRoot, b: FlyEnvPreferredRoot): numbe
   return a.name < b.name ? -1 : a.name > b.name ? 1 : 0
 }
 
-export const readFlyEnvJunctions = async (
+export const readQTEnvDevJunctions = async (
   envDir: string,
   platform: string = process.platform
-): Promise<FlyEnvJunction[]> => {
+): Promise<QTEnvDevJunction[]> => {
   if (!existsSync(envDir)) {
     return []
   }
 
   const names = await readdir(envDir)
-  const junctions: FlyEnvJunction[] = []
+  const junctions: QTEnvDevJunction[] = []
 
   for (const name of names) {
     const root = join(envDir, name)
@@ -190,7 +190,7 @@ export const readFlyEnvJunctions = async (
   return junctions.sort(compareRootNames)
 }
 
-const getManagedRoots = (junctions: FlyEnvJunction[], installedRoots: string[]): string[] => {
+const getManagedRoots = (junctions: QTEnvDevJunction[], installedRoots: string[]): string[] => {
   return [
     ...junctions.flatMap((junction) => [junction.root, junction.resolvedRoot]),
     ...installedRoots
@@ -198,18 +198,18 @@ const getManagedRoots = (junctions: FlyEnvJunction[], installedRoots: string[]):
 }
 
 const findJunctionByName = (
-  junctions: FlyEnvJunction[],
+  junctions: QTEnvDevJunction[],
   typeFlag: string
-): FlyEnvJunction | undefined => {
+): QTEnvDevJunction | undefined => {
   return junctions.find((junction) => junction.name.toLowerCase() === typeFlag.toLowerCase())
 }
 
-export const selectFlyEnvPreferredRoots = (
-  currentRoots: FlyEnvPreferredRoot[],
+export const selectQTEnvDevPreferredRoots = (
+  currentRoots: QTEnvDevPreferredRoot[],
   typeFlag: string,
   itemPath: string,
   junctionExpected: boolean
-): FlyEnvPreferredRoot[] => {
+): QTEnvDevPreferredRoot[] => {
   const selectedRoot = currentRoots.find(
     (root) => root.name.toLowerCase() === typeFlag.toLowerCase()
   )
@@ -217,7 +217,7 @@ export const selectFlyEnvPreferredRoots = (
     return currentRoots
   }
   if (junctionExpected) {
-    throw new Error(`FlyEnv junction "${typeFlag}" is missing`)
+    throw new Error(`QTEnvDev junction "${typeFlag}" is missing`)
   }
 
   // FAT/exFAT cannot host a junction. Promote only this selected installed
@@ -232,7 +232,7 @@ const normalizeWindowsPath = (value: string): string => {
 }
 
 const junctionResolvesToInstalledRoot = (
-  junction: FlyEnvJunction | undefined,
+  junction: QTEnvDevJunction | undefined,
   installedRoot: string
 ): boolean => {
   if (!junction?.resolvedRoot || !existsSync(installedRoot)) {
@@ -252,16 +252,16 @@ const junctionResolvesToInstalledRoot = (
 
 const removeProvenManagedEntries = (entries: string[], managedRoots: string[]): string[] => {
   return entries.filter(
-    (entry) => !managedRoots.some((managedRoot) => isFlyEnvManagedPathEntry(entry, managedRoot))
+    (entry) => !managedRoots.some((managedRoot) => isQTEnvDevManagedPathEntry(entry, managedRoot))
   )
 }
 
 /**
- * Builds only explicit FlyEnv priorities. Unresolved junctions stay eligible
+ * Builds only explicit QTEnvDev priorities. Unresolved junctions stay eligible
  * for cleanup but are never promoted into PATH.
  */
-export const buildFlyEnvPreferredPaths = (
-  roots: FlyEnvPreferredRoot[],
+export const buildQTEnvDevPreferredPaths = (
+  roots: QTEnvDevPreferredRoot[],
   pathExists: (path: string) => boolean = existsSync
 ): string[] => {
   const preferred: string[] = []
@@ -424,7 +424,7 @@ export function removePATH(item: SoftInstalled, typeFlag: string) {
       const envDir = join(dirname(global.Server.AppDir!), 'env')
       const flagDir = join(envDir, typeFlag)
       const previousJunctions = await timeOperation('path.read-junctions', () =>
-        readFlyEnvJunctions(envDir)
+        readQTEnvDevJunctions(envDir)
       )
       const selectedJunction = findJunctionByName(previousJunctions, typeFlag)
       const managedRoots = getManagedRoots(selectedJunction ? [selectedJunction] : [], [item.path])
@@ -464,7 +464,7 @@ export function updatePATH(item: SoftInstalled, typeFlag: string) {
       const flagDir = join(envDir, typeFlag)
       // 记录完整 PATH 前置步骤；正常 UI 诊断和原计时脚本复用同一阶段。
       const previousJunctions = await timeOperation('path.read-junctions', () =>
-        readFlyEnvJunctions(envDir)
+        readQTEnvDevJunctions(envDir)
       )
       const previousSelectedJunction = findJunctionByName(previousJunctions, typeFlag)
       if (previousSelectedJunction) {
@@ -484,12 +484,12 @@ export function updatePATH(item: SoftInstalled, typeFlag: string) {
       const junctionExpected = volumes.every(Boolean)
       logWindowsPath('path.volume-result', { ntfs: volumes, junctionExpected })
       let selectedJunction = findJunctionByName(
-        await timeOperation('path.check-junction-after-removal', () => readFlyEnvJunctions(envDir)),
+        await timeOperation('path.check-junction-after-removal', () => readQTEnvDevJunctions(envDir)),
         typeFlag
       )
 
       if (selectedJunction && !junctionResolvesToInstalledRoot(selectedJunction, item.path)) {
-        throw new Error(`Failed to replace FlyEnv junction "${flagDir}"`)
+        throw new Error(`Failed to replace QTEnvDev junction "${flagDir}"`)
       }
 
       if (junctionExpected && !selectedJunction) {
@@ -503,13 +503,13 @@ export function updatePATH(item: SoftInstalled, typeFlag: string) {
         }
 
         selectedJunction = findJunctionByName(
-          await timeOperation('path.verify-created-junction', () => readFlyEnvJunctions(envDir)),
+          await timeOperation('path.verify-created-junction', () => readQTEnvDevJunctions(envDir)),
           typeFlag
         )
         if (!junctionResolvesToInstalledRoot(selectedJunction, item.path)) {
           const reason =
             junctionCreationError instanceof Error ? `: ${junctionCreationError.message}` : ''
-          throw new Error(`Failed to create FlyEnv junction "${flagDir}"${reason}`)
+          throw new Error(`Failed to create QTEnvDev junction "${flagDir}"${reason}`)
         }
       }
 
@@ -528,16 +528,16 @@ export function updatePATH(item: SoftInstalled, typeFlag: string) {
       )
       await writeRebuiltSystemPath(async (snapshot) => {
         const currentJunctions = await timeOperation('path.rebuild-read-junctions', () =>
-          readFlyEnvJunctions(envDir)
+          readQTEnvDevJunctions(envDir)
         )
         const currentSelectedJunction = findJunctionByName(currentJunctions, typeFlag)
         if (
           currentSelectedJunction &&
           !junctionResolvesToInstalledRoot(currentSelectedJunction, item.path)
         ) {
-          throw new Error(`FlyEnv junction "${flagDir}" no longer resolves to the selected install`)
+          throw new Error(`QTEnvDev junction "${flagDir}" no longer resolves to the selected install`)
         }
-        const selectedRoots = selectFlyEnvPreferredRoots(
+        const selectedRoots = selectQTEnvDevPreferredRoots(
           currentJunctions,
           typeFlag,
           item.path,
@@ -548,7 +548,7 @@ export function updatePATH(item: SoftInstalled, typeFlag: string) {
           [item.path]
         )
         const legacyEntries = removeProvenManagedEntries(snapshot.entries, managedRoots)
-        const preferredEntries = buildFlyEnvPreferredPaths(selectedRoots)
+        const preferredEntries = buildQTEnvDevPreferredPaths(selectedRoots)
         if (composerVendorBinEntry) {
           preferredEntries.push(composerVendorBinEntry)
         }

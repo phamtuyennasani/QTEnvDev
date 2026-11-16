@@ -50,14 +50,14 @@ export const windowsHelperInstancePaths = (
     throw new Error('ProgramData must be an absolute Windows path')
   }
   const instanceId = windowsHelperInstanceId(sid)
-  const instanceRoot = path.win32.join(programData, 'FlyEnv', 'Helper', 'users', instanceId)
-  const taskFolder = '\\FlyEnv\\Helper'
+  const instanceRoot = path.win32.join(programData, 'QTEnvDev', 'Helper', 'users', instanceId)
+  const taskFolder = '\\QTEnvDev\\Helper'
   const taskName = instanceId
-  const pipeName = `FlyEnv.Helper.${instanceId}`
+  const pipeName = `QTEnvDev.Helper.${instanceId}`
   return {
     instanceId,
     instanceRoot,
-    executable: path.win32.join(instanceRoot, 'bin', 'flyenv-helper.exe'),
+    executable: path.win32.join(instanceRoot, 'bin', 'qtenvdev-helper.exe'),
     keyPath: path.win32.join(instanceRoot, 'helper.key'),
     allowedRootsPath: path.win32.join(instanceRoot, 'allowed-roots'),
     instanceConfigPath: path.win32.join(instanceRoot, 'instance.json'),
@@ -94,7 +94,7 @@ export const getWindowsHelperIdentity = async (): Promise<WindowsHelperIdentity>
     programData: string
   }
   if (!identity.account || !/^S-1-(?:\d+-)+\d+$/.test(identity.sid)) {
-    throw new Error('Could not capture the FlyEnv Windows user identity')
+    throw new Error('Could not capture the QTEnvDev Windows user identity')
   }
   return {
     account: identity.account,

@@ -21,7 +21,7 @@ export type ServiceStopContext = {
  * 不增加批次登记、取表 IPC 或释放协议；main 与不同 fork 的 globalThis 也互不共享。
  * 已发布的旧插件包不会自动获得此实现，需要重新构建才能复用直接传入的首表。
  */
-const contextKey = Symbol.for('flyenv.service-stop-context.v1')
+const contextKey = Symbol.for('qtenvdev.service-stop-context.v1')
 const contextHost = globalThis as typeof globalThis & {
   [contextKey]?: AsyncLocalStorage<ServiceStopContext | undefined>
 }

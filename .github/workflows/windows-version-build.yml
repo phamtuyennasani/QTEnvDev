@@ -1,4 +1,4 @@
-name: Build FlyEnv Windows Packages
+name: Build QTEnvDev Windows Packages
 on:
   workflow_dispatch:
   push:
@@ -76,11 +76,11 @@ jobs:
         run: npx tsx scripts/helper-version-sync-test.ts
 
       # 第 1 阶段:编译并生成 win-unpacked。portable 目标会先把 elevate.exe 放入 app 目录,
-      # 从而让它与 FlyEnv.exe / dll / node 扩展一起通过可信 GitHub Artifact 签名。
+      # 从而让它与 QTEnvDev.exe / dll / node 扩展一起通过可信 GitHub Artifact 签名。
       - name: Build unsigned Windows application
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FLYENV_WINDOWS_BUILD_STAGE: app
+          QTENVDEV_WINDOWS_BUILD_STAGE: app
         run: |
           cd "$env:GITHUB_WORKSPACE"
           yarn build
@@ -98,7 +98,7 @@ jobs:
         id: upload-unsigned-app
         uses: actions/upload-artifact@v4
         with:
-          name: FlyEnv-Windows-x64-app-unsigned
+          name: QTEnvDev-Windows-x64-app-unsigned
           path: release/signpath-app-unsigned
           if-no-files-found: error
           retention-days: 1
@@ -108,7 +108,7 @@ jobs:
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '4db4007d-ac9e-4889-a8d5-52d4a421d989'
-          project-slug: 'FlyEnv'
+          project-slug: 'QTEnvDev'
           signing-policy-slug: 'release-signing'
           artifact-configuration-slug: 'windows-app'
           github-artifact-id: ${{ steps.upload-unsigned-app.outputs.artifact-id }}
@@ -126,27 +126,27 @@ jobs:
             -BundleDir "$env:GITHUB_WORKSPACE/release/signpath-app-signed" `
             -ManifestPath "$env:GITHUB_WORKSPACE/release/signpath-app-manifest.json"
 
-      - name: Stage signed FlyEnv Helper backup
+      - name: Stage signed QTEnvDev Helper backup
         shell: pwsh
         run: |
-          $helper = "$env:GITHUB_WORKSPACE/release/win-unpacked/resources/helper/flyenv-helper.exe"
-          $backup = "$env:GITHUB_WORKSPACE/release/win-unpacked/resources/helper/flyenv-helper-backup.exe"
+          $helper = "$env:GITHUB_WORKSPACE/release/win-unpacked/resources/helper/qtenvdev-helper.exe"
+          $backup = "$env:GITHUB_WORKSPACE/release/win-unpacked/resources/helper/qtenvdev-helper-backup.exe"
           if (-not (Test-Path -LiteralPath $helper -PathType Leaf)) {
-            throw "Signed FlyEnv helper was not found: $helper"
+            throw "Signed QTEnvDev helper was not found: $helper"
           }
           Copy-Item -LiteralPath $helper -Destination $backup -Force -ErrorAction Stop
           $helperHash = (Get-FileHash -LiteralPath $helper -Algorithm SHA256 -ErrorAction Stop).Hash
           $backupHash = (Get-FileHash -LiteralPath $backup -Algorithm SHA256 -ErrorAction Stop).Hash
           if (-not [string]::Equals($helperHash, $backupHash, [System.StringComparison]::OrdinalIgnoreCase)) {
-            throw 'FlyEnv helper backup hash does not match the signed helper'
+            throw 'QTEnvDev helper backup hash does not match the signed helper'
           }
 
       # 第 2 阶段:使用已签名 app 目录生成安装包。NSIS 禁止复制 elevate.exe,
       # Portable 使用 useZip 直接打包预构建目录,避免覆盖第一阶段返回的有效签名。
       - name: Package signed Windows application
         env:
-          FLYENV_WINDOWS_BUILD_STAGE: installers
-          FLYENV_PREPACKAGED_APP_DIR: 'release/win-unpacked'
+          QTENVDEV_WINDOWS_BUILD_STAGE: installers
+          QTENVDEV_PREPACKAGED_APP_DIR: 'release/win-unpacked'
         run: |
           cd "$env:GITHUB_WORKSPACE"
           node electron/app-builder.mjs
@@ -156,17 +156,17 @@ jobs:
         id: upload-unsigned
         uses: actions/upload-artifact@v4
         with:
-          name: FlyEnv-Windows-x64-unsigned
+          name: QTEnvDev-Windows-x64-unsigned
           path: |
-            release/FlyEnv-Setup-*.exe
-            release/FlyEnv-Portable-*.exe
+            release/QTEnvDev-Setup-*.exe
+            release/QTEnvDev-Portable-*.exe
 
       - name: Submit signing request to SignPath
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '4db4007d-ac9e-4889-a8d5-52d4a421d989'
-          project-slug: 'FlyEnv'
+          project-slug: 'QTEnvDev'
           signing-policy-slug: 'release-signing'
           artifact-configuration-slug: 'windows-installer'
           github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
@@ -178,7 +178,7 @@ jobs:
       - name: Upload signed artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: FlyEnv-Windows-x64
+          name: QTEnvDev-Windows-x64
           path: |
             release/signed/*.exe
             release/*.msi

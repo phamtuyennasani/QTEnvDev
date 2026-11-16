@@ -48,6 +48,6 @@ export function podmanRosettaVersionTooOld(rawVersion: string): boolean {
   }
 }
 
-export const PODMAN_ROSETTA_DROPIN = `# Managed by FlyEnv. Global Podman [machine] rosetta preference (not per-VM).
+export const PODMAN_ROSETTA_DROPIN = `# Managed by QTEnvDev. Global Podman [machine] rosetta preference (not per-VM).
 # Safe to delete. Honored by Podman >= ${PODMAN_ROSETTA_MIN_VERSION} on Apple Silicon.
 `

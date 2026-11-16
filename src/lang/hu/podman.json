@@ -2,7 +2,7 @@
   "podmanInstall": "Podman telepítése",
   "installPodmanByHomebrew": "Podman telepítése Homebrew-val",
   "noPodmanFound": "Nem található <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a>.\nA Podman telepítéséhez kattintson a telepítés gombra.\nErre a hivatkozásra is kattinthat:\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nés követheti a dokumentációt a kézi telepítéshez.",
-  "podmanErrorTips": "A(z) {bin} helyen Podman futtatható fájl észlelhető.\nA FlyEnv azonban nem tudja meghívni. Hibaüzenet:\n{error}",
+  "podmanErrorTips": "A(z) {bin} helyen Podman futtatható fájl észlelhető.\nA QTEnvDev azonban nem tudja meghívni. Hibaüzenet:\n{error}",
   "removeContainerTips": "Biztosan eltávolítja ezt a konténert?",
   "removeMachineTips": "Biztosan eltávolítja ezt a virtuális gépet?",
   "removeImageTips": "Biztosan eltávolítja ezt az image-et?",

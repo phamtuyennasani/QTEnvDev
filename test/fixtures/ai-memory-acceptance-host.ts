@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import { readFile, writeFile, rm, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const root = process.env.FLYENV_DATA_ROOT!
+const root = process.env.QTENVDEV_DATA_ROOT!
 app.setPath('userData', join(root, 'user'))
 app.setPath('logs', join(root, 'logs'))
 app.on('window-all-closed', () => {})
@@ -35,16 +35,16 @@ void app.whenReady().then(async () => {
       port: options.port,
       token: options.token,
       enabledTools: [
-        'flyenv_memory_search',
-        'flyenv_memory_get',
-        'flyenv_memory_store',
-        'flyenv_memory_update',
-        'flyenv_memory_forget'
+        'qtenvdev_memory_search',
+        'qtenvdev_memory_get',
+        'qtenvdev_memory_store',
+        'qtenvdev_memory_update',
+        'qtenvdev_memory_forget'
       ],
       approval: {
-        flyenv_memory_store: 'auto',
-        flyenv_memory_update: 'auto',
-        flyenv_memory_forget: 'auto'
+        qtenvdev_memory_store: 'auto',
+        qtenvdev_memory_update: 'auto',
+        qtenvdev_memory_forget: 'auto'
       }
     })
     const registry = new PluginMCPRegistry(forks.pluginWorkers, (key, fallback) =>
@@ -109,7 +109,7 @@ void app.whenReady().then(async () => {
         let result: any
         if (request.kind === 'ui') {
           result = await window.webContents.executeJavaScript(
-            `new Promise(resolve => { const key = crypto.randomUUID(); window.FlyEnvNodeAPI.receive((command, responseKey, response) => { if (key === responseKey && response?.code !== 200) resolve(response); }); window.FlyEnvNodeAPI.send('app-fork:ai-memory', key, ...${JSON.stringify(request.args)}); })`
+            `new Promise(resolve => { const key = crypto.randomUUID(); window.QTEnvDevNodeAPI.receive((command, responseKey, response) => { if (key === responseKey && response?.code !== 200) resolve(response); }); window.QTEnvDevNodeAPI.send('app-fork:ai-memory', key, ...${JSON.stringify(request.args)}); })`
           )
         } else if (request.kind === 'audit') result = registry.diagnostics('ai-memory')
         else if (request.kind === 'fileAuditFailure') {
@@ -127,25 +127,25 @@ void app.whenReady().then(async () => {
           config.setConfig({ enabledTools: request.names })
           result = true
         } else if (request.kind === 'approvalRace') {
-          config.setConfig({ approval: { flyenv_memory_store: 'confirm' } })
+          config.setConfig({ approval: { qtenvdev_memory_store: 'confirm' } })
           try {
-            result = await registry.invoke('flyenv_memory_store', request.input, async () => {
-              config.setConfig({ enabledTools: ['flyenv_memory_search', 'flyenv_memory_get'] })
+            result = await registry.invoke('qtenvdev_memory_store', request.input, async () => {
+              config.setConfig({ enabledTools: ['qtenvdev_memory_search', 'qtenvdev_memory_get'] })
               return true
             })
           } finally {
             config.setConfig({
               enabledTools: [
-                'flyenv_memory_search',
-                'flyenv_memory_get',
-                'flyenv_memory_store',
-                'flyenv_memory_update',
-                'flyenv_memory_forget'
+                'qtenvdev_memory_search',
+                'qtenvdev_memory_get',
+                'qtenvdev_memory_store',
+                'qtenvdev_memory_update',
+                'qtenvdev_memory_forget'
               ],
               approval: {
-                flyenv_memory_store: 'auto',
-                flyenv_memory_update: 'auto',
-                flyenv_memory_forget: 'auto'
+                qtenvdev_memory_store: 'auto',
+                qtenvdev_memory_update: 'auto',
+                qtenvdev_memory_forget: 'auto'
               }
             })
           }

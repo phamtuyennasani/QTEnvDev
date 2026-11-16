@@ -17,7 +17,7 @@
   "passwordFormatError": "Veritabanı şifresi Çince karakterler veya özel karakterler içeremez",
   "savePassword": "Şifreyi güncelle",
   "resetPasswordTips": "Bu işlem veritabanı root kullanıcısının şifresini değiştirecektir",
-  "savePasswordTips": "Sadece FlyEnv'de saklanan şifreyi günceller, veritabanı root kullanıcısının şifresini değiştirmez. Bu şifre esas olarak {app} örneklerini güvenli bir şekilde durdurmak için kullanılır.",
+  "savePasswordTips": "Sadece QTEnvDev'de saklanan şifreyi günceller, veritabanı root kullanıcısının şifresini değiştirmez. Bu şifre esas olarak {app} örneklerini güvenli bir şekilde durdurmak için kullanılır.",
   "resetPasswordConfirm": "Bu işlem veritabanı root kullanıcısının şifresini değiştirecektir, bu işlemi gerçekleştirmek istediğinizden emin misiniz?",
   "mysqlNeedRunTips": "Lütfen önce {app}'ı çalıştırın",
   "databaseName": "Veritabanı adı",

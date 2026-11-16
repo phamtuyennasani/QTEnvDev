@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a `samwaf` service plugin that downloads official SamWaf WAF binaries (GitHub/Gitee releases only, no mirroring), installs them per-version, manages the process lifecycle, and opens its web admin panel from FlyEnv.
+**Goal:** Add a `samwaf` service plugin that downloads official SamWaf WAF binaries (GitHub/Gitee releases only, no mirroring), installs them per-version, manages the process lifecycle, and opens its web admin panel from QTEnvDev.
 
 **Architecture:** Clone of the `plugins/kafka` plugin shape (standard `ServiceManager`/`VersionManager` pages, fork module extending `Base`), with `plugins/llamacpp`-style GitHub Releases discovery. The renderer adds one extra feature: an "open admin panel" action that resolves `local_port` from `conf/config.yml` and surfaces the random initial admin password on fresh installs.
 
@@ -25,10 +25,10 @@ Verified by probing the real v1.3.24 Darwin arm64 release on 2026-11-01:
 - Logs land in `<exe dir>/logs/`: `log.log` (main), `supervisor.log`, `task/*.log`.
 - Default admin listener binds **all interfaces** (`*:26666`). The plugin's seeded default config restricts the whitelist to loopback (see Task 4) — safe default for a local dev tool; users can relax it in the Config tab.
 - Download sources: GitHub Releases API `https://api.github.com/repos/samwafgo/SamWaf/releases` (assets carry a `digest: "sha256:..."` field), Gitee mirror API `https://gitee.com/api/v5/repos/samwaf/SamWaf/releases` for CN reachability. Never mirror binaries ourselves.
-- SamWaf CLI subcommands (`install/start/stop/...`) register OS services — **do not use them**; FlyEnv runs the binary in the foreground like every other module.
+- SamWaf CLI subcommands (`install/start/stop/...`) register OS services — **do not use them**; QTEnvDev runs the binary in the foreground like every other module.
 - License: Apache-2.0 + permissive third-party notices; downloading from official sources needs no attribution work on our side.
 
-## Module-boundary decisions (per AGENTS.md + flyenv-module-boundaries)
+## Module-boundary decisions (per AGENTS.md + qtenvdev-module-boundaries)
 
 - No new Pinia store. No `config.setup` entries. No `StorageGetAsync` state — the plugin has no cross-session renderer state (start needs no parameters, so no `startExtParam`/`stopExtParam` registration at all; `ModuleInstalledItem.start()/stop()/restart()` are used as-is).
 - View state (selected tab, admin-panel dialog) lives in the mounted Vue components.
@@ -45,7 +45,7 @@ Verified by probing the real v1.3.24 Darwin arm64 release on 2026-11-01:
 | Stop service | `Base._stopServer` | `stopService` IPC | `APP-On-Log` | `APP-Service-Stop-Success` + resolve | Guarded by `ModuleInstalledItem` run state |
 | Open admin panel | `Index.vue` (view-only) | button click | none | `shell.openExternal` resolves / error notice | Idempotent; safe to click repeatedly |
 
-### Failure-boundary notes (per flyenv-failure-boundaries)
+### Failure-boundary notes (per qtenvdev-failure-boundaries)
 
 - SHA-256 mismatch in `_installSoftHandle` is a **required** failure: throw, let `Base.installSoft.fail()` remove the partial zip/appDir, report install failure. Never install unverified bytes.
 - Gitee fallback: GitHub API failure only triggers the fallback; a Gitee failure after that resolves an empty online list (existing kafka behavior: `resolve([])`), never throws into the version page.
@@ -113,7 +113,7 @@ The fork module keeps everything under `<AppDir>/samwaf/<version>/` (bin + `conf
     "en": "SamWaf open-source WAF service module. Runs the official SamWaf binary in the foreground and opens its local web admin panel.",
     "zh": "SamWaf 开源网站防火墙服务模块。以前台方式运行官方 SamWaf 程序，并可打开其本地 Web 管理面板。"
   },
-  "author": "FlyEnv",
+  "author": "QTEnvDev",
   "module": {
     "typeFlag": "samwaf",
     "moduleType": "webServer",
@@ -222,7 +222,7 @@ export type { SamWafLangKey } from '../lang'
 
 ```ts
 // The plugin owns a full copy of the SamWaf fork module (./SamWaf).
-// plugin:build bundles the referenced FlyEnv fork framework sources into the
+// plugin:build bundles the referenced QTEnvDev fork framework sources into the
 // standalone plugin artifact.
 import SamWaf from './SamWaf'
 
@@ -892,7 +892,7 @@ class SamWaf extends Base {
 
   /**
    * Readiness = a live process owned by THIS install, found the same way the
-   * rest of FlyEnv finds service processes: search by binary name, keep only
+   * rest of QTEnvDev finds service processes: search by binary name, keep only
    * rows whose command line carries this version's ownership markers (the
    * same `ownedProcessMarkers` Base's stop flow uses, so start/stop agree on
    * what "ours" means). A foreign SamWaf instance — manual start, leftover —
@@ -1315,7 +1315,7 @@ git commit -m "feat(samwaf-plugin): fork module with lifecycle, install verifica
 </script>
 ```
 
-- [ ] **Step 2: `AdminPanel.vue`** — icon button in the Service tab's `#tool-left` slot (same idiom as Mailpit's web-UI button), visible only while a version is running; on fresh installs it shows the random initial password **once**, then the fork writes a `.flyenv-initial-password-shown` marker in the install dir (upstream never deletes `initial_password.txt`, so existence alone cannot mean "fresh install"; the marker lives in the install dir so reinstalling a version resets it):
+- [ ] **Step 2: `AdminPanel.vue`** — icon button in the Service tab's `#tool-left` slot (same idiom as Mailpit's web-UI button), visible only while a version is running; on fresh installs it shows the random initial password **once**, then the fork writes a `.qtenvdev-initial-password-shown` marker in the install dir (upstream never deletes `initial_password.txt`, so existence alone cannot mean "fresh install"; the marker lives in the install dir so reinstalling a version resets it):
 
 ```vue
 <template>
@@ -1623,7 +1623,7 @@ Expected: passes (generic install/lifecycle/uninstall smoke with local fixtures)
 1. Version Manager tab lists stable SamWaf releases for the host platform (GitHub source; toggle network/proxy to confirm the Gitee fallback resolves a non-empty list when GitHub is unreachable).
 2. Install the newest version; watch progress reach 100% and the row flip to installed. Confirm `<AppDir>/samwaf/<version>/` contains exactly one `SamWaf*` executable (mode 755 on unix).
 3. Start the service from the sidebar switch. Expect: pid file at `<BaseDir>/samwaf/samwaf.pid`, `conf/config.yml` seeded with the loopback whitelist, admin panel reachable at `http://127.0.0.1:26666`.
-4. **Port-conflict case**: stop the service, then start SamWaf manually from a *different* directory (or a second install dir) so it owns port 26666. Start the service from FlyEnv — it must FAIL (our instance cannot bind; the listener is foreign) and the startup log must show the bind error, never a false "started" state. Kill the manual instance afterwards.
+4. **Port-conflict case**: stop the service, then start SamWaf manually from a *different* directory (or a second install dir) so it owns port 26666. Start the service from QTEnvDev — it must FAIL (our instance cannot bind; the listener is foreign) and the startup log must show the bind error, never a false "started" state. Kill the manual instance afterwards.
 5. The Admin Panel button (enabled only while running) shows the initial-password dialog on first start; the password actually logs in at the panel.
 6. Stop the service; confirm both supervisor and worker processes are gone and the pid file is removed.
 7. Config tab edits `config.yml` (e.g. change `local_port`), restart, and the panel opens on the new port.
@@ -1645,4 +1645,4 @@ git commit -m "feat(samwaf-plugin): build artifacts and registry entry"
 - `moduleType: 'webServer'` groups SamWaf with the traffic-handling servers; no new module type is introduced.
 - Darwin x64 executable name `SamWafDarwin64` follows the observed naming convention; the install path locates the executable by `SamWaf` prefix after unpacking, so a wrong guess breaks only `fetchAllOnlineVersion`'s `installed` flag on Intel Macs — caught by the Task 2 sync test and manual verification.
 - No privileged features (system-firewall IP blocking) are exposed; the WAF core and admin panel run unprivileged.
-- The plugin does not create FlyEnv host/site entries pointing at SamWaf; fronting local sites behind the WAF is user configuration inside SamWaf's own panel.
+- The plugin does not create QTEnvDev host/site entries pointing at SamWaf; fronting local sites behind the WAF is user configuration inside SamWaf's own panel.

@@ -9,10 +9,10 @@ import { createHash } from 'node:crypto'
 const pluginRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = resolve(pluginRoot, '../..')
 const output = resolve(
-  process.argv[2] || '.superpowers/sdd/2026-11-03-flyenv-ai-memory/agent-experiment'
+  process.argv[2] || '.superpowers/sdd/2026-11-03-qtenvdev-ai-memory/agent-experiment'
 )
 await mkdir(output, { recursive: true })
-const scratch = await mkdtemp(join(tmpdir(), 'flyenv-memory-effect-'))
+const scratch = await mkdtemp(join(tmpdir(), 'qtenvdev-memory-effect-'))
 const fixtures = JSON.parse(
   await readFile(join(pluginRoot, 'tests/fixtures/memories.json'), 'utf8')
 )
@@ -66,7 +66,7 @@ async function run(client: 'codex' | 'kimi', mode: 'baseline' | 'memory' | 'auto
   )
   await writeFile(
     join(scratch, `${mode}-agent.md`),
-    `---\nname: memory-effect-test\ndescription: Synthetic memory acceptance only\ntools: ${mode !== 'baseline' ? '["mcp__memory__flyenv_memory_search","mcp__memory__flyenv_memory_get","mcp__memory__flyenv_memory_store"]' : '[]'}\nsubagents: []\n---\nUse only the supplied fixture and memory tools. No repository work or other tools.\n`
+    `---\nname: memory-effect-test\ndescription: Synthetic memory acceptance only\ntools: ${mode !== 'baseline' ? '["mcp__memory__qtenvdev_memory_search","mcp__memory__qtenvdev_memory_get","mcp__memory__qtenvdev_memory_store"]' : '[]'}\nsubagents: []\n---\nUse only the supplied fixture and memory tools. No repository work or other tools.\n`
   )
   const automaticPrompt = `This is an isolated synthetic task-completion test. Only the supplied memory tools are available. ${rules}
 The project root is /fixture/atlas. Work log:
@@ -98,10 +98,10 @@ The task is complete. Give the user a brief completion summary. Do not use any o
                 '-c',
                 `mcp_servers.effect.args=${JSON.stringify(server.args)}`,
                 '-c',
-                'mcp_servers.effect.enabled_tools=["flyenv_memory_search","flyenv_memory_get","flyenv_memory_store"]',
+                'mcp_servers.effect.enabled_tools=["qtenvdev_memory_search","qtenvdev_memory_get","qtenvdev_memory_store"]',
                 ...['search', 'get', 'store'].flatMap((method) => [
                   '-c',
-                  `mcp_servers.effect.tools.flyenv_memory_${method}.approval_mode="approve"`
+                  `mcp_servers.effect.tools.qtenvdev_memory_${method}.approval_mode="approve"`
                 ])
               ]
             : []),

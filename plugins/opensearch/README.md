@@ -1,16 +1,16 @@
 # OpenSearch
 
-## Local TLS with FlyEnv certificates
+## Local TLS with QTEnvDev certificates
 
 Stop OpenSearch, then open **Configuration → opensearch.yml → Common → Local TLS certificates**.
-The default CA is `<FlyEnv server directory>/CA/FlyEnv-Root-CA.crt` with its matching `.key`.
-You can also select a CA created by FlyEnv's SSL certificate tool, or mkcert's
+The default CA is `<QTEnvDev server directory>/CA/QTEnvDev-Root-CA.crt` with its matching `.key`.
+You can also select a CA created by QTEnvDev's SSL certificate tool, or mkcert's
 `rootCA.pem` and `rootCA-key.pem`. The CA must use an unencrypted RSA private key.
 
 **Generate and configure TLS** signs separate node and administrator certificates.
 Node certificates cover `localhost`, the computer hostname, `127.0.0.1` and `::1`,
 and support both server and client authentication. Private keys use PKCS#8.
-Files are written under `config/flyenv-tls/<generation>/`; OpenSearch receives
+Files are written under `config/qtenvdev-tls/<generation>/`; OpenSearch receives
 relative paths. The CA private key remains at its original location.
 The previous `opensearch.yml` is backed up beside the configuration file.
 Start OpenSearch after configuration and connect using `https://localhost:9200`

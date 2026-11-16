@@ -189,7 +189,7 @@ export const ServiceActionStore: {
             let appPaths = [...app]
             if (window.Server.isWindows) {
               const stored = await localForage
-                .getItem<Record<string, string>>(`flyenv-app-env-dir`)
+                .getItem<Record<string, string>>(`qtenvdev-app-env-dir`)
                 .catch(() => null)
               appPaths = [...new Set([...Object.values(stored || {}), ...app])]
             }
@@ -251,7 +251,7 @@ export const ServiceActionStore: {
           if (window.Server.isWindows) {
             trace('renderer.local-directory-read-begin')
             localForage
-              .getItem(`flyenv-app-env-dir`)
+              .getItem(`qtenvdev-app-env-dir`)
               .then((res: Record<string, string>) => {
                 trace('renderer.local-directory-read-completed')
                 const list = res || {}
@@ -266,7 +266,7 @@ export const ServiceActionStore: {
                 const set = new Set([...Object.values(list), ...retainedApp])
                 const appList = Array.from(set)
                 localForage
-                  .setItem(`flyenv-app-env-dir`, list)
+                  .setItem(`qtenvdev-app-env-dir`, list)
                   .then(() => trace('renderer.local-directory-write-completed'))
                   .catch(() => trace('renderer.local-directory-write-failed'))
                 ServiceActionStore.appPath = reactive([...appList])

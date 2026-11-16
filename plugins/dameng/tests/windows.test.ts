@@ -14,13 +14,13 @@ import {
   windowsOperationError
 } from '../fork/windows'
 
-const root = 'C:\\FlyEnv\\app\\dameng\\DM8WIN'
-const ini = 'C:\\FlyEnv\\server\\dameng\\DM8WIN\\DAMENG\\dm.ini'
-const service = 'DmServiceFLYENVDM8WIN'
+const root = 'C:\\QTEnvDev\\app\\dameng\\DM8WIN'
+const ini = 'C:\\QTEnvDev\\server\\dameng\\DM8WIN\\DAMENG\\dm.ini'
+const service = 'DmServiceQTENVDEVDM8WIN'
 
 test('Windows selectors reject external service names and noncanonical config paths', () => {
   assert.doesNotThrow(() => assertWindowsIdentity(root, ini, service))
-  for (const name of ['DmServiceEXTERNAL', 'DmServiceFLYENV', service + ';bad']) {
+  for (const name of ['DmServiceEXTERNAL', 'DmServiceQTENVDEV', service + ';bad']) {
     assert.throws(() => assertWindowsIdentity(root, ini, name))
   }
   for (const value of [
@@ -42,12 +42,12 @@ test('stop rejects absent PID and script binds exact SCM executable/config befor
   assert.match(stop, /ProcessId -ne 123/)
   assert.match(stop.slice(stop.lastIndexOf('\n$root=')), /Stop-DmOwnedService/)
   assert.doesNotMatch(stop, /taskkill|Stop-Process|\.Kill\(/)
-  assert.match(windowsServiceBody(root, ini, service, 'start'), /already running outside FlyEnv/)
+  assert.match(windowsServiceBody(root, ini, service, 'start'), /already running outside QTEnvDev/)
 })
 
 test('installer confines mount and install to one elevation and preserves required vs cleanup outcomes', () => {
   const body = windowsInstallBody(
-    'C:\\FlyEnv\\cache\\official.iso',
+    'C:\\QTEnvDev\\cache\\official.iso',
     root,
     '<DATABASE><INIT_DB>N</INIT_DB></DATABASE>'
   )
@@ -64,7 +64,7 @@ test('installer confines mount and install to one elevation and preserves requir
 test('registration uses exact dmsvc database selector and grants caller SID without changing account', () => {
   const body = windowsRegistrationBody(root, ini, service)
   assert.match(body, /dmsvc\.exe/)
-  assert.match(body, /database FLYENVDM8WIN/)
+  assert.match(body, /database QTENVDEVDM8WIN/)
   assert.match(body, /Manual/)
   assert.match(body, /Grant-DmServiceAccess/)
   assert.match(body, /Grant-DmDirectoryAccess/)
@@ -114,13 +114,13 @@ test('command transport keeps stdout independent from successful stderr diagnost
 test('all generated privileged scripts parse in native PowerShell when available', async (t) => {
   const { existsSync } = await import('node:fs')
   const { spawnSync } = await import('node:child_process')
-  const shell = '/tmp/flyenv-powershell-test/pwsh'
+  const shell = '/tmp/qtenvdev-powershell-test/pwsh'
   if (!existsSync(shell)) return t.skip('optional PowerShell parser unavailable')
   const scripts = [
     windowsServiceBody(root, ini, service, 'start'),
     windowsServiceBody(root, ini, service, 'stop', '123'),
     windowsRegistrationBody(root, ini, service),
-    windowsInstallBody('C:\\FlyEnv\\cache\\official.iso', root, '<DATABASE/>'),
+    windowsInstallBody('C:\\QTEnvDev\\cache\\official.iso', root, '<DATABASE/>'),
     windowsUninstallBody(root),
     windowsElevationScript('Write-Output "test"', 'C:\\temp\\result.json', 'C:\\powershell.exe')
   ]
@@ -140,7 +140,7 @@ test('all generated privileged scripts parse in native PowerShell when available
 test('real PowerShell lifecycle guards refuse external running service and replaced owned PID', async (t) => {
   const { existsSync } = await import('node:fs')
   const { spawnSync } = await import('node:child_process')
-  const shell = '/tmp/flyenv-powershell-test/pwsh'
+  const shell = '/tmp/qtenvdev-powershell-test/pwsh'
   if (!existsSync(shell)) return t.skip('optional PowerShell unavailable')
   const mock = `
 $global:controlCalls=0; $global:current=[pscustomobject]@{State='Running';ProcessId=456}
@@ -156,7 +156,7 @@ function Stop-DmOwnedService { $global:controlCalls++ }
       '\n$root=',
       `${mock}\n$root=`
     )
-    const script = `$ErrorActionPreference='Stop'; $result=@{}; try { ${body}; throw 'guard did not reject' } catch { if ($_.Exception.Message -notmatch 'outside FlyEnv|PID changed') { throw }; if ($global:controlCalls -ne 0) { throw 'external service was controlled' } }; exit 0`
+    const script = `$ErrorActionPreference='Stop'; $result=@{}; try { ${body}; throw 'guard did not reject' } catch { if ($_.Exception.Message -notmatch 'outside QTEnvDev|PID changed') { throw }; if ($global:controlCalls -ne 0) { throw 'external service was controlled' } }; exit 0`
     const result = spawnSync(
       shell,
       [
@@ -178,7 +178,7 @@ function Stop-DmOwnedService { $global:controlCalls++ }
 test('compressed initial native transport executes large Unicode payload without truncation', async (t) => {
   const { existsSync } = await import('node:fs')
   const { spawnSync } = await import('node:child_process')
-  const shell = '/tmp/flyenv-powershell-test/pwsh'
+  const shell = '/tmp/qtenvdev-powershell-test/pwsh'
   if (!existsSync(shell)) return t.skip('optional PowerShell unavailable')
   const text = '达梦安装参数'.repeat(10000)
   const encoded = encodeWindowsScript(`[Console]::Write('${text}')`)
@@ -194,7 +194,7 @@ test('real PowerShell companion handoff continues after one helper fails and ski
   const { existsSync } = await import('node:fs')
   const { spawnSync } = await import('node:child_process')
   const { windowsFunctions } = await import('../fork/windows')
-  const shell = '/tmp/flyenv-powershell-test/pwsh'
+  const shell = '/tmp/qtenvdev-powershell-test/pwsh'
   if (!existsSync(shell)) return t.skip('optional PowerShell unavailable')
   const script = `${windowsFunctions}
 $ErrorActionPreference='Stop'; $global:configured=@()
@@ -284,9 +284,9 @@ test('command timeout reports unknown result without blind installer retries', a
 test('installer precondition refusal never adopts a preexisting engine from its catch path', async (t) => {
   const { existsSync } = await import('node:fs')
   const { spawnSync } = await import('node:child_process')
-  const shell = '/tmp/flyenv-powershell-test/pwsh'
+  const shell = '/tmp/qtenvdev-powershell-test/pwsh'
   if (!existsSync(shell)) return t.skip('optional PowerShell unavailable')
-  const body = windowsInstallBody('C:\\FlyEnv\\cache\\official.iso', root, '<DATABASE/>').replace(
+  const body = windowsInstallBody('C:\\QTEnvDev\\cache\\official.iso', root, '<DATABASE/>').replace(
     '\n$iso=',
     `\nfunction Assert-NoExternalDm { throw 'external global conflict' }\nfunction Test-Path { throw 'preexisting engine must not be inspected after precondition refusal' }\n$iso=`
   )
@@ -303,14 +303,14 @@ test('native stop bridge compiles and requests only the owned service stop/query
   const { existsSync } = await import('node:fs')
   const { spawnSync } = await import('node:child_process')
   const { windowsFunctions } = await import('../fork/windows')
-  const shell = '/tmp/flyenv-powershell-test/pwsh'
+  const shell = '/tmp/qtenvdev-powershell-test/pwsh'
   if (!existsSync(shell)) return t.skip('optional PowerShell unavailable')
   const csharp = windowsFunctions.match(/Add-Type -TypeDefinition @'\n([\s\S]*?)\n'@/)?.[1]
   assert.ok(csharp)
   assert.match(csharp, /OpenServiceW\(manager,name,0x24\)/)
   assert.match(csharp, /ControlService\(service,1,out status\)/)
   assert.doesNotMatch(csharp, /EnumDependent|TerminateProcess/)
-  const script = `$ErrorActionPreference='Stop'; Add-Type -TypeDefinition @'\n${csharp}\n'@\nif (!('FlyEnvDamengServiceStop' -as [type])) { throw 'native stop bridge compilation failed' }; exit 0`
+  const script = `$ErrorActionPreference='Stop'; Add-Type -TypeDefinition @'\n${csharp}\n'@\nif (!('QTEnvDevDamengServiceStop' -as [type])) { throw 'native stop bridge compilation failed' }; exit 0`
   const result = spawnSync(
     shell,
     ['-NoProfile', '-NonInteractive', '-EncodedCommand', encodeWindowsScript(script)],
@@ -322,7 +322,7 @@ test('native stop bridge compiles and requests only the owned service stop/query
 async function runPolicyScript(script: string, t: { skip: (reason: string) => void }) {
   const { existsSync } = await import('node:fs')
   const { spawnSync } = await import('node:child_process')
-  const shell = '/tmp/flyenv-powershell-test/pwsh'
+  const shell = '/tmp/qtenvdev-powershell-test/pwsh'
   if (!existsSync(shell)) {
     t.skip('optional PowerShell unavailable')
     return
@@ -339,7 +339,7 @@ function selectedDirectoryInstallPolicy(
   kind: 'empty' | 'nonempty' | 'file' | 'reparse' | 'partial'
 ) {
   const full = windowsInstallBody(
-    'C:\\FlyEnv\\cache\\official.iso',
+    'C:\\QTEnvDev\\cache\\official.iso',
     root,
     '<DATABASE><INIT_DB>N</INIT_DB><INSTALL_PATH>/owned</INSTALL_PATH></DATABASE>'
   ).replace(`$root='${root}'`, "$root='/owned'")
@@ -394,7 +394,7 @@ if ($global:launches -ne 1 -or $global:rootDeletes -ne 0 -or $global:entries.Cou
 })
 
 test('installed engine survives cleanup warning without required handoff failure', async (t) => {
-  const full = windowsInstallBody('C:\\FlyEnv\\cache\\official.iso', root, '<DATABASE/>')
+  const full = windowsInstallBody('C:\\QTEnvDev\\cache\\official.iso', root, '<DATABASE/>')
   const tail = full.slice(full.indexOf('  $installerRunning=$true;'))
   await runPolicyScript(
     `$ErrorActionPreference='Stop'; $result=@{}; $root='/owned'; $attempted=$true; $mounted=$true; $xmlFile=$null; $child=[pscustomobject]@{HasExited=$true}
@@ -411,7 +411,7 @@ if (!$result.installed -or $result.handoffError -or $result.warning -notmatch 'd
 })
 
 test('installed engine preserves required companion handoff failure separately from cleanup', async (t) => {
-  const full = windowsInstallBody('C:\\FlyEnv\\cache\\official.iso', root, '<DATABASE/>')
+  const full = windowsInstallBody('C:\\QTEnvDev\\cache\\official.iso', root, '<DATABASE/>')
   const tail = full.slice(full.indexOf('  $installerRunning=$true;'))
   await runPolicyScript(
     `$ErrorActionPreference='Stop'; $result=@{}; $root='/owned'; $attempted=$true; $mounted=$false; $xmlFile=$null; $child=[pscustomobject]@{HasExited=$true}
@@ -499,7 +499,7 @@ test('registration resumes its durable intent after service creation interrupted
       .slice(body.indexOf('\n$root='))
       .replace(`$root='${root}'`, `$root='${directory.replaceAll("'", "''")}'`)
     const script = `$ErrorActionPreference='Stop'; $result=@{}; $global:proof=[pscustomobject]@{files=@();companions=@()}; $global:service=$null; $global:key=$false; $global:values=[pscustomobject]@{}; $global:interrupt=$true; $global:creates=0
-function Assert-DmGlobalProof($Root) { $file=Join-Path $Root '.flyenv-windows-global.json'; if ([IO.File]::Exists($file)) { $global:proof=ConvertFrom-Json ([IO.File]::ReadAllText($file)) }; return $global:proof }
+function Assert-DmGlobalProof($Root) { $file=Join-Path $Root '.qtenvdev-windows-global.json'; if ([IO.File]::Exists($file)) { $global:proof=ConvertFrom-Json ([IO.File]::ReadAllText($file)) }; return $global:proof }
 function Assert-DmPath { }
 function Get-CimInstance { return $global:service }
 function Test-Path { return $global:key }
@@ -520,7 +520,7 @@ if ($global:creates -ne 1 -or $global:values.path -ne '${ini}' -or $global:value
 $global:values.path='external.ini'
 try { ${policy}; throw 'conflicting registry was adopted' } catch { if ($_.Exception.Message -notmatch 'Conflicting present DM registry') { throw } }
 if ($global:values.path -ne 'external.ini' -or $global:creates -ne 1) { throw 'conflicting registry was mutated' }
-[IO.File]::WriteAllText((Join-Path '${directory.replaceAll("'", "''")}' '.flyenv-windows-global.json'),'{"files":[],"companions":[],"instances":[]}')
+[IO.File]::WriteAllText((Join-Path '${directory.replaceAll("'", "''")}' '.qtenvdev-windows-global.json'),'{"files":[],"companions":[],"instances":[]}')
 try { ${policy}; throw 'external service without intent was adopted' } catch { if ($_.Exception.Message -notmatch 'lacks this installation registration intent') { throw } }
 if ($global:creates -ne 1) { throw 'external service was mutated' }
 exit 0`
@@ -544,7 +544,7 @@ try { ${tail}; throw 'unknown uninstall was treated as complete' } catch { if ($
 })
 
 test('known installer nonzero preserves existing engine with required handoff error', async (t) => {
-  const full = windowsInstallBody('C:\\FlyEnv\\cache\\official.iso', root, '<DATABASE/>')
+  const full = windowsInstallBody('C:\\QTEnvDev\\cache\\official.iso', root, '<DATABASE/>')
   const tail = full.slice(full.indexOf('  $installerRunning=$true;'))
   await runPolicyScript(
     `$ErrorActionPreference='Stop'; $result=@{}; $root='/owned'; $attempted=$true; $mounted=$false; $xmlFile=$null; $child=[pscustomobject]@{HasExited=$true}

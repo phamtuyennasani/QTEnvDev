@@ -14,7 +14,7 @@ import PluginManager, { type PluginManagerOptions } from '../../src/main/plugins
 const root = path.resolve(import.meta.dirname, '../..')
 
 async function fixture(version = 1) {
-  const dir = await mkdtemp(path.join(tmpdir(), 'flyenv-plugin-startup-'))
+  const dir = await mkdtemp(path.join(tmpdir(), 'qtenvdev-plugin-startup-'))
   const manifest = {
     apiVersion: 1,
     id: 'startup-fixture',
@@ -500,7 +500,7 @@ async function replacementInstaller(
   await writeFile(path.join(incoming, 'plugin.json'), JSON.stringify(manifest))
   await writeFile(path.join(incoming, 'render/index.mjs'), 'export default { updated: true }')
   await writeFile(path.join(incoming, 'fork/index.mjs'), 'export default { updated: true }')
-  const archive = path.join(f.dir, 'update.flyenv-plugin')
+  const archive = path.join(f.dir, 'update.qtenvdev-plugin')
   const sevenZip = createRequire(import.meta.url)('7zip-min-electron')
   await new Promise<void>((resolve, reject) =>
     sevenZip.pack(incoming, archive, (error: Error | null) => (error ? reject(error) : resolve()))

@@ -4,7 +4,7 @@
   "inputTips": "//Input JSON, JavaScript Object/Array, PHP Array, URL, XML, YAML, PList. Conversia automată în formatul selectat",
   "parseFailTips": "Analiza a eșuat",
   "inputCheckFailTips": "Nedentificat",
-  "systemProxyCheck": "S-a detectat că rețeaua folosește un proxy, este FlyEnv setat să folosească acest proxy?",
+  "systemProxyCheck": "S-a detectat că rețeaua folosește un proxy, este QTEnvDev setat să folosească acest proxy?",
   "systemProxyUsed": "Setare reușită. Dacă doriți să o modificați, vă rugăm să faceți acest lucru în Setări->Setări proxy.",
   "windowCount": "Numărul de ferestre",
   "codemake": "Generare cod",

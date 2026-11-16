@@ -101,7 +101,7 @@
   "allTasks": "تمام وظایف",
   "systemTasks": "وظایف سیستمی",
   "systemTask": "وظیفه سیستمی",
-  "flyenvTask": "وظیفه FlyEnv",
+  "qtenvdevTask": "وظیفه QTEnvDev",
   "otherTask": "سایر وظایف",
   "taskTrigger": "محرک (Trigger)",
   "deleteSystemTaskTips": "این وظیفه زمان‌بندی‌شده سیستمی حذف شود؟",

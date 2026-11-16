@@ -15,13 +15,13 @@ import {
   type WindowsHelperTask
 } from '../src/shared/WindowsHelperIdentity'
 
-const tempRoot = await fs.mkdtemp(path.join(tmpdir(), 'flyenv-helper-update-'))
+const tempRoot = await fs.mkdtemp(path.join(tmpdir(), 'qtenvdev-helper-update-'))
 const identity: WindowsHelperIdentity = {
   ...windowsHelperInstancePaths('S-1-5-21-100-200-300-1001'),
   account: 'test-user',
   sid: 'S-1-5-21-100-200-300-1001',
   localAppData: tempRoot,
-  executable: path.join(tempRoot, 'flyenv-helper.exe'),
+  executable: path.join(tempRoot, 'qtenvdev-helper.exe'),
   instanceConfigPath: path.join(tempRoot, 'instance.json')
 }
 const installedBuild = Buffer.from('previous signed build of the same helper version')

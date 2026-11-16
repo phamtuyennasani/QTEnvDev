@@ -17,7 +17,7 @@
   "passwordFormatError": "Databasepassordet kan ikke inneholde kinesiske eller spesialtegn",
   "savePassword": "Oppdater passord",
   "resetPasswordTips": "Denne operasjonen vil endre roten til databasen brukerens passord",
-  "savePasswordTips": "Bare oppdaterer passordet som er lagret i FlyEnv, endrer ikke roten av databasen roten brukerens passord. Dette passordet brukes hovedsakelig til å stoppe {app} forekomster.",
+  "savePasswordTips": "Bare oppdaterer passordet som er lagret i QTEnvDev, endrer ikke roten av databasen roten brukerens passord. Dette passordet brukes hovedsakelig til å stoppe {app} forekomster.",
   "resetPasswordConfirm": "Denne operasjonen vil endre roten til databasen brukerens passord, er du sikker på at du vil fortsette?",
   "mysqlNeedRunTips": "Vennligst kjør {app} først",
   "databaseName": "Database navn",

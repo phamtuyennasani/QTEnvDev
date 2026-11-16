@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Inicializácia adresára dát bola úspešná, cesta k adresáru dát: {dir}",
   "initDBDataDirFail": "Inicializácia adresára dát zlyhala, dôvod: {error}",
   "newProjectFail": "Nepodarilo sa vytvoriť nový projekt",
-  "processListFail": "Nepodarilo sa získať zoznam procesov. Nainštalujte pomocný program FlyEnv"
+  "processListFail": "Nepodarilo sa získať zoznam procesov. Nainštalujte pomocný program QTEnvDev"
 }

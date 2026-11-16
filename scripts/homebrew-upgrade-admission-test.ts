@@ -115,7 +115,7 @@ const uncertain = new HomebrewOperationCoordinator({
   running: () => [
     {
       module: 'php',
-      item: { ...previewItem(), bin: '/opt/homebrew/opt/nonexistent-flyenv-fixture/sbin/php-fpm' }
+      item: { ...previewItem(), bin: '/opt/homebrew/opt/nonexistent-qtenvdev-fixture/sbin/php-fpm' }
     }
   ],
   run: async () => {

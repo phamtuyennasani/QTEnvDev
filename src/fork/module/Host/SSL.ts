@@ -21,8 +21,8 @@ let sslQueue: Promise<unknown> = Promise.resolve()
 
 // 生成证书文件和加入系统信任是两个步骤；Windows 信任取消必须向外传递。
 const initCARoot = async (): Promise<boolean> => {
-  const CARoot = join(global.Server.BaseDir!, 'CA/FlyEnv-Root-CA.crt')
-  await Helper.send('host', 'sslAddTrustedCert', dirname(CARoot), 'FlyEnv-Root-CA.crt')
+  const CARoot = join(global.Server.BaseDir!, 'CA/QTEnvDev-Root-CA.crt')
+  await Helper.send('host', 'sslAddTrustedCert', dirname(CARoot), 'QTEnvDev-Root-CA.crt')
   return true
 }
 
@@ -47,11 +47,11 @@ const _makeAutoSSL = (host: AppHost): ForkPromise<{ crt: string; key: string } |
   return new ForkPromise(async (resolve, reject) => {
     try {
       const alias = hostAlias(host)
-      const CARoot = join(global.Server.BaseDir!, 'CA/FlyEnv-Root-CA.crt')
+      const CARoot = join(global.Server.BaseDir!, 'CA/QTEnvDev-Root-CA.crt')
       const CADir = dirname(CARoot)
       const hostCADir = join(CADir, `${host.id}`)
-      const rootCA = join(CADir, 'FlyEnv-Root-CA')
-      const caFileName = 'FlyEnv-Root-CA'
+      const rootCA = join(CADir, 'QTEnvDev-Root-CA')
+      const caFileName = 'QTEnvDev-Root-CA'
 
       if (isWindows()) {
         const openssl = join(global.Server.AppDir!, 'openssl/bin/openssl.exe')
@@ -91,7 +91,7 @@ authorityKeyIdentifier = keyid:always,issuer`
         // A cancelled trust operation leaves the generated CA on disk. Check
         // trust again on retry instead of treating the existing file as proof.
         const trust: any = await Helper.send('host', 'sslFindCertificate', CADir)
-        if (!trust.stdout.includes('FlyEnv-Root-CA')) await initCARoot()
+        if (!trust.stdout.includes('QTEnvDev-Root-CA')) await initCARoot()
 
         const hostCAName = `CA-${host.id}`
 

@@ -16,7 +16,7 @@
 - ESLint: zero errors; three `vue/no-v-html` warnings for copied host localized installation-help templates.
 - Full vue-tsc with 8GiB: 53 existing diagnostics, byte-for-byte identical to the baseline, zero plugin diagnostics. The default Node heap was insufficient, so the completed check used the established larger heap.
 - All host source remains unchanged: `git diff 619d7c8d -- src scripts` is empty.
-- Final archive: `dist/plugins/mysql-cluster/mysql-cluster-0.1.2.flyenv-plugin`, 601080 bytes, SHA-256 `f96cc38eec9274977b10e5d949bc635905f3c179302d90a5b055cb55e787bb18`, matching plugins/registry.json. Manifest/renderer/fork entries verified.
+- Final archive: `dist/plugins/mysql-cluster/mysql-cluster-0.1.2.qtenvdev-plugin`, 601080 bytes, SHA-256 `f96cc38eec9274977b10e5d949bc635905f3c179302d90a5b055cb55e787bb18`, matching plugins/registry.json. Manifest/renderer/fork entries verified.
 
 ## Failure-boundary review
 

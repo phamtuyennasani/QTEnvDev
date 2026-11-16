@@ -3,7 +3,7 @@ import productionConfig from './electron-builder'
 
 const config: Configuration = {
   ...productionConfig,
-  artifactName: 'FlyEnv-Local-${version}.${ext}',
+  artifactName: 'QTEnvDev-Local-${version}.${ext}',
   mac: {
     ...productionConfig.mac,
     identity: null,

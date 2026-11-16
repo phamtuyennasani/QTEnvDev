@@ -2,7 +2,7 @@
   "podmanInstall": "Installer Podman",
   "installPodmanByHomebrew": "Installer Podman via Homebrew",
   "noPodmanFound": "Ingen <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a> fundet.\nFor at installere Podman, kan du klikke på installationsknappen.\nDu kan også klikke på dette link\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nog følg dokumentationen for at installere den manuelt.",
-  "podmanErrorTips": "På placeringen {bin}blev en Podman eksekverbar opdaget.\nMen FlyEnv kan ikke påberåbe sig det. Fejlmeddelelse:\n{error}",
+  "podmanErrorTips": "På placeringen {bin}blev en Podman eksekverbar opdaget.\nMen QTEnvDev kan ikke påberåbe sig det. Fejlmeddelelse:\n{error}",
   "removeContainerTips": "Er du sikker på, at du vil fjerne denne container?",
   "removeMachineTips": "Er du sikker på, at du vil fjerne denne virtuelle maskine?",
   "removeImageTips": "Er du sikker på, at du vil fjerne dette billede?",

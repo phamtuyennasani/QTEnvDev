@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full min-h-0 flex-col overflow-hidden">
+  <div class="app-plugin-market flex h-full min-h-0 flex-col overflow-hidden">
     <div class="shrink-0 px-6 pb-5 pt-5">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-4">
@@ -13,23 +13,12 @@
             <p class="text-xs opacity-55 mt-1">{{ I18nT('setup.pluginsDescription') }}</p>
           </div>
         </div>
-        <div class="flex items-center gap-3">
-          <div
-            class="inline-flex items-center gap-0.5 rounded-lg border border-[var(--flyenv-light-border)] bg-[var(--flyenv-light-surface-muted)] p-1 shadow-[0_2px_8px_var(--flyenv-light-shadow)] dark:border-white/10 dark:bg-[var(--base-bg-color-1)] dark:shadow-none"
-          >
-            <button
-              v-for="t in tabs"
-              :key="t.value"
-              class="cursor-pointer h-7 rounded-lg border-0 bg-transparent px-3 py-1 text-xs transition-all active:scale-[0.98]"
-              :class="
-                tab === t.value
-                  ? '!bg-[var(--el-color-primary)] !text-white shadow-[0_2px_6px_var(--flyenv-light-primary-shadow)]'
-                  : 'text-[var(--el-text-color-primary)] opacity-60 hover:bg-[var(--el-color-primary-light-9)] hover:opacity-90'
-              "
-              @click="tab = t.value"
-              >{{ t.label }}</button
-            >
-          </div>
+        <div class="flex min-w-0 flex-wrap items-center gap-3">
+          <el-radio-group v-model="tab" :aria-label="I18nT('setup.pluginsTitle')">
+            <el-radio-button v-for="t in tabs" :key="t.value" :value="t.value">{{
+              t.label
+            }}</el-radio-button>
+          </el-radio-group>
           <el-button
             :icon="RefreshRight"
             :loading="PluginMarket.loading"
@@ -62,7 +51,7 @@
       <!-- Official catalog -->
       <template v-if="tab === 'official'">
         <div
-          class="min-h-0 flex-1 rounded-lg border border-[var(--flyenv-light-border)] bg-[var(--flyenv-light-surface)] p-4 shadow-[0_2px_10px_var(--flyenv-light-shadow)] dark:border-white/10 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none"
+          class="min-h-0 flex-1 rounded-lg border border-[var(--qtenvdev-light-border)] bg-[var(--qtenvdev-light-surface)] p-4 shadow-[0_2px_10px_var(--qtenvdev-light-shadow)] dark:border-white/10 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none"
         >
           <el-scrollbar class="h-full" view-style="height: 100%">
             <div class="h-full pr-2">
@@ -71,7 +60,7 @@
                 class="flex h-full flex-col items-center justify-center px-4 py-16 text-center"
               >
                 <div
-                  class="w-[88px] h-[88px] rounded-lg flex items-center justify-center text-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)] shadow-[0_8px_24px_var(--flyenv-light-shadow-strong)] dark:shadow-none"
+                  class="w-[88px] h-[88px] rounded-lg flex items-center justify-center text-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)] shadow-[0_8px_24px_var(--qtenvdev-light-shadow-strong)] dark:shadow-none"
                 >
                   <Box class="w-10 h-10" />
                 </div>
@@ -93,11 +82,10 @@
                 <div
                   v-for="item in official"
                   :key="item.id"
-                  class="flex items-start gap-4 rounded-lg border border-[var(--flyenv-light-border-light)] bg-[var(--flyenv-light-surface)] p-5 shadow-[0_1px_3px_var(--flyenv-light-shadow)] transition hover:border-[var(--el-color-primary-light-5)] hover:shadow-[0_6px_18px_var(--flyenv-light-shadow-strong)] dark:border-white/5 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none dark:hover:border-[var(--el-color-primary-light-3)] dark:hover:shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
+                  class="flex items-start gap-4 rounded-lg border border-[var(--qtenvdev-light-border-light)] bg-[var(--qtenvdev-light-surface)] p-5 shadow-[0_1px_3px_var(--qtenvdev-light-shadow)] transition hover:border-[var(--el-color-primary-light-5)] hover:shadow-[0_6px_18px_var(--qtenvdev-light-shadow-strong)] dark:border-white/5 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none dark:hover:border-[var(--el-color-primary-light-3)] dark:hover:shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
                 >
                   <div
-                    class="w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xl font-bold select-none shadow-[0_2px_6px_rgba(0,0,0,0.15)]"
-                    :style="{ background: avatarGradient(item.id) }"
+                    class="app-plugin-avatar w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center text-xl font-bold select-none"
                   >
                     {{ avatarLetter(item.name) }}
                   </div>
@@ -110,7 +98,7 @@
                       >
                       <el-tag size="small" type="success" effect="light" round>Official</el-tag>
                     </div>
-                    <div class="text-xs opacity-50 mt-1">{{ item.author || 'FlyEnv' }}</div>
+                    <div class="text-xs opacity-50 mt-1">{{ item.author || 'QTEnvDev' }}</div>
                     <p class="mt-2 text-[13px] leading-relaxed opacity-60 line-clamp-2">
                       {{ pluginDescription(item) || item.id }}
                     </p>
@@ -147,7 +135,7 @@
       <!-- Installed plugins -->
       <template v-else-if="tab === 'installed'">
         <div
-          class="min-h-0 flex-1 rounded-lg border border-[var(--flyenv-light-border)] bg-[var(--flyenv-light-surface)] p-4 shadow-[0_2px_10px_var(--flyenv-light-shadow)] dark:border-white/10 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none"
+          class="min-h-0 flex-1 rounded-lg border border-[var(--qtenvdev-light-border)] bg-[var(--qtenvdev-light-surface)] p-4 shadow-[0_2px_10px_var(--qtenvdev-light-shadow)] dark:border-white/10 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none"
         >
           <el-scrollbar class="h-full" view-style="height: 100%">
             <div class="h-full pr-2">
@@ -156,7 +144,7 @@
                 class="flex h-full flex-col items-center justify-center px-4 py-16 text-center"
               >
                 <div
-                  class="w-[88px] h-[88px] rounded-lg flex items-center justify-center text-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)] shadow-[0_8px_24px_var(--flyenv-light-shadow-strong)] dark:shadow-none"
+                  class="w-[88px] h-[88px] rounded-lg flex items-center justify-center text-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)] shadow-[0_8px_24px_var(--qtenvdev-light-shadow-strong)] dark:shadow-none"
                 >
                   <Box class="w-10 h-10" />
                 </div>
@@ -169,12 +157,11 @@
                 <div
                   v-for="item in PluginMarket.installed"
                   :key="item.id"
-                  class="flex items-start gap-4 rounded-lg border border-[var(--flyenv-light-border-light)] bg-[var(--flyenv-light-surface)] p-5 shadow-[0_1px_3px_var(--flyenv-light-shadow)] transition hover:border-[var(--el-color-primary-light-5)] hover:shadow-[0_6px_18px_var(--flyenv-light-shadow-strong)] dark:border-white/5 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none dark:hover:border-[var(--el-color-primary-light-3)] dark:hover:shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
+                  class="flex items-start gap-4 rounded-lg border border-[var(--qtenvdev-light-border-light)] bg-[var(--qtenvdev-light-surface)] p-5 shadow-[0_1px_3px_var(--qtenvdev-light-shadow)] transition hover:border-[var(--el-color-primary-light-5)] hover:shadow-[0_6px_18px_var(--qtenvdev-light-shadow-strong)] dark:border-white/5 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none dark:hover:border-[var(--el-color-primary-light-3)] dark:hover:shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
                   :class="{ 'opacity-[0.55]': !item.enabled }"
                 >
                   <div
-                    class="w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xl font-bold select-none shadow-[0_2px_6px_rgba(0,0,0,0.15)]"
-                    :style="{ background: avatarGradient(item.id) }"
+                    class="app-plugin-avatar w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center text-xl font-bold select-none"
                   >
                     {{ avatarLetter(item.name) }}
                   </div>
@@ -255,7 +242,7 @@
             />
 
             <div
-              class="rounded-lg border border-[var(--flyenv-light-border)] bg-[var(--flyenv-light-surface)] p-4 shadow-[0_2px_10px_var(--flyenv-light-shadow)] dark:border-white/10 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none"
+              class="rounded-lg border border-[var(--qtenvdev-light-border)] bg-[var(--qtenvdev-light-surface)] p-4 shadow-[0_2px_10px_var(--qtenvdev-light-shadow)] dark:border-white/10 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none"
             >
               <div class="text-base font-semibold">{{ I18nT('setup.pluginsAddSourceTitle') }}</div>
               <div class="mt-0.5 text-xs opacity-50">{{ I18nT('setup.pluginsAddSourceDesc') }}</div>
@@ -283,7 +270,7 @@
                 <div
                   v-for="source in PluginMarket.sources"
                   :key="source.url"
-                  class="flex items-center gap-3 rounded-lg border border-[var(--flyenv-light-border-light)] bg-[var(--flyenv-light-surface)] px-4 py-3 transition-colors hover:border-[var(--el-color-primary-light-5)] dark:border-white/5 dark:bg-[var(--main-panel-bg-color)]"
+                  class="flex items-center gap-3 rounded-lg border border-[var(--qtenvdev-light-border-light)] bg-[var(--qtenvdev-light-surface)] px-4 py-3 transition-colors hover:border-[var(--el-color-primary-light-5)] dark:border-white/5 dark:bg-[var(--main-panel-bg-color)]"
                 >
                   <div
                     class="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-lg bg-[var(--el-color-primary-light-9)] text-[var(--el-color-primary)]"
@@ -322,11 +309,10 @@
                 <div
                   v-for="item in thirdParty"
                   :key="item.id"
-                  class="flex items-start gap-4 rounded-lg border border-[var(--flyenv-light-border-light)] bg-[var(--flyenv-light-surface)] p-5 shadow-[0_1px_3px_var(--flyenv-light-shadow)] transition hover:border-[var(--el-color-primary-light-5)] hover:shadow-[0_6px_18px_var(--flyenv-light-shadow-strong)] dark:border-white/5 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none dark:hover:border-[var(--el-color-primary-light-3)] dark:hover:shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
+                  class="flex items-start gap-4 rounded-lg border border-[var(--qtenvdev-light-border-light)] bg-[var(--qtenvdev-light-surface)] p-5 shadow-[0_1px_3px_var(--qtenvdev-light-shadow)] transition hover:border-[var(--el-color-primary-light-5)] hover:shadow-[0_6px_18px_var(--qtenvdev-light-shadow-strong)] dark:border-white/5 dark:bg-[var(--main-panel-bg-color)] dark:shadow-none dark:hover:border-[var(--el-color-primary-light-3)] dark:hover:shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
                 >
                   <div
-                    class="w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xl font-bold select-none shadow-[0_2px_6px_rgba(0,0,0,0.15)]"
-                    :style="{ background: avatarGradient(item.id) }"
+                    class="app-plugin-avatar w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center text-xl font-bold select-none"
                   >
                     {{ avatarLetter(item.name) }}
                   </div>
@@ -336,7 +322,7 @@
                       <el-tag size="small" type="warning" effect="light" round>Third-party</el-tag>
                     </div>
                     <div class="text-xs opacity-50 mt-1">
-                      {{ item.author || 'FlyEnv' }} · v{{ item.version }}
+                      {{ item.author || 'QTEnvDev' }} · v{{ item.version }}
                     </div>
                     <p class="mt-2 text-[13px] leading-relaxed opacity-60 line-clamp-2">
                       {{ pluginDescription(item) || item.id }}
@@ -406,23 +392,10 @@
     { value: 'sources', label: I18nT('setup.pluginsThirdParty') }
   ])
 
-  const avatarGradients = [
-    'linear-gradient(135deg, #8b9cf9 0%, #667eea 100%)',
-    'linear-gradient(135deg, #fdab1f 0%, #f67b0c 100%)',
-    'linear-gradient(135deg, #34c9a3 0%, #1e9e8a 100%)',
-    'linear-gradient(135deg, #f78fb3 0%, #e15f8b 100%)'
-  ]
-
   const avatarLetter = (name: string) => (name?.trim()?.[0] ?? '?').toUpperCase()
 
-  const avatarGradient = (id: string) => {
-    let hash = 0
-    for (const ch of id) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0
-    return avatarGradients[hash % avatarGradients.length]
-  }
-
   const actionLabel = (item: PluginCatalogItem) => {
-    if (item.compatible === false) return I18nT('setup.pluginsUpdateFlyEnv')
+    if (item.compatible === false) return I18nT('setup.pluginsUpdateQTEnvDev')
     const action = PluginMarket.actionFor(item)
     if (action === 'update') return I18nT('setup.pluginsUpdate')
     if (action === 'reinstall') return I18nT('setup.pluginsReinstall')
@@ -450,7 +423,7 @@
           }
         )
           .then(() => {
-            setupStore.tab = 'licenses'
+            setupStore.tab = 'module'
           })
           .catch(() => {})
         return
@@ -529,7 +502,7 @@
       cancelButtonText: I18nT('base.cancel'),
       type: 'info'
     })
-      .then(() => window.FlyEnvNodeAPI.ipcSendToMain('application:relaunch', 'plugin-relaunch'))
+      .then(() => window.QTEnvDevNodeAPI.ipcSendToMain('application:relaunch', 'plugin-relaunch'))
       .catch(() => {})
 
   onMounted(refresh)

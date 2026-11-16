@@ -5,8 +5,8 @@
   "envTips": "Ścieżka została dodana do zmiennej środowiskowej",
   "aliasTips": "Alias używany w terminalu",
   "useSysPHP": "Użyj domyślnej wersji PHP",
-  "setByApp": "Zmienne środowiskowe ustawione przez FlyEnv",
-  "setByNoApp": "Zmienne środowiskowe nie ustawione przez FlyEnv",
+  "setByApp": "Zmienne środowiskowe ustawione przez QTEnvDev",
+  "setByNoApp": "Zmienne środowiskowe nie ustawione przez QTEnvDev",
   "bundleinVersionDelTips": "Ta wersja jest wersją wbudowaną, potwierdza, że nie jest wyświetlana?",
   "customDirVersionDelTips": "Ta wersja jest niestandardową wersją, potwierdza, że nie jest wyświetlana?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Uruchom to zadanie wymagające podwyższonych uprawnień ręcznie i przeprowadź autoryzację w terminalu; macOS/Linux nie obsługuje automatycznego sudo w tle.",
-  "linuxFtpUnmanagedRoot": "Ten proces FTP działający jako root nie został uruchomiony przez usługę zarządzaną przez FlyEnv. Zatrzymaj go z uprawnieniami administratora przed ponownym uruchomieniem.",
+  "linuxFtpUnmanagedRoot": "Ten proces FTP działający jako root nie został uruchomiony przez usługę zarządzaną przez QTEnvDev. Zatrzymaj go z uprawnieniami administratora przed ponownym uruchomieniem.",
   "linuxFtpUsersRefreshFailed": "Zmiany kont FTP zostały zapisane, ale działająca usługa nie mogła ich zastosować: {error}",
   "pathSavedRefreshFailed": "Zmienne środowiskowe zostały zapisane, ale nie udało się odświeżyć listy: {error}"
 }

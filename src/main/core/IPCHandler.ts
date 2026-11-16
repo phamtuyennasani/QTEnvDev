@@ -573,17 +573,17 @@ export default class IPCHandler extends EventEmitter {
           })
         break
 
-      // FlyEnv Helper 相关
-      case 'APP-FlyEnv-Helper-Install':
+      // QTEnvDev Helper 相关
+      case 'APP-QTEnvDev-Helper-Install':
         this.handleHelperInstall(command, key)
         break
-      case 'APP:FlyEnv-Helper-Command':
+      case 'APP:QTEnvDev-Helper-Command':
         this.handleHelperCommand(command, key)
         break
-      case 'APP:FlyEnv-Helper-Terminal-Install':
+      case 'APP:QTEnvDev-Helper-Terminal-Install':
         this.handleHelperTerminalInstall(command, key, args[0])
         break
-      case 'APP:FlyEnv-Helper-Check':
+      case 'APP:QTEnvDev-Helper-Check':
         this.handleHelperCheck(command, key, args[0] === true)
         break
 
@@ -824,7 +824,7 @@ export default class IPCHandler extends EventEmitter {
       .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
   }
 
-  // ===== FlyEnv Helper 相关 =====
+  // ===== QTEnvDev Helper 相关 =====
 
   /** 管理员进程无需安装；其他用户必须已明确选 Helper，手动修复也进入统一队列。 */
   private handleHelperInstall(command: string, key: string) {
@@ -873,7 +873,7 @@ export default class IPCHandler extends EventEmitter {
       this.sendToMainWindow(command, key, {
         code: 1,
         reason: 'helper_execution_failed',
-        msg: 'FlyEnv helper installation is already in progress'
+        msg: 'QTEnvDev helper installation is already in progress'
       })
       return
     }
@@ -917,9 +917,9 @@ export default class IPCHandler extends EventEmitter {
           })
           await nodePty.execAndWait(ptyKey, [
             isLinux() ? `sudo ${options.command}` : options.command,
-            'flyenv_terminal_exit_code=$?',
+            'qtenvdev_terminal_exit_code=$?',
             'wait',
-            'exit "$flyenv_terminal_exit_code"'
+            'exit "$qtenvdev_terminal_exit_code"'
           ])
         })
       )
@@ -982,7 +982,7 @@ export default class IPCHandler extends EventEmitter {
       return
     }
     const pass = args?.[0] ?? ''
-    execPromiseSudo(['-k', 'echo', 'FlyEnv'], undefined, pass)
+    execPromiseSudo(['-k', 'echo', 'QTEnvDev'], undefined, pass)
       .then(() => {
         this.deps.configManager.setConfig('password', pass)
         global.Server.Password = pass
@@ -1043,7 +1043,7 @@ export default class IPCHandler extends EventEmitter {
 
   private handleOpenDevWindow(command: string, key: string) {
     this.deps.mainWindow?.webContents?.openDevTools()
-    const debugFile = join(tmpdir(), 'flyenv-debug.log')
+    const debugFile = join(tmpdir(), 'qtenvdev-debug.log')
     shell.showItemInFolder(debugFile)
     this.sendToMainWindow(command, key, true)
   }
@@ -1251,7 +1251,7 @@ export default class IPCHandler extends EventEmitter {
       })
   }
 
-  // ===== FlyEnv plugins =====
+  // ===== QTEnvDev plugins =====
 
   private pluginManagerOrError(command: string, key: string) {
     const manager = this.deps.pluginManager

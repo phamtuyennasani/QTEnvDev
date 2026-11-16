@@ -8,10 +8,10 @@ import electron from 'electron'
 import viteConfig from '../configs/vite.config'
 import { buildLanguageAssets } from './build-language-assets'
 import { buildPlugin } from './plugin-builder'
-const output = resolve('.superpowers/sdd/2026-11-03-flyenv-ai-memory/app-smoke')
+const output = resolve('.superpowers/sdd/2026-11-03-qtenvdev-ai-memory/app-smoke')
 await mkdir(output, { recursive: true })
 await rm(join(output, 'result.json'), { force: true })
-const root = await mkdtemp(join(tmpdir(), 'flyenv-memory-app-'))
+const root = await mkdtemp(join(tmpdir(), 'qtenvdev-memory-app-'))
 const server = await createServer({
   ...viteConfig.serverConfig,
   configFile: false,
@@ -57,8 +57,8 @@ try {
   })
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    FLYENV_DATA_ROOT: root,
-    FLYENV_PLUGIN_PATH: join(output, 'package'),
+    QTENVDEV_DATA_ROOT: root,
+    QTENVDEV_PLUGIN_PATH: join(output, 'package'),
     MEMORY_SMOKE_OUTPUT: output,
     MEMORY_SMOKE_REPO: process.cwd()
   }

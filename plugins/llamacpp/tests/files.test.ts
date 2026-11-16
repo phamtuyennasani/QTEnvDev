@@ -83,7 +83,7 @@ test('managed fingerprint checks current sidecar evidence even when renderer cat
       size,
       sha256: 'a'.repeat(64)
     }
-    await writeFile(path + '.flyenv.json', JSON.stringify({ ...old, sha256: 'b'.repeat(64) }))
+    await writeFile(path + '.qtenvdev.json', JSON.stringify({ ...old, sha256: 'b'.repeat(64) }))
     await assert.rejects(
       resolveModelReference(
         {
@@ -119,7 +119,7 @@ test('scans nested selected-folder GGUF files and skips invalid candidates indep
     const invalidPath = join(nested, 'broken.gguf')
     await writeFile(modelPath, gguf('llama', ['token_embd.weight', 'blk.0.attn.weight']))
     await writeFile(
-      `${modelPath}.flyenv.json`,
+      `${modelPath}.qtenvdev.json`,
       JSON.stringify({
         repoId: 'test/model',
         revision: 'main',
@@ -179,7 +179,7 @@ test('discovered local models launch without sidecars and detect same-size repla
   assert.ok(report.prepared, report.issues.map((issue) => issue.message).join('\n'))
   assert.equal(report.prepared.dependencies[0].path, await realpath(path))
   assert.ok(report.issues.some((issue) => issue.code === 'source-unverified'))
-  await assert.rejects(readFile(path + '.flyenv.json'), { code: 'ENOENT' })
+  await assert.rejects(readFile(path + '.qtenvdev.json'), { code: 'ENOENT' })
   await utimes(path, 200, 200)
   const changed = await prepareLaunch(input, runtime, deps)
   assert.equal(changed.prepared, undefined)
@@ -200,7 +200,7 @@ test('invalid or misplaced sidecars do not prevent discovered local references f
       localPath: join(dir, 'missing.gguf')
     })
   ]) {
-    await writeFile(path + '.flyenv.json', content)
+    await writeFile(path + '.qtenvdev.json', content)
     const { models } = await scanModelsDirectory(dir)
     const dep = await resolveModelReference(
       { kind: 'managed', fileKey: modelFileKey(models[0]) },
@@ -209,7 +209,7 @@ test('invalid or misplaced sidecars do not prevent discovered local references f
     )
     assert.equal(dep.path, await realpath(path))
     assert.equal(dep.fingerprint.sha256, undefined)
-    assert.equal(await readFile(path + '.flyenv.json', 'utf8'), content)
+    assert.equal(await readFile(path + '.qtenvdev.json', 'utf8'), content)
   }
 })
 

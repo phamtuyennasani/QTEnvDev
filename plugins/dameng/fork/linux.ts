@@ -145,7 +145,7 @@ export function createLinuxOperations(overrides: Partial<Dependencies> = {}) {
       const source = join(media, 'DMInstall.bin')
       if (!(await stat(source).then((item) => item.isFile())))
         throw new Error('Official DM media has no regular DMInstall.bin installer.')
-      scratch = await mkdtemp(join(tmpdir(), 'flyenv-dm-install-'))
+      scratch = await mkdtemp(join(tmpdir(), 'qtenvdev-dm-install-'))
       const installer = join(scratch, 'DMInstall.bin'),
         config = join(scratch, 'install.xml')
       await copyFile(source, installer)

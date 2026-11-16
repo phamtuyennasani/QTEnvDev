@@ -16,14 +16,14 @@ export default async function (configuration: AfterPackContext) {
   // 定位你的 helper 文件
   const helperPath = join(
     appOutDir,
-    'resources/app.asar.unpacked/node_modules/helper/flyenv-helper.exe'
+    'resources/app.asar.unpacked/node_modules/helper/qtenvdev-helper.exe'
   )
   if (!existsSync(helperPath)) {
     throw new Error(`Windows helper artifact is missing: ${helperPath}`)
   }
 
-  const dest = join(appOutDir, 'resources/helper/flyenv-helper.exe')
-  const backup = join(appOutDir, 'resources/helper/flyenv-helper-backup.exe')
+  const dest = join(appOutDir, 'resources/helper/qtenvdev-helper.exe')
+  const backup = join(appOutDir, 'resources/helper/qtenvdev-helper-backup.exe')
   await mkdirp(dirname(dest))
   await copyFile(helperPath, dest)
   await copyFile(dest, backup)

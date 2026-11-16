@@ -60,7 +60,7 @@ import type { DamengInitParams, DamengInstanceInfo, DamengRuntime } from '../sha
 
 type Manifest = {
   schema: 1
-  owner: 'flyenv-dameng'
+  owner: 'qtenvdev-dameng'
   installId: string
   version: string
   isoSha256: string
@@ -122,7 +122,7 @@ class Dameng extends Base {
         const record = JSON.parse(readFileSync(this.recordFile(item), 'utf8')) as Manifest
         if (
           record.schema !== 1 ||
-          record.owner !== 'flyenv-dameng' ||
+          record.owner !== 'qtenvdev-dameng' ||
           record.installId !== item.id ||
           record.version !== item.version ||
           record.isoSha256 !== item.isoSha256 ||
@@ -137,7 +137,7 @@ class Dameng extends Base {
       }
     }
     const dataDir = join(this.root, 'instances', item.id)
-    const instance = `FLYENV${createHash('sha256').update(item.id).digest('hex').slice(0, 8).toUpperCase()}`
+    const instance = `QTENVDEV${createHash('sha256').update(item.id).digest('hex').slice(0, 8).toUpperCase()}`
     return {
       programDir,
       dataDir,
@@ -227,7 +227,7 @@ class Dameng extends Base {
       if (parent === probeDir) throw new Error('DM installation parent is unavailable.')
       probeDir = parent
     }
-    const probe = join(probeDir, `.flyenv_dm_probe_${randomUUID()}`)
+    const probe = join(probeDir, `.qtenvdev_dm_probe_${randomUUID()}`)
     try {
       const file = await open(probe, 'wx', 0o600)
       await file.close()
@@ -258,7 +258,7 @@ class Dameng extends Base {
     const m = await readJson<Manifest>(p.manifest)
     if (
       m.schema !== 1 ||
-      m.owner !== 'flyenv-dameng' ||
+      m.owner !== 'qtenvdev-dameng' ||
       m.installId !== item.id ||
       m.version !== item.version ||
       m.isoSha256 !== item.isoSha256 ||
@@ -368,7 +368,7 @@ class Dameng extends Base {
         (manifest.active.created && row.CREATED !== manifest.active.created)
       ) {
         throw new Error(
-          'DM instance is running outside this FlyEnv start; external process left untouched.'
+          'DM instance is running outside this QTEnvDev start; external process left untouched.'
         )
       }
     }
@@ -571,7 +571,7 @@ class Dameng extends Base {
               )
             const m: Manifest = {
               schema: 1,
-              owner: 'flyenv-dameng',
+              owner: 'qtenvdev-dameng',
               installId: item.id,
               version: item.version,
               isoSha256: item.isoSha256,
@@ -770,7 +770,7 @@ class Dameng extends Base {
     })
     if (/\[-2501\]/.test(output)) throw authenticationError()
     if (
-      !output.split(/\r?\n/).some((line) => line.trim() === `FLYENV_DM_READY=${p.instance}:OPEN`) ||
+      !output.split(/\r?\n/).some((line) => line.trim() === `QTENVDEV_DM_READY=${p.instance}:OPEN`) ||
       /\[-\d+\]/.test(output)
     )
       throw new Error(
@@ -801,7 +801,7 @@ class Dameng extends Base {
               current?.CREATED !== m.active.created
             )
               throw new Error(
-                'DM service is running outside this FlyEnv start; it will not be taken over.'
+                'DM service is running outside this QTEnvDev start; it will not be taken over.'
               )
             return { 'APP-Service-Start-PID': m.active.pid }
           }
@@ -931,7 +931,7 @@ class Dameng extends Base {
         let tree: string[] = []
         if (status.state !== 'Stopped' && status.state !== 'Missing') {
           if (!m.active)
-            throw new Error('DM service was started outside FlyEnv; it will not be stopped.')
+            throw new Error('DM service was started outside QTEnvDev; it will not be stopped.')
           const current = list.find((row) => row.PID === status.pid)
           if (
             status.pid !== m.active.pid ||
@@ -1041,7 +1041,7 @@ class Dameng extends Base {
       if (result.initialized && params?.sysdbaPassword) {
         try {
           const output = await this.connection(item, m, credential(params.sysdbaPassword), true)
-          result.expiredDate = output.match(/FLYENV_DM_LICENSE=([^\r\n]+)/)?.[1]?.trim()
+          result.expiredDate = output.match(/QTENVDEV_DM_LICENSE=([^\r\n]+)/)?.[1]?.trim()
           result.version =
             output
               .split(/\r?\n/)

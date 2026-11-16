@@ -84,7 +84,7 @@ export class OuterArcLayer {
       new THREE.BufferAttribute(new Float32Array(vertices), 1).setUsage(THREE.DynamicDrawUsage)
     )
     const material = new THREE.ShaderMaterial({
-      defines: { FLYENV_OUTER_ARC_LAYER: 1 },
+      defines: { QTENVDEV_OUTER_ARC_LAYER: 1 },
       uniforms: {
         uAlpha: { value: 0 },
         uColor: { value: new THREE.Color(GOLD) },
@@ -116,7 +116,7 @@ export class OuterArcLayer {
       }))
     )
     const material = createRibbonMaterial(width, 0, 1.7, 'flow')
-    material.defines.FLYENV_OUTER_ARC_LAYER = 1
+    material.defines.QTENVDEV_OUTER_ARC_LAYER = 1
     const mesh = new THREE.Mesh(geometry, material)
     mesh.name = strands === 2 ? 'transient-outer-primary' : 'transient-outer-companions'
     mesh.frustumCulled = false

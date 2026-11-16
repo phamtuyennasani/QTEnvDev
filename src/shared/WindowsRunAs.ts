@@ -45,7 +45,7 @@ try {
   if ($null -eq $p) { throw 'Windows did not return an administrator process handle' }
   $p.WaitForExit()
   if ($p.ExitCode -eq 73) {
-    @{ phase='wait'; childStarted=$true; nativeErrorCode=73; pipeConnectFailed=$true; message='The administrator process could not connect to the FlyEnv result pipe' } | ConvertTo-Json -Compress
+    @{ phase='wait'; childStarted=$true; nativeErrorCode=73; pipeConnectFailed=$true; message='The administrator process could not connect to the QTEnvDev result pipe' } | ConvertTo-Json -Compress
   }
   exit $p.ExitCode
 } catch {

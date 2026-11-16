@@ -26,8 +26,8 @@ export function windowsOperationScript(body: string, resultFile: string): string
 /** Compress the complete runtime script, including the captured token groups. */
 export function windowsEncodeElevationScript(): string {
   const loader =
-    '$stream=[IO.MemoryStream]::new([Convert]::FromBase64String("__FLYENV_PAYLOAD__")); $gzip=[IO.Compression.GZipStream]::new($stream,[IO.Compression.CompressionMode]::Decompress); $reader=[IO.StreamReader]::new($gzip,[Text.Encoding]::UTF8); try { & ([scriptblock]::Create($reader.ReadToEnd())) } finally { $reader.Dispose(); $gzip.Dispose(); $stream.Dispose() }'
-  return `$buffer=[IO.MemoryStream]::new(); $zip=$null; try { $zip=[IO.Compression.GZipStream]::new($buffer,[IO.Compression.CompressionMode]::Compress,$true); $bytes=[Text.Encoding]::UTF8.GetBytes($script); $zip.Write($bytes,0,$bytes.Length); $zip.Dispose(); $payload=[Convert]::ToBase64String($buffer.ToArray()) } finally { if ($zip) { $zip.Dispose() }; $buffer.Dispose() }; $loader=${psString(loader)}.Replace('__FLYENV_PAYLOAD__',$payload); $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($loader)); if ($encoded.Length -gt 30000) { throw 'SQL Server elevation request exceeds the Windows command limit' }`
+    '$stream=[IO.MemoryStream]::new([Convert]::FromBase64String("__QTENVDEV_PAYLOAD__")); $gzip=[IO.Compression.GZipStream]::new($stream,[IO.Compression.CompressionMode]::Decompress); $reader=[IO.StreamReader]::new($gzip,[Text.Encoding]::UTF8); try { & ([scriptblock]::Create($reader.ReadToEnd())) } finally { $reader.Dispose(); $gzip.Dispose(); $stream.Dispose() }'
+  return `$buffer=[IO.MemoryStream]::new(); $zip=$null; try { $zip=[IO.Compression.GZipStream]::new($buffer,[IO.Compression.CompressionMode]::Compress,$true); $bytes=[Text.Encoding]::UTF8.GetBytes($script); $zip.Write($bytes,0,$bytes.Length); $zip.Dispose(); $payload=[Convert]::ToBase64String($buffer.ToArray()) } finally { if ($zip) { $zip.Dispose() }; $buffer.Dispose() }; $loader=${psString(loader)}.Replace('__QTENVDEV_PAYLOAD__',$payload); $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($loader)); if ($encoded.Length -gt 30000) { throw 'SQL Server elevation request exceeds the Windows command limit' }`
 }
 
 /** Capture the caller before UAC, including when different admin credentials are used. */
@@ -55,7 +55,7 @@ export function windowsServiceControlBody(
   // Recheck after UAC: the pre-elevation observation may no longer be current.
   const guard =
     action === 'start'
-      ? `if ($current.State -ne 'Stopped') { throw 'SQL Server service is already running outside FlyEnv' }; Start-Service -InputObject (Get-Service -Name $name)`
+      ? `if ($current.State -ne 'Stopped') { throw 'SQL Server service is already running outside QTEnvDev' }; Start-Service -InputObject (Get-Service -Name $name)`
       : `if ($current.State -ne 'Stopped') { if ($current.ProcessId -ne ${expectedPid}) { throw 'SQL Server service PID changed; external service left untouched' }; Stop-Service -InputObject (Get-Service -Name $name) }`
   const supplementaryAccess = accessBody
     ? `; try { ${accessBody} } catch { $result.permissionError=$_.Exception.Message }`

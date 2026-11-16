@@ -12,7 +12,7 @@ import { EXPERIMENT_BUDGETS } from '../core/limits'
 import type { ResolvedScope } from '../shared'
 
 async function fixture(count = 5) {
-  const root = await realpath(await mkdtemp(join(tmpdir(), 'flyenv-cache-')))
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'qtenvdev-cache-')))
   const coordinator = new ScopeCoordinator()
   const budgets = { ...EXPERIMENT_BUDGETS }
   const records = new RecordStore(budgets)

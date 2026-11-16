@@ -71,7 +71,7 @@ export const parseWindowsActionStage = (value: unknown): WindowsActionStageEvent
 /** Node 分块读取 stderr 后按完整行解析；UTF-8 不依赖 Windows 控制台代码页。 */
 export const parseWindowsActionStageLine = (line: string): WindowsActionStageEvent | undefined => {
   const fields = line.trimEnd().split('|')
-  if (fields.length !== 5 || fields[0] !== 'FLYENV_ACTION_STAGE') return
+  if (fields.length !== 5 || fields[0] !== 'QTENVDEV_ACTION_STAGE') return
   return parseWindowsActionStage({
     stage: fields[1],
     at: fields[2],

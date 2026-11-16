@@ -13,7 +13,7 @@ import {
  * MCP 的开关 / 端口 / token / 工具白名单 / 审批策略不应再往里塞。
  */
 export interface MCPConfigOptions {
-  /** FlyEnv 启动时是否自动拉起 MCP Server */
+  /** QTEnvDev 启动时是否自动拉起 MCP Server */
   autoStart: boolean
   /** 群组启动/关闭是否跳过 MCP 服务 */
   independentService: boolean
@@ -36,7 +36,7 @@ export interface MCPConfigOptions {
   allowRemote: boolean
   /**
    * 是否对出站内容做密钥掩码（日志/配置里的 password= 等）。默认 false。
-   * FlyEnv 是本地开发工具，bin/path/凭据本就是 AI 代理执行任务所需，默认不屏蔽；
+   * QTEnvDev 是本地开发工具，bin/path/凭据本就是 AI 代理执行任务所需，默认不屏蔽；
    * 仅给「会共享屏幕 / 担心云端日志」的谨慎用户保留可选开关。
    */
   maskSecrets: boolean

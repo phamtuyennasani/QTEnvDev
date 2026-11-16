@@ -8,7 +8,7 @@ import (
 func TestValidateWindowsHelperHealthRequiresConfiguredAllowedRoots(t *testing.T) {
 	previous := allowedRootsFilePathForTesting
 	defer func() { allowedRootsFilePathForTesting = previous }()
-	allowedRootsFilePathForTesting = filepath.Join(t.TempDir(), "flyenv.allowed-roots")
+	allowedRootsFilePathForTesting = filepath.Join(t.TempDir(), "qtenvdev.allowed-roots")
 
 	if err := ValidateWindowsHelperHealth(); err == nil {
 		t.Fatal("missing configured allowed roots must fail helper health validation")

@@ -101,7 +101,7 @@
   "allTasks": "Όλες οι εργασίες",
   "systemTasks": "Εργασίες συστήματος",
   "systemTask": "Εργασία συστήματος",
-  "flyenvTask": "Εργασία FlyEnv",
+  "qtenvdevTask": "Εργασία QTEnvDev",
   "otherTask": "Άλλη εργασία",
   "taskTrigger": "Ενεργοποιητής",
   "deleteSystemTaskTips": "Να διαγραφεί αυτή η προγραμματισμένη εργασία συστήματος;",

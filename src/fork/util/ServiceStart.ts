@@ -151,7 +151,7 @@ export function buildUnixCustomerServiceStartScript(
     )
   }
 
-  lines.push('echo "##FlyEnv-Process-ID$!FlyEnv-Process-ID##"')
+  lines.push('echo "##QTEnvDev-Process-ID$!QTEnvDev-Process-ID##"')
   return lines.join('\n')
 }
 
@@ -186,7 +186,7 @@ export async function serviceStartExec(
   const outFile = join(baseDir, `${typeFlag}-${versionStr}-start-out.log`.split(' ').join(''))
   const errFile = join(baseDir, `${typeFlag}-${versionStr}-start-error.log`.split(' ').join(''))
 
-  let psScript = await readFile(join(global.Server.Static!, 'sh/flyenv-async-exec.sh'), 'utf8')
+  let psScript = await readFile(join(global.Server.Static!, 'sh/qtenvdev-async-exec.sh'), 'utf8')
 
   psScript = psScript
     .replace('#ENV#', execEnv)
@@ -253,7 +253,7 @@ export async function serviceStartExec(
     }
     let pid = ''
     const stdout = res.stdout.trim() + '\n' + res.stderr.trim()
-    const regex = /FlyEnv-Process-ID(.*?)FlyEnv-Process-ID/g
+    const regex = /QTEnvDev-Process-ID(.*?)QTEnvDev-Process-ID/g
     const match = regex.exec(stdout)
     if (match) {
       pid = match[1]
@@ -417,7 +417,7 @@ export async function customerServiceStartExec(
   if (!version.pidPath) {
     let pid = ''
     const stdout = res.stdout.trim() + '\n' + res.stderr.trim()
-    const regex = /FlyEnv-Process-ID(.*?)FlyEnv-Process-ID/g
+    const regex = /QTEnvDev-Process-ID(.*?)QTEnvDev-Process-ID/g
     const match = regex.exec(stdout)
     if (match) {
       pid = match[1]

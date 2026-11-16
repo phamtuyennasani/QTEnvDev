@@ -28,7 +28,7 @@ const setArrayOrDelete = (object: XMLItem, key: string, values: XMLItem[]) => {
   }
 }
 
-const isFlyEnv = (value: XMLItem | undefined) => value?.appFlag === 'FlyEnv'
+const isQTEnvDev = (value: XMLItem | undefined) => value?.appFlag === 'QTEnvDev'
 const isSSLConnector = (connector: XMLItem) => connector.SSLEnabled === 'true'
 const isRewriteValve = (valve: XMLItem) =>
   valve.className === 'org.apache.catalina.valves.rewrite.RewriteValve'
@@ -43,7 +43,7 @@ const certificate = (cert: string, key: string): XMLItem => ({
 })
 
 const sslHostConfig = (hostName: string, cert: string, key: string): XMLItem => ({
-  appFlag: 'FlyEnv',
+  appFlag: 'QTEnvDev',
   hostName,
   sslProtocol: 'TLS',
   certificateVerification: 'false',
@@ -51,7 +51,7 @@ const sslHostConfig = (hostName: string, cert: string, key: string): XMLItem => 
 })
 
 const accessLogValve = (host: TomcatSiteHost): XMLItem => ({
-  appFlag: 'FlyEnv',
+  appFlag: 'QTEnvDev',
   className: 'org.apache.catalina.valves.AccessLogValve',
   directory: join(global.Server.BaseDir!, 'vhost/logs'),
   prefix: `${host.name}-tomcat_access_log`,
@@ -61,7 +61,7 @@ const accessLogValve = (host: TomcatSiteHost): XMLItem => ({
 
 const addOrUpdateHost = (hosts: XMLItem[], name: string, host: TomcatSiteHost) => {
   let item = hosts.find((candidate) => candidate.name === name)
-  if (item && !isFlyEnv(item)) {
+  if (item && !isQTEnvDev(item)) {
     throw new Error(`Tomcat site conflicts with a user-managed Host named ${name}`)
   }
   if (!item) {
@@ -71,7 +71,7 @@ const addOrUpdateHost = (hosts: XMLItem[], name: string, host: TomcatSiteHost) =
   Object.assign(item, {
     name,
     appBase: host.root,
-    appFlag: 'FlyEnv',
+    appFlag: 'QTEnvDev',
     unpackWARs: 'true',
     deployOnStartup: 'true',
     autoDeploy: 'true'
@@ -92,13 +92,13 @@ const addOrUpdateHost = (hosts: XMLItem[], name: string, host: TomcatSiteHost) =
     valves.push(accessLogValve(host))
   }
   const enabled = tomcatSiteConfig(host).rewrite.enabled
-  if (enabled && valves.some((valve) => !isFlyEnv(valve) && isRewriteValve(valve))) {
+  if (enabled && valves.some((valve) => !isQTEnvDev(valve) && isRewriteValve(valve))) {
     throw new Error(`Tomcat site has a user-managed RewriteValve on Host ${name}`)
   }
-  const retained = valves.filter((valve) => !(isFlyEnv(valve) && isRewriteValve(valve)))
+  const retained = valves.filter((valve) => !(isQTEnvDev(valve) && isRewriteValve(valve)))
   if (enabled) {
     retained.push({
-      appFlag: 'FlyEnv',
+      appFlag: 'QTEnvDev',
       className: 'org.apache.catalina.valves.rewrite.RewriteValve'
     })
   }
@@ -128,16 +128,16 @@ const reconcileSSLConfigs = (connector: XMLItem, group: TomcatSiteHost[]) => {
   const existing = asArray<XMLItem>(connector.SSLHostConfig)
   const desiredNames = new Set(desired.keys())
   const manualConflict = existing.find(
-    (config) => !isFlyEnv(config) && desiredNames.has(config.hostName ?? '_default_')
+    (config) => !isQTEnvDev(config) && desiredNames.has(config.hostName ?? '_default_')
   )
   if (manualConflict) {
     throw new Error(
       `Tomcat site conflicts with a user-managed SSLHostConfig: ${manualConflict.hostName ?? '_default_'}`
     )
   }
-  const retained = existing.filter((config) => !isFlyEnv(config))
+  const retained = existing.filter((config) => !isQTEnvDev(config))
   for (const [name, paths] of desired) {
-    const config = existing.find((candidate) => isFlyEnv(candidate) && candidate.hostName === name)
+    const config = existing.find((candidate) => isQTEnvDev(candidate) && candidate.hostName === name)
     if (config) {
       Object.assign(config, sslHostConfig(name, paths.cert, paths.key))
       retained.push(config)
@@ -162,7 +162,7 @@ const reconcileConnectors = (
       throw new Error(`Tomcat site cannot use the same HTTP and HTTPS Connector port: ${port}`)
     }
     const existing = connectors.find((connector) => `${connector.port}` === `${port}`)
-    if (existing && (!isFlyEnv(existing) || !isSSLConnector(existing))) {
+    if (existing && (!isQTEnvDev(existing) || !isSSLConnector(existing))) {
       throw new Error(`Tomcat site conflicts with a user-managed HTTPS Connector on port ${port}`)
     }
   }
@@ -174,7 +174,7 @@ const reconcileConnectors = (
     }
     if (!existing) {
       connectors.push({
-        appFlag: 'FlyEnv',
+        appFlag: 'QTEnvDev',
         port: String(port),
         protocol: 'HTTP/1.1',
         connectionTimeout: '60000'
@@ -189,7 +189,7 @@ const reconcileConnectors = (
       connectors.push(connector)
     }
     Object.assign(connector, {
-      appFlag: 'FlyEnv',
+      appFlag: 'QTEnvDev',
       port: String(port),
       protocol: 'org.apache.coyote.http11.Http11NioProtocol',
       maxThreads: '150',
@@ -202,7 +202,7 @@ const reconcileConnectors = (
   }
 
   const retained = connectors.filter((connector) => {
-    if (!isFlyEnv(connector)) {
+    if (!isQTEnvDev(connector)) {
       return true
     }
     const port = Number(connector.port)
@@ -211,7 +211,7 @@ const reconcileConnectors = (
         return true
       }
       const configs = asArray<XMLItem>(connector.SSLHostConfig)
-      const manual = configs.filter((config) => !isFlyEnv(config))
+      const manual = configs.filter((config) => !isQTEnvDev(config))
       if (manual.length > 0) {
         setArrayOrDelete(connector, 'SSLHostConfig', manual)
         return true
@@ -263,7 +263,7 @@ export const makeTomcatServerXML = (
   setArrayOrDelete(
     engine,
     'Host',
-    hosts.filter((host) => !isFlyEnv(host) || desiredNames.has(host.name))
+    hosts.filter((host) => !isQTEnvDev(host) || desiredNames.has(host.name))
   )
   reconcileConnectors(service, tomcatHosts, sslHosts ?? tomcatHosts)
   return builder.build(document)
@@ -282,7 +282,7 @@ export const reconcileTomcatBase = async (catalinaBase: string, suppliedHosts?: 
   )
   const configFile = join(catalinaBase, 'conf', 'server.xml')
   let serverContent = await readFile(configFile, 'utf-8')
-  serverContent = serverContent.replaceAll('PhpWebStudy', 'FlyEnv')
+  serverContent = serverContent.replaceAll('PhpWebStudy', 'QTEnvDev')
   const next = makeTomcatServerXML(join(catalinaBase, 'conf'), serverContent, tomcatHosts, sslHosts)
   await reconcileTomcatSiteFiles(catalinaBase, tomcatHosts)
   await writeFile(configFile, next)

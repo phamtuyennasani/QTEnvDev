@@ -5,8 +5,8 @@
   "envTips": "Wurde der Pfad zur Umgebungsvariable hinzugefügt",
   "aliasTips": "Alias im Terminal verwendet",
   "useSysPHP": "Standard-PHP-Version verwenden",
-  "setByApp": "Umgebungsvariablen von FlyEnv",
-  "setByNoApp": "Umgebungsvariablen nicht von FlyEnv gesetzt",
+  "setByApp": "Umgebungsvariablen von QTEnvDev",
+  "setByNoApp": "Umgebungsvariablen nicht von QTEnvDev gesetzt",
   "bundleinVersionDelTips": "Dies ist die integrierte Version. Möchten Sie sie wirklich nicht mehr anzeigen?",
   "customDirVersionDelTips": "Diese Version ist eine benutzerdefinierte Pfadversion, bestätigen Sie nicht angezeigt?",
   "ErrorTips": {
@@ -19,7 +19,7 @@
     }
   },
   "linuxSudoRequiresTerminal": "Starten Sie diese Aufgabe mit erhöhten Rechten manuell und schließen Sie die Autorisierung im Terminal ab; macOS/Linux unterstützt kein automatisches sudo im Hintergrund.",
-  "linuxFtpUnmanagedRoot": "Dieser als root laufende FTP-Prozess wurde nicht vom verwalteten Dienst von FlyEnv gestartet. Beenden Sie ihn mit Administratorrechten, bevor Sie den Dienst erneut starten.",
+  "linuxFtpUnmanagedRoot": "Dieser als root laufende FTP-Prozess wurde nicht vom verwalteten Dienst von QTEnvDev gestartet. Beenden Sie ihn mit Administratorrechten, bevor Sie den Dienst erneut starten.",
   "linuxFtpUsersRefreshFailed": "Die Änderungen an den FTP-Konten wurden gespeichert, konnten jedoch vom laufenden Dienst nicht übernommen werden: {error}",
   "pathSavedRefreshFailed": "Die Umgebungsvariablen wurden gespeichert, aber die Liste konnte nicht aktualisiert werden: {error}"
 }

@@ -63,9 +63,9 @@ const report =
     )
     .join('\n') +
   `\n\nAliases are hand-authored fixture expansions, **not measured Agent expansion**. Raw and alias results must remain separate.\n\n` +
-  `Actual Codex/Kimi tool calls, Explicit receipts, short-task Automatic coverage and baseline answers are recorded separately in [client evidence](2026-11-03-flyenv-ai-memory-effect-clients.md). This synthetic table alone is not final product acceptance; long tasks and controlled token comparison remain for stage D.\n`
+  `Actual Codex/Kimi tool calls, Explicit receipts, short-task Automatic coverage and baseline answers are recorded separately in [client evidence](2026-11-03-qtenvdev-ai-memory-effect-clients.md). This synthetic table alone is not final product acceptance; long tasks and controlled token comparison remain for stage D.\n`
 const output = resolve(
-  arg('--report', 'docs/superpowers/reports/2026-11-03-flyenv-ai-memory-effect.md')
+  arg('--report', 'docs/superpowers/reports/2026-11-03-qtenvdev-ai-memory-effect.md')
 )
 await mkdir(dirname(output), { recursive: true })
 await writeFile(output, report)

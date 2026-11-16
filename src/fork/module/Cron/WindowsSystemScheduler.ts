@@ -20,7 +20,7 @@ type WindowsCronWrapperScriptParams = {
 }
 
 export const WINDOWS_CRON_WRAPPER_VERSION = 2
-export const WINDOWS_CRON_WRAPPER_VERSION_MARKER = `$FlyEnvCronWrapperVersion = ${WINDOWS_CRON_WRAPPER_VERSION}`
+export const WINDOWS_CRON_WRAPPER_VERSION_MARKER = `$QTEnvDevCronWrapperVersion = ${WINDOWS_CRON_WRAPPER_VERSION}`
 
 export function buildWindowsCronWrapperScript(params: WindowsCronWrapperScriptParams): string {
   return `${WINDOWS_CRON_WRAPPER_VERSION_MARKER}
@@ -334,8 +334,8 @@ $tasks = @(Get-ScheduledTask | Sort-Object TaskPath, TaskName | ForEach-Object {
     }
   } catch {}
   $fullName = "$($_.TaskPath)$($_.TaskName)"
-  $isFlyEnv = $_.TaskName -like 'FlyEnv-Cron-*'
-  $jobId = if ($isFlyEnv) { $_.TaskName.Substring('FlyEnv-Cron-'.Length) } else { $null }
+  $isQTEnvDev = $_.TaskName -like 'QTEnvDev-Cron-*'
+  $jobId = if ($isQTEnvDev) { $_.TaskName.Substring('QTEnvDev-Cron-'.Length) } else { $null }
   [PSCustomObject]@{
     id = $fullName
     platform = 'windows'
@@ -349,7 +349,7 @@ $tasks = @(Get-ScheduledTask | Sort-Object TaskPath, TaskName | ForEach-Object {
     enabled = [bool]($_.State -ne 'Disabled')
     description = [string]$_.Description
     author = [string]$_.Author
-    isFlyEnv = [bool]$isFlyEnv
+    isQTEnvDev = [bool]$isQTEnvDev
     jobId = $jobId
     raw = $fullName
   }

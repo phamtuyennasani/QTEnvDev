@@ -31,7 +31,7 @@ func decodePowerShellPayloadForTest(t *testing.T, payload string) string {
 }
 
 func TestPowerShellEncodedArgsAvoidScriptFiles(t *testing.T) {
-	script := "[Console]::OutputEncoding = [Text.Encoding]::UTF8; Write-Output 'FlyEnv 环境同步'"
+	script := "[Console]::OutputEncoding = [Text.Encoding]::UTF8; Write-Output 'QTEnvDev 环境同步'"
 
 	args := powerShellEncodedArgs(script)
 	joined := strings.Join(args, " ")
@@ -68,7 +68,7 @@ func TestResolveWindowsSystemExeRefusesMissingFile(t *testing.T) {
 	if runtime.GOOS != "windows" {
 		t.Skip("Windows system API is unavailable")
 	}
-	got, err := utils.GetWindowsSystemExe("flyenv-nonexistent-system-tool-for-test")
+	got, err := utils.GetWindowsSystemExe("qtenvdev-nonexistent-system-tool-for-test")
 	if got != "" || !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("missing system file must fail without a command fallback, got %q, %v", got, err)
 	}

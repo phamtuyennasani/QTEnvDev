@@ -15,7 +15,7 @@ export const MongoDB = reactive({
   volumes: [
     {
       type: 'bind',
-      source: './flyenv-docker-compose/mongodb/data',
+      source: './qtenvdev-docker-compose/mongodb/data',
       target: '/data/db' // Standard MongoDB data path
     }
   ],
@@ -48,13 +48,13 @@ export const MongoDB = reactive({
       image: `${mirror}mongo:${MongoDB.version}`,
       ports: MongoDB.ports.map((p) => `${p.out}:${p.in}`),
       environment,
-      networks: ['flyenv-network']
+      networks: ['qtenvdev-network']
     }
 
     // If persistence is enabled, add volumes and create the local data directory
     if (MongoDB.persistence) {
       mongodb.volumes = MongoDB.volumes
-      await fs.mkdirp(join(dirname(base.dir), 'flyenv-docker-compose/mongodb/data'))
+      await fs.mkdirp(join(dirname(base.dir), 'qtenvdev-docker-compose/mongodb/data'))
     }
 
     return {

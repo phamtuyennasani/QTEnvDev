@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "初始化資料夾成功，資料夾路徑：{dir}",
   "initDBDataDirFail": "初始化資料夾失敗，原因：{error}",
   "newProjectFail": "創建新專案失敗",
-  "processListFail": "處理程序清單取得失敗，請先安裝 FlyEnv Helper"
+  "processListFail": "處理程序清單取得失敗，請先安裝 QTEnvDev Helper"
 }

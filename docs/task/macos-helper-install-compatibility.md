@@ -27,7 +27,7 @@ registering the published daemon.
   stop and actual exit, credential/publication writes, launchd registration and
   health. Their actual errors still fail their dependents. Waiting for actual
   exit has no arbitrary retry count. Stage cleanup remains supplementary.
-- Existing `/Library/Application Support/FlyEnv/Helper` directory owner/mode/ACL
+- Existing `/Library/Application Support/QTEnvDev/Helper` directory owner/mode/ACL
   is not an installation, startup or health precondition. Actual access/file
   errors still propagate; policy/key file integrity and client UID authentication
   remain checked. Socket runtime, Linux, hosts and FTP directory policies are

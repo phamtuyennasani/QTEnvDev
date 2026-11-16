@@ -6,8 +6,8 @@
   "envTips": "路徑是否已添加到環境變數中",
   "aliasTips": "在終端中使用的別名",
   "useSysPHP": "使用預設 PHP 版本",
-  "setByApp": "FlyEnv 設定的環境變數",
-  "setByNoApp": "非 FlyEnv 設定的環境變數",
+  "setByApp": "QTEnvDev 設定的環境變數",
+  "setByNoApp": "非 QTEnvDev 設定的環境變數",
   "bundleinVersionDelTips": "此版本為內建版本，確定不再顯示？",
   "customDirVersionDelTips": "此版本為使用者自訂版本，確定不再顯示？",
   "ErrorTips": {
@@ -20,6 +20,6 @@
     }
   },
   "linuxSudoRequiresTerminal": "請手動啟動此工作並在終端機完成授權；macOS/Linux 不支援在背景自動執行 sudo。",
-  "linuxFtpUnmanagedRoot": "此 root FTP 程序不屬於 FlyEnv 管理的服務。請先以管理員權限停止舊程序，再重新啟動。",
+  "linuxFtpUnmanagedRoot": "此 root FTP 程序不屬於 QTEnvDev 管理的服務。請先以管理員權限停止舊程序，再重新啟動。",
   "linuxFtpUsersRefreshFailed": "FTP 帳號變更已儲存，但執行中的服務無法套用變更：{error}"
 }

@@ -92,7 +92,7 @@ func TestDarwinHostsNativeMetadata(t *testing.T) {
 	if err = setDarwinKeyACL(f, os.Getuid()); err != nil {
 		t.Fatal(err)
 	}
-	if err = unix.Fsetxattr(int(f.Fd()), "com.flyenv.fixture", []byte("metadata"), 0); err != nil {
+	if err = unix.Fsetxattr(int(f.Fd()), "com.qtenvdev.fixture", []byte("metadata"), 0); err != nil {
 		t.Fatal(err)
 	}
 	if err = unix.Fchflags(int(f.Fd()), unix.UF_NODUMP); err != nil {
@@ -125,7 +125,7 @@ func TestDarwinHostsNativeMetadata(t *testing.T) {
 		t.Fatal("ACL lost", err)
 	}
 	buffer := make([]byte, 32)
-	n, err := unix.Fgetxattr(int(f.Fd()), "com.flyenv.fixture", buffer)
+	n, err := unix.Fgetxattr(int(f.Fd()), "com.qtenvdev.fixture", buffer)
 	if err != nil || string(buffer[:n]) != "metadata" {
 		t.Fatal("xattr lost", err)
 	}
@@ -159,7 +159,7 @@ func TestDarwinHostsRejectsNonMutableFlagsWithoutTemporaryFiles(t *testing.T) {
 			}
 			t.Cleanup(func() {
 				files, _ := filepath.Glob(filepath.Join(dir, "*"))
-				temps, _ := filepath.Glob(filepath.Join(dir, ".flyenv-hosts-*"))
+				temps, _ := filepath.Glob(filepath.Join(dir, ".qtenvdev-hosts-*"))
 				for _, file := range append(files, temps...) {
 					unix.Chflags(file, 0)
 				}
@@ -176,7 +176,7 @@ func TestDarwinHostsRejectsNonMutableFlagsWithoutTemporaryFiles(t *testing.T) {
 			if err != nil || string(data) != "original\n" {
 				t.Fatal("original hosts changed", err)
 			}
-			temps, err := filepath.Glob(filepath.Join(dir, ".flyenv-hosts-*"))
+			temps, err := filepath.Glob(filepath.Join(dir, ".qtenvdev-hosts-*"))
 			if err != nil || len(temps) != 0 {
 				t.Fatal("nonmutable temporary files leaked", temps, err)
 			}

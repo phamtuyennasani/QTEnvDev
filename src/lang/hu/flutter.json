@@ -18,7 +18,7 @@
   "sourcePath": "Rendszer PATH",
   "sourceDefault": "Alapértelmezett SDK-hely",
   "sourceCustom": "Beállított egyéni útvonal",
-  "sourceFlyenv": "FlyEnv által kezelt SDK",
+  "sourceQTEnvDev": "QTEnvDev által kezelt SDK",
   "sourceUnknown": "Ismeretlen",
   "createProjectTitle": "Flutter projekt létrehozása",
   "create": "Létrehozás",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Meglévő Android/iOS alkalmazásba beágyazható Flutter modul.",
   "templateSkeletonDesc": "Lista/részletek Flutter alkalmazás Material 3-mal és Navigation 2.0-val.",
   "androidSdkNotDetected": "Az Android SDK nem található",
-  "androidSdkInstallHint": "A FlyEnv nem telepíti automatikusan az Android SDK-t. Telepítse az SDK-t az Android Studio vagy a hivatalos Android parancssori eszközök segítségével.",
+  "androidSdkInstallHint": "A QTEnvDev nem telepíti automatikusan az Android SDK-t. Telepítse az SDK-t az Android Studio vagy a hivatalos Android parancssori eszközök segítségével.",
   "installAndroidStudio": "Android Studio telepítése",
   "androidCommandLineTools": "Android parancssori eszközök",
-  "androidSdkAfterInstall": "Az SDK telepítése után térjen vissza a FlyEnv alkalmazásba, kattintson a Frissítés gombra, majd az Auto-fix segítségével állítsa be a környezetet."
+  "androidSdkAfterInstall": "Az SDK telepítése után térjen vissza a QTEnvDev alkalmazásba, kattintson a Frissítés gombra, majd az Auto-fix segítségével állítsa be a környezetet."
 }

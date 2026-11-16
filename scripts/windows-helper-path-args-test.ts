@@ -22,7 +22,7 @@ async function main() {
   assert.deepEqual(fallbackArgs, [['C:\\SDK\\bin'], {}, path])
 
   await assert.rejects(
-    helper.send('tools', 'writeFileByRoot', 'C:\\FlyEnv\\..\\outside.txt', 'x'),
+    helper.send('tools', 'writeFileByRoot', 'C:\\QTEnvDev\\..\\outside.txt', 'x'),
     /Path traversal detected/
   )
   console.log('Windows helper path argument tests passed')

@@ -1,6 +1,6 @@
 # AI Memory 用户界面交付改进验收
 
-日期：2026-11-05。用户要求：以可上线交付用户使用为目标循环处理，界面沿用 FlyEnv 风格。本轮在当前工作区完成，未提交、未推送、未发布。
+日期：2026-11-05。用户要求：以可上线交付用户使用为目标循环处理，界面沿用 QTEnvDev 风格。本轮在当前工作区完成，未提交、未推送、未发布。
 
 ## 交付内容
 
@@ -29,13 +29,13 @@
 - `tsx scripts/renderer-operation-boundaries-test.ts`：通过；新增 MemoryOperation 页面边界检查。
 - 改动代码 ESLint、`git diff --check`：通过。
 - 完整 `vue-tsc --noEmit`：仍有 59 条基线诊断；与此前最终验收 `final-types.log` 按文件和错误消息剔除行列号逐项比较，新增 0、移除 0。不能称全量类型检查通过。
-- 生成压缩发行插件及本地 `.flyenv-plugin` 包；没有改发布 registry。
+- 生成压缩发行插件及本地 `.qtenvdev-plugin` 包；没有改发布 registry。
 
 界面测试此前存在后台窗口导致旧帧截图的问题，最终使用前台窗口、关闭后台节流、等待绘制后重新执行完整流程；最终截图均重新读取并逐张检查。运行冒烟期间不修改源码，避免 Vite 热重载影响结果。
 
 ## 产物与范围
 
-本地包：`tmp/ai-memory-user-delivery/ai-memory-0.1.0.flyenv-plugin`。解包目录：同目录 `package/`。截图、11 项结果及验证日志：`tmp/ai-memory-user-delivery/`。这些是忽略产物，不随 Git 分发。
+本地包：`tmp/ai-memory-user-delivery/ai-memory-0.1.0.qtenvdev-plugin`。解包目录：同目录 `package/`。截图、11 项结果及验证日志：`tmp/ai-memory-user-delivery/`。这些是忽略产物，不随 Git 分发。
 
 测试仅使用临时 userData、项目目录、记忆目录和随机端口 MCP 服务；未写用户真实客户端配置、正式记忆库或系统 hosts。关闭测试宿主的 Helper/代理提示，仅为隔离界面验收，不修改相关产品流程。
 

@@ -54,7 +54,7 @@ export default class TrayManager extends EventEmitter {
       .createFromPath(join(__static, 'run.png'))
       .resize({ width: size, height: size })
     this.tray = new Tray(this.normalIcon)
-    this.tray.setToolTip('FlyEnv')
+    this.tray.setToolTip('QTEnvDev')
     this.onBlur = this.onBlur.bind(this)
   }
 

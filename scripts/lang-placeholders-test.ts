@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 
 function checkMessages(messages: Record<string, Record<string, unknown>>) {
-  const root = mkdtempSync(join(tmpdir(), 'flyenv-lang-placeholders-'))
+  const root = mkdtempSync(join(tmpdir(), 'qtenvdev-lang-placeholders-'))
   try {
     const langDir = join(root, 'src/lang')
     for (const locale of ['en', 'ja', 'zh']) {

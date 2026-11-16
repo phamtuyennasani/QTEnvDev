@@ -50,7 +50,7 @@ ${targets}
 ${expected}
 ${windowsStopProcessLookup}
 ${buildPerformanceProcessStopPrelude()}
-function Confirm-FlyEnvOriginalProcess($target, $snapshot) {
+function Confirm-QTEnvDevOriginalProcess($target, $snapshot) {
   $actualTime = $target.StartTime.ToUniversalTime()
   $expectedTime = [DateTime]::Parse([string]$snapshot.created, [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::RoundtripKind).ToUniversalTime()
   $format = if ($snapshot.source -eq 'startTime') { 'o' } else { "yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'" }
@@ -76,16 +76,16 @@ $opened = [Collections.Generic.List[object]]::new()
 try {
   # 全部目标先打开句柄；句柄跨越预检、父结束与后代结束，号码不能被新对象复用。
   foreach ($targetPid in $targetPids) {
-    Add-FlyEnvProcessStopEvent 'preflight-request' $targetPid
-    $target = Get-FlyEnvStopTarget $targetPid
-    if ($null -eq $target) { Add-FlyEnvProcessStopEvent 'preflight-skipped-missing' $targetPid; continue }
+    Add-QTEnvDevProcessStopEvent 'preflight-request' $targetPid
+    $target = Get-QTEnvDevStopTarget $targetPid
+    if ($null -eq $target) { Add-QTEnvDevProcessStopEvent 'preflight-skipped-missing' $targetPid; continue }
     try {
       $targetHandle = $target.Handle
-      if ($target.HasExited) { Add-FlyEnvProcessStopEvent 'preflight-skipped-exited' $targetPid; $target.Dispose(); continue }
+      if ($target.HasExited) { Add-QTEnvDevProcessStopEvent 'preflight-skipped-exited' $targetPid; $target.Dispose(); continue }
       $snapshot = $expectedByPid[[int]$targetPid]
       if ($null -eq $snapshot) { throw ('Missing process identity; PID=' + $targetPid) }
-      $created = Confirm-FlyEnvOriginalProcess $target $snapshot
-      Add-FlyEnvProcessStopEvent 'preflight-identity' $targetPid @{ expectedCreated=$snapshot.created; actualCreated=$created; source=$snapshot.source }
+      $created = Confirm-QTEnvDevOriginalProcess $target $snapshot
+      Add-QTEnvDevProcessStopEvent 'preflight-identity' $targetPid @{ expectedCreated=$snapshot.created; actualCreated=$created; source=$snapshot.source }
       $opened.Add(@{ target=$target; snapshot=$snapshot })
     } catch {
       # 获取句柄/StartTime 也可能失败；清理不能再次抛错并覆盖原错误或遗漏 Dispose。
@@ -93,22 +93,22 @@ try {
       $alreadyExited = $false
       try { $alreadyExited = $target.HasExited } catch { }
       try { $target.Dispose() } catch { }
-      if ($alreadyExited) { Add-FlyEnvProcessStopEvent 'preflight-skipped-exited' $targetPid; continue }
-      Add-FlyEnvProcessStopEvent 'preflight-failed' $targetPid @{ error=$preflightError.Exception.Message }
+      if ($alreadyExited) { Add-QTEnvDevProcessStopEvent 'preflight-skipped-exited' $targetPid; continue }
+      Add-QTEnvDevProcessStopEvent 'preflight-failed' $targetPid @{ error=$preflightError.Exception.Message }
       throw $preflightError
     }
   }
   # 授权等待后再次比对原句柄身份；只收集尚未退出的原对象，不扩树、不接纳复用 PID。
   $live = @(foreach ($entry in $opened) {
     $target = $entry.target
-    if ($target.HasExited) { Add-FlyEnvProcessStopEvent 'before-stop-skipped-exited' $target.Id; continue }
-    [void](Confirm-FlyEnvOriginalProcess $target $entry.snapshot)
+    if ($target.HasExited) { Add-QTEnvDevProcessStopEvent 'before-stop-skipped-exited' $target.Id; continue }
+    [void](Confirm-QTEnvDevOriginalProcess $target $entry.snapshot)
     $target
   })
   if ($live.Count -gt 0) {
     $executable = [IO.Path]::Combine([Environment]::SystemDirectory, 'taskkill.exe')
     $arguments = '/F' + (($live | ForEach-Object { ' /PID ' + [int]$_.Id }) -join '')
-    Add-FlyEnvProcessStopEvent 'taskkill-request' 0 @{ executable=$executable; arguments=$arguments; orderedPids=@($live | ForEach-Object { $_.Id }) }
+    Add-QTEnvDevProcessStopEvent 'taskkill-request' 0 @{ executable=$executable; arguments=$arguments; orderedPids=@($live | ForEach-Object { $_.Id }) }
     $startInfo = [Diagnostics.ProcessStartInfo]::new()
     $startInfo.FileName=$executable; $startInfo.Arguments=$arguments
     $startInfo.UseShellExecute=$false; $startInfo.CreateNoWindow=$true
@@ -123,12 +123,12 @@ try {
         try { $command.Kill() } catch { }
         throw 'taskkill command timed out; result is unknown'
       }
-      Add-FlyEnvProcessStopEvent 'taskkill-result' 0 @{ exitCode=$command.ExitCode; stdout=$stdout.GetAwaiter().GetResult(); stderr=$stderr.GetAwaiter().GetResult() }
+      Add-QTEnvDevProcessStopEvent 'taskkill-result' 0 @{ exitCode=$command.ExitCode; stdout=$stdout.GetAwaiter().GetResult(); stderr=$stderr.GetAwaiter().GetResult() }
       if ($command.ExitCode -ne 0 -and @($live | Where-Object { -not $_.HasExited }).Count -gt 0) {
         throw ('taskkill failed; exitCode=' + $command.ExitCode)
       }
       # 非零但原句柄全部已退出是自然退出竞态；命令成功不额外等待每一个 PID。
-      foreach ($target in $live) { Add-FlyEnvProcessStopEvent 'stop-command-completed' $target.Id }
+      foreach ($target in $live) { Add-QTEnvDevProcessStopEvent 'stop-command-completed' $target.Id }
     } finally { $command.Dispose() }
   }
 } finally {
@@ -152,16 +152,16 @@ const MAX_DIRECT_UAC_COMMAND_LENGTH = 30_000
 const MACHINE_ENV_REGISTRY_PATH =
   'Registry::HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment'
 const ALLOWED_OTHER_ENV_KEYS = new Set(['ERLANG_HOME', 'GRADLE_HOME', 'JAVA_HOME'])
-const ALLOWED_AUTO_START_TASKS = new Set(['FlyEnvHelperTask', 'FlyEnvStartup', 'flyenv-helper'])
+const ALLOWED_AUTO_START_TASKS = new Set(['QTEnvDevHelperTask', 'QTEnvDevStartup', 'qtenvdev-helper'])
 const ALLOWED_AUTO_START_BASENAMES = new Set([
   'electron.exe',
-  'flyenv-helper.exe',
-  'flyenv.exe',
+  'qtenvdev-helper.exe',
+  'qtenvdev.exe',
   'phpwebstudy.exe'
 ])
 const MANAGED_PATH_FRAGMENTS = [
-  '/flyenv',
-  '/flyenv.app',
+  '/qtenvdev',
+  '/qtenvdev.app',
   '/php-web-study',
   '/phpwebstudy',
   '/phpwebstudy-data'
@@ -183,18 +183,18 @@ type ValidatedWriteBufferArgs = {
   base64Content: string
 }
 
-type FlyEnvPowerShellProfileTarget = {
+type QTEnvDevPowerShellProfileTarget = {
   edition: 'windows-powershell' | 'pwsh'
   path: string
 }
 
-type ValidatedFlyEnvPowerShellIntegrationArgs = {
+type ValidatedQTEnvDevPowerShellIntegrationArgs = {
   scriptPath: string
   scriptBase64: string
-  profiles: FlyEnvPowerShellProfileTarget[]
+  profiles: QTEnvDevPowerShellProfileTarget[]
 }
 
-export type FlyEnvPowerShellIntegrationUacPlan = {
+export type QTEnvDevPowerShellIntegrationUacPlan = {
   powershellPath: string
   args: string[]
   childCommand: string
@@ -204,7 +204,7 @@ export type FlyEnvPowerShellIntegrationUacPlan = {
   commandLength: number
 }
 
-export type FlyEnvPowerShellIntegrationUacPlanOptions = {
+export type QTEnvDevPowerShellIntegrationUacPlanOptions = {
   powershellPath?: string
   resultPath?: string
   nonce?: string
@@ -213,7 +213,7 @@ export type FlyEnvPowerShellIntegrationUacPlanOptions = {
 
 const execFileAsync = promisify(execFile)
 
-export type FlyEnvPowerShellIntegrationFallbackResult = {
+export type QTEnvDevPowerShellIntegrationFallbackResult = {
   scriptState: 'updated' | 'unchanged'
   profiles: Array<{
     edition: 'windows-powershell' | 'pwsh'
@@ -392,7 +392,7 @@ function isManagedPathByExecutable(targetPath: string): boolean {
   let current = path.win32.normalize(executableDir)
   for (;;) {
     const base = path.win32.basename(current).toLowerCase()
-    if (base.includes('flyenv') || base.includes('phpwebstudy') || base.includes('php-web-study')) {
+    if (base.includes('qtenvdev') || base.includes('phpwebstudy') || base.includes('php-web-study')) {
       return pathInDir(targetPath, current)
     }
     const parent = path.win32.dirname(current)
@@ -403,7 +403,7 @@ function isManagedPathByExecutable(targetPath: string): boolean {
   }
 }
 
-function isWindowsProgramFilesFlyEnvPath(targetPath: string): boolean {
+function isWindowsProgramFilesQTEnvDevPath(targetPath: string): boolean {
   const candidates = [process.env.ProgramFiles, process.env['ProgramFiles(x86)']].filter(
     Boolean
   ) as string[]
@@ -413,7 +413,7 @@ function isWindowsProgramFilesFlyEnvPath(targetPath: string): boolean {
     }
     const normalized = comparePath(targetPath)
     return (
-      normalized.includes('/flyenv') ||
+      normalized.includes('/qtenvdev') ||
       normalized.includes('/phpwebstudy') ||
       normalized.includes('/php-web-study')
     )
@@ -432,11 +432,11 @@ function allowedRootsFilePath(targetUserSid?: string): string {
     try {
       return windowsHelperInstancePaths(targetUserSid).allowedRootsPath
     } catch {
-      helperExecutionFailed('FlyEnv helper target SID is invalid')
+      helperExecutionFailed('QTEnvDev helper target SID is invalid')
     }
   }
   const programData = process.env.ProgramData || 'C:\\ProgramData'
-  return path.win32.join(programData, 'FlyEnv', 'flyenv.allowed-roots')
+  return path.win32.join(programData, 'QTEnvDev', 'qtenvdev.allowed-roots')
 }
 
 function readConfiguredAllowedRoots(scope: WindowsActionScope): ConfiguredAllowedRoots {
@@ -494,9 +494,9 @@ function isConfiguredAllowedRoot(targetPath: string, roots: string[]): boolean {
   return roots.some((root) => pathInDir(targetPath, root))
 }
 
-function validateFlyEnvDataDirectoryRecoveryRoot(value: string, scope: WindowsActionScope): string {
-  const targetPath = cleanAbsPath(value, 'ensureFlyEnvDataDirectory data directory')
-  const protectedRoot = path.win32.join(process.env.ProgramData || 'C:\\ProgramData', 'FlyEnv')
+function validateQTEnvDevDataDirectoryRecoveryRoot(value: string, scope: WindowsActionScope): string {
+  const targetPath = cleanAbsPath(value, 'ensureQTEnvDevDataDirectory data directory')
+  const protectedRoot = path.win32.join(process.env.ProgramData || 'C:\\ProgramData', 'QTEnvDev')
   if (pathInDir(targetPath, protectedRoot) || pathInDir(protectedRoot, targetPath)) {
     helperExecutionFailed('Cannot grant user write access to helper installation')
   }
@@ -504,14 +504,14 @@ function validateFlyEnvDataDirectoryRecoveryRoot(value: string, scope: WindowsAc
     helperExecutionFailed(`sensitive system path is not allowed: ${value}`)
   }
   if (pathHasSymlinkComponent(targetPath)) {
-    helperExecutionFailed(`ensureFlyEnvDataDirectory data directory contains a reparse point`)
+    helperExecutionFailed(`ensureQTEnvDevDataDirectory data directory contains a reparse point`)
   }
   const configured = readConfiguredAllowedRoots(scope)
   if (!configured.filePresent || configured.roots.length === 0) {
-    helperExecutionFailed('FlyEnv data-directory roots are unavailable')
+    helperExecutionFailed('QTEnvDev data-directory roots are unavailable')
   }
   if (!configured.roots.some((root) => pathEqual(targetPath, root))) {
-    helperExecutionFailed(`unexpected FlyEnv data-directory root: ${value}`)
+    helperExecutionFailed(`unexpected QTEnvDev data-directory root: ${value}`)
   }
   return targetPath
 }
@@ -541,7 +541,7 @@ function isBusinessPathAllowed(targetPath: string, scope: WindowsActionScope): b
     return (
       isManagedPathByName(targetPath) ||
       isManagedPathByExecutable(targetPath) ||
-      isWindowsProgramFilesFlyEnvPath(targetPath)
+      isWindowsProgramFilesQTEnvDevPath(targetPath)
     )
   }
   return false
@@ -564,7 +564,7 @@ function validatePathAccess(
     helperExecutionFailed(`sensitive system path is not allowed: ${targetPath}`)
   }
   if (!isBusinessPathAllowed(clean, scope)) {
-    helperExecutionFailed(`path outside FlyEnv allowed scope: ${targetPath}`)
+    helperExecutionFailed(`path outside QTEnvDev allowed scope: ${targetPath}`)
   }
   if (pathHasSymlinkComponent(clean)) {
     helperExecutionFailed(`${label} contains symlink component`)
@@ -605,7 +605,7 @@ function validateEnvironmentPathExpression(value: string, label: string): string
     helperExecutionFailed(`${label} must be a %ENVVAR%-style path`)
   }
   // 单个环境变量值允许单引号和分号；只验证路径语法，不展开变量或访问文件系统。
-  cleanAbsPath(`C:\\FlyEnvEnvValue${value.slice(prefix.length)}`, label)
+  cleanAbsPath(`C:\\QTEnvDevEnvValue${value.slice(prefix.length)}`, label)
   return value
 }
 
@@ -623,7 +623,7 @@ function validateSystemEnvKey(key: string, allowWhitelisted: boolean): string {
   if (!ENV_KEY_PATTERN.test(key)) {
     helperExecutionFailed(`invalid environment variable key: ${key}`)
   }
-  if (key.startsWith('FLYENV_')) {
+  if (key.startsWith('QTENVDEV_')) {
     return key
   }
   if (allowWhitelisted && ALLOWED_OTHER_ENV_KEYS.has(key)) {
@@ -641,7 +641,7 @@ function validateSystemEnvValue(key: string, value: string): string {
   }
   if (path.win32.isAbsolute(value.trim())) {
     // 这里只把路径作为白名单环境键的字符串值写入注册表，并不写入该路径。
-    // JAVA_HOME 等必须能够引用 FlyEnv junction 和自定义安装目录；复用文件写入
+    // JAVA_HOME 等必须能够引用 QTEnvDev junction 和自定义安装目录；复用文件写入
     // 校验会误拒绝 junction/allowed-root 外的版本。保留完整路径语法检查，实际
     // 文件写入、删除及 profile 的 allowed-root/reparse 防护不作放宽。
     return cleanAbsPath(value, `environment variable value for ${key}`)
@@ -673,24 +673,24 @@ function validateBase64(value: string, label: string): string {
   return value
 }
 
-function validateFlyEnvPowerShellProfileTarget(
+function validateQTEnvDevPowerShellProfileTarget(
   value: unknown,
   index: number
-): FlyEnvPowerShellProfileTarget {
+): QTEnvDevPowerShellProfileTarget {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    helperExecutionFailed(`installFlyEnvPowerShellIntegration profiles[${index}] must be an object`)
+    helperExecutionFailed(`installQTEnvDevPowerShellIntegration profiles[${index}] must be an object`)
   }
   const profile = value as Record<string, unknown>
   const edition = ensureString(
     profile.edition,
-    `installFlyEnvPowerShellIntegration profiles[${index}].edition`
+    `installQTEnvDevPowerShellIntegration profiles[${index}].edition`
   )
   if (edition !== 'windows-powershell' && edition !== 'pwsh') {
     helperExecutionFailed(`unsupported PowerShell edition: ${edition}`)
   }
   const targetPath = cleanAbsPath(
-    ensureString(profile.path, `installFlyEnvPowerShellIntegration profiles[${index}].path`),
-    `installFlyEnvPowerShellIntegration profiles[${index}].path`
+    ensureString(profile.path, `installQTEnvDevPowerShellIntegration profiles[${index}].path`),
+    `installQTEnvDevPowerShellIntegration profiles[${index}].path`
   )
   if (pathHasSymlinkComponent(targetPath)) {
     helperExecutionFailed(`PowerShell profile contains a reparse point: ${targetPath}`)
@@ -708,55 +708,55 @@ function validateFlyEnvPowerShellProfileTarget(
   return { edition, path: targetPath }
 }
 
-function validateFlyEnvPowerShellScriptPath(value: string, scope: WindowsActionScope): string {
+function validateQTEnvDevPowerShellScriptPath(value: string, scope: WindowsActionScope): string {
   const scriptPath = validatePathForWrite(
     value,
-    'installFlyEnvPowerShellIntegration scriptPath',
+    'installQTEnvDevPowerShellIntegration scriptPath',
     scope
   )
   if (
-    path.win32.basename(scriptPath).toLowerCase() !== 'flyenv.ps1' ||
+    path.win32.basename(scriptPath).toLowerCase() !== 'qtenvdev.ps1' ||
     path.win32.basename(path.win32.dirname(scriptPath)).toLowerCase() !== 'bin'
   ) {
-    helperExecutionFailed(`invalid FlyEnv runtime script path: ${scriptPath}`)
+    helperExecutionFailed(`invalid QTEnvDev runtime script path: ${scriptPath}`)
   }
   const configured = readConfiguredAllowedRoots(scope)
   if (!configured.filePresent || configured.roots.length === 0) {
-    helperExecutionFailed('FlyEnv runtime script roots are unavailable')
+    helperExecutionFailed('QTEnvDev runtime script roots are unavailable')
   }
-  const expectedPaths = configured.roots.map((root) => path.win32.join(root, 'bin', 'flyenv.ps1'))
+  const expectedPaths = configured.roots.map((root) => path.win32.join(root, 'bin', 'qtenvdev.ps1'))
   if (!expectedPaths.some((expected) => pathEqual(scriptPath, expected))) {
-    helperExecutionFailed(`unexpected FlyEnv runtime script path: ${scriptPath}`)
+    helperExecutionFailed(`unexpected QTEnvDev runtime script path: ${scriptPath}`)
   }
   return scriptPath
 }
 
-function validateFlyEnvPowerShellIntegrationArgs(
+function validateQTEnvDevPowerShellIntegrationArgs(
   args: unknown[],
   scope: WindowsActionScope
-): ValidatedFlyEnvPowerShellIntegrationArgs {
-  ensureArgCount(args, 1, 'installFlyEnvPowerShellIntegration')
+): ValidatedQTEnvDevPowerShellIntegrationArgs {
+  ensureArgCount(args, 1, 'installQTEnvDevPowerShellIntegration')
   if (typeof args[0] !== 'object' || args[0] === null || Array.isArray(args[0])) {
-    helperExecutionFailed('installFlyEnvPowerShellIntegration request must be an object')
+    helperExecutionFailed('installQTEnvDevPowerShellIntegration request must be an object')
   }
   const request = args[0] as Record<string, unknown>
-  const scriptPath = validateFlyEnvPowerShellScriptPath(
-    ensureString(request.scriptPath, 'installFlyEnvPowerShellIntegration scriptPath'),
+  const scriptPath = validateQTEnvDevPowerShellScriptPath(
+    ensureString(request.scriptPath, 'installQTEnvDevPowerShellIntegration scriptPath'),
     scope
   )
   const scriptBase64 = validateBase64(
-    ensureString(request.scriptBase64, 'installFlyEnvPowerShellIntegration scriptBase64'),
-    'installFlyEnvPowerShellIntegration scriptBase64'
+    ensureString(request.scriptBase64, 'installQTEnvDevPowerShellIntegration scriptBase64'),
+    'installQTEnvDevPowerShellIntegration scriptBase64'
   )
   if (!scriptBase64 || Buffer.from(scriptBase64, 'base64').length > 1024 * 1024) {
-    helperExecutionFailed('invalid FlyEnv runtime script content')
+    helperExecutionFailed('invalid QTEnvDev runtime script content')
   }
   if (!Array.isArray(request.profiles) || request.profiles.length === 0) {
-    helperExecutionFailed('installFlyEnvPowerShellIntegration requires at least one profile')
+    helperExecutionFailed('installQTEnvDevPowerShellIntegration requires at least one profile')
   }
   const seen = new Set<string>()
   const profiles = request.profiles.map((profile, index) => {
-    const target = validateFlyEnvPowerShellProfileTarget(profile, index)
+    const target = validateQTEnvDevPowerShellProfileTarget(profile, index)
     if (seen.has(target.edition)) {
       helperExecutionFailed(`duplicate PowerShell profile edition: ${target.edition}`)
     }
@@ -768,7 +768,7 @@ function validateFlyEnvPowerShellIntegrationArgs(
 
 function buildTempFilePath(kind: WindowsHelperFallbackTempFileKind): string {
   const suffix = kind === 'base64' ? '.b64.txt' : '.txt'
-  return path.join(os.tmpdir(), `flyenv-helper-fallback-${randomUUID()}${suffix}`)
+  return path.join(os.tmpdir(), `qtenvdev-helper-fallback-${randomUUID()}${suffix}`)
 }
 
 function buildPowerShellPreamble(): string {
@@ -885,7 +885,7 @@ function validateSetAutoStartArgs(
     helperExecutionFailed(`invalid auto-start executable: ${exeBasename}`)
   }
   if (!isBusinessPathAllowed(exePath, scope) && !isManagedDirectoryByName(exePath)) {
-    helperExecutionFailed(`auto-start executable outside FlyEnv allowed scope: ${exePath}`)
+    helperExecutionFailed(`auto-start executable outside QTEnvDev allowed scope: ${exePath}`)
   }
   return { enabled, taskName, exePath }
 }
@@ -940,8 +940,8 @@ $bytes = [System.Convert]::FromBase64String($base64Content)
 [System.IO.File]::WriteAllBytes($targetPath, $bytes)`
 }
 
-function buildInstallFlyEnvPowerShellIntegrationScript(
-  args: ValidatedFlyEnvPowerShellIntegrationArgs,
+function buildInstallQTEnvDevPowerShellIntegrationScript(
+  args: ValidatedQTEnvDevPowerShellIntegrationArgs,
   options: {
     resultPath?: string
     nonce?: string
@@ -958,7 +958,7 @@ function buildInstallFlyEnvPowerShellIntegrationScript(
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
-public static class FlyEnvProfileCloudTag {
+public static class QTEnvDevProfileCloudTag {
   [StructLayout(LayoutKind.Sequential)] private struct AttributeTag { public uint Attributes; public uint Tag; }
   [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
   private static extern SafeFileHandle CreateFile(string path, uint access, uint share, IntPtr security, uint disposition, uint flags, IntPtr template);
@@ -984,31 +984,31 @@ public static class FlyEnvProfileCloudTag {
 $payload = $payloadJson | ConvertFrom-Json`
   const resultSetup =
     options.resultPath && options.nonce
-      ? `$flyEnvResultPath = ${powerShellString(options.resultPath)}
-$flyEnvResultNonce = ${powerShellString(options.nonce)}
-function Write-FlyEnvIntegrationResult($Result) {
+      ? `$QTEnvDevResultPath = ${powerShellString(options.resultPath)}
+$QTEnvDevResultNonce = ${powerShellString(options.nonce)}
+function Write-QTEnvDevIntegrationResult($Result) {
   $json = $Result | ConvertTo-Json -Compress -Depth 8
-  [IO.File]::WriteAllText($flyEnvResultPath, $json, [Text.UTF8Encoding]::new($false))
+  [IO.File]::WriteAllText($QTEnvDevResultPath, $json, [Text.UTF8Encoding]::new($false))
 }`
       : ''
   const resultStart = options.resultPath && options.nonce ? 'try {' : ''
   const resultEnd =
     options.resultPath && options.nonce
-      ? `Write-FlyEnvIntegrationResult ([PSCustomObject]@{ nonce = $flyEnvResultNonce; result = $flyEnvResult })
+      ? `Write-QTEnvDevIntegrationResult ([PSCustomObject]@{ nonce = $QTEnvDevResultNonce; result = $QTEnvDevResult })
 }
 catch {
   try {
-    Write-FlyEnvIntegrationResult ([PSCustomObject]@{ nonce = $flyEnvResultNonce; error = $_.Exception.Message })
+    Write-QTEnvDevIntegrationResult ([PSCustomObject]@{ nonce = $QTEnvDevResultNonce; error = $_.Exception.Message })
   }
   catch {}
   exit 1
 }`
-      : '$flyEnvResult | ConvertTo-Json -Compress'
+      : '$QTEnvDevResult | ConvertTo-Json -Compress'
   return `${buildPowerShellPreamble()}
 ${runtimeSetup}
 ${resultSetup}
 ${resultStart}
-function Normalize-FlyEnvShellPath([string]$Value, [string]$Label) {
+function Normalize-QTEnvDevShellPath([string]$Value, [string]$Label) {
   if ([string]::IsNullOrWhiteSpace($Value) -or $Value -match "[\x00\r\n]") {
     throw "$Label is invalid"
   }
@@ -1017,33 +1017,33 @@ function Normalize-FlyEnvShellPath([string]$Value, [string]$Label) {
   }
   return [IO.Path]::GetFullPath($Value)
 }
-function Test-FlyEnvShellPathEqual([string]$Left, [string]$Right) {
+function Test-QTEnvDevShellPathEqual([string]$Left, [string]$Right) {
   return [string]::Equals($Left, $Right, [StringComparison]::OrdinalIgnoreCase)
 }
-function Assert-FlyEnvShellNoReparsePoint([string]$Path, [bool]$AllowCloudProfile = $false) {
+function Assert-QTEnvDevShellNoReparsePoint([string]$Path, [bool]$AllowCloudProfile = $false) {
   $current = [IO.Path]::GetFullPath($Path)
   while ($true) {
     if (Test-Path -LiteralPath $current) {
       $item = Get-Item -LiteralPath $current -Force
       if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
         # Cloud 例外只允许 profile 调用显式启用，不能一律放行 ReparsePoint。
-        if (-not $AllowCloudProfile) { throw "FlyEnv shell path contains a reparse point: $Path" }
-        if (-not ('FlyEnvProfileCloudTag' -as [type])) {
+        if (-not $AllowCloudProfile) { throw "QTEnvDev shell path contains a reparse point: $Path" }
+        if (-not ('QTEnvDevProfileCloudTag' -as [type])) {
           Add-Type -TypeDefinition ${powerShellString(cloudTagReader)} -ErrorAction Stop
         }
-        if (-not [FlyEnvProfileCloudTag]::IsCloudPlaceholder($current)) {
-          throw "FlyEnv shell path contains a reparse point: $Path"
+        if (-not [QTEnvDevProfileCloudTag]::IsCloudPlaceholder($current)) {
+          throw "QTEnvDev shell path contains a reparse point: $Path"
         }
       }
     }
     $parent = Split-Path -Parent $current
-    if ([string]::IsNullOrEmpty($parent) -or (Test-FlyEnvShellPathEqual $parent $current)) {
+    if ([string]::IsNullOrEmpty($parent) -or (Test-QTEnvDevShellPathEqual $parent $current)) {
       break
     }
     $current = $parent
   }
 }
-function Get-FlyEnvShellOwnerSid([string]$Owner, [string]$Path) {
+function Get-QTEnvDevShellOwnerSid([string]$Owner, [string]$Path) {
   try {
     return ([System.Security.Principal.NTAccount]::new($Owner)).Translate([System.Security.Principal.SecurityIdentifier]).Value
   }
@@ -1051,10 +1051,10 @@ function Get-FlyEnvShellOwnerSid([string]$Owner, [string]$Path) {
     throw "failed to resolve owner SID for $Path"
   }
 }
-function Assert-FlyEnvAllowedRootsObjectSecurity([string]$Path) {
+function Assert-QTEnvDevAllowedRootsObjectSecurity([string]$Path) {
   try {
     $acl = Get-Acl -LiteralPath $Path -ErrorAction Stop
-    $ownerSid = Get-FlyEnvShellOwnerSid ([string]$acl.Owner) $Path
+    $ownerSid = Get-QTEnvDevShellOwnerSid ([string]$acl.Owner) $Path
   }
   catch {
     throw "failed to inspect allowed roots ACL: $Path"
@@ -1086,30 +1086,30 @@ function Assert-FlyEnvAllowedRootsObjectSecurity([string]$Path) {
     }
   }
 }
-function Assert-FlyEnvAllowedRootsSecurity([string]$AllowedRootsFile) {
+function Assert-QTEnvDevAllowedRootsSecurity([string]$AllowedRootsFile) {
   $parent = Split-Path -Parent $AllowedRootsFile
   if ([string]::IsNullOrWhiteSpace($parent)) {
-    throw 'FlyEnv runtime script roots parent is unavailable'
+    throw 'QTEnvDev runtime script roots parent is unavailable'
   }
-  Assert-FlyEnvShellNoReparsePoint $parent
-  Assert-FlyEnvShellNoReparsePoint $AllowedRootsFile
-  Assert-FlyEnvAllowedRootsObjectSecurity $parent
-  Assert-FlyEnvAllowedRootsObjectSecurity $AllowedRootsFile
+  Assert-QTEnvDevShellNoReparsePoint $parent
+  Assert-QTEnvDevShellNoReparsePoint $AllowedRootsFile
+  Assert-QTEnvDevAllowedRootsObjectSecurity $parent
+  Assert-QTEnvDevAllowedRootsObjectSecurity $AllowedRootsFile
 }
-function Assert-FlyEnvPowerShellIntegrationPayload($Request) {
-  $scriptPath = Normalize-FlyEnvShellPath ([string]$Request.scriptPath) 'runtime script path'
-  Assert-FlyEnvShellNoReparsePoint $scriptPath
+function Assert-QTEnvDevPowerShellIntegrationPayload($Request) {
+  $scriptPath = Normalize-QTEnvDevShellPath ([string]$Request.scriptPath) 'runtime script path'
+  Assert-QTEnvDevShellNoReparsePoint $scriptPath
   ${
     options.runtimeRoots
       ? `$allowedRootValues = @(${options.runtimeRoots.map(powerShellString).join(', ')})`
-      : `$allowedRootsFile = Normalize-FlyEnvShellPath ${powerShellString(options.allowedRootsPath ?? allowedRootsFilePath())} 'allowed roots path'
+      : `$allowedRootsFile = Normalize-QTEnvDevShellPath ${powerShellString(options.allowedRootsPath ?? allowedRootsFilePath())} 'allowed roots path'
   if (-not (Test-Path -LiteralPath $allowedRootsFile -PathType Leaf)) {
-    throw 'FlyEnv runtime script roots are unavailable'
+    throw 'QTEnvDev runtime script roots are unavailable'
   }
   if ([IO.FileInfo]::new($allowedRootsFile).Length -gt 65536) {
-    throw 'FlyEnv runtime script roots are too large'
+    throw 'QTEnvDev runtime script roots are too large'
   }
-  Assert-FlyEnvAllowedRootsSecurity $allowedRootsFile
+  Assert-QTEnvDevAllowedRootsSecurity $allowedRootsFile
   $allowedRootValues = @(Get-Content -LiteralPath $allowedRootsFile -Encoding UTF8)`
   }
   $allowed = $false
@@ -1118,23 +1118,23 @@ function Assert-FlyEnvPowerShellIntegrationPayload($Request) {
     if ([string]::IsNullOrWhiteSpace($root) -or $root.TrimStart().StartsWith('#')) {
       continue
     }
-    $expectedScript = Join-Path (Normalize-FlyEnvShellPath $root 'allowed FlyEnv root') 'bin\\flyenv.ps1'
-    if (Test-FlyEnvShellPathEqual $scriptPath $expectedScript) {
+    $expectedScript = Join-Path (Normalize-QTEnvDevShellPath $root 'allowed QTEnvDev root') 'bin\\qtenvdev.ps1'
+    if (Test-QTEnvDevShellPathEqual $scriptPath $expectedScript) {
       $allowed = $true
       break
     }
   }
   if (-not $allowed) {
-    throw "unexpected FlyEnv runtime script path: $scriptPath"
+    throw "unexpected QTEnvDev runtime script path: $scriptPath"
   }
   try {
     [byte[]]$scriptBytes = [Convert]::FromBase64String([string]$Request.scriptBase64)
   }
   catch {
-    throw 'invalid FlyEnv runtime script content'
+    throw 'invalid QTEnvDev runtime script content'
   }
   if ($scriptBytes.Length -eq 0 -or $scriptBytes.Length -gt 1048576) {
-    throw 'invalid FlyEnv runtime script content'
+    throw 'invalid QTEnvDev runtime script content'
   }
   $seen = @{}
   $profiles = @()
@@ -1154,7 +1154,7 @@ function Assert-FlyEnvPowerShellIntegrationPayload($Request) {
       $expectedProfileDirectory = 'PowerShell'
       $expectedProfileFileName = 'Profile.ps1'
     }
-    $profilePath = Normalize-FlyEnvShellPath ([string]$profile.path) "$edition profile path"
+    $profilePath = Normalize-QTEnvDevShellPath ([string]$profile.path) "$edition profile path"
     if (
       -not [string]::Equals([IO.Path]::GetFileName($profilePath), $expectedProfileFileName, [StringComparison]::OrdinalIgnoreCase) -or
       -not [string]::Equals([IO.Path]::GetFileName([IO.Path]::GetDirectoryName($profilePath)), $expectedProfileDirectory, [StringComparison]::OrdinalIgnoreCase)
@@ -1162,7 +1162,7 @@ function Assert-FlyEnvPowerShellIntegrationPayload($Request) {
       throw "unexpected $edition profile path: $profilePath"
     }
     # Documents 来自原用户已知目录，跨账户 UAC 仍写该 profile；允许标准 Cloud 标签。
-    Assert-FlyEnvShellNoReparsePoint $profilePath $true
+    Assert-QTEnvDevShellNoReparsePoint $profilePath $true
     # The app supplies profiles from Electron app.getPath('documents'). That
     # known-folder path is authoritative; redirected Documents ancestors are
     # not required to be owned by the target SID.
@@ -1170,12 +1170,12 @@ function Assert-FlyEnvPowerShellIntegrationPayload($Request) {
     $profiles += [PSCustomObject]@{ edition = $edition; path = $profilePath }
   }
   if ($profiles.Count -eq 0) {
-    throw 'FlyEnv PowerShell integration requires at least one profile'
+    throw 'QTEnvDev PowerShell integration requires at least one profile'
   }
   return [PSCustomObject]@{ scriptPath = $scriptPath; scriptBase64 = [string]$Request.scriptBase64; profiles = $profiles }
 }
-$payload = Assert-FlyEnvPowerShellIntegrationPayload $payload
-function Get-FlyEnvProfileDocument([string]$Path) {
+$payload = Assert-QTEnvDevPowerShellIntegrationPayload $payload
+function Get-QTEnvDevProfileDocument([string]$Path) {
   if (-not (Test-Path -LiteralPath $Path)) {
     return [PSCustomObject]@{ Text = ''; Encoding = 'utf8' }
   }
@@ -1191,7 +1191,7 @@ function Get-FlyEnvProfileDocument([string]$Path) {
   }
   return [PSCustomObject]@{ Text = [Text.Encoding]::UTF8.GetString($bytes); Encoding = 'utf8' }
 }
-function ConvertTo-FlyEnvProfileBytes([string]$Text, [string]$EncodingName) {
+function ConvertTo-QTEnvDevProfileBytes([string]$Text, [string]$EncodingName) {
   switch ($EncodingName) {
     'utf8bom' {
       [byte[]]$body = [Text.Encoding]::UTF8.GetBytes($Text)
@@ -1217,10 +1217,10 @@ function ConvertTo-FlyEnvProfileBytes([string]$Text, [string]$EncodingName) {
     default { return ,[Text.Encoding]::UTF8.GetBytes($Text) }
   }
 }
-function Write-FlyEnvAtomically([string]$Path, [byte[]]$Bytes) {
+function Write-QTEnvDevAtomically([string]$Path, [byte[]]$Bytes) {
   $directory = Split-Path -Parent $Path
   [IO.Directory]::CreateDirectory($directory) | Out-Null
-  $temporary = Join-Path $directory ('.flyenv-shell-' + [Guid]::NewGuid().ToString('N') + '.tmp')
+  $temporary = Join-Path $directory ('.qtenvdev-shell-' + [Guid]::NewGuid().ToString('N') + '.tmp')
   # .NET File.WriteAllBytes cannot create files in some redirected OneDrive
   # profile folders even when the PowerShell provider can write them. Use the
   # provider for the byte-preserving write, then keep the existing atomic move.
@@ -1249,44 +1249,44 @@ $scriptPath = [string]$payload.scriptPath
 $existingScript = if (Test-Path -LiteralPath $scriptPath) { [IO.File]::ReadAllBytes($scriptPath) } else { $null }
 $scriptState = if ($null -ne $existingScript -and [Linq.Enumerable]::SequenceEqual([byte[]]$existingScript, [byte[]]$scriptBytes)) { 'unchanged' } else { 'updated' }
 if ($scriptState -eq 'updated') {
-  Write-FlyEnvAtomically $scriptPath $scriptBytes
+  Write-QTEnvDevAtomically $scriptPath $scriptBytes
 }
 $profileResults = @()
 foreach ($profile in @($payload.profiles)) {
   $profilePath = [string]$profile.path
-  $document = Get-FlyEnvProfileDocument $profilePath
+  $document = Get-QTEnvDevProfileDocument $profilePath
   $source = [regex]::Replace(
     $document.Text,
-    '(?im)^[\\t ]*# FlyEnv Auto-Load\\r?\\n[\\t ]*\\.[\\t ]+["''][^"''\\r\\n]*[\\\\/]bin[\\\\/]flyenv\\.ps1["''][\\t ]*(?:\\r?\\n)?',
+    '(?im)^[\\t ]*# QTEnvDev Auto-Load\\r?\\n[\\t ]*\\.[\\t ]+["''][^"''\\r\\n]*[\\\\/]bin[\\\\/]qtenvdev\\.ps1["''][\\t ]*(?:\\r?\\n)?',
     ''
   )
-  $beginCount = [regex]::Matches($source, [regex]::Escape('# >>> FlyEnv shell integration >>>')).Count
-  $endCount = [regex]::Matches($source, [regex]::Escape('# <<< FlyEnv shell integration <<<')).Count
+  $beginCount = [regex]::Matches($source, [regex]::Escape('# >>> QTEnvDev shell integration >>>')).Count
+  $endCount = [regex]::Matches($source, [regex]::Escape('# <<< QTEnvDev shell integration <<<')).Count
   if ($beginCount -ne $endCount -or $beginCount -gt 1) {
-    throw "ambiguous FlyEnv PowerShell profile marker blocks: $profilePath"
+    throw "ambiguous QTEnvDev PowerShell profile marker blocks: $profilePath"
   }
   $newline = if ($source.Contains("\`r\`n")) { "\`r\`n" } else { "\`n" }
   $profileLine = [string]::Concat(
-    '$flyenvScript = ',
+    '$qtenvdevScript = ',
     [char]39,
     $scriptPath.Replace("'", "''"),
     [char]39
   )
   $block = @(
-    '# >>> FlyEnv shell integration >>>',
+    '# >>> QTEnvDev shell integration >>>',
     $profileLine,
-    'if (Test-Path -LiteralPath $flyenvScript) {',
-    '  . $flyenvScript',
+    'if (Test-Path -LiteralPath $qtenvdevScript) {',
+    '  . $qtenvdevScript',
     '}',
-    '# <<< FlyEnv shell integration <<<'
+    '# <<< QTEnvDev shell integration <<<'
   ) -join $newline
-  $start = $source.IndexOf('# >>> FlyEnv shell integration >>>')
-  $end = $source.IndexOf('# <<< FlyEnv shell integration <<<')
+  $start = $source.IndexOf('# >>> QTEnvDev shell integration >>>')
+  $end = $source.IndexOf('# <<< QTEnvDev shell integration <<<')
   if (($start -lt 0) -xor ($end -lt 0) -or ($end -ge 0 -and $end -lt $start)) {
-    throw "incomplete FlyEnv PowerShell profile marker block: $profilePath"
+    throw "incomplete QTEnvDev PowerShell profile marker block: $profilePath"
   }
   if ($start -ge 0) {
-    $next = $source.Substring(0, $start) + $block + $source.Substring($end + '# <<< FlyEnv shell integration <<<'.Length)
+    $next = $source.Substring(0, $start) + $block + $source.Substring($end + '# <<< QTEnvDev shell integration <<<'.Length)
   }
   elseif ([string]::IsNullOrWhiteSpace($source)) {
     $next = $block + $newline
@@ -1296,12 +1296,12 @@ foreach ($profile in @($payload.profiles)) {
   }
   $state = if ($next -ceq $document.Text) { 'unchanged' } else { 'updated' }
   if ($state -eq 'updated') {
-    [byte[]]$profileBytes = ConvertTo-FlyEnvProfileBytes $next ([string]$document.Encoding)
-    Write-FlyEnvAtomically $profilePath $profileBytes
+    [byte[]]$profileBytes = ConvertTo-QTEnvDevProfileBytes $next ([string]$document.Encoding)
+    Write-QTEnvDevAtomically $profilePath $profileBytes
   }
   $profileResults += [PSCustomObject]@{ edition = [string]$profile.edition; path = $profilePath; state = $state }
 }
-$flyEnvResult = [PSCustomObject]@{ scriptState = $scriptState; profiles = $profileResults }
+$QTEnvDevResult = [PSCustomObject]@{ scriptState = $scriptState; profiles = $profileResults }
 ${resultEnd}`
 }
 
@@ -1377,8 +1377,8 @@ foreach ($entry in $otherVars.GetEnumerator()) {
     Set-ItemProperty -LiteralPath ${powerShellString(MACHINE_ENV_REGISTRY_PATH)} -Name $name -Value $value
   }
 }
-New-ItemProperty -LiteralPath ${powerShellString(MACHINE_ENV_REGISTRY_PATH)} -Name 'FLYENV_ENV_FLUSH' -Value '0' -PropertyType String -Force | Out-Null
-Set-ItemProperty -LiteralPath ${powerShellString(MACHINE_ENV_REGISTRY_PATH)} -Name 'FLYENV_ENV_FLUSH' -Value '0'`
+New-ItemProperty -LiteralPath ${powerShellString(MACHINE_ENV_REGISTRY_PATH)} -Name 'QTENVDEV_ENV_FLUSH' -Value '0' -PropertyType String -Force | Out-Null
+Set-ItemProperty -LiteralPath ${powerShellString(MACHINE_ENV_REGISTRY_PATH)} -Name 'QTENVDEV_ENV_FLUSH' -Value '0'`
 }
 
 function buildSetSystemEnvScript(args: ValidatedSetSystemEnvArgs, tempFilePath?: string): string {
@@ -1418,7 +1418,7 @@ function buildSetAutoStartScript(
   targetUserSid?: string
 ): string {
   if (
-    args.taskName !== 'FlyEnvStartup' ||
+    args.taskName !== 'QTEnvDevStartup' ||
     !targetUserSid ||
     !WINDOWS_SID_PATTERN.test(targetUserSid)
   ) {
@@ -1471,22 +1471,22 @@ if ($LASTEXITCODE -ne 0) {
 }`
 }
 
-function buildFlyEnvDataDirectoryRecoveryScript(dataDirectory: string, userSid: string): string {
+function buildQTEnvDevDataDirectoryRecoveryScript(dataDirectory: string, userSid: string): string {
   const dataDirectoryBase64 = Buffer.from(dataDirectory, 'utf8').toString('base64')
   const userSidBase64 = Buffer.from(userSid, 'utf8').toString('base64')
   return `${buildPowerShellPreamble()}
 $dataPath = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(${powerShellString(dataDirectoryBase64)}))
 $userSid = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(${powerShellString(userSidBase64)}))
 if ([string]::IsNullOrWhiteSpace($dataPath) -or [string]::IsNullOrWhiteSpace($userSid)) {
-  throw 'FlyEnv data-directory recovery arguments are invalid'
+  throw 'QTEnvDev data-directory recovery arguments are invalid'
 }
 if (Test-Path -LiteralPath $dataPath) {
   $item = Get-Item -LiteralPath $dataPath -Force -ErrorAction Stop
   if (-not $item.PSIsContainer) {
-    throw 'FlyEnv data-directory recovery target is not a directory'
+    throw 'QTEnvDev data-directory recovery target is not a directory'
   }
   if (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
-    throw 'FlyEnv data-directory recovery target is a reparse point'
+    throw 'QTEnvDev data-directory recovery target is a reparse point'
   }
 }
 else {
@@ -1494,7 +1494,7 @@ else {
 }
 $item = Get-Item -LiteralPath $dataPath -Force -ErrorAction Stop
 if (-not $item.PSIsContainer -or ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
-  throw 'FlyEnv data-directory recovery target is invalid after creation'
+  throw 'QTEnvDev data-directory recovery target is invalid after creation'
 }
 $acl = Get-Acl -LiteralPath $dataPath -ErrorAction Stop
 $userIdentity = New-Object System.Security.Principal.SecurityIdentifier($userSid)
@@ -1520,16 +1520,16 @@ function createPlan(
   }
 }
 
-export function buildFlyEnvDataDirectoryRecoveryUacPlan(
+export function buildQTEnvDevDataDirectoryRecoveryUacPlan(
   dataDirectory: string,
   userSid: string
 ): WindowsHelperFallbackPlan {
   if (!WINDOWS_SID_PATTERN.test(userSid)) {
-    helperExecutionFailed('FlyEnv data-directory recovery user SID is invalid')
+    helperExecutionFailed('QTEnvDev data-directory recovery user SID is invalid')
   }
   const scope: WindowsActionScope = { targetUserSid: userSid }
-  const validatedDirectory = validateFlyEnvDataDirectoryRecoveryRoot(dataDirectory, scope)
-  return createPlan(buildFlyEnvDataDirectoryRecoveryScript(validatedDirectory, userSid))
+  const validatedDirectory = validateQTEnvDevDataDirectoryRecoveryRoot(dataDirectory, scope)
+  return createPlan(buildQTEnvDevDataDirectoryRecoveryScript(validatedDirectory, userSid))
 }
 
 /** 业务脚本与旧传输适配分离；数据文件内容只在旧入口明确选中该运输时求值。 */
@@ -1580,21 +1580,21 @@ finally {
 & ([ScriptBlock]::Create($decodedScript))`
 }
 
-export function buildFlyEnvPowerShellIntegrationUacPlan(
+export function buildQTEnvDevPowerShellIntegrationUacPlan(
   args: unknown[],
-  options: FlyEnvPowerShellIntegrationUacPlanOptions = {}
-): FlyEnvPowerShellIntegrationUacPlan {
+  options: QTEnvDevPowerShellIntegrationUacPlanOptions = {}
+): QTEnvDevPowerShellIntegrationUacPlan {
   // 旧计划入口沿用 SID 校验，但无需额外 with-roots 包装或共享状态切换。
   if (options.targetUserSid) allowedRootsFilePath(options.targetUserSid)
   const scope: WindowsActionScope = { targetUserSid: options.targetUserSid }
-  const validated = validateFlyEnvPowerShellIntegrationArgs(args, scope)
+  const validated = validateQTEnvDevPowerShellIntegrationArgs(args, scope)
   // 纯计划允许注入完整路径；真实执行入口只注入经过存在检查的系统程序。
   const powershellPath = cleanAbsPath(
     options.powershellPath ?? windowsPowerShellPath(),
     'PowerShell executable'
   )
   const resultPath = cleanAbsPath(
-    options.resultPath ?? path.join(os.tmpdir(), `flyenv-shell-uac-${randomUUID()}.json`),
+    options.resultPath ?? path.join(os.tmpdir(), `qtenvdev-shell-uac-${randomUUID()}.json`),
     'UAC result path'
   )
   const nonce = options.nonce ?? randomUUID()
@@ -1602,7 +1602,7 @@ export function buildFlyEnvPowerShellIntegrationUacPlan(
     helperExecutionFailed('UAC result nonce is invalid')
   }
 
-  const childScript = buildInstallFlyEnvPowerShellIntegrationScript(validated, {
+  const childScript = buildInstallQTEnvDevPowerShellIntegrationScript(validated, {
     resultPath,
     nonce,
     allowedRootsPath: allowedRootsFilePath(options.targetUserSid)
@@ -1637,7 +1637,7 @@ catch {
   const commandLength =
     powershellPath.length + launcherArgs.reduce((total, arg) => total + arg.length + 3, 0)
   if (commandLength >= MAX_DIRECT_UAC_COMMAND_LENGTH) {
-    helperExecutionFailed('FlyEnv PowerShell integration is too large for direct UAC invocation')
+    helperExecutionFailed('QTEnvDev PowerShell integration is too large for direct UAC invocation')
   }
   return {
     powershellPath,
@@ -1733,80 +1733,80 @@ export function buildWindowsHelperFallbackPlan(
   return createPlan(data.buildScript(tempFilePath), data.kind, data.content(), tempFilePath)
 }
 
-export function parseFlyEnvPowerShellIntegrationFallbackResult(
+export function parseQTEnvDevPowerShellIntegrationFallbackResult(
   stdout: string
-): FlyEnvPowerShellIntegrationFallbackResult {
+): QTEnvDevPowerShellIntegrationFallbackResult {
   let result: unknown
   try {
     result = JSON.parse(stdout)
   } catch {
-    helperExecutionFailed('FlyEnv PowerShell integration fallback returned invalid JSON')
+    helperExecutionFailed('QTEnvDev PowerShell integration fallback returned invalid JSON')
   }
   if (typeof result !== 'object' || result === null || Array.isArray(result)) {
-    helperExecutionFailed('FlyEnv PowerShell integration fallback returned an invalid result')
+    helperExecutionFailed('QTEnvDev PowerShell integration fallback returned an invalid result')
   }
   const data = result as Record<string, unknown>
   if (data.scriptState !== 'updated' && data.scriptState !== 'unchanged') {
-    helperExecutionFailed('FlyEnv PowerShell integration fallback returned an invalid script state')
+    helperExecutionFailed('QTEnvDev PowerShell integration fallback returned an invalid script state')
   }
   if (!Array.isArray(data.profiles)) {
-    helperExecutionFailed('FlyEnv PowerShell integration fallback returned invalid profiles')
+    helperExecutionFailed('QTEnvDev PowerShell integration fallback returned invalid profiles')
   }
   const profiles = data.profiles.map((profile, index) => {
     if (typeof profile !== 'object' || profile === null || Array.isArray(profile)) {
-      helperExecutionFailed(`FlyEnv PowerShell integration fallback profile ${index} is invalid`)
+      helperExecutionFailed(`QTEnvDev PowerShell integration fallback profile ${index} is invalid`)
     }
     const item = profile as Record<string, unknown>
     if (item.edition !== 'windows-powershell' && item.edition !== 'pwsh') {
       helperExecutionFailed(
-        `FlyEnv PowerShell integration fallback profile ${index} has an invalid edition`
+        `QTEnvDev PowerShell integration fallback profile ${index} has an invalid edition`
       )
     }
     if (typeof item.path !== 'string' || (item.state !== 'updated' && item.state !== 'unchanged')) {
-      helperExecutionFailed(`FlyEnv PowerShell integration fallback profile ${index} is invalid`)
+      helperExecutionFailed(`QTEnvDev PowerShell integration fallback profile ${index} is invalid`)
     }
     const edition =
-      item.edition as FlyEnvPowerShellIntegrationFallbackResult['profiles'][number]['edition']
+      item.edition as QTEnvDevPowerShellIntegrationFallbackResult['profiles'][number]['edition']
     const state =
-      item.state as FlyEnvPowerShellIntegrationFallbackResult['profiles'][number]['state']
+      item.state as QTEnvDevPowerShellIntegrationFallbackResult['profiles'][number]['state']
     return { edition, path: item.path as string, state }
   })
   return { scriptState: data.scriptState, profiles }
 }
 
-function parseFlyEnvPowerShellIntegrationUacResult(
+function parseQTEnvDevPowerShellIntegrationUacResult(
   stdout: string,
   nonce: string
-): FlyEnvPowerShellIntegrationFallbackResult {
+): QTEnvDevPowerShellIntegrationFallbackResult {
   let envelope: unknown
   try {
     envelope = JSON.parse(stdout)
   } catch {
-    helperExecutionFailed('FlyEnv PowerShell integration UAC fallback returned invalid JSON')
+    helperExecutionFailed('QTEnvDev PowerShell integration UAC fallback returned invalid JSON')
   }
   if (typeof envelope !== 'object' || envelope === null || Array.isArray(envelope)) {
-    helperExecutionFailed('FlyEnv PowerShell integration UAC fallback returned an invalid result')
+    helperExecutionFailed('QTEnvDev PowerShell integration UAC fallback returned an invalid result')
   }
   const data = envelope as Record<string, unknown>
   if (data.nonce !== nonce) {
-    helperExecutionFailed('FlyEnv PowerShell integration UAC fallback returned an invalid nonce')
+    helperExecutionFailed('QTEnvDev PowerShell integration UAC fallback returned an invalid nonce')
   }
   if (typeof data.error === 'string' && data.error.trim()) {
     helperExecutionFailed(data.error)
   }
   if (!Object.hasOwn(data, 'result')) {
-    helperExecutionFailed('FlyEnv PowerShell integration UAC fallback returned no result')
+    helperExecutionFailed('QTEnvDev PowerShell integration UAC fallback returned no result')
   }
-  return parseFlyEnvPowerShellIntegrationFallbackResult(JSON.stringify(data.result))
+  return parseQTEnvDevPowerShellIntegrationFallbackResult(JSON.stringify(data.result))
 }
 
-async function runFlyEnvPowerShellIntegrationUacFallback(
+async function runQTEnvDevPowerShellIntegrationUacFallback(
   args: unknown[]
-): Promise<FlyEnvPowerShellIntegrationFallbackResult> {
+): Promise<QTEnvDevPowerShellIntegrationFallbackResult> {
   // 环境同步及旧 Sudo 错误分类仅归兼容执行入口，不应随现代脚本构造初始化。
   const { default: EnvSync } = await import('./EnvSync')
   await EnvSync.sync().catch(() => undefined)
-  const plan = buildFlyEnvPowerShellIntegrationUacPlan(args, {
+  const plan = buildQTEnvDevPowerShellIntegrationUacPlan(args, {
     powershellPath: resolveWindowsPowerShellPath(),
     targetUserSid: (await getWindowsHelperIdentity()).sid
   })
@@ -1825,9 +1825,9 @@ async function runFlyEnvPowerShellIntegrationUacFallback(
     try {
       stdout = await fs.readFile(plan.resultPath, 'utf8')
     } catch {
-      helperExecutionFailed('FlyEnv PowerShell integration UAC fallback returned no result')
+      helperExecutionFailed('QTEnvDev PowerShell integration UAC fallback returned no result')
     }
-    return parseFlyEnvPowerShellIntegrationUacResult(stdout, plan.nonce)
+    return parseQTEnvDevPowerShellIntegrationUacResult(stdout, plan.nonce)
   } finally {
     await fs.rm(plan.resultPath, { force: true }).catch(() => {})
   }
@@ -1837,27 +1837,27 @@ export async function runWindowsHelperFallback(
   module: string,
   fn: string,
   args: unknown[]
-): Promise<true | FlyEnvPowerShellIntegrationFallbackResult> {
+): Promise<true | QTEnvDevPowerShellIntegrationFallbackResult> {
   if (process.platform !== 'win32') {
     fallbackNotSupported(module, fn)
   }
-  if (module === 'tools' && fn === 'installFlyEnvPowerShellIntegration') {
-    return await runFlyEnvPowerShellIntegrationUacFallback(args)
+  if (module === 'tools' && fn === 'installQTEnvDevPowerShellIntegration') {
+    return await runQTEnvDevPowerShellIntegrationUacFallback(args)
   }
   // 标准业务路由使用 runWindowsAction；只有实际进入无 provider 的兼容执行
   // 分支时才加载旧 Sudo。保留外部/独立入口能力，不给现代路径增加旧初始化依赖。
   const { exec: Sudo } = await import('./Sudo')
-  if (module === 'tools' && fn === 'ensureFlyEnvDataDirectory') {
-    ensureArgCount(args, 1, 'ensureFlyEnvDataDirectory')
-    const dataDirectory = ensureString(args[0], 'ensureFlyEnvDataDirectory arg[0] (dataDirectory)')
+  if (module === 'tools' && fn === 'ensureQTEnvDevDataDirectory') {
+    ensureArgCount(args, 1, 'ensureQTEnvDevDataDirectory')
+    const dataDirectory = ensureString(args[0], 'ensureQTEnvDevDataDirectory arg[0] (dataDirectory)')
     let userSid: string
     try {
       userSid = (await getWindowsHelperIdentity()).sid
     } catch {
-      helperExecutionFailed('failed to determine the FlyEnv user SID')
+      helperExecutionFailed('failed to determine the QTEnvDev user SID')
     }
-    const plan = buildFlyEnvDataDirectoryRecoveryUacPlan(dataDirectory, userSid)
-    await Sudo(plan.command, { name: 'FlyEnv' })
+    const plan = buildQTEnvDevDataDirectoryRecoveryUacPlan(dataDirectory, userSid)
+    await Sudo(plan.command, { name: 'QTEnvDev' })
     return true
   }
   const { default: EnvSync } = await import('./EnvSync')
@@ -1869,7 +1869,7 @@ export async function runWindowsHelperFallback(
     if (plan.tempFilePath && plan.tempFileContent !== undefined) {
       await fs.writeFile(plan.tempFilePath, plan.tempFileContent, 'utf8')
     }
-    await Sudo(plan.command, { name: 'FlyEnv' })
+    await Sudo(plan.command, { name: 'QTEnvDev' })
     // 仅返回脚本执行结果；实际环境业务处理 clean，并在自身 resolve/reject 后通知。
     // 独立 fallback 不能提前启动广播，否则会抢占后续列表刷新的 worker。
     return true
@@ -1908,22 +1908,22 @@ export function buildWindowsPrivilegeAction(
     targetUserSid: context.userSid
   }
   const preamble = buildPowerShellPreamble()
-  if (module === 'tools' && fn === 'installFlyEnvPowerShellIntegration') {
-    const request = validateFlyEnvPowerShellIntegrationArgs(args, scope)
+  if (module === 'tools' && fn === 'installQTEnvDevPowerShellIntegration') {
+    const request = validateQTEnvDevPowerShellIntegrationArgs(args, scope)
     for (const profile of request.profiles) {
       if (!pathInDir(profile.path, cleanAbsPath(context.userDocuments, 'user Documents'))) {
         helperExecutionFailed('PowerShell profile is outside the original user Documents directory')
       }
     }
-    return buildInstallFlyEnvPowerShellIntegrationScript(request, {
+    return buildInstallQTEnvDevPowerShellIntegrationScript(request, {
       runtimeRoots: scope.roots
     }).replace(
-      '$flyEnvResult | ConvertTo-Json -Compress',
-      '$global:FlyEnvActionResult = $flyEnvResult'
+      '$QTEnvDevResult | ConvertTo-Json -Compress',
+      '$global:QTEnvDevActionResult = $QTEnvDevResult'
     )
   }
-  // 仅恢复 FlyEnv 的精确业务根目录 ACL，拒绝系统目录、Helper 安装目录及其祖先。
-  if (module === 'tools' && fn === 'ensureFlyEnvDataDirectory') {
+  // 仅恢复 QTEnvDev 的精确业务根目录 ACL，拒绝系统目录、Helper 安装目录及其祖先。
+  if (module === 'tools' && fn === 'ensureQTEnvDevDataDirectory') {
     ensureArgCount(args, 1, fn)
     const root = cleanAbsPath(ensureString(args[0], 'data directory'), 'data directory')
     if (
@@ -1931,30 +1931,30 @@ export function buildWindowsPrivilegeAction(
       pathHasSymlinkComponent(root)
     ) {
       helperExecutionFailed(
-        'FlyEnv data-directory recovery target is outside the application roots'
+        'QTEnvDev data-directory recovery target is outside the application roots'
       )
     }
-    validateFlyEnvDataDirectoryRecoveryRoot(root, scope)
+    validateQTEnvDevDataDirectoryRecoveryRoot(root, scope)
     if (pathInDir(root, windowsSystemRoot()) || pathInDir(windowsSystemRoot(), root)) {
       helperExecutionFailed('Cannot grant user write access to Windows system directories')
     }
     if (!context.userSid || !WINDOWS_SID_PATTERN.test(context.userSid))
       helperExecutionFailed('Original user SID is required')
-    return buildFlyEnvDataDirectoryRecoveryScript(root, context.userSid)
+    return buildQTEnvDevDataDirectoryRecoveryScript(root, context.userSid)
   }
   if (module === 'tools' && fn === 'readFileByRoot') {
     ensureArgCount(args, 1, fn)
     const file = validatePathForRead(ensureString(args[0], 'file'), 'file', scope)
-    return `${preamble}\n$global:FlyEnvActionResult = [IO.File]::ReadAllText(${powerShellString(file)}, [Text.Encoding]::UTF8)`
+    return `${preamble}\n$global:QTEnvDevActionResult = [IO.File]::ReadAllText(${powerShellString(file)}, [Text.Encoding]::UTF8)`
   }
   if (module === 'tools' && fn === 'getSystemPath') {
     ensureArgCount(args, 0, fn)
-    return `${preamble}\n$global:FlyEnvActionResult = [string][Environment]::GetEnvironmentVariable('Path', 'Machine')`
+    return `${preamble}\n$global:QTEnvDevActionResult = [string][Environment]::GetEnvironmentVariable('Path', 'Machine')`
   }
   if (module === 'tools' && (fn === 'processListWin' || fn === 'getPortPids')) {
     ensureArgCount(args, fn === 'processListWin' ? 0 : 1, fn)
     if (fn === 'processListWin') {
-      return `${preamble}\n$global:FlyEnvActionResult = ConvertTo-Json -InputObject @(Get-CimInstance Win32_Process | Select-Object CommandLine,ExecutablePath,ProcessId,ParentProcessId,CreationClassName) -Compress`
+      return `${preamble}\n$global:QTEnvDevActionResult = ConvertTo-Json -InputObject @(Get-CimInstance Win32_Process | Select-Object CommandLine,ExecutablePath,ProcessId,ParentProcessId,CreationClassName) -Compress`
     }
     const port = Number(args[0])
     if (!Number.isInteger(port) || port < 1 || port > 65535) helperExecutionFailed('Invalid port')
@@ -1962,7 +1962,7 @@ export function buildWindowsPrivilegeAction(
     // 可能报告 OwningProcess=0，这不是进程目标，跳过即可。其他 TCP/CIM 查询失败
     // 必须传播，不能伪装成空快照。
     return `${preamble}\n${windowsTcpConnectionLookup}
-$global:FlyEnvActionResult = @(Get-FlyEnvTcpConnections ${port} | Where-Object { [int]$_.OwningProcess -gt 0 } | ForEach-Object { $p = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $_.OwningProcess) -ErrorAction Stop; if ($null -ne $p) { @{ PID=[string]$_.OwningProcess; PPID=[string]$p.ParentProcessId; COMMAND=[string]$p.CommandLine; USER='' } } })`
+$global:QTEnvDevActionResult = @(Get-QTEnvDevTcpConnections ${port} | Where-Object { [int]$_.OwningProcess -gt 0 } | ForEach-Object { $p = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $_.OwningProcess) -ErrorAction Stop; if ($null -ne $p) { @{ PID=[string]$_.OwningProcess; PPID=[string]$p.ParentProcessId; COMMAND=[string]$p.CommandLine; USER='' } } })`
   }
   // 有限数字白名单阻止命令注入；在执行进程中再次核对创建时间，不以 PID 单独授权。
   if (module === 'tools' && (fn === 'kill' || fn === 'killPorts')) {
@@ -1993,7 +1993,7 @@ $global:FlyEnvActionResult = @(Get-FlyEnvTcpConnections ${port} | Where-Object {
       fn === 'kill'
         ? `$targetPids = @(${ids.join(', ')})`
         : // 提升执行时重新读取监听者；读取错误须失败，不能当作端口已空。
-          `$targetPids = @(@(${ids.join(', ')}) | ForEach-Object { Get-FlyEnvStopListenerPids ([int]$_) } | Sort-Object -Unique)`
+          `$targetPids = @(@(${ids.join(', ')}) | ForEach-Object { Get-QTEnvDevStopListenerPids ([int]$_) } | Sort-Object -Unique)`
     const expected = context.processes
       ? `$expectedProcesses = @(${context.processes.map((item) => `@{ pid=${item.pid}; created=${powerShellString(item.created)}; source=${powerShellString(item.source ?? 'startTime')}; path=${powerShellString(item.path ?? '')} }`).join(', ')})`
       : '$expectedProcesses = $null'
@@ -2016,9 +2016,9 @@ $currentPids = @($targetPids | ForEach-Object { [int]$_ } | Sort-Object -Unique)
 if (@($currentPids | Where-Object { $expectedPids -notcontains $_ }).Count -gt 0) { throw 'Windows port owner changed; refresh and retry' }
 }
 $targets = @(foreach ($targetPid in $targetPids) {
-Add-FlyEnvProcessStopEvent 'preflight-request' $targetPid
-$target = Get-FlyEnvStopTarget $targetPid
-if ($null -eq $target) { Add-FlyEnvProcessStopEvent 'preflight-skipped-missing' $targetPid; continue }
+Add-QTEnvDevProcessStopEvent 'preflight-request' $targetPid
+$target = Get-QTEnvDevStopTarget $targetPid
+if ($null -eq $target) { Add-QTEnvDevProcessStopEvent 'preflight-skipped-missing' $targetPid; continue }
 try {
   # 先取得并保留原进程句柄，再读取创建身份；该句柄覆盖整个预检，finally 保证
   # 即使权限/身份查询失败或目标已退出也释放句柄。
@@ -2029,9 +2029,9 @@ try {
     if ($expected.Count -ne 1) {
       throw ('Process identity changed; PID=' + $target.Id + '; stage=preflight; expectedCount=' + $expected.Count + '; refresh and retry')
     }
-    $actual = Get-FlyEnvStopIdentity $target.Id $expected[0].source
-    if ($null -eq $actual) { Add-FlyEnvProcessStopEvent 'preflight-skipped-exited' $target.Id; continue }
-    Add-FlyEnvProcessStopEvent 'preflight-identity' $target.Id @{ expectedCreated=$expected[0].created; actualCreated=$actual.created; executable=$actual.path }
+    $actual = Get-QTEnvDevStopIdentity $target.Id $expected[0].source
+    if ($null -eq $actual) { Add-QTEnvDevProcessStopEvent 'preflight-skipped-exited' $target.Id; continue }
+    Add-QTEnvDevProcessStopEvent 'preflight-identity' $target.Id @{ expectedCreated=$expected[0].created; actualCreated=$actual.created; executable=$actual.path }
     if ($actual.created -cne $expected[0].created -or ($expected[0].source -eq 'cim' -and -not [string]::Equals([IO.Path]::GetFullPath($actual.path), [IO.Path]::GetFullPath($expected[0].path), [StringComparison]::OrdinalIgnoreCase))) {
       throw ('Process identity changed; PID=' + $target.Id + '; stage=preflight; refresh and retry')
     }
@@ -2045,34 +2045,34 @@ try {
   }
   @{ pid=$target.Id; created=$created; source=$source; path=$path }
 } catch {
-  Add-FlyEnvProcessStopEvent 'preflight-failed' $targetPid @{ error=$_.Exception.Message }
+  Add-QTEnvDevProcessStopEvent 'preflight-failed' $targetPid @{ error=$_.Exception.Message }
   throw
 } finally {
   $target.Dispose()
 }
 })
 foreach ($snapshot in $targets) {
-Add-FlyEnvProcessStopEvent 'before-stop-request' $snapshot.pid
-$target = Get-FlyEnvStopTarget $snapshot.pid
-if ($null -eq $target) { Add-FlyEnvProcessStopEvent 'before-stop-skipped-missing' $snapshot.pid; continue }
+Add-QTEnvDevProcessStopEvent 'before-stop-request' $snapshot.pid
+$target = Get-QTEnvDevStopTarget $snapshot.pid
+if ($null -eq $target) { Add-QTEnvDevProcessStopEvent 'before-stop-skipped-missing' $snapshot.pid; continue }
 try {
   # 普通进程工具固定本轮目标的原生句柄，再重查身份；服务有序集合走上方专用分支。
   # 不靠 PID 数字跨过“复核→Stop-Process”间隙，所有返回都在 finally 释放。
   $targetHandle = $target.Handle
-  $actual = Get-FlyEnvStopIdentity $snapshot.pid $snapshot.source
-  if ($null -eq $actual) { Add-FlyEnvProcessStopEvent 'before-stop-skipped-exited' $snapshot.pid; continue }
-  Add-FlyEnvProcessStopEvent 'before-stop-identity' $snapshot.pid @{ expectedCreated=$snapshot.created; actualCreated=$actual.created; executable=$actual.path }
+  $actual = Get-QTEnvDevStopIdentity $snapshot.pid $snapshot.source
+  if ($null -eq $actual) { Add-QTEnvDevProcessStopEvent 'before-stop-skipped-exited' $snapshot.pid; continue }
+  Add-QTEnvDevProcessStopEvent 'before-stop-identity' $snapshot.pid @{ expectedCreated=$snapshot.created; actualCreated=$actual.created; executable=$actual.path }
   if ($actual.created -cne $snapshot.created -or ($snapshot.source -eq 'cim' -and -not [string]::Equals([IO.Path]::GetFullPath($actual.path), [IO.Path]::GetFullPath($snapshot.path), [StringComparison]::OrdinalIgnoreCase))) {
     throw ('Process identity changed; PID=' + $snapshot.pid + '; stage=before-stop; refresh and retry')
   }
   # 属性可能在身份核对后消失；仅确认目标已自行退出时才幂等跳过。
   ${windowsProcessSafetyGuard('$target')}
-  Add-FlyEnvProcessStopEvent 'stop-process-request' $target.Id
+  Add-QTEnvDevProcessStopEvent 'stop-process-request' $target.Id
   Stop-Process -InputObject $target -Force -ErrorAction Stop
   if (-not $target.WaitForExit(10000)) { throw ('Process is still running after the stop request; PID=' + $target.Id) }
-  Add-FlyEnvProcessStopEvent 'root-exited' $target.Id
+  Add-QTEnvDevProcessStopEvent 'root-exited' $target.Id
 } catch {
-  Add-FlyEnvProcessStopEvent 'stop-error' $snapshot.pid @{ error=$_.Exception.Message }
+  Add-QTEnvDevProcessStopEvent 'stop-error' $snapshot.pid @{ error=$_.Exception.Message }
   # 普通工具只负责显式 PID；原对象已经自然退出时允许幂等完成。
   if ($target.HasExited) { continue }
   throw
@@ -2090,11 +2090,11 @@ try {
     if (args.length < 1 || args.length > 2) helperExecutionFailed('Invalid certificate query')
     ensureString(args[0], 'certificate directory')
     const name =
-      args[1] === undefined ? 'FlyEnv-Root-CA' : ensureString(args[1], 'certificate name')
+      args[1] === undefined ? 'QTEnvDev-Root-CA' : ensureString(args[1], 'certificate name')
     if (!/^[A-Za-z0-9_. -]{1,128}$/.test(name)) helperExecutionFailed('Invalid certificate name')
     return `${preamble}
 $certs = @(Get-ChildItem Cert:\\LocalMachine\\Root | Where-Object { $_.Subject -eq ${powerShellString(`CN=${name}`)} })
-$global:FlyEnvActionResult = @{ stdout=($certs | Format-List | Out-String); stderr='' }`
+$global:QTEnvDevActionResult = @{ stdout=($certs | Format-List | Out-String); stderr='' }`
   }
   // 直接消费统一验证后的业务脚本。命令编码、大小阈值和 TEMP 仅归旧适配入口，
   // 不再用 Number.MAX_SAFE_INTEGER 伪装 inline 计划来取得现代动作。

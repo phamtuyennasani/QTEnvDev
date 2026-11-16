@@ -27,11 +27,11 @@ const Apache = reactive({
     const apache: any = {
       image: `${mirror}httpd:${Apache.version}`,
       ports: Apache.ports.map((p) => `${p.out}:${p.in}`),
-      networks: ['flyenv-network']
+      networks: ['qtenvdev-network']
     }
-    const flyenvDir = join(dirname(base.dir), 'flyenv-docker-compose/apache')
-    await fs.mkdirp(flyenvDir)
-    await fs.mkdirp(join(flyenvDir, 'conf'))
+    const qtenvdevDir = join(dirname(base.dir), 'qtenvdev-docker-compose/apache')
+    await fs.mkdirp(qtenvdevDir)
+    await fs.mkdirp(join(qtenvdevDir, 'conf'))
     const root = Apache.wwwRoot
     const volumes = [
       {
@@ -42,17 +42,17 @@ const Apache = reactive({
       },
       {
         type: 'bind',
-        source: './flyenv-docker-compose/apache/conf/httpd.conf',
+        source: './qtenvdev-docker-compose/apache/conf/httpd.conf',
         target: '/usr/local/apache2/conf/httpd.conf',
         read_only: false
       }
     ]
     const tmpl = join(window.Server.Static!, 'tmpl/docker-apache.conf')
-    await fs.copyFile(tmpl, join(flyenvDir, 'conf/httpd.conf'))
+    await fs.copyFile(tmpl, join(qtenvdevDir, 'conf/httpd.conf'))
     if (PHP.enable) {
       volumes.push({
         type: 'bind',
-        source: './flyenv-docker-compose/apache/conf/vhost.conf',
+        source: './qtenvdev-docker-compose/apache/conf/vhost.conf',
         target: '/usr/local/apache2/conf/extra/vhost.conf',
         read_only: true
       })
@@ -87,7 +87,7 @@ const Apache = reactive({
     </Directory>
 </VirtualHost>
 `
-      await fs.writeFile(join(flyenvDir, 'conf/vhost.conf'), content)
+      await fs.writeFile(join(qtenvdevDir, 'conf/vhost.conf'), content)
     }
     const environment: any = {
       ...Apache.environment

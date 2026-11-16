@@ -15,12 +15,12 @@
 
 **模块边界契约**（遵循 AGENTS.md 新模块约束）：
 
-- 持久化：独立存储键 `flyenv-plugin-mariadb-cluster-v1`（StorageGetAsync/StorageSetAsync），不写 `config.setup`
+- 持久化：独立存储键 `qtenvdev-plugin-mariadb-cluster-v1`（StorageGetAsync/StorageSetAsync），不写 `config.setup`
 - 渲染状态：模块本地类 + reactiveBind，不新增 Pinia store
 - 服务生命周期：复用 `ModuleInstalledItem.start/stop/restart`，参数经 `startExtParam/stopExtParam`（aside/manager 注册）
 - 模块自有类型、helper、策略全部留在 `plugins/mariadb-cluster/` 内，不改宿主通用代码（宿主无需任何改动：`src/` 中对 `mysql-cluster` 零引用，插件经 PluginManager 自发现）
 
-**失败边界契约**（遵循 flyenv-failure-boundaries）：逐实例操作互不影响，部分失败要区分 skipped/failed/completed；补充动作（如 DbGate 面板关闭）失败不得覆盖主操作结果。
+**失败边界契约**（遵循 qtenvdev-failure-boundaries）：逐实例操作互不影响，部分失败要区分 skipped/failed/completed；补充动作（如 DbGate 面板关闭）失败不得覆盖主操作结果。
 
 ## 方案选择
 
@@ -32,11 +32,11 @@
 |---|---|
 | 插件 id / typeFlag / fork IPC | `mariadb-cluster` / `app-fork:mariadb-cluster` |
 | 进度事件 | `APP-Mariadb-Cluster-Progress` |
-| 存储键 | `flyenv-plugin-mariadb-cluster-v1` |
+| 存储键 | `qtenvdev-plugin-mariadb-cluster-v1` |
 | 数据目录 | `<MariaDBDir>/mariadb-cluster`、`<BaseDir>/mariadb-cluster/data` |
 | 路由 / 图标 / asideIndex | `/mariadb-cluster` / `@/svg/mariaDB.svg` / 28 |
 | 起始端口建议基准 | 13307（避开 mysql-cluster 的 13306） |
-| Windows 命名管道 | `FlyEnvMDBC_<id>_<n>`；Unix socket `/tmp/flyenv-mdbc-<id>-<n>.sock` |
+| Windows 命名管道 | `QTEnvDevMDBC_<id>_<n>`；Unix socket `/tmp/qtenvdev-mdbc-<id>-<n>.sock` |
 | PID 文件 | `mariadb.pid`；配置仍 `my.cnf` |
 | 宿主集成 | `BrewStore().module('mariadb')`、`app-fork:mariadb`、`config.server.mariadb.current`、`setup.mariadb.dirs`、`MySQLManage.init('mariadb')`、`ServiceActionStore*(…, 'mariadb')` |
 

@@ -2,7 +2,7 @@ import { CloudflareTunnel } from '@/core/CloudflareTunnel/CloudflareTunnel'
 import { StorageGetAsync, StorageSetAsync } from '@/util/Storage'
 import { reactiveBind } from '@/util/Index'
 
-const storeKey = 'flyenv-cloudflare-tunnel-store'
+const storeKey = 'qtenvdev-cloudflare-tunnel-store'
 
 class CloudflareTunnelStore {
   items: CloudflareTunnel[] = []

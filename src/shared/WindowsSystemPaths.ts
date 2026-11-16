@@ -3,7 +3,7 @@ import { statSync } from 'node:fs'
 
 /**
  * Windows 环境键不区分大小写；不能只读 SystemRoot 而漏掉 SYSTEMROOT/windir。
- * 这里读取 FlyEnv 启动时继承的环境，不读取用户注册表同步出来的 PATH/ComSpec。
+ * 这里读取 QTEnvDev 启动时继承的环境，不读取用户注册表同步出来的 PATH/ComSpec。
  */
 const inheritedEnv = (name: string): string | undefined =>
   Object.entries(process.env).find(([key]) => key.toLowerCase() === name.toLowerCase())?.[1]

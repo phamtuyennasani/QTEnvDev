@@ -203,31 +203,31 @@ export const performanceDiagnosticText = (enabled: string, disabled = '', reques
 export const buildPerformanceStagePrelude = (collectResult = false) =>
   performanceDiagnosticText(
     `
-$script:FlyEnvStageClock = [Diagnostics.Stopwatch]::StartNew()
-${collectResult ? '$script:FlyEnvActionStages = [Collections.Generic.List[object]]::new()' : ''}
-function Write-FlyEnvActionStage([string]$stage) {
+$script:QTEnvDevStageClock = [Diagnostics.Stopwatch]::StartNew()
+${collectResult ? '$script:QTEnvDevActionStages = [Collections.Generic.List[object]]::new()' : ''}
+function Write-QTEnvDevActionStage([string]$stage) {
   try {
     $at = [DateTime]::UtcNow.ToString('o', [Globalization.CultureInfo]::InvariantCulture)
-    $ms = $script:FlyEnvStageClock.Elapsed.TotalMilliseconds
+    $ms = $script:QTEnvDevStageClock.Elapsed.TotalMilliseconds
     ${
       collectResult
-        ? '$script:FlyEnvActionStages.Add(@{ stage=$stage; at=$at; elapsedMs=$ms; pid=$PID })'
-        : "[Console]::Error.WriteLine('FLYENV_ACTION_STAGE|' + $stage + '|' + $at + '|' + $ms.ToString('F3', [Globalization.CultureInfo]::InvariantCulture) + '|' + $PID)"
+        ? '$script:QTEnvDevActionStages.Add(@{ stage=$stage; at=$at; elapsedMs=$ms; pid=$PID })'
+        : "[Console]::Error.WriteLine('QTENVDEV_ACTION_STAGE|' + $stage + '|' + $at + '|' + $ms.ToString('F3', [Globalization.CultureInfo]::InvariantCulture) + '|' + $PID)"
     }
   } catch { }
 }
 `,
-    'function Write-FlyEnvActionStage([string]$stage) {}'
+    'function Write-QTEnvDevActionStage([string]$stage) {}'
   )
 
 /** 两个停止脚本共用事件收集函数，统一控制初始化与写入，关闭时没有未初始化列表访问。 */
 export const buildPerformanceProcessStopPrelude = () => `
-$global:FlyEnvProcessStopEvents = ${performanceDiagnosticText('[Collections.Generic.List[object]]::new()', '$null')}
-function Add-FlyEnvProcessStopEvent([string]$stage, [int]$pidValue, [hashtable]$details = @{}) {
+$global:QTEnvDevProcessStopEvents = ${performanceDiagnosticText('[Collections.Generic.List[object]]::new()', '$null')}
+function Add-QTEnvDevProcessStopEvent([string]$stage, [int]$pidValue, [hashtable]$details = @{}) {
 ${performanceDiagnosticText(`
   $entry = @{ stage=$stage; pid=$pidValue; at=[DateTime]::UtcNow.ToString('o') }
   foreach ($key in $details.Keys) { $entry[$key] = $details[$key] }
-  [void]$global:FlyEnvProcessStopEvents.Add($entry)
+  [void]$global:QTEnvDevProcessStopEvents.Add($entry)
 `)}
 }
 `
@@ -247,11 +247,11 @@ export const buildPerformanceScriptTiming = (
   const end =
     stage === 'action.execute'
       ? '$result.timingMs=$actionTimer.Elapsed.TotalMilliseconds'
-      : `[Console]::Error.WriteLine('FLYENV_TIMING|${stage}|' + ${variable}.Elapsed.TotalMilliseconds.ToString('F3', [Globalization.CultureInfo]::InvariantCulture))`
+      : `[Console]::Error.WriteLine('QTENVDEV_TIMING|${stage}|' + ${variable}.Elapsed.TotalMilliseconds.ToString('F3', [Globalization.CultureInfo]::InvariantCulture))`
   return performanceDiagnosticText(
     phase === 'start'
       ? (stage === 'launcher.runas'
-          ? "[Console]::Error.WriteLine('FLYENV_TIMING|launcher.runas-requested'); "
+          ? "[Console]::Error.WriteLine('QTENVDEV_TIMING|launcher.runas-requested'); "
           : '') + start
       : end,
     '',
@@ -264,7 +264,7 @@ export const buildPerformanceNativeStageWriters = () => `
   static void WriteTiming(string line) { try { Console.Error.WriteLine(line); } catch {} }
   static void WriteStage(string stage, Stopwatch timer) {
     ${performanceDiagnosticText(`try {
-      WriteTiming("FLYENV_ACTION_STAGE|" + stage + "|" + DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture) + "|" + timer.Elapsed.TotalMilliseconds.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) + "|" + Process.GetCurrentProcess().Id);
+      WriteTiming("QTENVDEV_ACTION_STAGE|" + stage + "|" + DateTime.UtcNow.ToString("o", System.Globalization.CultureInfo.InvariantCulture) + "|" + timer.Elapsed.TotalMilliseconds.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) + "|" + Process.GetCurrentProcess().Id);
     } catch {}`)}
   }
 `
@@ -273,8 +273,8 @@ export const buildPerformanceNativeLaunchTiming = (phase: 'start' | 'end') =>
   phase === 'start'
     ? performanceDiagnosticText(`Stopwatch timer = null;
     if (elevated && timing) {
-      WriteTiming("FLYENV_TIMING|launcher.runas-requested"); timer = Stopwatch.StartNew();
+      WriteTiming("QTENVDEV_TIMING|launcher.runas-requested"); timer = Stopwatch.StartNew();
     }`)
     : performanceDiagnosticText(
-        `if (timer != null) WriteTiming("FLYENV_TIMING|launcher.runas|" + timer.Elapsed.TotalMilliseconds.ToString("F3", System.Globalization.CultureInfo.InvariantCulture));`
+        `if (timer != null) WriteTiming("QTENVDEV_TIMING|launcher.runas|" + timer.Elapsed.TotalMilliseconds.ToString("F3", System.Globalization.CultureInfo.InvariantCulture));`
       )

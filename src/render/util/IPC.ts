@@ -7,7 +7,7 @@ class IPC {
 
   constructor() {
     this.listens = {}
-    window.FlyEnvNodeAPI.ipcReceiveFromMain(
+    window.QTEnvDevNodeAPI.ipcReceiveFromMain(
       (e: any, command: string, key: string, ...args: any) => {
         // Sensitivity belongs to the request identity, including late/duplicate
         // replies after the listener has gone away. No retained key cache needed.
@@ -36,7 +36,7 @@ class IPC {
     if (log) {
       console.log('ipcSendToMain: ', command, key, args)
     }
-    window.FlyEnvNodeAPI.ipcSendToMain(command, key, ...args)
+    window.QTEnvDevNodeAPI.ipcSendToMain(command, key, ...args)
     return {
       key,
       then: (callback: IPCCallback) => {

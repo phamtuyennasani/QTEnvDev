@@ -148,7 +148,7 @@ export const installerXml = (path: string) =>
 
 export function dminitControl(root: string, instance: string, input: DamengInitParams): string {
   const p = validateInit(input)
-  if (!/^FLYENV[A-Z0-9]{1,10}$/.test(instance)) throw new Error('Invalid DM instance name.')
+  if (!/^QTENVDEV[A-Z0-9]{1,10}$/.test(instance)) throw new Error('Invalid DM instance name.')
   const paths = /^[A-Za-z]:[\\/]/.test(root) ? win32 : posix
   const database = paths.join(root, 'DAMENG')
   // CONTROL values use native INI escaping, separately from DIsql credentials.
@@ -161,5 +161,5 @@ export function dminitControl(root: string, instance: string, input: DamengInitP
 export function disqlInput(password: string, port: number, info: boolean): string {
   credential(password)
   if (!Number.isInteger(port) || port < 1024 || port > 65534) throw new Error('Invalid DM port.')
-  return `SET ECHO OFF\nSET DEFINE OFF\nWHENEVER SQLERROR EXIT 1\nCONNECT SYSDBA/${quoted(password)}@127.0.0.1:${port}\nSET HEADING OFF\nSET FEEDBACK OFF\nSET LINESHOW OFF\nSET TIMING OFF\nSELECT 'FLYENV_DM_READY=' || INSTANCE_NAME || ':' || STATUS$ FROM V$INSTANCE;\n${info ? `SELECT 'FLYENV_DM_LICENSE=' || EXPIRED_DATE FROM SYS."V$LICENSE";\nSELECT BANNER FROM V$VERSION;\n` : ''}EXIT 0\n`
+  return `SET ECHO OFF\nSET DEFINE OFF\nWHENEVER SQLERROR EXIT 1\nCONNECT SYSDBA/${quoted(password)}@127.0.0.1:${port}\nSET HEADING OFF\nSET FEEDBACK OFF\nSET LINESHOW OFF\nSET TIMING OFF\nSELECT 'QTENVDEV_DM_READY=' || INSTANCE_NAME || ':' || STATUS$ FROM V$INSTANCE;\n${info ? `SELECT 'QTENVDEV_DM_LICENSE=' || EXPIRED_DATE FROM SYS."V$LICENSE";\nSELECT BANNER FROM V$VERSION;\n` : ''}EXIT 0\n`
 }

@@ -16,7 +16,7 @@
 
 ### 参考与依据
 
-- 原始需求：[flyenv-ai-mem-star-map.md](../../task/flyenv-ai-mem-star-map.md)。
+- 原始需求：[qtenvdev-ai-mem-star-map.md](../../task/qtenvdev-ai-mem-star-map.md)。
 - 初始设计：[2026-11-09-ai-memory-neural-static-preview-design.md](2026-11-09-ai-memory-neural-static-preview-design.md)。
 - 新版融合设计：[2026-11-10-ai-memory-holographic-cohesion-design.md](../../../.worktrees/ai-memory-neural-preview/docs/superpowers/specs/2026-11-10-ai-memory-holographic-cohesion-design.md)。
 - 参考视频：`/Users/x/Desktop/Kapture 2026-11-09 at 21.57.41.mp4`。

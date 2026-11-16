@@ -11,7 +11,7 @@ import {
 
 async function run() {
   app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
-  const root = process.env.FLYENV_DATA_ROOT!
+  const root = process.env.QTENVDEV_DATA_ROOT!
   const output = process.env.MEMORY_SMOKE_OUTPUT!
   app.setPath('userData', join(root, 'user'))
   app.setPath('sessionData', join(root, 'user'))
@@ -79,7 +79,7 @@ async function run() {
       const until = Date.now() + timeout
       while (Date.now() < until) {
         await js(
-          `document.querySelectorAll('.el-message-box').forEach(box => { if (/FlyEnv Helper|Administrator|network is using a proxy/.test(box.textContent)) box.querySelector('.el-message-box__headerbtn')?.click(); })`
+          `document.querySelectorAll('.el-message-box').forEach(box => { if (/QTEnvDev Helper|Administrator|network is using a proxy/.test(box.textContent)) box.querySelector('.el-message-box__headerbtn')?.click(); })`
         ).catch(() => {})
         if (await js(expression).catch(() => false)) return
         await new Promise((resolve) => setTimeout(resolve, 250))
@@ -87,12 +87,12 @@ async function run() {
       throw new Error(`UI condition timed out: ${expression}`)
     }
     await waitFor(
-      `!!window.__FLYENV_PLUGIN_ROUTER__?.getRoutes().find(r => r.path === '/ai-memory')`,
+      `!!window.__QTENVDEV_PLUGIN_ROUTER__?.getRoutes().find(r => r.path === '/ai-memory')`,
       120_000
     )
     window.webContents.closeDevTools()
     await waitFor(`window.innerWidth >= 960`)
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/mcp')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/mcp')`)
     const memoryAside = `Array.from(document.querySelectorAll('.aside .menu li')).find(item => item.textContent.includes('AI Memory'))`
     await waitFor(`!!(${memoryAside})`, 10_000)
     await js(`(${memoryAside}).click()`)
@@ -111,7 +111,7 @@ async function run() {
       ),
       true
     )
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/mcp')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/mcp')`)
     await js(
       `Array.from(document.querySelectorAll('.main-right-panel > .el-radio-group .el-radio-button')).find(el => el.textContent.trim()==='Tools').click()`
     )
@@ -125,20 +125,20 @@ async function run() {
       `Array.from(document.querySelectorAll('.mcp-tool-tabs .el-tabs__item')).find(el => el.textContent.includes('AI Memory')).click()`
     )
     await waitFor(
-      `Array.from(document.querySelectorAll('.mcp-tool-tabs .el-tab-pane')).some(el => el.offsetParent !== null && el.textContent.includes('flyenv_memory_search'))`
+      `Array.from(document.querySelectorAll('.mcp-tool-tabs .el-tab-pane')).some(el => el.offsetParent !== null && el.textContent.includes('qtenvdev_memory_search'))`
     )
     await capture('ui-mcp-plugin-tab.png')
     const memoryToolNames = ['search', 'get', 'store', 'update', 'forget'].map(
-      (name) => 'flyenv_memory_' + name
+      (name) => 'qtenvdev_memory_' + name
     )
     await js(
-      `window.__FLYENV_PLUGIN_HOST__.mcp.setToolsEnabled(${JSON.stringify(memoryToolNames)},true)`
+      `window.__QTENVDEV_PLUGIN_HOST__.mcp.setToolsEnabled(${JSON.stringify(memoryToolNames)},true)`
     )
     await application.mcpRuntime.start()
     assert.equal(application.mcpRuntime.status().running, true)
     const enabled = application.mcpConfigManager.getConfig('enabledTools')
     assert.ok(enabled.includes(siblingTool))
-    assert.equal(enabled.filter((name: string) => name.startsWith('flyenv_memory_')).length, 5)
+    assert.equal(enabled.filter((name: string) => name.startsWith('qtenvdev_memory_')).length, 5)
     async function toolCatalog() {
       const config = application.mcpConfigManager.getConfig()
       const response = await fetch(`http://127.0.0.1:${config.port}/mcp`, {
@@ -163,28 +163,28 @@ async function run() {
       return payload.result.tools.map((tool: any) => tool.name) as string[]
     }
     assert.equal(
-      (await toolCatalog()).filter((name) => name.startsWith('flyenv_memory_')).length,
+      (await toolCatalog()).filter((name) => name.startsWith('qtenvdev_memory_')).length,
       5
     )
     await js(
-      `window.__FLYENV_PLUGIN_HOST__.mcp.setToolsEnabled(${JSON.stringify(memoryToolNames)},false)`
+      `window.__QTENVDEV_PLUGIN_HOST__.mcp.setToolsEnabled(${JSON.stringify(memoryToolNames)},false)`
     )
     assert.equal(application.mcpRuntime.status().running, true)
     assert.deepEqual(application.mcpConfigManager.getConfig('enabledTools'), [siblingTool])
     assert.equal(
-      (await toolCatalog()).some((name) => name.startsWith('flyenv_memory_')),
+      (await toolCatalog()).some((name) => name.startsWith('qtenvdev_memory_')),
       false
     )
     assert.ok((await toolCatalog()).includes(siblingTool))
     // Both the generic tool page and plugin use atomic updates; neither revives a stale array.
     await js(
-      `Promise.all([window.__FLYENV_PLUGIN_HOST__.mcp.toggleTool(${JSON.stringify(siblingTool)},false),window.__FLYENV_PLUGIN_HOST__.mcp.setToolsEnabled(['flyenv_memory_search'],true)])`
+      `Promise.all([window.__QTENVDEV_PLUGIN_HOST__.mcp.toggleTool(${JSON.stringify(siblingTool)},false),window.__QTENVDEV_PLUGIN_HOST__.mcp.setToolsEnabled(['qtenvdev_memory_search'],true)])`
     )
     assert.deepEqual(application.mcpConfigManager.getConfig('enabledTools'), [
-      'flyenv_memory_search'
+      'qtenvdev_memory_search'
     ])
     await js(
-      `Promise.all([window.__FLYENV_PLUGIN_HOST__.mcp.toggleTool(${JSON.stringify(siblingTool)},true),window.__FLYENV_PLUGIN_HOST__.mcp.setToolsEnabled(['flyenv_memory_search'],false)])`
+      `Promise.all([window.__QTENVDEV_PLUGIN_HOST__.mcp.toggleTool(${JSON.stringify(siblingTool)},true),window.__QTENVDEV_PLUGIN_HOST__.mcp.setToolsEnabled(['qtenvdev_memory_search'],false)])`
     )
     assert.deepEqual(application.mcpConfigManager.getConfig('enabledTools'), [siblingTool])
     const configSet = application.mcpConfigManager.setConfig.bind(application.mcpConfigManager)
@@ -194,7 +194,7 @@ async function run() {
       }
       assert.equal(
         await js(
-          `window.__FLYENV_PLUGIN_HOST__.mcp.toggleTool(${JSON.stringify(siblingTool)},false)`
+          `window.__QTENVDEV_PLUGIN_HOST__.mcp.toggleTool(${JSON.stringify(siblingTool)},false)`
         ),
         false
       )
@@ -203,7 +203,7 @@ async function run() {
       application.mcpConfigManager.setConfig = configSet
     }
     assert.equal(
-      await js(`window.__FLYENV_PLUGIN_HOST__.mcp.setToolsEnabled(['unknown_fixture_tool'],true)`),
+      await js(`window.__QTENVDEV_PLUGIN_HOST__.mcp.setToolsEnabled(['unknown_fixture_tool'],true)`),
       false
     )
     assert.deepEqual(application.mcpConfigManager.getConfig('enabledTools'), [siblingTool])
@@ -213,12 +213,12 @@ async function run() {
     checkpoints.push('sidebar-plugin-entry-without-independent-switch')
     window.webContents.closeDevTools()
     await js(
-      `document.querySelectorAll('.el-message-box').forEach(box => { if (box.textContent.includes('FlyEnv Helper')) box.querySelector('.el-message-box__headerbtn')?.click(); })`
+      `document.querySelectorAll('.el-message-box').forEach(box => { if (box.textContent.includes('QTEnvDev Helper')) box.querySelector('.el-message-box__headerbtn')?.click(); })`
     )
     checkpoints.push('full-application-plugin-route')
     const call = (method: string, input: any) =>
       js(
-        `new Promise(resolve => { const ipc = window.__FLYENV_PLUGIN_HOST__.ipc; ipc.sendSensitive('app-fork:ai-memory', ${JSON.stringify(method)}, ${JSON.stringify(input)}).then((key,res) => { if (res?.code === 200) return; ipc.off(key); resolve(res); }); })`
+        `new Promise(resolve => { const ipc = window.__QTENVDEV_PLUGIN_HOST__.ipc; ipc.sendSensitive('app-fork:ai-memory', ${JSON.stringify(method)}, ${JSON.stringify(input)}).then((key,res) => { if (res?.code === 200) return; ipc.off(key); resolve(res); }); })`
       )
     const showList = async () => {
       await js(
@@ -227,7 +227,7 @@ async function run() {
       await waitFor(`!!document.querySelector('.memory-table')`)
     }
     // A real user starts in an empty library, validates a form, creates and deletes a record.
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/ai-memory')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/ai-memory')`)
     await waitFor(`!!document.querySelector('.memory-universe-empty .el-empty')`)
     await capture('ui-empty.png')
     await showList()
@@ -245,7 +245,7 @@ async function run() {
     )
     // Simulate a committed response lost in transit. Only this test renderer alters the reply.
     await js(
-      `(() => { const ipc=window.__FLYENV_PLUGIN_HOST__.ipc; const original=ipc.sendSensitive.bind(ipc); ipc.sendSensitive=(command,...args) => { const call=original(command,...args); if(command!=='app-fork:ai-memory'||args[0]!=='store') return call; ipc.sendSensitive=original; return {key:call.key, then(cb) { call.then((key,res)=>cb(key,res?.code===0 ? {code:0,data:{outcome:'unknown',error_code:'response_timeout'}} : res)); }}; }; })()`
+      `(() => { const ipc=window.__QTENVDEV_PLUGIN_HOST__.ipc; const original=ipc.sendSensitive.bind(ipc); ipc.sendSensitive=(command,...args) => { const call=original(command,...args); if(command!=='app-fork:ai-memory'||args[0]!=='store') return call; ipc.sendSensitive=original; return {key:call.key, then(cb) { call.then((key,res)=>cb(key,res?.code===0 ? {code:0,data:{outcome:'unknown',error_code:'response_timeout'}} : res)); }}; }; })()`
     )
     await js(`document.querySelector('#memory-save').click()`)
     await waitFor(
@@ -262,7 +262,7 @@ async function run() {
     assert.equal(manual.data.data.results.length, 1)
     assert.equal(
       manual.data.data.results[0].source.description,
-      'Entered manually by the user in FlyEnv.'
+      'Entered manually by the user in QTEnvDev.'
     )
     await js(`document.querySelector('.memory-row').click()`)
     await waitFor(`!!document.querySelector('#memory-delete')`)
@@ -401,7 +401,7 @@ async function run() {
     await js(`document.querySelectorAll('.memory-row')[0].click()`)
     await waitFor(`!!document.querySelector('#memory-delete')`)
     await js(
-      `(() => { const ipc=window.__FLYENV_PLUGIN_HOST__.ipc; const original=ipc.sendSensitive.bind(ipc); ipc.sendSensitive=(command,...args)=> { if(command!=='app-fork:ai-memory'||args[0]!=='forget') return original(command,...args); ipc.sendSensitive=original; return {key:'fixture-failed-delete', then(cb) { setTimeout(()=>cb('fixture-failed-delete',{code:0,data:{outcome:'failed',error_code:'operation_failed'}}),0); }}; }; })()`
+      `(() => { const ipc=window.__QTENVDEV_PLUGIN_HOST__.ipc; const original=ipc.sendSensitive.bind(ipc); ipc.sendSensitive=(command,...args)=> { if(command!=='app-fork:ai-memory'||args[0]!=='forget') return original(command,...args); ipc.sendSensitive=original; return {key:'fixture-failed-delete', then(cb) { setTimeout(()=>cb('fixture-failed-delete',{code:0,data:{outcome:'failed',error_code:'operation_failed'}}),0); }}; }; })()`
     )
     await js(`document.querySelector('#memory-delete').click()`)
     await waitFor(
@@ -447,20 +447,20 @@ async function run() {
     await js(`document.querySelector('#memory-edit').click()`)
     await waitFor(`!!document.querySelector('#memory-title')`)
     await js(
-      `for (const [selector,value] of [['#memory-title','Edited in full FlyEnv UI'],['#memory-reason','UI acceptance edit']]) { const el=document.querySelector(selector); el.value=value; el.dispatchEvent(new Event('input',{bubbles:true})); }`
+      `for (const [selector,value] of [['#memory-title','Edited in full QTEnvDev UI'],['#memory-reason','UI acceptance edit']]) { const el=document.querySelector(selector); el.value=value; el.dispatchEvent(new Event('input',{bubbles:true})); }`
     )
     await js(
-      `document.querySelector('#memory-save').click(); window.__FLYENV_PLUGIN_ROUTER__.push('/mcp')`
+      `document.querySelector('#memory-save').click(); window.__QTENVDEV_PLUGIN_ROUTER__.push('/mcp')`
     )
     await new Promise((resolve) => setTimeout(resolve, 400))
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/ai-memory')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/ai-memory')`)
     await showList()
     await waitFor(
-      `Array.from(document.querySelectorAll('.memory-row')).some(el => el.textContent.includes('Edited in full FlyEnv UI'))`
+      `Array.from(document.querySelectorAll('.memory-row')).some(el => el.textContent.includes('Edited in full QTEnvDev UI'))`
     )
-    const result = await call('search', { scope: 'global', queries: ['Edited in full FlyEnv UI'] })
+    const result = await call('search', { scope: 'global', queries: ['Edited in full QTEnvDev UI'] })
     const edited = result.data.data.results.find(
-      (row: any) => row.title === 'Edited in full FlyEnv UI'
+      (row: any) => row.title === 'Edited in full QTEnvDev UI'
     )
     assert.ok(edited)
     assert.equal(edited.revision, 2)
@@ -498,9 +498,9 @@ async function run() {
     await waitFor(
       `document.querySelector('.memory-detail h3')?.textContent === 'Project reentry fixture'`
     )
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/mcp')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/mcp')`)
     await waitFor(`!document.querySelector('#memory-search')`)
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/ai-memory')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/ai-memory')`)
     await waitFor(`!!document.querySelector('#memory-search')`)
     await showList()
     assert.equal(
@@ -517,17 +517,17 @@ async function run() {
       `Array.from(document.querySelectorAll('.el-checkbox')).find(el => el.textContent.includes('Include global')).click(); document.querySelector('#memory-search').click()`
     )
     await waitFor(
-      `Array.from(document.querySelectorAll('.memory-row')).some(el => el.textContent.includes('Edited in full FlyEnv UI'))`
+      `Array.from(document.querySelectorAll('.memory-row')).some(el => el.textContent.includes('Edited in full QTEnvDev UI'))`
     )
     await js(
-      `Array.from(document.querySelectorAll('.memory-row')).find(el => el.textContent.includes('Edited in full FlyEnv UI')).click()`
+      `Array.from(document.querySelectorAll('.memory-row')).find(el => el.textContent.includes('Edited in full QTEnvDev UI')).click()`
     )
     await waitFor(
-      `document.querySelector('.memory-detail h3')?.textContent === 'Edited in full FlyEnv UI'`
+      `document.querySelector('.memory-detail h3')?.textContent === 'Edited in full QTEnvDev UI'`
     )
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/mcp')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/mcp')`)
     await waitFor(`!document.querySelector('#memory-search')`)
-    await js(`window.__FLYENV_PLUGIN_ROUTER__.push('/ai-memory')`)
+    await js(`window.__QTENVDEV_PLUGIN_ROUTER__.push('/ai-memory')`)
     await waitFor(`!!document.querySelector('#memory-search')`)
     await showList()
     assert.equal(await js(`!!document.querySelector('#memory-edit')`), false)
@@ -536,10 +536,10 @@ async function run() {
     await waitFor(`!!document.querySelector('#memory-edit')`)
     window.webContents.closeDevTools()
     await js(
-      `document.querySelectorAll('.el-message-box').forEach(box => { if (box.textContent.includes('FlyEnv Helper')) box.querySelector('.el-message-box__headerbtn')?.click(); })`
+      `document.querySelectorAll('.el-message-box').forEach(box => { if (box.textContent.includes('QTEnvDev Helper')) box.querySelector('.el-message-box__headerbtn')?.click(); })`
     )
     await js(
-      `window.__FLYENV_PLUGIN_HOST__['element-plus'].ElMessageBox.close(); document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light')`
+      `window.__QTENVDEV_PLUGIN_HOST__['element-plus'].ElMessageBox.close(); document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light')`
     )
     await new Promise((resolve) => setTimeout(resolve, 500))
     await capture('ui-light.png')
@@ -552,7 +552,7 @@ async function run() {
       `document.querySelector('.memory-detail').closest('.el-drawer').querySelector('.el-drawer__close-btn').click()`
     )
     await js(
-      `window.__FLYENV_PLUGIN_HOST__.lang.AppI18n().global.locale = 'zh'; document.querySelectorAll('.memory-page > .el-radio-group .el-radio-button')[1].click()`
+      `window.__QTENVDEV_PLUGIN_HOST__.lang.AppI18n().global.locale = 'zh'; document.querySelectorAll('.memory-page > .el-radio-group .el-radio-button')[1].click()`
     )
     await waitFor(`document.body.textContent.includes('准备记忆服务')`)
     await new Promise((resolve) => setTimeout(resolve, 500))
@@ -571,7 +571,7 @@ async function run() {
     application.mcpConfigManager.setConfig('port', memoryPort)
     application.mcpConfigManager.setConfig(
       'enabledTools',
-      ['search', 'get', 'store', 'update', 'forget'].map((name) => 'flyenv_memory_' + name)
+      ['search', 'get', 'store', 'update', 'forget'].map((name) => 'qtenvdev_memory_' + name)
     )
     await application.mcpRuntime.start()
     await js(
@@ -589,7 +589,7 @@ async function run() {
     const { Client } = await import('@modelcontextprotocol/sdk/client/index.js')
     const { StreamableHTTPClientTransport } =
       await import('@modelcontextprotocol/sdk/client/streamableHttp.js')
-    const mcpClient = new Client({ name: 'flyenv', version: '1.0.0' })
+    const mcpClient = new Client({ name: 'qtenvdev', version: '1.0.0' })
     const mcpConfig = application.mcpConfigManager.getConfig()
     await mcpClient.connect(
       new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${memoryPort}/mcp`), {
@@ -597,7 +597,7 @@ async function run() {
       })
     )
     const searchEnvelope: any = await mcpClient.callTool({
-      name: 'flyenv_memory_search',
+      name: 'qtenvdev_memory_search',
       arguments: { scope: 'global', queries: [noHitQuery], topic: 'missing-topic', limit: 8 }
     })
     await mcpClient.close()
@@ -609,7 +609,7 @@ async function run() {
       .trim()
       .split('\n')
       .map((row) => JSON.parse(row))
-    const fileRow = fileRows.find((row) => row.tool === 'flyenv_memory_search')
+    const fileRow = fileRows.find((row) => row.tool === 'qtenvdev_memory_search')
     assert.equal(fileRow.outcome, 'success')
     assert.equal(JSON.stringify(fileRow).includes(noHitQuery), false)
     const callRows = application.mcpRuntime.plugins.diagnostics('ai-memory')

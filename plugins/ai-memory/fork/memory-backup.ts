@@ -15,7 +15,7 @@ export type MaintenanceReceipt = {
 }
 type Entry = { path: string; bytes: number; sha256: string }
 type Manifest = {
-  format: 'flyenv-ai-memory'
+  format: 'qtenvdev-ai-memory'
   version: 1
   createdAt: string
   directories: string[]
@@ -85,7 +85,7 @@ async function scan(root: string, ignoreOwner = false) {
   if (!(await lstat(root)).isDirectory()) fault('backup_invalid')
   async function visit(directory: string) {
     for (const entry of await readdir(join(root, directory), { withFileTypes: true })) {
-      if (!directory && entry.name === '.flyenv-owner.lock') {
+      if (!directory && entry.name === '.qtenvdev-owner.lock') {
         if (ignoreOwner) continue
         fault('backup_invalid')
       }
@@ -132,7 +132,7 @@ export async function createMemoryBackup(
       files.push({ path: name, bytes: bytes.length, sha256: digest(bytes) })
     }
     const manifest: Manifest = {
-      format: 'flyenv-ai-memory',
+      format: 'qtenvdev-ai-memory',
       version: 1,
       createdAt: stamp,
       directories: tree.directories,
@@ -161,7 +161,7 @@ async function stageBackup(source: string, stage: string) {
     (await bytesAt(join(source, 'manifest.json'), 16 * 1024 * 1024)).toString('utf8')
   )
   if (
-    manifest?.format !== 'flyenv-ai-memory' ||
+    manifest?.format !== 'qtenvdev-ai-memory' ||
     manifest.version !== 1 ||
     !Number.isFinite(Date.parse(manifest.createdAt)) ||
     !Array.isArray(manifest.files) ||
@@ -228,7 +228,7 @@ type RestoreJournal = {
   incomingNames: string[]
 }
 const payloadName = (name: unknown): name is string =>
-  safeName(name) && !name.includes('/') && name !== '.flyenv-owner.lock'
+  safeName(name) && !name.includes('/') && name !== '.qtenvdev-owner.lock'
 async function saveJournal(root: string, entry: RestoreJournal) {
   await new AtomicFile().replace(journalPath(root), JSON.stringify(entry))
 }
@@ -326,7 +326,7 @@ export async function restoreMemoryBackup(
   try {
     incoming = await stageBackup(canonical, stage)
     safety = await createMemoryBackup(root, dirname(root))
-    const originalNames = (await readdir(root)).filter((name) => name !== '.flyenv-owner.lock')
+    const originalNames = (await readdir(root)).filter((name) => name !== '.qtenvdev-owner.lock')
     const incomingNames = await readdir(stage)
     await mkdir(rollback, { mode: 0o700 })
     const journal: RestoreJournal = {

@@ -101,7 +101,7 @@ export const waitForWindowsBrokerLaunch = async (
 /**
  * 一次性子进程引导：先连接管道并证明 nonce，再接收脚本，校验由父进程
  * 固定在引导中的 SHA-256。批准 UAC 的账户不需要读取原用户 TEMP。
- * 脚本来自本地动作白名单，业务返回值只取 FlyEnvActionResult；stdout
+ * 脚本来自本地动作白名单，业务返回值只取 QTEnvDevActionResult；stdout
  * 不构成成功证据。沿异常链识别真正的权限拒绝，文件锁等普通错误不提权。
  */
 export const buildWindowsActionBootstrap = (
@@ -112,12 +112,12 @@ export const buildWindowsActionBootstrap = (
 ) => `
 $ErrorActionPreference = 'Stop'
 ${buildWindowsActionStagePrelude(true)}
-Write-FlyEnvActionStage 'action.bootstrap'
+Write-QTEnvDevActionStage 'action.bootstrap'
 $env:PSModulePath = Join-Path $PSHOME 'Modules'
 ${buildWindowsPipeClient(pipeName)}
-Write-FlyEnvActionStage 'action.connect-start'
+Write-QTEnvDevActionStage 'action.connect-start'
 try { $pipe.Connect(10000) } catch { exit 73 }
-Write-FlyEnvActionStage 'action.connected'
+Write-QTEnvDevActionStage 'action.connected'
 $reader = New-Object IO.StreamReader($pipe, (New-Object Text.UTF8Encoding($false)))
 $writer = New-Object IO.StreamWriter($pipe, (New-Object Text.UTF8Encoding($false)))
 $writer.AutoFlush = $true
@@ -126,23 +126,23 @@ try {
     # A failed identity handshake/payload check happens before the action; return the pre-execution pipe code.
     $writer.WriteLine(${quote(nonce)})
     $line = $reader.ReadLine()
-    Write-FlyEnvActionStage 'action.payload-received'
+    Write-QTEnvDevActionStage 'action.payload-received'
     if ($null -eq $line) { throw 'Windows action pipe rejected the connection' }
     $payload = $line | ConvertFrom-Json
     $bytes = [Text.Encoding]::UTF8.GetBytes([string]$payload.script)
     $sha = [Security.Cryptography.SHA256]::Create()
     try { $hash = ([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant() } finally { $sha.Dispose() }
     if ($hash -cne ${quote(digest)}) { throw 'Windows action payload mismatch' }
-    Write-FlyEnvActionStage 'action.payload-verified'
+    Write-QTEnvDevActionStage 'action.payload-verified'
   } catch { exit 73 }
-  $global:FlyEnvActionResult = $true
+  $global:QTEnvDevActionResult = $true
   # 每次动作独立初始化；kill 脚本才填入事件，成功/异常都随认证终态回传。
-  $global:FlyEnvProcessStopEvents = $null
+  $global:QTEnvDevProcessStopEvents = $null
   ${buildPerformanceScriptTiming('action.execute', 'start', reportTiming)}
   try {
-    Write-FlyEnvActionStage 'action.execute-start'
+    Write-QTEnvDevActionStage 'action.execute-start'
     & ([ScriptBlock]::Create([string]$payload.script)) | Out-Null
-    $result = @{ nonce = ${quote(nonce)}; ok = $true; data = $global:FlyEnvActionResult }
+    $result = @{ nonce = ${quote(nonce)}; ok = $true; data = $global:QTEnvDevActionResult }
   } catch {
     $e = $_.Exception
     $denied = $_.CategoryInfo.Category -eq 'PermissionDenied'
@@ -152,11 +152,11 @@ try {
     }
     $result = @{ nonce = ${quote(nonce)}; ok = $false; error = $_.Exception.Message; permissionDenied = $denied }
   }
-  Write-FlyEnvActionStage 'action.execute-end'
+  Write-QTEnvDevActionStage 'action.execute-end'
   ${buildPerformanceScriptTiming('action.execute', 'end', reportTiming)}
-  if ($null -ne $global:FlyEnvProcessStopEvents) { $result.processStopEvents = @($global:FlyEnvProcessStopEvents.ToArray()) }
-  Write-FlyEnvActionStage 'action.result-write'
-  ${performanceDiagnosticText('$result.actionStages = @($script:FlyEnvActionStages.ToArray())')}
+  if ($null -ne $global:QTEnvDevProcessStopEvents) { $result.processStopEvents = @($global:QTEnvDevProcessStopEvents.ToArray()) }
+  Write-QTEnvDevActionStage 'action.result-write'
+  ${performanceDiagnosticText('$result.actionStages = @($script:QTEnvDevActionStages.ToArray())')}
   $writer.WriteLine(($result | ConvertTo-Json -Depth 16 -Compress))
 } finally { $writer.Dispose(); $reader.Dispose(); $pipe.Dispose() }
 `
@@ -250,7 +250,7 @@ export const runWindowsAction = async <T>(
   }
   logResult('started')
   if (stopId) await logStop('action.started', { actionId, elevated })
-  const pipeName = `FlyEnv.Action.${randomUUID()}`
+  const pipeName = `QTEnvDev.Action.${randomUUID()}`
   const reportTiming = hasOperationTiming()
   const bootstrap = buildWindowsActionBootstrap(pipeName, nonce, digest, reportTiming)
   const args = ['-NoProfile', '-NonInteractive', '-Command', bootstrap]
@@ -314,7 +314,7 @@ export const runWindowsAction = async <T>(
           Number.isFinite(candidate.timingMs)
         )
           acceptOperationTimingLine(
-            `FLYENV_TIMING|action.execute|${candidate.timingMs}`,
+            `QTENVDEV_TIMING|action.execute|${candidate.timingMs}`,
             candidate.ok ? 'ok' : 'error'
           )
         result ??= candidate

@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Inicialização da pasta de dados bem-sucedida, caminho da pasta de dados: {dir}",
   "initDBDataDirFail": "Inicialização da pasta de dados falhou, motivo: {error}",
   "newProjectFail": "Falha ao criar novo projeto",
-  "processListFail": "Falha ao buscar lista de processos. Por favor, instale o Auxiliar FlyEnv"
+  "processListFail": "Falha ao buscar lista de processos. Por favor, instale o Auxiliar QTEnvDev"
 }

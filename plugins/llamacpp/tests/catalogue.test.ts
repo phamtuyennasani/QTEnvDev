@@ -71,7 +71,7 @@ const catalogueModel = (name: string, downloadedAt = 1) => ({
 test('late discovery preserves completed downloads and replacements in memory and storage', async () => {
   const old = catalogueModel('old'),
     added = catalogueModel('added', 3)
-  const data = new Map<string, any>([['flyenv-llama-cpp-models', [old]]])
+  const data = new Map<string, any>([['qtenvdev-llama-cpp-models', [old]]])
   const started = deferred<void>(),
     result = deferred<any>()
   let hold = false
@@ -105,7 +105,7 @@ test('late discovery preserves completed downloads and replacements in memory an
     ]
   )
   assert.deepEqual(
-    data.get('flyenv-llama-cpp-models').map((model: any) => [model.path, model.downloadedAt]),
+    data.get('qtenvdev-llama-cpp-models').map((model: any) => [model.path, model.downloadedAt]),
     [
       ['old.gguf', 2],
       ['added.gguf', 3]
@@ -115,7 +115,7 @@ test('late discovery preserves completed downloads and replacements in memory an
 
 test('late discovery cannot restore a file deleted during the scan', async () => {
   const file = catalogueModel('deleted')
-  const data = new Map<string, any>([['flyenv-llama-cpp-models', [file]]])
+  const data = new Map<string, any>([['qtenvdev-llama-cpp-models', [file]]])
   const started = deferred<void>(),
     result = deferred<any>()
   let hold = false
@@ -140,7 +140,7 @@ test('late discovery cannot restore a file deleted during the scan', async () =>
   result.resolve({ models: [file], skipped: [] })
   await scan
   assert.deepEqual(manager.localModels, [])
-  assert.deepEqual(data.get('flyenv-llama-cpp-models'), [])
+  assert.deepEqual(data.get('qtenvdev-llama-cpp-models'), [])
 })
 
 test('a delayed scan write cannot overwrite a later download registration', async () => {
@@ -165,7 +165,7 @@ test('a delayed scan write cannot overwrite a later download registration', asyn
     },
     async () => ({ models: hold ? [file] : [], skipped: [] }),
     async (key, value) => {
-      if (key === 'flyenv-llama-cpp-models') {
+      if (key === 'qtenvdev-llama-cpp-models') {
         activeWrites++
         maxWrites = Math.max(maxWrites, activeWrites)
         if (hold && value.length === 1 && value[0].path === 'found.gguf') {
@@ -188,7 +188,7 @@ test('a delayed scan write cannot overwrite a later download registration', asyn
   await Promise.all([scan, download])
   assert.equal(maxWrites, 1)
   assert.deepEqual(
-    data.get('flyenv-llama-cpp-models').map((model: any) => model.path),
+    data.get('qtenvdev-llama-cpp-models').map((model: any) => model.path),
     ['found.gguf', 'downloaded.gguf']
   )
   assert.deepEqual(
@@ -206,7 +206,7 @@ test('failed directory discovery still inspects registered files and reports a p
     size: 8,
     standalone: true
   }
-  const data = new Map<string, any>([['flyenv-llama-cpp-models', [file]]])
+  const data = new Map<string, any>([['qtenvdev-llama-cpp-models', [file]]])
   const manager = await loadController(
     data,
     async (_method, args) => args[0].map((path: string) => ({ path, status: 'available' })),
@@ -218,7 +218,7 @@ test('failed directory discovery still inspects registered files and reports a p
   assert.equal(manager.localModels[0]?.localPath, file.localPath)
   assert.equal(manager.localModelScan.status, 'partial')
   assert.match(manager.localModelScan.error, /selected folder unavailable/)
-  assert.deepEqual(data.get('flyenv-llama-cpp-models'), [file])
+  assert.deepEqual(data.get('qtenvdev-llama-cpp-models'), [file])
 })
 
 test('missing model files disappear from available models while records and profiles survive restoration', async (t) => {
@@ -247,7 +247,7 @@ test('missing model files disappear from available models while records and prof
     modelProfiles: profiles
   }
   const data = new Map<string, any>([
-    ['flyenv-llama-cpp-models', files],
+    ['qtenvdev-llama-cpp-models', files],
     [SETTINGS_KEY, settings]
   ])
   const manager = await loadController(data, async (method, args) => {
@@ -261,7 +261,7 @@ test('missing model files disappear from available models while records and prof
   )
   assert.equal(manager.selectedModel, undefined)
   assert.deepEqual(data.get(SETTINGS_KEY), settings)
-  assert.deepEqual(data.get('flyenv-llama-cpp-models'), files)
+  assert.deepEqual(data.get('qtenvdev-llama-cpp-models'), files)
   await writeFile(files[1].localPath, 'GGUFdata')
   await manager.refreshLocalModels()
   assert.equal(manager.selectedModel.localPath, files[1].localPath)
@@ -307,7 +307,7 @@ test('catalogue refresh coalesces and a late missing result cannot hide a comple
     standalone: true,
     downloadedAt: 1
   }
-  const data = new Map<string, any>([['flyenv-llama-cpp-models', [file]]])
+  const data = new Map<string, any>([['qtenvdev-llama-cpp-models', [file]]])
   let hold = false,
     fail = false,
     checks = 0,
@@ -342,7 +342,7 @@ test('catalogue refresh coalesces and a late missing result cannot hide a comple
   fail = true
   await assert.rejects(manager.refreshLocalModels(), /scan unavailable/)
   assert.equal(manager.localModels.length, 0)
-  assert.equal(data.get('flyenv-llama-cpp-models')[0].downloadedAt, 2)
+  assert.equal(data.get('qtenvdev-llama-cpp-models')[0].downloadedAt, 2)
   fail = false
   await manager.refreshLocalModels()
   assert.equal(manager.localModels.length, 1)

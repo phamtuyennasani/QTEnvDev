@@ -50,7 +50,7 @@ Files: extend owner and regression script; create test/fixtures/window-presentat
 - [x] Add failing tests for A-to-B migration, same-display stability, captured target after cursor movement, target unplug/workArea change, negative coordinates, small displays, minimum-size restoration, minimized/maximized/fullscreen transitions and fullscreen timeout/cancellation.
 - [x] Implement target snapshot + placement policy, preserving window modes and cancelling obsolete transitions.
 - [x] Verify with `node_modules/.bin/tsx scripts/window-presentation-test.ts`, targeted ESLint/type checks and a bundled main-process compilation.
-- [x] Run a separate Electron process using temporary userData and hidden fixture windows; check available real displays, repeated visibility, native mode transitions and no late reopening. Do not change the user's live FlyEnv process or services. If only one physical display is available, report that dual-display/Space visual acceptance still needs hardware testing.
+- [x] Run a separate Electron process using temporary userData and hidden fixture windows; check available real displays, repeated visibility, native mode transitions and no late reopening. Do not change the user's live QTEnvDev process or services. If only one physical display is available, report that dual-display/Space visual acceptance still needs hardware testing.
 - [x] Obtain one independent review, address substantive findings with regression coverage, integrate into original master, and verify original file hashes unchanged.
 
 ## Progress

@@ -26,8 +26,8 @@ export function createDraftRequest(draft: Draft, platform: Platform): CreateRequ
       port: draft.startPort + n,
       socket:
         platform === 'Windows'
-          ? `FlyEnvMC_${draft.id}_${n + 1}`
-          : `/tmp/flyenv-mc-${draft.id.slice(0, 12)}-${n + 1}.sock`,
+          ? `QTEnvDevMC_${draft.id}_${n + 1}`
+          : `/tmp/qtenvdev-mc-${draft.id.slice(0, 12)}-${n + 1}.sock`,
       dataDir:
         draft.dataDirs?.[id] ??
         `${draft.rootDir.replace(/\\/g, '/').replace(/\/$/, '')}/${draft.id}/node-${n + 1}`,

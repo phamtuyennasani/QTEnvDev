@@ -15,7 +15,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// FTP needs root for chroot and login credential changes. FlyEnv's normal
+// FTP needs root for chroot and login credential changes. QTEnvDev's normal
 // user-owned installations remain supported; binary/dependency integrity is
 // outside this API's scope. The filename/ELF checks validate the input format.
 // systemd owns the full process tree; callers cannot select a unit or signal PID.
@@ -56,8 +56,8 @@ func linuxFTPTool(path string, args ...string) (string, error) {
 	return runFixedTool(path, 30*time.Second, args...)
 }
 
-func linuxFTPUnit(p linuxPolicy) string        { return fmt.Sprintf("flyenv-pure-ftpd-%d.service", p.UID) }
-func linuxFTPDescription(p linuxPolicy) string { return fmt.Sprintf("FlyEnv Pure-FTPd UID=%d", p.UID) }
+func linuxFTPUnit(p linuxPolicy) string        { return fmt.Sprintf("qtenvdev-pure-ftpd-%d.service", p.UID) }
+func linuxFTPDescription(p linuxPolicy) string { return fmt.Sprintf("QTEnvDev Pure-FTPd UID=%d", p.UID) }
 
 func linuxFTPPW(bin string) (string, error) {
 	var last error
@@ -160,7 +160,7 @@ func startLinuxFTP(req unixFTPStart, p linuxPolicy) (int, error) {
 	if err = refreshLinuxFTPDatabase(p, dir, pw, req.Users); err != nil {
 		return 0, err
 	}
-	_, err = linuxFTPTool("/usr/bin/systemd-run", "--quiet", "--collect", "--unit="+linuxFTPUnit(p), "--service-type=exec", "--description="+linuxFTPDescription(p), "--property=KillMode=control-group", "--property=KillSignal=SIGINT", "--property=TimeoutStopSec=10s", "--property=TimeoutStartSec=10s", "--property=PartOf=flyenv-helper.service", "--property=NoNewPrivileges=yes", "--", bin, filepath.Join(dir, "pure-ftpd.conf"))
+	_, err = linuxFTPTool("/usr/bin/systemd-run", "--quiet", "--collect", "--unit="+linuxFTPUnit(p), "--service-type=exec", "--description="+linuxFTPDescription(p), "--property=KillMode=control-group", "--property=KillSignal=SIGINT", "--property=TimeoutStopSec=10s", "--property=TimeoutStartSec=10s", "--property=PartOf=qtenvdev-helper.service", "--property=NoNewPrivileges=yes", "--", bin, filepath.Join(dir, "pure-ftpd.conf"))
 	if err != nil {
 		return 0, err
 	}

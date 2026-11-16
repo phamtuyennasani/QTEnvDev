@@ -79,7 +79,7 @@ export const waitForHelperHealth = async <T>(
       if (isAppHelperError(lastError)) {
         throw new AppHelperError(
           'helper_start_timeout',
-          `Timed out waiting for FlyEnv helper health: ${lastError.message}`,
+          `Timed out waiting for QTEnvDev helper health: ${lastError.message}`,
           lastError.stderr
         )
       }
@@ -116,7 +116,7 @@ const toAppHelperInstallError = (error: unknown): AppHelperError => {
   const stderr = typeof rawStderr === 'string' ? rawStderr : undefined
   // The existing macOS Sudo applet includes stderr in Error.message.
   const diagnostic = stderr ?? message
-  const marker = diagnostic.match(/FLYENV_HELPER_INSTALL_ERROR:([a-z_]+):(.*)/i)
+  const marker = diagnostic.match(/QTENVDEV_HELPER_INSTALL_ERROR:([a-z_]+):(.*)/i)
   if (marker && installerErrorCodes.has(marker[1] as AppHelperErrorCode)) {
     return new AppHelperError(
       marker[1] as AppHelperErrorCode,
@@ -144,8 +144,8 @@ const lazySudo: SudoExec = async (...args) => {
 const quoteLinuxShell = (value: string) => `'${value.replace(/'/g, "'\\''")}'`
 
 function checkLinuxInstallSource(file: string, appRoot: string) {
-  if (!file.startsWith(`${appRoot}/`)) throw new Error('Invalid FlyEnv installer resource path')
-  if (!statSync(file).isFile()) throw new Error(`Invalid FlyEnv installer resource: ${file}`)
+  if (!file.startsWith(`${appRoot}/`)) throw new Error('Invalid QTEnvDev installer resource path')
+  if (!statSync(file).isFile()) throw new Error(`Invalid QTEnvDev installer resource: ${file}`)
 }
 
 const linuxInstallCommand = (
@@ -169,23 +169,23 @@ role="$6"
 data="$7"
 # Resolve the fixed staging location; system parent permissions are user-managed.
 for parent in / /private /private/var /private/var/root; do
-  [ -d "$parent" ] && [ ! -L "$parent" ] || { echo 'FLYENV_HELPER_INSTALL_ERROR:helper_acl_invalid:Invalid staging parent' >&2; exit 1; }
+  [ -d "$parent" ] && [ ! -L "$parent" ] || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_acl_invalid:Invalid staging parent' >&2; exit 1; }
 done
-stage=$(/usr/bin/mktemp -d /private/var/root/flyenv-helper-install.XXXXXXXX)
+stage=$(/usr/bin/mktemp -d /private/var/root/qtenvdev-helper-install.XXXXXXXX)
 trap '/bin/rm -rf "$stage"' EXIT HUP INT TERM
 # This newly created staging directory is private to the elevated operation.
 # Remove inherited ACLs before creating the files that will run as root.
 /bin/chmod -N "$stage"
 if [ "$mode" = production ]; then
   resources="$source/Contents/Resources"
-  for path in "$source" "$source/Contents" "$resources" "$resources/helper" "$resources/plist" "$resources/helper/flyenv-helper-init.sh" "$resources/helper/flyenv-helper" "$resources/plist/com.flyenv.helper.plist"; do
-    [ ! -L "$path" ] || { echo 'FLYENV_HELPER_INSTALL_ERROR:helper_signature_invalid:Symlink in installer resource path' >&2; exit 1; }
+  for path in "$source" "$source/Contents" "$resources" "$resources/helper" "$resources/plist" "$resources/helper/qtenvdev-helper-init.sh" "$resources/helper/qtenvdev-helper" "$resources/plist/com.qtenvdev.helper.plist"; do
+    [ ! -L "$path" ] || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:Symlink in installer resource path' >&2; exit 1; }
   done
-  /usr/bin/codesign --verify --deep --strict --all-architectures -R '=identifier "phpstudy.xpfme.com" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] and certificate leaf[field.1.2.840.113635.100.6.1.13] and certificate leaf[subject.OU] = "956BZQ2F2P"' "$source" || { echo 'FLYENV_HELPER_INSTALL_ERROR:helper_signature_invalid:FlyEnv application signature or resources are invalid. Use an officially signed build.' >&2; exit 1; }
-  [ "$(/usr/libexec/PlistBuddy -c 'Print :FlyEnvHelperProtocolVersion' "$source/Contents/Info.plist")" = ${HelperVersion} ] || { echo 'FLYENV_HELPER_INSTALL_ERROR:helper_version_mismatch:Unsupported signed helper installation protocol' >&2; exit 1; }
-  binary_source="$resources/helper/flyenv-helper"
-  installer_source="$resources/helper/flyenv-helper-init.sh"
-  plist_source="$resources/plist/com.flyenv.helper.plist"
+  /usr/bin/codesign --verify --deep --strict --all-architectures -R '=identifier "phpstudy.xpfme.com" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] and certificate leaf[field.1.2.840.113635.100.6.1.13] and certificate leaf[subject.OU] = "956BZQ2F2P"' "$source" || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:QTEnvDev application signature or resources are invalid. Use an officially signed build.' >&2; exit 1; }
+  [ "$(/usr/libexec/PlistBuddy -c 'Print :QTEnvDevHelperProtocolVersion' "$source/Contents/Info.plist")" = ${HelperVersion} ] || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_version_mismatch:Unsupported signed helper installation protocol' >&2; exit 1; }
+  binary_source="$resources/helper/qtenvdev-helper"
+  installer_source="$resources/helper/qtenvdev-helper-init.sh"
+  plist_source="$resources/plist/com.qtenvdev.helper.plist"
 elif [ "$mode" = development ]; then
   echo 'Explicit administrator development installation: unsigned helper and installer.' >&2
   binary_source="$3"
@@ -195,9 +195,9 @@ else
   echo 'Invalid installer mode' >&2
   exit 1
 fi
-binary="$stage/flyenv-helper"
-installer="$stage/flyenv-helper-init.sh"
-plist="$stage/com.flyenv.helper.plist"
+binary="$stage/qtenvdev-helper"
+installer="$stage/qtenvdev-helper-init.sh"
+plist="$stage/com.qtenvdev.helper.plist"
 for file in "$binary_source" "$installer_source" "$plist_source"; do
   [ -f "$file" ] && [ ! -L "$file" ] || { echo 'Invalid installer resource' >&2; exit 1; }
 done
@@ -207,7 +207,7 @@ done
 /bin/chmod 0700 "$stage" "$binary"
 /usr/bin/xattr -dr com.apple.quarantine "$binary" "$installer" "$plist"
 if [ "$mode" = production ]; then
-  /usr/bin/codesign --verify --strict --all-architectures -R '=identifier "flyenv-helper" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] and certificate leaf[field.1.2.840.113635.100.6.1.13] and certificate leaf[subject.OU] = "956BZQ2F2P"' "$binary" || { echo 'FLYENV_HELPER_INSTALL_ERROR:helper_signature_invalid:FlyEnv helper signature is invalid. Use an officially signed build.' >&2; exit 1; }
+  /usr/bin/codesign --verify --strict --all-architectures -R '=identifier "qtenvdev-helper" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] and certificate leaf[field.1.2.840.113635.100.6.1.13] and certificate leaf[subject.OU] = "956BZQ2F2P"' "$binary" || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:QTEnvDev helper signature is invalid. Use an officially signed build.' >&2; exit 1; }
 fi
 /bin/sh "$installer" "$binary" "$plist" "$role" "$data"
 `
@@ -232,7 +232,7 @@ export function buildMacOSHelperInstallCommand(options: MacOSHelperInstallOption
     options.role,
     options.dataRoot
   ]
-  return `/usr/bin/sudo /usr/bin/env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/sh -c ${quoteLinuxShell(macOSHelperBootstrap)} flyenv-helper-bootstrap ${args.map(quoteLinuxShell).join(' ')}`
+  return `/usr/bin/sudo /usr/bin/env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/sh -c ${quoteLinuxShell(macOSHelperBootstrap)} qtenvdev-helper-bootstrap ${args.map(quoteLinuxShell).join(' ')}`
 }
 
 type AppHelperDeps = {
@@ -301,12 +301,12 @@ export class AppHelper {
   }> {
     if (isWindows()) {
       const bin = getWindowsHelperBinaryPath()
-      const backupBin = is.production() ? join(dirname(bin), 'flyenv-helper-backup.exe') : bin
+      const backupBin = is.production() ? join(dirname(bin), 'qtenvdev-helper-backup.exe') : bin
       if (!bin || (!windowsHelperBinaryExists() && !existsSync(backupBin))) {
         throw new AppHelperError('helper_binary_missing', `Windows helper binary missing: ${bin}`)
       }
       const tmpl = await readFile(
-        join(global.Server.Static!, 'sh/flyenv-auto-start-now.ps1'),
+        join(global.Server.Static!, 'sh/qtenvdev-auto-start-now.ps1'),
         'utf-8'
       )
       const windowsIdentity = await getIdentity()
@@ -324,14 +324,14 @@ export class AppHelper {
       const account = userInfo()
       const appRoot = PathResolve(global.Server.Static!, '../../../../')
       const helperFile = global.Server.isArmArch
-        ? 'flyenv-helper-linux-arm64'
-        : 'flyenv-helper-linux-amd64-v1'
+        ? 'qtenvdev-helper-linux-arm64'
+        : 'qtenvdev-helper-linux-amd64-v1'
       const binary = is.production()
-        ? join(appRoot, 'helper/flyenv-helper')
+        ? join(appRoot, 'helper/qtenvdev-helper')
         : PathResolve(global.Server.Static!, '../../../src/helper-go/dist', helperFile)
       const script = is.production()
-        ? join(appRoot, 'helper/flyenv-helper-init.sh')
-        : join(global.Server.Static!, 'sh/flyenv-helper-init.sh')
+        ? join(appRoot, 'helper/qtenvdev-helper-init.sh')
+        : join(global.Server.Static!, 'sh/qtenvdev-helper-init.sh')
       if (is.production()) {
         checkLinuxInstallSource(binary, appRoot)
         checkLinuxInstallSource(script, appRoot)
@@ -352,8 +352,8 @@ export class AppHelper {
       const production = is.production()
       const appRoot = PathResolve(global.Server.Static!, '../../../../')
       const helperFile = global.Server.isArmArch
-        ? 'flyenv-helper-darwin-arm64'
-        : 'flyenv-helper-darwin-amd64'
+        ? 'qtenvdev-helper-darwin-arm64'
+        : 'qtenvdev-helper-darwin-amd64'
       return {
         command: buildMacOSHelperInstallCommand({
           mode: production ? 'production' : 'development',
@@ -361,10 +361,10 @@ export class AppHelper {
           binary: production
             ? ''
             : PathResolve(global.Server.Static!, '../../../src/helper-go/dist', helperFile),
-          installer: production ? '' : join(global.Server.Static!, 'sh/flyenv-helper-init.sh'),
+          installer: production ? '' : join(global.Server.Static!, 'sh/qtenvdev-helper-init.sh'),
           plist: production
             ? ''
-            : PathResolve(global.Server.Static!, '../../../build/plist/com.flyenv.helper.plist'),
+            : PathResolve(global.Server.Static!, '../../../build/plist/com.qtenvdev.helper.plist'),
           role: `${account.uid}:${account.gid}`,
           dataRoot: realpathSync(dirname(global.Server.AppDir!))
         }),
@@ -430,7 +430,7 @@ export class AppHelper {
   private startInstallation(run: () => Promise<boolean>, terminal = false): Promise<boolean> {
     if (this.installation) {
       if (!terminal && !this.terminalInstallation) return this.installation
-      return Promise.reject(new Error('FlyEnv helper installation is already in progress'))
+      return Promise.reject(new Error('QTEnvDev helper installation is already in progress'))
     }
     this.state = 'installing'
     this.terminalInstallation = terminal
@@ -506,7 +506,7 @@ export class AppHelper {
         windowsInstallation = !!windowsScript
         const { stdout, stderr } = windowsScript
           ? await this.deps.installWindows(windowsScript)
-          : await this.deps.sudo(command, { name: 'FlyEnv', ...(icns ? { icns } : {}) })
+          : await this.deps.sudo(command, { name: 'QTEnvDev', ...(icns ? { icns } : {}) })
         appDebugLog('[AppHelper][install]', `${stdout}\n${stderr}`).catch(() => {})
         installationPerformed = true
         this.state = 'installed'

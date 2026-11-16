@@ -4,7 +4,7 @@
   "inputTips": "//Vstup JSON, JavaScript objekt/pole, pole PHP, URL, XML, YAML, PList. Automatický prevod do vybraného formátu",
   "parseFailTips": "Spracovanie zlyhalo",
   "inputCheckFailTips": "Nerozpoznané",
-  "systemProxyCheck": "Zistilo sa, že sieť používa proxy. Má byť FlyEnv nastavený na použitie tohto proxy?",
+  "systemProxyCheck": "Zistilo sa, že sieť používa proxy. Má byť QTEnvDev nastavený na použitie tohto proxy?",
   "systemProxyUsed": "Nastavenie bolo úspešné. Ak ho chcete zmeniť, urobte to v Nastavenia → Nastavenia proxy.",
   "windowCount": "Počet okien",
   "codemake": "Generovanie kódu",

@@ -101,7 +101,7 @@
   "allTasks": "すべてのタスク",
   "systemTasks": "システムタスク",
   "systemTask": "システムタスク",
-  "flyenvTask": "FlyEnv タスク",
+  "qtenvdevTask": "QTEnvDev タスク",
   "otherTask": "その他のタスク",
   "taskTrigger": "トリガー",
   "deleteSystemTaskTips": "このシステムのスケジュールタスクを削除しますか？",

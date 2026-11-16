@@ -4,7 +4,7 @@
   "inputTips": "//Nhập JSON, JavaScript Object/Array, PHP Array, URL, XML, YAML, PList. Tự động chuyển đổi sang định dạng đã chọn",
   "parseFailTips": "Phân tích thất bại",
   "inputCheckFailTips": "Không xác định",
-  "systemProxyCheck": "Phát hiện mạng đang sử dụng proxy, FlyEnv đã được cấu hình để dùng proxy này chưa?",
+  "systemProxyCheck": "Phát hiện mạng đang sử dụng proxy, QTEnvDev đã được cấu hình để dùng proxy này chưa?",
   "systemProxyUsed": "Thiết lập thành công. Nếu muốn thay đổi, vui lòng thực hiện trong Cài đặt -> Cài đặt Proxy.",
   "windowCount": "Số lượng cửa sổ",
   "codemake": "Sinh mã",

@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import assert from 'node:assert/strict'
 
-const root = process.env.FLYENV_DATA_ROOT!
+const root = process.env.QTENVDEV_DATA_ROOT!
 app.setPath('userData', root)
 app.setPath('logs', join(root, 'logs'))
 app.on('window-all-closed', () => {})
@@ -98,7 +98,7 @@ void app.whenReady().then(async () => {
     const code = (await manager.getRendererPlugins())[0].code
     await window.webContents.executeJavaScript(`window.mountFixture(${JSON.stringify(code)})`)
     await mcp.start()
-    const client = new Client({ name: 'flyenv', version: '1.0.0' })
+    const client = new Client({ name: 'qtenvdev', version: '1.0.0' })
     await client.connect(
       new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${options.port}/mcp`), {
         requestInit: { headers: { Authorization: 'Bearer temporary-smoke-token' } }

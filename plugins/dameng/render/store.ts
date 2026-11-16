@@ -22,7 +22,7 @@ import {
   type DamengVersionItem
 } from '../shared'
 
-const storageKey = 'flyenv-dameng-settings'
+const storageKey = 'qtenvdev-dameng-settings'
 export const isInitialPasswordValid = (password: string): boolean => {
   return (
     password.length >= 9 &&

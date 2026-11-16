@@ -1,7 +1,7 @@
 {
-  "description": "Licența FlyEnv susține dezvoltarea și întreținerea continuă a proiectului. Aceasta nu este destinată blocării dezvoltării locale de bază — runtime-urile esențiale și funcțiile de gestionare a mediului vor rămâne întotdeauna accesibile. O licență elimină limitele de evaluare ale instrumentelor premium și ajută la menținerea FlyEnv pe macOS, Windows și Linux.",
+  "description": "Licența QTEnvDev susține dezvoltarea și întreținerea continuă a proiectului. Aceasta nu este destinată blocării dezvoltării locale de bază — runtime-urile esențiale și funcțiile de gestionare a mediului vor rămâne întotdeauna accesibile. O licență elimină limitele de evaluare ale instrumentelor premium și ajută la menținerea QTEnvDev pe macOS, Windows și Linux.",
   "restrictions": {
-    "title": "FlyEnv rămâne funcțional fără licență, însă se aplică următoarele limite de evaluare:",
+    "title": "QTEnvDev rămâne funcțional fără licență, însă se aplică următoarele limite de evaluare:",
     "items": {
       "0": "Gestionarea siturilor este limitată la maximum 3 situri locale.",
       "1": "Asistentul AI este limitat la o perioadă de probă de 3 zile.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Cum să obții o licență",
-    "description": "FlyEnv oferă următoarele trei modalități de a obține o licență. Licențele nu pot fi emise automat încă, așa că toate cererile sunt verificate și emise manual:",
+    "description": "QTEnvDev oferă următoarele trei modalități de a obține o licență. Licențele nu pot fi emise automat încă, așa că toate cererile sunt verificate și emise manual:",
     "methods": {
       "0": {
         "title": "Achiziționează o licență personală",
-        "description": "O licență personală FlyEnv costă $10 USD. Aceasta acoperă un dispozitiv activ (transferul pe alt dispozitiv este acceptat prin gestionarea licenței) și elimină toate limitele de evaluare. Plata este procesată de Paddle. După achiziție, trimite ID-ul comenzii Paddle în formularul de cerere de mai jos. Pagina de achiziție:"
+        "description": "O licență personală QTEnvDev costă $10 USD. Aceasta acoperă un dispozitiv activ (transferul pe alt dispozitiv este acceptat prin gestionarea licenței) și elimină toate limitele de evaluare. Plata este procesată de Paddle. După achiziție, trimite ID-ul comenzii Paddle în formularul de cerere de mai jos. Pagina de achiziție:"
       },
       "1": {
         "title": "Contribuie la codul sursă",
-        "description": "Trimite un Pull Request pe GitHub pentru a ajuta la îmbunătățirea FlyEnv. Fiecare contribuție semnificativă contează — de la funcții majore la simple corecturi de documentație."
+        "description": "Trimite un Pull Request pe GitHub pentru a ajuta la îmbunătățirea QTEnvDev. Fiecare contribuție semnificativă contează — de la funcții majore la simple corecturi de documentație."
       },
       "2": {
         "title": "Promovează proiectul",
-        "description": "Împărtășește experiența ta cu FlyEnv pe orice platformă, în orice limbă — articole, videoclipuri, bloguri sau postări. Conținutul trebuie să fie original și autentic; conținutul publicat cu mai mult de 3 luni în urmă ar putea să nu mai fie eligibil."
+        "description": "Împărtășește experiența ta cu QTEnvDev pe orice platformă, în orice limbă — articole, videoclipuri, bloguri sau postări. Conținutul trebuie să fie original și autentic; conținutul publicat cu mai mult de 3 luni în urmă ar putea să nu mai fie eligibil."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Cod de autorizare neprimit",
   "oauthTimeout": "Autorizare expirată",
   "oauthSuccessTitle": "Autorizare reușită",
-  "oauthSuccessMessage": "Această pagină poate fi închisă. Vă rugăm să reveniți la FlyEnv pentru a vizualiza informațiile despre licență.",
+  "oauthSuccessMessage": "Această pagină poate fi închisă. Vă rugăm să reveniți la QTEnvDev pentru a vizualiza informațiile despre licență.",
   "trialExpiredTitle": "Licența nu este activată",
-  "trialExpiredTips": "Folosești FlyEnv de {days} zile. Dacă FlyEnv ți-a fost de ajutor, ia în considerare obținerea unei licențe pentru a susține proiectul."
+  "trialExpiredTips": "Folosești QTEnvDev de {days} zile. Dacă QTEnvDev ți-a fost de ajutor, ia în considerare obținerea unei licențe pentru a susține proiectul."
 }

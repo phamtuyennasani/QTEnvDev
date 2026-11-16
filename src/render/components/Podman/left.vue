@@ -2,7 +2,7 @@
   <el-card
     style="--el-card-padding: 12px 10px"
     shadow="never"
-    class="app-base-el-card w-[240px] overflow-hidden"
+    class="app-container-aside app-base-el-card w-[240px] overflow-hidden"
   >
     <template #header>
       <div class="flex items-center justify-between">

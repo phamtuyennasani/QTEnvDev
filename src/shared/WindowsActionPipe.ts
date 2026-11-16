@@ -37,13 +37,13 @@ const quote = (value: string) => `'${value.replace(/'/g, "''")}'`
  */
 export const windowsActionBrokerBootstrap = `$ErrorActionPreference='Stop'; $ProgressPreference='SilentlyContinue';
 ${buildWindowsActionStagePrelude()}
-Write-FlyEnvActionStage 'broker.bootstrap'
-$script:FlyEnvBrokerInput=[IO.StreamReader]::new([Console]::OpenStandardInput(), [Text.UTF8Encoding]::new($false, $true), $false, 4096, $true)
-$source=$script:FlyEnvBrokerInput.ReadLine()
-Write-FlyEnvActionStage 'broker.source-read'
+Write-QTEnvDevActionStage 'broker.bootstrap'
+$script:QTEnvDevBrokerInput=[IO.StreamReader]::new([Console]::OpenStandardInput(), [Text.UTF8Encoding]::new($false, $true), $false, 4096, $true)
+$source=$script:QTEnvDevBrokerInput.ReadLine()
+Write-QTEnvDevActionStage 'broker.source-read'
 if ($null -eq $source) { exit 1 }
 $decoded=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($source.TrimStart([char]0xFEFF)))
-Write-FlyEnvActionStage 'broker.source-decoded'
+Write-QTEnvDevActionStage 'broker.source-decoded'
 & ([ScriptBlock]::Create($decoded))`
 
 /**
@@ -63,7 +63,7 @@ using System.Security.Principal;
 using System.Security.AccessControl;
 using Microsoft.Win32.SafeHandles;
 // Only launch diagnostics are returned here. Business results still require native pipe authentication.
-public sealed class FlyEnvActionLaunch {
+public sealed class QTEnvDevActionLaunch {
   public string phase = "launch";
   public bool childStarted;
   public int? nativeErrorCode;
@@ -72,16 +72,16 @@ public sealed class FlyEnvActionLaunch {
   public string message;
   public int code = 1;
 }
-public static class FlyEnvActionPipe {
+public static class QTEnvDevActionPipe {
   ${buildPerformanceNativeStageWriters()}
   // Run Process.Start/WaitForExit outside the PowerShell runspace so it can serve the pipe
   // while consent is pending and while the client is waiting for its private action payload.
   // Reusing the already started broker removes a second ordinary PowerShell startup.
   // LongRunning gives blocking consent/exit waits a dedicated background thread; small
   // enterprise VMs must not wait for the thread pool to grow behind the stdin watcher.
-  public static System.Threading.Tasks.Task<FlyEnvActionLaunch> Launch(string executable, string arguments, bool elevated, bool timing) {
+  public static System.Threading.Tasks.Task<QTEnvDevActionLaunch> Launch(string executable, string arguments, bool elevated, bool timing) {
     return System.Threading.Tasks.Task.Factory.StartNew(delegate {
-      var result = new FlyEnvActionLaunch(); Process process = null;
+      var result = new QTEnvDevActionLaunch(); Process process = null;
       Stopwatch launchClock = ${performanceDiagnosticText('Stopwatch.StartNew()', 'null')};
       try {
         var info = new ProcessStartInfo(executable, arguments);
@@ -119,7 +119,7 @@ public static class FlyEnvActionPipe {
         WriteStage("launcher.child-exited", launchClock);
         if (result.code == 73) {
           result.nativeErrorCode = 73; result.pipeConnectFailed = true;
-          result.message = "The action process could not connect to the FlyEnv result pipe";
+          result.message = "The action process could not connect to the QTEnvDev result pipe";
         }
       } catch (Exception error) {
         while (error.InnerException != null) error = error.InnerException;
@@ -253,43 +253,43 @@ export const buildWindowsActionPipeBroker = (
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=New-Object Text.UTF8Encoding($false)
 try {
-  Write-FlyEnvActionStage 'broker.compile-start'
+  Write-QTEnvDevActionStage 'broker.compile-start'
   ${buildPerformanceScriptTiming('broker.compile', 'start', reportTiming)}
   Add-Type -TypeDefinition ${quote(nativePipeSource)}
-  Write-FlyEnvActionStage 'broker.compile-end'
+  Write-QTEnvDevActionStage 'broker.compile-end'
   ${buildPerformanceScriptTiming('broker.compile', 'end', reportTiming)}
   # The bootstrap may have prefetched part of this JSON while reading the code frame.
   # Reuse its reader; do not change Console.InputEncoding or reopen standard input here.
   # Parse failures must not echo a fragment of private file content into the public diagnostic.
   try {
-    Write-FlyEnvActionStage 'broker.input-read-start'
-    $inputLine=$script:FlyEnvBrokerInput.ReadLine()
-    Write-FlyEnvActionStage 'broker.input-read-end'
+    Write-QTEnvDevActionStage 'broker.input-read-start'
+    $inputLine=$script:QTEnvDevBrokerInput.ReadLine()
+    Write-QTEnvDevActionStage 'broker.input-read-end'
     $inputData=$inputLine | ConvertFrom-Json
-    Write-FlyEnvActionStage 'broker.input-parse-end'
+    Write-QTEnvDevActionStage 'broker.input-parse-end'
   }
   catch { throw 'Invalid Windows action input frame' }
-  ${options.launch ? '' : '[FlyEnvActionPipe]::WatchParent($script:FlyEnvBrokerInput)'}
+  ${options.launch ? '' : '[QTEnvDevActionPipe]::WatchParent($script:QTEnvDevBrokerInput)'}
   $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
   $sid=$identity.User.Value
   $requireElevated=${options.elevated ? '$true' : '$false'} -or ([Security.Principal.WindowsPrincipal]::new($identity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
   $executable=[Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
-  $pipe=[FlyEnvActionPipe]::Create(${quote(options.pipeName)}, $sid)
-  Write-FlyEnvActionStage 'broker.pipe-created'
+  $pipe=[QTEnvDevActionPipe]::Create(${quote(options.pipeName)}, $sid)
+  Write-QTEnvDevActionStage 'broker.pipe-created'
   try {
     [Console]::WriteLine('READY')
-    Write-FlyEnvActionStage 'broker.ready'
+    Write-QTEnvDevActionStage 'broker.ready'
     ${
       options.launch
         ? `
     # READY must be accepted by the live Node parent before a potentially mutating client starts.
     # Otherwise the 30s startup timeout can race with READY and misreport an already started write.
-    if ($script:FlyEnvBrokerInput.ReadLine() -cne 'LAUNCH') { throw 'Windows action parent did not authorize launch' }
-    Write-FlyEnvActionStage 'broker.launch-authorized'
+    if ($script:QTEnvDevBrokerInput.ReadLine() -cne 'LAUNCH') { throw 'Windows action parent did not authorize launch' }
+    Write-QTEnvDevActionStage 'broker.launch-authorized'
     # Only now give the same reader to the EOF watcher; it must not steal the launch acknowledgement.
-    [FlyEnvActionPipe]::WatchParent($script:FlyEnvBrokerInput)
+    [QTEnvDevActionPipe]::WatchParent($script:QTEnvDevBrokerInput)
     # Launch arguments contain only the fixed pipe bootstrap. Private action data stays on stdin/pipe.
-    $launchTask=[FlyEnvActionPipe]::Launch($executable, [string]$inputData.launchArguments, ${options.elevated ? '$true' : '$false'}, ${performanceDiagnosticText('$true', '$false', reportTiming)})
+    $launchTask=[QTEnvDevActionPipe]::Launch($executable, [string]$inputData.launchArguments, ${options.elevated ? '$true' : '$false'}, ${performanceDiagnosticText('$true', '$false', reportTiming)})
     $script:launchReported=$false
     function Report-ActionLaunch {
       if (-not $script:launchReported -and $launchTask.IsCompleted) {
@@ -314,18 +314,18 @@ try {
           : '$pipe.WaitForConnection()'
       }
       try {
-        Write-FlyEnvActionStage 'broker.client-connected'
-        $nonce=[FlyEnvActionPipe]::ReadLine($pipe, 256, 10000)
-        if ($nonce -cne ${quote(options.nonce)} -or -not [FlyEnvActionPipe]::Authenticate($pipe, $sid, $requireElevated, $executable)) { continue }
-        Write-FlyEnvActionStage 'broker.client-authenticated'
+        Write-QTEnvDevActionStage 'broker.client-connected'
+        $nonce=[QTEnvDevActionPipe]::ReadLine($pipe, 256, 10000)
+        if ($nonce -cne ${quote(options.nonce)} -or -not [QTEnvDevActionPipe]::Authenticate($pipe, $sid, $requireElevated, $executable)) { continue }
+        Write-QTEnvDevActionStage 'broker.client-authenticated'
         $writer=New-Object IO.StreamWriter($pipe, (New-Object Text.UTF8Encoding($false)), 4096, $true)
         try {
           $writer.AutoFlush=$true
           if ($null -ne $inputData.payload) { $writer.WriteLine(($inputData.payload | ConvertTo-Json -Depth 16 -Compress)) }
           else { $writer.WriteLine('READY') }
-          Write-FlyEnvActionStage 'broker.payload-sent'
-          $line=[FlyEnvActionPipe]::ReadLine($pipe, ${options.maxBytes}, 900000)
-          Write-FlyEnvActionStage 'broker.result-received'
+          Write-QTEnvDevActionStage 'broker.payload-sent'
+          $line=[QTEnvDevActionPipe]::ReadLine($pipe, ${options.maxBytes}, 900000)
+          Write-QTEnvDevActionStage 'broker.result-received'
           [Console]::WriteLine((@{ result=$line } | ConvertTo-Json -Compress))
           ${options.launch ? 'while (-not $launchTask.Wait(50)) { }; Report-ActionLaunch' : ''}
           break
@@ -334,7 +334,7 @@ try {
       finally { if ($pipe.IsConnected) { $pipe.Disconnect() } }
     }
   } finally { $pipe.Dispose(); $identity.Dispose() }
-} catch { Write-FlyEnvActionStage 'broker.failed'; [Console]::Error.WriteLine($_.Exception.Message); exit 1 }
+} catch { Write-QTEnvDevActionStage 'broker.failed'; [Console]::Error.WriteLine($_.Exception.Message); exit 1 }
 `
 
 export const createWindowsActionPipe = async (
@@ -455,7 +455,7 @@ export const createWindowsActionPipe = async (
             diagnostic = (diagnostic + line + '\n').slice(-2000)
         }
         // 错误流可能没有末尾换行，原启动错误仍应保留；固定阶段在完整行前不解释。
-        if (timingDiagnostic && !timingDiagnostic.startsWith('FLYENV_'))
+        if (timingDiagnostic && !timingDiagnostic.startsWith('QTENVDEV_'))
           diagnostic = (diagnostic + timingDiagnostic).slice(-2000)
       })
       child.stdout.setEncoding('utf8')

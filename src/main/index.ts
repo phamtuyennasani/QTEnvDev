@@ -8,7 +8,7 @@ import { getElectronResourcePath } from './utils/AppRuntimePath'
 
 if (is.production() && !isLinux()) {
   if (process.env?.PORTABLE_EXECUTABLE_DIR) {
-    const portableDataPath = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'FlyEnv-Data')
+    const portableDataPath = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'QTEnvDev-Data')
     app.setPath('userData', portableDataPath)
     app.setPath('sessionData', portableDataPath)
   } else {

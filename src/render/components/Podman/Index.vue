@@ -1,5 +1,5 @@
 <template>
-  <div class="soft-index-panel main-right-panel">
+  <div class="soft-index-panel main-right-panel app-workbench-page">
     <el-radio-group v-model="tab" class="mt-3">
       <el-radio-button label="Podman" value="podman"></el-radio-button>
     </el-radio-group>
@@ -62,7 +62,7 @@
         </el-card>
       </template>
       <template v-else-if="showNomal">
-        <div class="flex h-full w-full overflow-hidden gap-3">
+        <div class="app-container-workspace flex h-full w-full overflow-hidden gap-3">
           <LeftVM />
           <RightVM />
         </div>

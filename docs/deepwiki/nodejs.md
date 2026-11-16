@@ -9,7 +9,7 @@
 
 ## Overview
 
-Node.js 模块是 FlyEnv 中用于管理 Node.js 运行环境的核心组件。它支持多种版本管理工具（内置默认方式、fnm、nvm），提供版本安装/卸载、项目依赖管理、npm 镜像配置等功能。
+Node.js 模块是 QTEnvDev 中用于管理 Node.js 运行环境的核心组件。它支持多种版本管理工具（内置默认方式、fnm、nvm），提供版本安装/卸载、项目依赖管理、npm 镜像配置等功能。
 
 相关文档链接:
 - [Base Class](./base.md) - 所有服务模块的基类
@@ -28,7 +28,7 @@ Renderer Process
 │   ├── ProjectIndex (项目列表 Tab)
 │   ├── Service (服务管理 Tab)
 │   ├── Versions/List.vue (版本管理 Tab)
-│   │   ├── default/index.vue (FlyEnv 内置)
+│   │   ├── default/index.vue (QTEnvDev 内置)
 │   │   ├── fnm/index.vue (fnm 版本管理)
 │   │   └── nvm/index.vue (nvm 版本管理)
 │   ├── Config.vue (.npmrc 配置 Tab)
@@ -54,17 +54,17 @@ Fork Process
    │ - allVersion(): Fetch from nodejs.org
    │ - installOrUninstall(): Download & extract
    ▼
-4. Version Storage (~/Library/Application Support/FlyEnv/nodejs/)
+4. Version Storage (~/Library/Application Support/QTEnvDev/nodejs/)
    │
    ▼
-5. Environment Linking (~/Library/Application Support/FlyEnv/env/node)
+5. Environment Linking (~/Library/Application Support/QTEnvDev/env/node)
 ```
 
 ### Version Management Tools Support
 
 | Tool | Platform | Install Source | Version Storage |
 |------|----------|----------------|-----------------|
-| default (FlyEnv) | All | nodejs.org | `~/FlyEnv-Data/nodejs/` |
+| default (QTEnvDev) | All | nodejs.org | `~/QTEnvDev-Data/nodejs/` |
 | fnm | All | fnm CLI | `$FNM_DIR/node-versions/` |
 | nvm | Unix | nvm CLI | `$NVM_DIR/versions/node/` |
 
@@ -190,7 +190,7 @@ installOrUninstall('default', 'install', version)
 versionChange(item)
 │
 ├─> 1. Build version path
-│   path: ~/FlyEnv-Data/nodejs/v{item.version}/
+│   path: ~/QTEnvDev-Data/nodejs/v{item.version}/
 │
 ├─> 2. Update environment via ServiceActionStore
 │   IPC: app-fork:tools, 'updatePath'

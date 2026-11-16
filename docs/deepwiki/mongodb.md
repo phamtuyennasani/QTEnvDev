@@ -9,7 +9,7 @@
 
 ## Overview
 
-MongoDB 模块为 FlyEnv 提供 MongoDB 文档数据库的管理能力，支持多版本安装、服务启停控制、配置文件管理和日志查看。该模块采用标准的 FlyEnv 服务模块架构，在 Windows 平台使用 MongoDB Shell (mongosh) 进行服务关闭操作。
+MongoDB 模块为 QTEnvDev 提供 MongoDB 文档数据库的管理能力，支持多版本安装、服务启停控制、配置文件管理和日志查看。该模块采用标准的 QTEnvDev 服务模块架构，在 Windows 平台使用 MongoDB Shell (mongosh) 进行服务关闭操作。
 
 相关文档链接:
 - [MySQL Deep Dive](./mysql.md) - 关系型数据库对比
@@ -265,7 +265,7 @@ Uses Base class default implementation with TERM signal:
 |------|--------|-------------|
 | 1 | Process list fetch | Get all running processes |
 | 2 | PID collection | Collect from pid file and version.pid |
-| 3 | Process search | Find mongod processes matching FlyEnv paths |
+| 3 | Process search | Find mongod processes matching QTEnvDev paths |
 | 4 | Signal send | Send `-TERM` signal to collected PIDs |
 | 5 | Cleanup | Remove pid file |
 

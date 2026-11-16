@@ -4,7 +4,7 @@
   "inputTips": "//Introduzca JSON, Objeto/Array JavaScript, Array PHP, URL, XML, YAML, PList. Conversión automática al formato seleccionado",
   "parseFailTips": "Fallo al parsear",
   "inputCheckFailTips": "No identificado",
-  "systemProxyCheck": "Se detectó que la red usa un proxy, ¿FlyEnv está configurado para usar este proxy?",
+  "systemProxyCheck": "Se detectó que la red usa un proxy, ¿QTEnvDev está configurado para usar este proxy?",
   "systemProxyUsed": "Configuración exitosa. Si deseas modificar, hazlo en Configuraciones->Configuración de Proxy.",
   "windowCount": "Cantidad de Ventanas",
   "codemake": "Generación de Código",

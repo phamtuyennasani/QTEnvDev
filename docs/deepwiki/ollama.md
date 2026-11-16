@@ -9,7 +9,7 @@
 
 ## Overview
 
-Ollama 模块为 FlyEnv 提供本地大型语言模型(LLM)的运行和管理能力。用户可以通过该模块下载、管理和运行各种开源 AI 模型(如 Llama、Mistral 等)，并通过 REST API 进行交互。
+Ollama 模块为 QTEnvDev 提供本地大型语言模型(LLM)的运行和管理能力。用户可以通过该模块下载、管理和运行各种开源 AI 模型(如 Llama、Mistral 等)，并通过 REST API 进行交互。
 
 相关文档链接:
 - [Base Module](base.md) - 所有服务模块的基类
@@ -218,7 +218,7 @@ Inherited from `Base._stopServer()`:
 
 1. Read PID from `pid/ollama.pid`
 2. Search processes matching 'ollama' command
-3. Filter by FlyEnv data directories
+3. Filter by QTEnvDev data directories
 4. Send `-INT` signal (SIGINT) to terminate
 5. Clean up PID file
 
@@ -363,7 +363,7 @@ Parses output table to extract name and size.
 
 ### Model Library
 
-Fetches curated model list from FlyEnv API:
+Fetches curated model list from QTEnvDev API:
 
 ```
 POST https://api.one-env.com/api/version/fetch

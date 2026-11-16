@@ -1,7 +1,7 @@
 export default {
   tlsTitle: '本地 TLS 证书',
   tlsDescription:
-    '复用 FlyEnv 根 CA、SSL 证书工具生成的 CA，或 mkcert 的 rootCA.pem 和 rootCA-key.pem。为 localhost、本机名称、127.0.0.1 和 ::1 生成独立的节点及管理证书，并启用 HTTPS；CA 私钥保留在原位置。',
+    '复用 QTEnvDev 根 CA、SSL 证书工具生成的 CA，或 mkcert 的 rootCA.pem 和 rootCA-key.pem。为 localhost、本机名称、127.0.0.1 和 ::1 生成独立的节点及管理证书，并启用 HTTPS；CA 私钥保留在原位置。',
   tlsCACert: 'CA 证书',
   tlsCAKey: 'CA 私钥',
   tlsConfigure: '生成并配置 TLS',

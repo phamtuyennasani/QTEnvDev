@@ -174,11 +174,11 @@ func TestVerifySignatureIncludesAuthFields(t *testing.T) {
 		Key:       "request-1",
 		Module:    "tools",
 		Function:  "readFileByRoot",
-		Args:      []interface{}{"/tmp/FlyEnv/test.txt"},
+		Args:      []interface{}{"/tmp/QTEnvDev/test.txt"},
 		Ts:        time.Now().UnixMilli(),
 		Nonce:     "nonce-verify",
 		ClientPid: 12345,
-		ClientExe: "/Applications/FlyEnv.app/Contents/MacOS/FlyEnv",
+		ClientExe: "/Applications/QTEnvDev.app/Contents/MacOS/QTEnvDev",
 	}
 	item.Sig = signTaskForTest(helperKey, item)
 
@@ -193,7 +193,7 @@ func TestVerifySignatureIncludesAuthFields(t *testing.T) {
 	}
 
 	tampered = item
-	tampered.Args = []interface{}{"/tmp/FlyEnv/other.txt"}
+	tampered.Args = []interface{}{"/tmp/QTEnvDev/other.txt"}
 	if app.verifySignature(tampered) {
 		t.Fatal("signature should fail when args change")
 	}
@@ -210,19 +210,19 @@ func TestVerifySignatureCanonicalizesObjectArguments(t *testing.T) {
 	item := TaskItem{
 		Key:      "request-shell-hook",
 		Module:   "tools",
-		Function: "installFlyEnvPowerShellIntegration",
+		Function: "installQTEnvDevPowerShellIntegration",
 		Args: []interface{}{map[string]interface{}{
-			"scriptPath":   `C:\FlyEnv\bin\flyenv.ps1`,
+			"scriptPath":   `C:\QTEnvDev\bin\qtenvdev.ps1`,
 			"scriptBase64": "abc",
 			"profiles": []interface{}{map[string]interface{}{
-				"path":    `C:\Users\FlyEnv\Profile.ps1`,
+				"path":    `C:\Users\QTEnvDev\Profile.ps1`,
 				"edition": "pwsh",
 			}},
 		}},
 		Ts:        time.Now().UnixMilli(),
 		Nonce:     "nonce-shell-hook",
 		ClientPid: 12345,
-		ClientExe: `C:\FlyEnv\FlyEnv.exe`,
+		ClientExe: `C:\QTEnvDev\QTEnvDev.exe`,
 	}
 	item.Sig = signTaskForTest(helperKey, item)
 
@@ -237,7 +237,7 @@ func TestParseSetSystemPathArgsAcceptsOptionalExpectedRawPath(t *testing.T) {
 		`..\relative`,
 		``,
 	}
-	otherVars := map[string]interface{}{"JAVA_HOME": `C:\FlyEnv\java`}
+	otherVars := map[string]interface{}{"JAVA_HOME": `C:\QTEnvDev\java`}
 
 	parsedPaths, parsedVars, expectedRawPath, err := parseSetSystemPathArgs(
 		[]interface{}{paths, otherVars, `C:\SDK\bin;`},
@@ -248,7 +248,7 @@ func TestParseSetSystemPathArgsAcceptsOptionalExpectedRawPath(t *testing.T) {
 	if len(parsedPaths) != len(paths) || parsedPaths[0] != paths[0] || parsedPaths[2] != "" {
 		t.Fatalf("paths were not preserved: %#v", parsedPaths)
 	}
-	if parsedVars["JAVA_HOME"] != `C:\FlyEnv\java` {
+	if parsedVars["JAVA_HOME"] != `C:\QTEnvDev\java` {
 		t.Fatalf("otherVars were not preserved: %#v", parsedVars)
 	}
 	if expectedRawPath == nil || *expectedRawPath != `C:\SDK\bin;` {
@@ -266,7 +266,7 @@ func TestParseSetSystemPathArgsAcceptsOptionalExpectedRawPath(t *testing.T) {
 
 func TestParseSetSystemPathArgsRejectsNonStringExpectedRawPath(t *testing.T) {
 	_, _, _, err := parseSetSystemPathArgs(
-		[]interface{}{[]interface{}{`C:\FlyEnv\bin`}, map[string]interface{}{}, true},
+		[]interface{}{[]interface{}{`C:\QTEnvDev\bin`}, map[string]interface{}{}, true},
 	)
 	if err == nil {
 		t.Fatal("non-string expectedRawPath should fail")
@@ -275,7 +275,7 @@ func TestParseSetSystemPathArgsRejectsNonStringExpectedRawPath(t *testing.T) {
 
 func TestParseSetSystemPathArgsRejectsNULExpectedRawPath(t *testing.T) {
 	_, _, _, err := parseSetSystemPathArgs(
-		[]interface{}{[]interface{}{`C:\FlyEnv\bin`}, map[string]interface{}{}, "C:\\FlyEnv\x00bin"},
+		[]interface{}{[]interface{}{`C:\QTEnvDev\bin`}, map[string]interface{}{}, "C:\\QTEnvDev\x00bin"},
 	)
 	if err == nil {
 		t.Fatal("NUL expectedRawPath should fail")

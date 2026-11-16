@@ -1,7 +1,7 @@
 {
-  "description": "The FlyEnv license supports the ongoing development and maintenance of the project. It is not intended to block core local development — core runtimes and environment management features will always remain accessible. A license removes the evaluation limits of premium tools and helps keep FlyEnv maintained across macOS, Windows, and Linux.",
+  "description": "The QTEnvDev license supports the ongoing development and maintenance of the project. It is not intended to block core local development — core runtimes and environment management features will always remain accessible. A license removes the evaluation limits of premium tools and helps keep QTEnvDev maintained across macOS, Windows, and Linux.",
   "restrictions": {
-    "title": "FlyEnv remains functional without a license, but the following evaluation limits apply:",
+    "title": "QTEnvDev remains functional without a license, but the following evaluation limits apply:",
     "items": {
       "0": "Site management is limited to a maximum of 3 local sites.",
       "1": "The AI assistant is limited to a 3-day trial.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "How to Get Licensed",
-    "description": "FlyEnv offers the following three ways to obtain a license. Licenses cannot be issued automatically yet, so all requests are reviewed and issued manually:",
+    "description": "QTEnvDev offers the following three ways to obtain a license. Licenses cannot be issued automatically yet, so all requests are reviewed and issued manually:",
     "methods": {
       "0": {
         "title": "Purchase a Personal License",
-        "description": "A FlyEnv Personal License costs $10 USD. It covers one active device (device transfer is supported via license management) and removes all evaluation limits. Checkout is processed by Paddle. After purchasing, submit your Paddle order ID in the request form below. Purchase page:"
+        "description": "A QTEnvDev Personal License costs $10 USD. It covers one active device (device transfer is supported via license management) and removes all evaluation limits. Checkout is processed by Paddle. After purchasing, submit your Paddle order ID in the request form below. Purchase page:"
       },
       "1": {
         "title": "Contribute to the Codebase",
-        "description": "Submit a Pull Request on GitHub to help improve FlyEnv. Every meaningful contribution counts — from major features to simple documentation fixes."
+        "description": "Submit a Pull Request on GitHub to help improve QTEnvDev. Every meaningful contribution counts — from major features to simple documentation fixes."
       },
       "2": {
         "title": "Spread the Word",
-        "description": "Share your FlyEnv experience on any platform in any language — articles, videos, blogs, or posts. Content must be original and authentic; content published more than 3 months ago may no longer be eligible."
+        "description": "Share your QTEnvDev experience on any platform in any language — articles, videos, blogs, or posts. Content must be original and authentic; content published more than 3 months ago may no longer be eligible."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Authorization code not received",
   "oauthTimeout": "Authorization timeout",
   "oauthSuccessTitle": "Authorization Successful",
-  "oauthSuccessMessage": "This page can be closed. Please return to FlyEnv to view the license information.",
+  "oauthSuccessMessage": "This page can be closed. Please return to QTEnvDev to view the license information.",
   "trialExpiredTitle": "License Not Activated",
-  "trialExpiredTips": "You have been using FlyEnv for {days} days. If FlyEnv has been helpful to you, please consider obtaining a license to support the project."
+  "trialExpiredTips": "You have been using QTEnvDev for {days} days. If QTEnvDev has been helpful to you, please consider obtaining a license to support the project."
 }

@@ -1,7 +1,7 @@
 {
-  "description": "A FlyEnv licenc a projekt folyamatos fejlesztését és karbantartását támogatja. Nem célja az alapvető helyi fejlesztés akadályozása – az alapvető futtatókörnyezetek és a környezetkezelési funkciók mindig elérhetők maradnak. A licenc megszünteti a prémium eszközök próbaidőszaki korlátozásait, és hozzájárul ahhoz, hogy a FlyEnv macOS-en, Windowson és Linuxon is karbantartott maradjon.",
+  "description": "A QTEnvDev licenc a projekt folyamatos fejlesztését és karbantartását támogatja. Nem célja az alapvető helyi fejlesztés akadályozása – az alapvető futtatókörnyezetek és a környezetkezelési funkciók mindig elérhetők maradnak. A licenc megszünteti a prémium eszközök próbaidőszaki korlátozásait, és hozzájárul ahhoz, hogy a QTEnvDev macOS-en, Windowson és Linuxon is karbantartott maradjon.",
   "restrictions": {
-    "title": "A FlyEnv licenc nélkül is működik, de az alábbi próbaidőszaki korlátozások érvényesek:",
+    "title": "A QTEnvDev licenc nélkül is működik, de az alábbi próbaidőszaki korlátozások érvényesek:",
     "items": {
       "0": "A webhelykezelés legfeljebb 3 helyi webhelyre korlátozódik.",
       "1": "Az AI asszisztens 3 napos próbaidőszakra korlátozódik.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Licenc megszerzése",
-    "description": "A FlyEnv a következő három módot kínálja a licenc megszerzésére. A licencek kiállítása egyelőre nem automatizált, ezért minden kérelmet manuálisan ellenőrzünk és állítunk ki:",
+    "description": "A QTEnvDev a következő három módot kínálja a licenc megszerzésére. A licencek kiállítása egyelőre nem automatizált, ezért minden kérelmet manuálisan ellenőrzünk és állítunk ki:",
     "methods": {
       "0": {
         "title": "Personal License vásárlása",
-        "description": "A FlyEnv Personal License ára $10 USD. Egy aktív eszközre vonatkozik (az eszköz átvitele a licenckezelésen keresztül támogatott), és megszünteti az összes próbaidőszaki korlátozást. A fizetést a Paddle dolgozza fel. A vásárlás után adja meg a Paddle rendelésazonosítóját az alábbi űrlapon. Vásárlási oldal:"
+        "description": "A QTEnvDev Personal License ára $10 USD. Egy aktív eszközre vonatkozik (az eszköz átvitele a licenckezelésen keresztül támogatott), és megszünteti az összes próbaidőszaki korlátozást. A fizetést a Paddle dolgozza fel. A vásárlás után adja meg a Paddle rendelésazonosítóját az alábbi űrlapon. Vásárlási oldal:"
       },
       "1": {
         "title": "Hozzájárulás a kódbázishoz",
-        "description": "Küldjön be Pull Requestet a GitHubon, hogy segítse a FlyEnv fejlesztését. Minden értékes hozzájárulás számít – a nagyobb funkcióktól az egyszerű dokumentációjavításokig."
+        "description": "Küldjön be Pull Requestet a GitHubon, hogy segítse a QTEnvDev fejlesztését. Minden értékes hozzájárulás számít – a nagyobb funkcióktól az egyszerű dokumentációjavításokig."
       },
       "2": {
         "title": "Terjessze a hírt",
-        "description": "Ossza meg FlyEnv-s tapasztalatait bármely platformon, bármilyen nyelven – cikkekben, videókban, blogokban vagy bejegyzésekben. A tartalomnak eredetinek és hitelesnek kell lennie; a 3 hónapnál régebben közzétett tartalmak már nem feltétlenül jogosítanak licencre."
+        "description": "Ossza meg QTEnvDev-s tapasztalatait bármely platformon, bármilyen nyelven – cikkekben, videókban, blogokban vagy bejegyzésekben. A tartalomnak eredetinek és hitelesnek kell lennie; a 3 hónapnál régebben közzétett tartalmak már nem feltétlenül jogosítanak licencre."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Nem érkezett engedélyezési kód",
   "oauthTimeout": "Engedélyezési időtúllépés",
   "oauthSuccessTitle": "Engedélyezés sikeres",
-  "oauthSuccessMessage": "Ez az oldal bezárható. Térjen vissza a FlyEnv-be a licencinformációk megtekintéséhez.",
+  "oauthSuccessMessage": "Ez az oldal bezárható. Térjen vissza a QTEnvDev-be a licencinformációk megtekintéséhez.",
   "trialExpiredTitle": "A licenc nincs aktiválva",
-  "trialExpiredTips": "{days} napja használja a FlyEnv-et. Ha a FlyEnv hasznos volt Önnek, fontolja meg a licenc megszerzését a projekt támogatásához."
+  "trialExpiredTips": "{days} napja használja a QTEnvDev-et. Ha a QTEnvDev hasznos volt Önnek, fontolja meg a licenc megszerzését a projekt támogatásához."
 }

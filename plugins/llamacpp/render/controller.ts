@@ -127,7 +127,7 @@ const notifyOperationError = (message: string) => {
     .catch(() => {})
 }
 
-const modelsKey = 'flyenv-llama-cpp-models'
+const modelsKey = 'qtenvdev-llama-cpp-models'
 type RuntimeChannel = 'stable' | 'prerelease'
 type HubCatalog = { pages: Record<string, HubModel[]>; files: Record<string, HubModelFile[]> }
 type ModelViewState = {

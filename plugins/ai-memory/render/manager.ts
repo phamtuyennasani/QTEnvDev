@@ -17,7 +17,7 @@ import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
 export const memoryRules = () =>
   `${AppI18n().global.locale ?? 'en'}`.startsWith('zh') ? rulesZh : rulesEn
 const memoryTools = ['search', 'get', 'store', 'update', 'forget'].map(
-  (name) => `flyenv_memory_${name}`
+  (name) => `qtenvdev_memory_${name}`
 )
 function readMCP(command = 'mcp:getConfig'): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -39,8 +39,8 @@ export const MemoryManager = reactiveBind(
   new MemoryController({
     ipc: IPC,
     id: () => crypto.randomUUID(),
-    readPreferences: () => StorageGetAsync('flyenv-plugin-ai-memory-v1'),
-    writePreferences: (value) => StorageSetAsync('flyenv-plugin-ai-memory-v1', value),
+    readPreferences: () => StorageGetAsync('qtenvdev-plugin-ai-memory-v1'),
+    writePreferences: (value) => StorageSetAsync('qtenvdev-plugin-ai-memory-v1', value),
     readConnection: async () => {
       const [config, status] = await Promise.all([readMCP(), readMCP('mcp:status')])
       if (MCPSetup) {
@@ -66,7 +66,7 @@ export const MemoryManager = reactiveBind(
     copyRules: () => clipboard.writeText(memoryRules()),
     downloadRules: async () => {
       const choice = await dialog.showSaveDialog({
-        defaultPath: 'flyenv-memory-rules.md',
+        defaultPath: 'qtenvdev-memory-rules.md',
         filters: [{ name: 'Markdown', extensions: ['md'] }]
       })
       if (choice.canceled || !choice.filePath) return false

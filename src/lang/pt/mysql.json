@@ -17,7 +17,7 @@
   "passwordFormatError": "A senha do banco de dados não pode conter caracteres chineses ou especiais",
   "savePassword": "Atualizar senha",
   "resetPasswordTips": "Esta operação irá alterar a senha do usuário root do banco de dados.",
-  "savePasswordTips": "Apenas atualiza a senha armazenada no FlyEnv, não altera a senha do usuário root do banco de dados. Esta senha é usada principalmente para parar com segurança a instância {app}.",
+  "savePasswordTips": "Apenas atualiza a senha armazenada no QTEnvDev, não altera a senha do usuário root do banco de dados. Esta senha é usada principalmente para parar com segurança a instância {app}.",
   "resetPasswordConfirm": "Esta operação irá alterar a senha do usuário root do banco de dados. Tem a certeza que quer continuar?",
   "mysqlNeedRunTips": "Por favor, inicie {app} primeiro",
   "databaseName": "Nome do banco de dados",

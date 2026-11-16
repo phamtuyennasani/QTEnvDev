@@ -43,11 +43,11 @@ const sources: Record<string, string> = {
     'export const StopProcessListFetch=async()=>globalThis.__damengCore.list',
   '@shared/Process':
     'export const ProcessListFetch=async()=>globalThis.__damengCore.list;export const ProcessListByExactPid=pid=>globalThis.__damengCore.list.filter(p=>p.PID===pid)',
-  './policy': `export * from "/Users/x/Desktop/WorkSpace/GitHub/FlyEnv/plugins/dameng/fork/policy.ts"; import {assertDataPath as data} from "/Users/x/Desktop/WorkSpace/GitHub/FlyEnv/plugins/dameng/fork/policy.ts";
+  './policy': `export * from "/Users/x/Desktop/WorkSpace/GitHub/QTEnvDev/plugins/dameng/fork/policy.ts"; import {assertDataPath as data} from "/Users/x/Desktop/WorkSpace/GitHub/QTEnvDev/plugins/dameng/fork/policy.ts";
     export const assertDataPath=root=>data(root,false);`,
   'node:os': "export const arch=()=> 'x64';export const freemem=()=>32*1024**3",
   './linux': `export const linuxInstall=async(_iso,dir)=>{const h=globalThis.__damengCore;if(h.installFails)throw Error('external config preflight');{const fs=globalThis.__dmFs;await fs.mkdir(dir+'/bin',{recursive:true});for(const f of ['dmserver','dminit','disql'])await fs.writeFile(dir+'/bin/'+f,'engine');}return {installed:true,handoffError:h.installHandoff?'companion handoff failed':undefined}};export const linuxUninstall=async()=>{if(globalThis.__damengCore.uninstallPreflight)throw Object.assign(Error('missing uninstaller'),{noSideEffects:true});return {uninstalled:true}}`,
-  './windows': `const h=globalThis.__damengCore;export const windowsInstall=async()=>{throw Error('UAC canceled')};export const windowsRegisterService=async()=>{if(h.registrationFails)throw Error('ACL handoff failed')};export const windowsServiceStatus=async()=>({state:h.state,pid:h.state==='Running'?'42':''});export const windowsStartService=async()=>{h.state='Running';h.list=[{PID:'42',COMMAND:'dmsvc.exe database FLYENV',CREATED:'2026-10-16T01:00:00Z'}];return {pid:'42'}};export const windowsStopService=async()=>{h.state='Stopped';h.list=[]};export const windowsUninstall=async()=>({uninstalled:true})`
+  './windows': `const h=globalThis.__damengCore;export const windowsInstall=async()=>{throw Error('UAC canceled')};export const windowsRegisterService=async()=>{if(h.registrationFails)throw Error('ACL handoff failed')};export const windowsServiceStatus=async()=>({state:h.state,pid:h.state==='Running'?'42':''});export const windowsStartService=async()=>{h.state='Running';h.list=[{PID:'42',COMMAND:'dmsvc.exe database QTENVDEV',CREATED:'2026-10-16T01:00:00Z'}];return {pid:'42'}};export const windowsStopService=async()=>{h.state='Stopped';h.list=[]};export const windowsUninstall=async()=>({uninstalled:true})`
 }
 const actualFs = await import('node:fs/promises')
 ;(globalThis as any).__dmFs = actualFs
@@ -55,7 +55,7 @@ const runtimePath = resolve('plugins/dameng/fork/runtime.ts')
 sources['./runtime'] =
   String.raw`export * from ${JSON.stringify(runtimePath)};const h=globalThis.__damengCore;const fs=globalThis.__dmFs;
   export const downloadPackage=async()=>{};export const extractPinnedIso=async()=>{};
-  export const runCommand=async(bin,args,options)=>{if(bin.endsWith('dminit')||bin.endsWith('dminit.exe')){h.initCount++;if(h.initControlRejects)throw Error('[SYSTEM_PATH] value error; invalid control file');const control=await fs.readFile(args[0].slice(8),'utf8');const root=control.match(/SYSTEM_PATH = '(.*)'/)[1].replaceAll("''","'");const instance=control.match(/INSTANCE_NAME = (.*)/)[1];await fs.mkdir(root+'/DAMENG',{recursive:true});await fs.writeFile(root+'/DAMENG/dm.ini','INSTANCE_NAME = '+instance+'\nPORT_NUM = 5236');for(const f of ['SYSTEM.DBF','MAIN.DBF','ROLL.DBF','dm.ctl'])await fs.writeFile(root+'/DAMENG/'+f,'data');if(h.initFails)throw Error('dminit failed after writing files');}if(bin.endsWith('disql')||bin.endsWith('disql.exe')){h.disqlCalls.push(options.input);if(h.disqlAuthFail)throw Error('DM command disql.exe exited 1: [-2501]:Invalid username or password.');return 'FLYENV_DM_READY='+h.disqlInstance+':OPEN';}return 'FLYENV_DM_READY\nFLYENV_DM_LICENSE=2027-01-01';}`
+  export const runCommand=async(bin,args,options)=>{if(bin.endsWith('dminit')||bin.endsWith('dminit.exe')){h.initCount++;if(h.initControlRejects)throw Error('[SYSTEM_PATH] value error; invalid control file');const control=await fs.readFile(args[0].slice(8),'utf8');const root=control.match(/SYSTEM_PATH = '(.*)'/)[1].replaceAll("''","'");const instance=control.match(/INSTANCE_NAME = (.*)/)[1];await fs.mkdir(root+'/DAMENG',{recursive:true});await fs.writeFile(root+'/DAMENG/dm.ini','INSTANCE_NAME = '+instance+'\nPORT_NUM = 5236');for(const f of ['SYSTEM.DBF','MAIN.DBF','ROLL.DBF','dm.ctl'])await fs.writeFile(root+'/DAMENG/'+f,'data');if(h.initFails)throw Error('dminit failed after writing files');}if(bin.endsWith('disql')||bin.endsWith('disql.exe')){h.disqlCalls.push(options.input);if(h.disqlAuthFail)throw Error('DM command disql.exe exited 1: [-2501]:Invalid username or password.');return 'QTENVDEV_DM_READY='+h.disqlInstance+':OPEN';}return 'QTENVDEV_DM_READY\nQTENVDEV_DM_LICENSE=2027-01-01';}`
 const output = join(directory, 'core.mjs')
 try {
   await build({
@@ -112,7 +112,7 @@ try {
     await mkdir(join(directory, 'server/dameng/installations'), { recursive: true })
     const m = {
       schema: 1,
-      owner: 'flyenv-dameng',
+      owner: 'qtenvdev-dameng',
       installId: item.id,
       version: item.version,
       isoSha256: item.isoSha256,
@@ -153,7 +153,7 @@ try {
     await mkdir(path, { recursive: true })
   }
   const realConnection = dm.connection.bind(dm)
-  dm.connection = async () => 'FLYENV_DM_READY'
+  dm.connection = async () => 'QTENVDEV_DM_READY'
 
   const params = {
     ...defaultDamengSettings(),
@@ -257,11 +257,11 @@ try {
     'known authentication failure releases admission for an explicit retry'
   )
   await dm._stopServer(authFailure.row)
-  dm.connection = async () => 'FLYENV_DM_READY'
+  dm.connection = async () => 'QTENVDEV_DM_READY'
 
   const windowsReused = await setup('win32', 'initialized', { pid: '42', created: 'old' })
   harness.state = 'Running'
-  harness.list = [{ PID: '42', CREATED: 'new', COMMAND: 'dmsvc.exe database FLYENV' }]
+  harness.list = [{ PID: '42', CREATED: 'new', COMMAND: 'dmsvc.exe database QTENVDEV' }]
   await assert.rejects(Promise.resolve(dm._stopServer(windowsReused.row)), /birth identity/)
   assert.equal(harness.state, 'Running', 'SCM PID reuse must not stop the external restart')
   const windowsStale = await setup('win32', 'initialized', { pid: '41', created: 'old' })
@@ -278,7 +278,7 @@ try {
   })
   harness.state = 'Running'
   harness.list = [
-    { PID: '42', CREATED: '2026-10-16T01:00:00Z', COMMAND: 'dmsvc.exe database FLYENV' }
+    { PID: '42', CREATED: '2026-10-16T01:00:00Z', COMMAND: 'dmsvc.exe database QTENVDEV' }
   ]
   harness.failExitWait = true
   await assert.rejects(Promise.resolve(dm._stopServer(windowsExit.row)), /DAMENG_OUTCOME_UNKNOWN/)

@@ -18,7 +18,7 @@
   "sourcePath": "PATH سیستم",
   "sourceDefault": "مکان پیش‌فرض SDK",
   "sourceCustom": "مسیر سفارشی پیکربندی‌شده",
-  "sourceFlyenv": "SDK مدیریت‌شده توسط FlyEnv",
+  "sourceQTEnvDev": "SDK مدیریت‌شده توسط QTEnvDev",
   "sourceUnknown": "ناشناخته",
   "createProjectTitle": "ایجاد پروژه فلاتر",
   "create": "ایجاد",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "یک ماژول فلاتر برای قرار گرفتن در یک برنامه اندروید یا iOS موجود.",
   "templateSkeletonDesc": "یک برنامه لیست/جزئیات فلاتر با متریال ۳ و ناوبری ۲.۰.",
   "androidSdkNotDetected": "Android SDK شناسایی نشد",
-  "androidSdkInstallHint": "FlyEnv به‌طور خودکار Android SDK را نصب نمی‌کند. SDK را با Android Studio یا ابزارهای رسمی خط فرمان Android نصب کنید.",
+  "androidSdkInstallHint": "QTEnvDev به‌طور خودکار Android SDK را نصب نمی‌کند. SDK را با Android Studio یا ابزارهای رسمی خط فرمان Android نصب کنید.",
   "installAndroidStudio": "نصب Android Studio",
   "androidCommandLineTools": "ابزارهای خط فرمان Android",
-  "androidSdkAfterInstall": "پس از نصب SDK، به FlyEnv برگردید، روی به‌روزرسانی (Refresh) کلیک کنید و سپس با Auto-fix محیط را پیکربندی کنید."
+  "androidSdkAfterInstall": "پس از نصب SDK، به QTEnvDev برگردید، روی به‌روزرسانی (Refresh) کلیک کنید و سپس با Auto-fix محیط را پیکربندی کنید."
 }

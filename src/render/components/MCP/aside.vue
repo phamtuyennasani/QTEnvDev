@@ -8,7 +8,7 @@
       <div class="icon-block" :class="{ run: serviceRunning }">
         <yb-icon :svg="import('@/svg/mcp.svg?raw')" style="padding: 3px" width="28" height="28" />
       </div>
-      <span class="title">FlyEnv {{ I18nT('mcp.title') }}</span>
+      <span class="title">QTEnvDev {{ I18nT('mcp.title') }}</span>
     </div>
     <el-switch
       v-model="serviceRunning"

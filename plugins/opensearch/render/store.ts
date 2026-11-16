@@ -5,7 +5,7 @@ import IPC from '@/util/IPC'
 import { I18nT } from '@lang/index'
 import { OpenSearchT } from './lang'
 
-const storageKey = 'flyenv-opensearch-dev-mode'
+const storageKey = 'qtenvdev-opensearch-dev-mode'
 
 export const normalizeOpenSearchPath = (path: string | undefined | null) => {
   const value = `${path ?? ''}`.trim().replaceAll('\\', '/')

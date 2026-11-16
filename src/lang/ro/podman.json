@@ -2,7 +2,7 @@
   "podmanInstall": "Instaleaza Podman",
   "installPodmanByHomebrew": "Instalați Podman prin Homebrew",
   "noPodmanFound": "Nici un <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a> detectat.\nPentru a instala Podman, puteţi face clic pe butonul de instalare.\nDe asemenea, puteți da click pe acest link\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nși să urmați documentația pentru a o instala manual.",
-  "podmanErrorTips": "La locația {bin}, un executabil Podman a fost detectat.\nDar FlyEnv nu îl poate invoca pe acesta. Mesaj de eroare:\n{error}",
+  "podmanErrorTips": "La locația {bin}, un executabil Podman a fost detectat.\nDar QTEnvDev nu îl poate invoca pe acesta. Mesaj de eroare:\n{error}",
   "removeContainerTips": "Sunteţi sigur că doriţi să eliminaţi acest container?",
   "removeMachineTips": "Sunteţi sigur că doriţi să eliminaţi această maşină virtuală?",
   "removeImageTips": "Sunteţi sigur că doriţi să ştergeţi această imagine?",

@@ -7,7 +7,7 @@ import { ShortcutsT } from './lang'
 import { shell } from '@/util/NodeFn'
 import { openDirectoryPath } from './path'
 
-const storageKey = 'flyenv-plugin-command-shortcuts-v1'
+const storageKey = 'qtenvdev-plugin-command-shortcuts-v1'
 
 export const CommandShortcutsManager = reactiveBind(
   new CommandShortcutsController({

@@ -66,7 +66,7 @@ export const executeWindowsPrivilegeOperation = async <T>(
     ],
     userDocuments: global.Server?.UserDocuments ?? ''
   }
-  if (fn === 'ensureFlyEnvDataDirectory' || fn === 'setAutoStartWin')
+  if (fn === 'ensureQTEnvDevDataDirectory' || fn === 'setAutoStartWin')
     context.userSid = (await originalIdentity()).sid
   if (fn === 'kill' || fn === 'killPorts') {
     // 此处只服务显式 Helper/端口工具动作；普通服务已经使用首次列表与
@@ -91,7 +91,7 @@ export const executeWindowsPrivilegeOperation = async <T>(
     const targets =
       fn === 'kill'
         ? `@(${targetIds})`
-        : `@(@(${targetIds}) | ForEach-Object { Get-FlyEnvStopListenerPids ([int]$_) } | Sort-Object -Unique)`
+        : `@(@(${targetIds}) | ForEach-Object { Get-QTEnvDevStopListenerPids ([int]$_) } | Sort-Object -Unique)`
 
     // 先使用完整精度的 Process.StartTime；权限拒绝时才以当前 CIM 创建时间和
     // 可执行路径固定候选，再要求授权后的执行端重查相同来源。只读查询不启动 Helper。
@@ -104,8 +104,8 @@ export const executeWindowsPrivilegeOperation = async <T>(
           `${windowsStopProcessLookup}
 ${windowsStopListenerLookup}
 $targetPids = ${targets}
-$global:FlyEnvActionResult = @(foreach ($targetPid in $targetPids) {
-  $target = Get-FlyEnvStopTarget $targetPid
+$global:QTEnvDevActionResult = @(foreach ($targetPid in $targetPids) {
+  $target = Get-QTEnvDevStopTarget $targetPid
   if ($null -eq $target) { continue }
   try {
     $created = ${windowsProcessStartIdentity}
@@ -132,7 +132,7 @@ $global:FlyEnvActionResult = @(foreach ($targetPid in $targetPids) {
         const owners = await timeOperation('process-stop.fallback-listeners', () =>
           runWindowsAction<unknown>(
             `${windowsStopListenerLookup}
-$global:FlyEnvActionResult = @(@(${portIds}) | ForEach-Object { Get-FlyEnvStopListenerPids ([int]$_) } | Sort-Object -Unique)`,
+$global:QTEnvDevActionResult = @(@(${portIds}) | ForEach-Object { Get-QTEnvDevStopListenerPids ([int]$_) } | Sort-Object -Unique)`,
             false,
             { readOnly: true }
           )
@@ -173,7 +173,7 @@ $global:FlyEnvActionResult = @(@(${portIds}) | ForEach-Object { Get-FlyEnvStopLi
     'writeFileByRoot',
     'writeBufferBase64ByRoot',
     'rm',
-    'ensureFlyEnvDataDirectory',
+    'ensureQTEnvDevDataDirectory',
     'sslAddTrustedCert'
   ].includes(fn)
     ? [String(args[0])]
@@ -191,7 +191,7 @@ $global:FlyEnvActionResult = @(@(${portIds}) | ForEach-Object { Get-FlyEnvStopLi
     fn === 'setSystemPath' ||
     fn === 'setSystemEnv' ||
     fn === 'sslAddTrustedCert' ||
-    fn === 'ensureFlyEnvDataDirectory'
+    fn === 'ensureQTEnvDevDataDirectory'
   // 普通文件成功时不探测令牌，PowerShell 被企业策略限制也不影响 Node 文件操作。
   const elevated = machineWrite ? await isWindowsProcessElevated() : false
   logWindowsPath('privilege.route', { fn, elevated, machineWrite })

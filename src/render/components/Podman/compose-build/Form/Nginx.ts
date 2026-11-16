@@ -27,11 +27,11 @@ const Nginx = reactive({
     const nginx: any = {
       image: `${mirror}nginx:${Nginx.version}`,
       ports: Nginx.ports.map((p) => `${p.out}:${p.in}`),
-      networks: ['flyenv-network']
+      networks: ['qtenvdev-network']
     }
-    const flyenvDir = join(dirname(base.dir), 'flyenv-docker-compose/nginx')
-    await fs.mkdirp(flyenvDir)
-    await fs.mkdirp(join(flyenvDir, 'conf'))
+    const qtenvdevDir = join(dirname(base.dir), 'qtenvdev-docker-compose/nginx')
+    await fs.mkdirp(qtenvdevDir)
+    await fs.mkdirp(join(qtenvdevDir, 'conf'))
 
     const root = Nginx.wwwRoot
     const volumes = [
@@ -45,16 +45,16 @@ const Nginx = reactive({
 
     // 复制默认配置文件
     const tmpl = join(window.Server.Static!, 'tmpl/docker-nginx.conf')
-    await fs.copyFile(tmpl, join(flyenvDir, 'conf/nginx.conf'))
+    await fs.copyFile(tmpl, join(qtenvdevDir, 'conf/nginx.conf'))
 
     if (PHP.enable) {
       volumes.push({
         type: 'bind',
-        source: './flyenv-docker-compose/nginx/conf/vhost.conf',
+        source: './qtenvdev-docker-compose/nginx/conf/vhost.conf',
         target: '/etc/nginx/conf.d/default.conf',
         read_only: true
       })
-      await fs.mkdirp(join(flyenvDir, 'conf'))
+      await fs.mkdirp(join(qtenvdevDir, 'conf'))
 
       let rootPath = '/usr/share/nginx/html'
       if (Nginx.docRoot !== '/') {
@@ -100,7 +100,7 @@ const Nginx = reactive({
         access_log off;
     }
 }`
-      await fs.writeFile(join(flyenvDir, 'conf/vhost.conf'), content)
+      await fs.writeFile(join(qtenvdevDir, 'conf/vhost.conf'), content)
     }
 
     const environment: any = {

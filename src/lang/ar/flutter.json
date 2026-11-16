@@ -18,7 +18,7 @@
   "sourcePath": "مسار النظام",
   "sourceDefault": "موقع SDK الافتراضي",
   "sourceCustom": "مسار مخصص",
-  "sourceFlyenv": "SDK مُدار بواسطة FlyEnv",
+  "sourceQTEnvDev": "SDK مُدار بواسطة QTEnvDev",
   "sourceUnknown": "غير معروف",
   "createProjectTitle": "إنشاء مشروع Flutter",
   "create": "إنشاء",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "وحدة Flutter يمكن دمجها داخل تطبيق Android/iOS موجود.",
   "templateSkeletonDesc": "قالب قائمة/تفاصيل يعتمد على Material 3 و Navigation 2.0.",
   "androidSdkNotDetected": "لم يتم اكتشاف Android SDK",
-  "androidSdkInstallHint": "لا يثبّت FlyEnv حزمة Android SDK تلقائيًا. ثبّت الحزمة باستخدام Android Studio أو أدوات سطر الأوامر الرسمية لنظام Android.",
+  "androidSdkInstallHint": "لا يثبّت QTEnvDev حزمة Android SDK تلقائيًا. ثبّت الحزمة باستخدام Android Studio أو أدوات سطر الأوامر الرسمية لنظام Android.",
   "installAndroidStudio": "تثبيت Android Studio",
   "androidCommandLineTools": "أدوات سطر الأوامر لنظام Android",
-  "androidSdkAfterInstall": "بعد تثبيت SDK، عُد إلى FlyEnv وانقر على تحديث (Refresh)، ثم استخدم الإصلاح التلقائي (Auto-fix) لإعداد البيئة."
+  "androidSdkAfterInstall": "بعد تثبيت SDK، عُد إلى QTEnvDev وانقر على تحديث (Refresh)، ثم استخدم الإصلاح التلقائي (Auto-fix) لإعداد البيئة."
 }

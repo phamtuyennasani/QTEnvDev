@@ -34,7 +34,7 @@ test('one-click node previews allocate independent identities, sockets, ports an
     [13307, 13308, 13309]
   )
   assert.equal(new Set(request.instances.map((i: any) => i.socket)).size, 3)
-  assert.equal(request.instances[0].socket, '/tmp/flyenv-mdbc-abc-1.sock')
+  assert.equal(request.instances[0].socket, '/tmp/qtenvdev-mdbc-abc-1.sock')
   assert.equal(request.instances[0].dataDir, '/tmp/my data/abc/node-1')
   assert.equal(request.cluster.memberIds.length, 3)
 })
@@ -58,7 +58,7 @@ test('replica count adds a source and Windows previews use pipe names', () => {
     'Windows'
   )
   assert.equal(request.instances.length, 3)
-  assert.equal(request.instances[0].socket, 'FlyEnvMDBC_abc_1')
+  assert.equal(request.instances[0].socket, 'QTEnvDevMDBC_abc_1')
   assert.equal(request.credentials.abc_1.password, 'pw')
 })
 

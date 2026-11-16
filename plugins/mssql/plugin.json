@@ -7,7 +7,7 @@
     "en": "Microsoft SQL Server for x64 Windows and Ubuntu. Windows installs silently with official Setup and uses manual service startup. Ubuntu runs the unpacked engine with Bubblewrap.",
     "zh": "适用于 x64 Windows 和 Ubuntu 的 SQL Server。Windows 使用官方 Setup 静默安装，服务按需启动；Ubuntu 通过 Bubblewrap 运行解包后的引擎。"
   },
-  "author": "FlyEnv",
+  "author": "QTEnvDev",
   "module": {
     "typeFlag": "mssql",
     "moduleType": "dataBaseServer",

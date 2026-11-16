@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Initialisering af datamappe lykkedes, datamappe sti: {dir}",
   "initDBDataDirFail": "Initialisering af datamappe mislykkedes, årsag: {error}",
   "newProjectFail": "Kunne ikke oprette nyt projekt",
-  "processListFail": "Procesliste hentning mislykkedes. Installer venligst FlyEnv Helper"
+  "processListFail": "Procesliste hentning mislykkedes. Installer venligst QTEnvDev Helper"
 }

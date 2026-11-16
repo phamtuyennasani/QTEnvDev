@@ -4,7 +4,7 @@ import AfterPack from '../build/afterPack'
 import Notarize from '../build/notarize'
 
 // Use the requested macOS target architecture when cross-building; otherwise use the host arch.
-const configuredArch = process.env.FLYENV_MAC_BUILD_ARCH
+const configuredArch = process.env.QTENVDEV_MAC_BUILD_ARCH
 const currentArch =
   configuredArch === 'arm64' || (configuredArch !== 'x64' && process.arch === 'arm64')
     ? 'arm64'
@@ -35,8 +35,8 @@ const ptyPrebuildExcludes = [
  * One Environ
  */
 const conf: Configuration = {
-  productName: 'FlyEnv',
-  executableName: 'FlyEnv',
+  productName: 'QTEnvDev',
+  executableName: 'QTEnvDev',
   buildVersion: '4.21.0',
   electronVersion: '39.8.10',
   appId: 'phpstudy.xpfme.com',
@@ -89,10 +89,10 @@ const conf: Configuration = {
     asarUnpack: ['**/*.node', '**/node_modules/sharp/**/*', '**/node_modules/@img/**/*'],
     extendInfo: {
       'Icon file': 'icon.icns',
-      CFBundleDisplayName: 'FlyEnv',
-      CFBundleExecutable: 'FlyEnv',
+      CFBundleDisplayName: 'QTEnvDev',
+      CFBundleExecutable: 'QTEnvDev',
       // Sealed installation protocol; fixed bootstrap rejects older signed installers.
-      FlyEnvHelperProtocolVersion: 50
+      QTEnvDevHelperProtocolVersion: 50
     },
     type: 'distribution',
     darkModeSupport: true,

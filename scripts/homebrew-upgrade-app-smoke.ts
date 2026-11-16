@@ -11,7 +11,7 @@ import { buildLanguageAssets } from './build-language-assets'
 const output = resolve('.superpowers/sdd/2026-11-07-homebrew-language-upgrade/app-smoke')
 await mkdir(output, { recursive: true })
 await rm(join(output, 'result.json'), { force: true })
-const root = await realpath(await mkdtemp(join(tmpdir(), 'flyenv-brew-smoke-')))
+const root = await realpath(await mkdtemp(join(tmpdir(), 'qtenvdev-brew-smoke-')))
 const server = await createServer({
   ...viteConfig.serverConfig,
   configFile: false,
@@ -89,7 +89,7 @@ if(args[0]==='--prefix')console.log(path.join(root,'prefix'));else if(args[0]===
   })
   const env = {
     ...process.env,
-    FLYENV_DATA_ROOT: root,
+    QTENVDEV_DATA_ROOT: root,
     BREW_SMOKE_ROOT: root,
     BREW_SMOKE_OUTPUT: output,
     BREW_SMOKE_REPO: process.cwd(),

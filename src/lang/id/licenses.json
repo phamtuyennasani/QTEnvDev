@@ -1,7 +1,7 @@
 {
-  "description": "Lisensi FlyEnv mendukung pengembangan dan pemeliharaan proyek ini secara berkelanjutan. Lisensi ini tidak dimaksudkan untuk memblokir pengembangan lokal inti — runtime inti dan fitur manajemen lingkungan akan selalu tetap dapat diakses. Lisensi menghapus batas evaluasi pada alat premium dan membantu menjaga FlyEnv tetap terpelihara di macOS, Windows, dan Linux.",
+  "description": "Lisensi QTEnvDev mendukung pengembangan dan pemeliharaan proyek ini secara berkelanjutan. Lisensi ini tidak dimaksudkan untuk memblokir pengembangan lokal inti — runtime inti dan fitur manajemen lingkungan akan selalu tetap dapat diakses. Lisensi menghapus batas evaluasi pada alat premium dan membantu menjaga QTEnvDev tetap terpelihara di macOS, Windows, dan Linux.",
   "restrictions": {
-    "title": "FlyEnv tetap berfungsi tanpa lisensi, tetapi batas evaluasi berikut berlaku:",
+    "title": "QTEnvDev tetap berfungsi tanpa lisensi, tetapi batas evaluasi berikut berlaku:",
     "items": {
       "0": "Manajemen situs dibatasi maksimal 3 situs lokal.",
       "1": "Asisten AI dibatasi untuk masa percobaan 3 hari.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Cara Mendapatkan Lisensi",
-    "description": "FlyEnv menawarkan tiga cara berikut untuk mendapatkan lisensi. Lisensi belum dapat diterbitkan secara otomatis, sehingga semua permohonan ditinjau dan diterbitkan secara manual:",
+    "description": "QTEnvDev menawarkan tiga cara berikut untuk mendapatkan lisensi. Lisensi belum dapat diterbitkan secara otomatis, sehingga semua permohonan ditinjau dan diterbitkan secara manual:",
     "methods": {
       "0": {
         "title": "Beli Lisensi Personal",
-        "description": "Lisensi Personal FlyEnv seharga $10 USD. Lisensi ini mencakup satu perangkat aktif (perpindahan perangkat didukung melalui manajemen lisensi) dan menghapus semua batas evaluasi. Pembayaran diproses oleh Paddle. Setelah membeli, kirimkan ID pesanan Paddle Anda di formulir permohonan di bawah. Halaman pembelian:"
+        "description": "Lisensi Personal QTEnvDev seharga $10 USD. Lisensi ini mencakup satu perangkat aktif (perpindahan perangkat didukung melalui manajemen lisensi) dan menghapus semua batas evaluasi. Pembayaran diproses oleh Paddle. Setelah membeli, kirimkan ID pesanan Paddle Anda di formulir permohonan di bawah. Halaman pembelian:"
       },
       "1": {
         "title": "Berkontribusi pada Kode",
-        "description": "Kirimkan Pull Request di GitHub untuk membantu meningkatkan FlyEnv. Setiap kontribusi yang bermakna diperhitungkan — mulai dari fitur besar hingga perbaikan dokumentasi sederhana."
+        "description": "Kirimkan Pull Request di GitHub untuk membantu meningkatkan QTEnvDev. Setiap kontribusi yang bermakna diperhitungkan — mulai dari fitur besar hingga perbaikan dokumentasi sederhana."
       },
       "2": {
         "title": "Sebarkan Kabar",
-        "description": "Bagikan pengalaman FlyEnv Anda di platform mana pun dalam bahasa apa pun — artikel, video, blog, atau postingan. Konten harus orisinal dan autentik; konten yang dipublikasikan lebih dari 3 bulan yang lalu mungkin tidak lagi memenuhi syarat."
+        "description": "Bagikan pengalaman QTEnvDev Anda di platform mana pun dalam bahasa apa pun — artikel, video, blog, atau postingan. Konten harus orisinal dan autentik; konten yang dipublikasikan lebih dari 3 bulan yang lalu mungkin tidak lagi memenuhi syarat."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Kode otorisasi tidak diterima",
   "oauthTimeout": "Waktu otorisasi habis",
   "oauthSuccessTitle": "Otorisasi Berhasil",
-  "oauthSuccessMessage": "Halaman ini dapat ditutup. Silakan kembali ke FlyEnv untuk melihat informasi lisensi.",
+  "oauthSuccessMessage": "Halaman ini dapat ditutup. Silakan kembali ke QTEnvDev untuk melihat informasi lisensi.",
   "trialExpiredTitle": "Lisensi belum diaktifkan",
-  "trialExpiredTips": "Anda telah menggunakan FlyEnv selama {days} hari. Jika FlyEnv bermanfaat bagi Anda, pertimbangkan untuk mendapatkan lisensi untuk mendukung proyek ini."
+  "trialExpiredTips": "Anda telah menggunakan QTEnvDev selama {days} hari. Jika QTEnvDev bermanfaat bagi Anda, pertimbangkan untuk mendapatkan lisensi untuk mendukung proyek ini."
 }

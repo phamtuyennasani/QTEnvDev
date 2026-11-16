@@ -59,7 +59,7 @@
   "samePortTips": "Web-lokacija s istom domenom i priključkom za slušanje već postoji. Upotrijebite drugi priključak za dodavanje drugog web-mjesta s istom domenom.",
   "composerVersion": "Verzija Composera",
   "useSysVersion": "Verzije postavljene korištenjem varijabli okruženja",
-  "sslTips": "<p>Funkcija automatskog SSL certifikata zahtijeva dodavanje certifikata nazvanog FlyEnv-Root-CA u lanac ključeva i postavljanje da mu se uvijek vjeruje</p>\n<p>Normalno, ova funkcija će biti automatski dovršena. </p>\n<p>Ako ova funkcija ne radi ispravno. Možete i kopirati i izvršiti naredbe u terminalu. </p>\n<p>Možete i dvostruko kliknuti za dodavanje certifikata u otvorenu mapu i ručno postaviti povjerenje na uvijek vjerovati u aplikaciji za lanac ključeva</p>",
+  "sslTips": "<p>Funkcija automatskog SSL certifikata zahtijeva dodavanje certifikata nazvanog QTEnvDev-Root-CA u lanac ključeva i postavljanje da mu se uvijek vjeruje</p>\n<p>Normalno, ova funkcija će biti automatski dovršena. </p>\n<p>Ako ova funkcija ne radi ispravno. Možete i kopirati i izvršiti naredbe u terminalu. </p>\n<p>Možete i dvostruko kliknuti za dodavanje certifikata u otvorenu mapu i ručno postaviti povjerenje na uvijek vjerovati u aplikaciji za lanac ključeva</p>",
   "copyCommand": "Kopiraj Naredbu",
   "showFile": "Prikaži Datoteku",
   "sticky": "Prikvači",

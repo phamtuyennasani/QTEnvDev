@@ -78,7 +78,7 @@ test('adapts actual Unix host installed entries to the real server while retaini
   for (const [path, flag, source] of [
     ['/opt/homebrew/Cellar/mysql@8.4/8.4.8/', '', 'Homebrew'],
     ['/opt/local/lib/mysql8/', 'macports', 'Macports'],
-    ['/Applications/FlyEnv/mysql/', '', 'Static']
+    ['/Applications/QTEnvDev/mysql/', '', 'Static']
   ]) {
     const candidate = {
       path,

@@ -180,7 +180,7 @@ export default {
   connectHttpHelp:
     'Add a server in the client’s global MCP settings and paste the configuration. Field names vary by client.',
   connectStdioHelp:
-    'For clients that require stdio. Local Node.js and the FlyEnv bridge are required.',
+    'For clients that require stdio. Local Node.js and the QTEnvDev bridge are required.',
   connectKeepRunning: 'The configuration contains your access token; share it carefully.',
   connectAddRules: 'Add memory instructions',
   connectGenericRulesHelp:
@@ -285,7 +285,7 @@ export default {
   setup: 'Connection & maintenance',
   mcpSettings: 'Open MCP settings',
   setupHelp:
-    'Open MCP settings, start the HTTP service, then enable the five flyenv_memory tools and choose their approval rules. Return here and check status.',
+    'Open MCP settings, start the HTTP service, then enable the five qtenvdev_memory tools and choose their approval rules. Return here and check status.',
   configureCodex: 'Configure Codex',
   configureKimi: 'Configure Kimi',
   configured: 'Client configuration written. Reconnect and verify tools.',
@@ -299,7 +299,7 @@ export default {
   actionFailed: 'Action failed; other completed actions are unchanged.',
   calls: 'Call Records',
   callsHelp:
-    'Detailed memory calls, search queries, filters and hit summaries for debugging and verification. Full content is excluded. Records are memory-only and clear when FlyEnv exits.',
+    'Detailed memory calls, search queries, filters and hit summaries for debugging and verification. Full content is excluded. Records are memory-only and clear when QTEnvDev exits.',
   duration: 'Duration',
   request: 'Request',
   response: 'Response',
@@ -312,7 +312,7 @@ export default {
   backupHelp:
     'Disable this plugin in the plugin manager and wait for disable to finish (the worker must exit). Copy the entire data directory, including projects.json, projects.previous.json, global and projects. Before restoring, keep a copy of the current directory. Restore a consistent full backup while disabled. For a mapping-only repair, validate projects.previous.json, explicitly copy it to projects.json, then re-enable and inspect unmapped project IDs. Never guess a mapping or delete unmatched directories.',
   lifecycleHelp:
-    'Moving a project creates a new project scope. Old projects remain accessible by ID. Memory tools require FlyEnv to be running. Deletion cannot erase external backups.',
+    'Moving a project creates a new project scope. Old projects remain accessible by ID. Memory tools require QTEnvDev to be running. Deletion cannot erase external backups.',
   record_not_found: 'Memory not found',
   project_unregistered: 'Project is not registered',
   invalid_input: 'Check required fields, lengths and timestamps.',
@@ -352,7 +352,7 @@ export default {
   contentHelp: 'The facts, decisions or instructions you want to keep. Markdown is supported.',
   reasonHelp: 'What changed and why?',
   topicHelp: 'Uses the title when left empty.',
-  manualSource: 'Entered manually by the user in FlyEnv.',
+  manualSource: 'Entered manually by the user in QTEnvDev.',
   bodyTooLarge: 'Content exceeds 16 KiB. Shorten it before saving.',
   reloadLatest: 'Reload latest version (replaces this draft)',
   connectIntro:
@@ -384,7 +384,7 @@ export default {
   downloadFailed: 'Could not save the file. Choose another location.',
   verifyStep: '4. Verify in your agent',
   verificationPrompt:
-    'Use FlyEnv memory for this project. Remember that this is a connection test. Save it with the memory tool, then retrieve the saved memory and report its actual ID and revision. Ask me to confirm the project root if it is unclear.',
+    'Use QTEnvDev memory for this project. Remember that this is a connection test. Save it with the memory tool, then retrieve the saved memory and report its actual ID and revision. Ask me to confirm the project root if it is unclear.',
   verificationHelp:
     'Copy this request into a new Codex or Kimi session in your project. A successful save and read confirms that session can use memory.',
   copyVerification: 'Copy test request',
@@ -397,7 +397,7 @@ export default {
   result: 'Result',
   hits: 'Matches',
   noCalls:
-    'No calls observed in this FlyEnv session. Run a memory request from your agent, then refresh.',
+    'No calls observed in this QTEnvDev session. Run a memory request from your agent, then refresh.',
   backupStop: 'Disable AI Memory in the plugin manager and wait until it is disabled.',
   backupCopy: 'Open the data directory and copy the entire folder to your backup location.',
   backupRestore:

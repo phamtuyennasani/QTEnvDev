@@ -48,11 +48,11 @@ assert.deepEqual(
 )
 console.log('RabbitMQ startup identity regression: 8 cases passed')
 
-if (process.platform !== 'win32' || !process.env.FLYENV_RABBITMQ_TEST_BIN) {
-  console.log('RabbitMQ live stop test: set FLYENV_RABBITMQ_TEST_BIN on Windows to run')
+if (process.platform !== 'win32' || !process.env.QTENVDEV_RABBITMQ_TEST_BIN) {
+  console.log('RabbitMQ live stop test: set QTENVDEV_RABBITMQ_TEST_BIN on Windows to run')
   process.exit(0)
 }
-const root = await mkdtemp(join(tmpdir(), 'FlyEnv RabbitMQ stop '))
+const root = await mkdtemp(join(tmpdir(), 'QTEnvDev RabbitMQ stop '))
 const previousServer = global.Server
 const previousEnv = EnvSync.AppEnv
 const previousCwd = process.cwd()
@@ -66,7 +66,7 @@ try {
   await mkdir(join(root, 'home'))
   EnvSync.AppEnv = {
     ...Object.fromEntries(Object.entries(process.env).filter(([, value]) => value !== undefined)),
-    ERLANG_HOME: process.env.FLYENV_RABBITMQ_TEST_ERLANG_HOME!,
+    ERLANG_HOME: process.env.QTENVDEV_RABBITMQ_TEST_ERLANG_HOME!,
     HOME: join(root, 'home'),
     USERPROFILE: join(root, 'home')
   }
@@ -83,12 +83,12 @@ try {
   )
   const version = {
     version: '4.3.4',
-    bin: process.env.FLYENV_RABBITMQ_TEST_BIN!,
-    path: dirname(dirname(process.env.FLYENV_RABBITMQ_TEST_BIN!)),
+    bin: process.env.QTENVDEV_RABBITMQ_TEST_BIN!,
+    path: dirname(dirname(process.env.QTENVDEV_RABBITMQ_TEST_BIN!)),
     typeFlag: 'rabbitmq'
   } as SoftInstalled
   const foreign = spawn(
-    join(process.env.FLYENV_RABBITMQ_TEST_ERLANG_HOME!, 'bin/erl.exe'),
+    join(process.env.QTENVDEV_RABBITMQ_TEST_ERLANG_HOME!, 'bin/erl.exe'),
     [
       '-noshell',
       '-noinput',
@@ -123,14 +123,14 @@ try {
   await writeFile(
     join(rabbitmq.baseDir, 'rabbitmq-4.bat'),
     [
-      `set "RABBITMQ_NODENAME=flyenv_test_${process.pid}@localhost"`,
+      `set "RABBITMQ_NODENAME=qtenvdev_test_${process.pid}@localhost"`,
       `set "RABBITMQ_DIST_PORT=${ports[1]}"`,
       `set "MNESIA_BASE=${mnesia}"`,
       `set "RABBITMQ_PID_FILE=${join(mnesia, 'fixture.pid')}"`,
       `set "RABBITMQ_LOG_BASE=${join(rabbitmq.baseDir, 'logs')}"`,
       `set "RABBITMQ_CONFIG_FILE=${brokerConfig}"`,
       `set "RABBITMQ_ENABLED_PLUGINS_FILE=${join(rabbitmq.baseDir, 'enabled_plugins-4')}"`,
-      `set "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=+S 2:2 +A 2 -setcookie flyenv_fixture_${process.pid}"`
+      `set "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=+S 2:2 +A 2 -setcookie qtenvdev_fixture_${process.pid}"`
     ].join('\r\n')
   )
   for (const reason of ['stop', 'quit'] as const) {
@@ -208,6 +208,6 @@ try {
   rabbitmq.pidPath = previousPidPath
   EnvSync.AppEnv = previousEnv
   global.Server = previousServer
-  assert.ok(root.startsWith(join(tmpdir(), 'FlyEnv RabbitMQ stop ')))
+  assert.ok(root.startsWith(join(tmpdir(), 'QTEnvDev RabbitMQ stop ')))
   await rm(root, { recursive: true, force: true })
 }

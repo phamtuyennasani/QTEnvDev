@@ -9,7 +9,7 @@ import { timePerformanceOperation, writePerformanceLog } from '@shared/Performan
  * 不增加 READY/ACK，不改变 worker 分派或 runtime 的初始化协议。
  */
 const bootstrapWriter = (category: string, message: string) =>
-  appendFile(join(tmpdir(), 'flyenv-debug.log'), `${category}: ${message}\n`, 'utf8')
+  appendFile(join(tmpdir(), 'qtenvdev-debug.log'), `${category}: ${message}\n`, 'utf8')
 const traceBootstrap = (
   stage: string,
   data: Record<string, unknown> | (() => Record<string, unknown>) = {},

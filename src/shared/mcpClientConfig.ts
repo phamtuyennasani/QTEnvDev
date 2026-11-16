@@ -37,11 +37,11 @@ export function buildHttpClientConfigSnippet(
         rmcp_client: true
       },
       mcp_servers: {
-        flyenv: { url }
+        qtenvdev: { url }
       }
     }
     if (headers) {
-      data.mcp_servers.flyenv.http_headers = headers
+      data.mcp_servers.qtenvdev.http_headers = headers
     }
     return stringifyToml(data)
   }
@@ -50,7 +50,7 @@ export function buildHttpClientConfigSnippet(
     return JSON.stringify(
       {
         mcp: {
-          flyenv: {
+          qtenvdev: {
             type: 'remote',
             url,
             ...(headers ? { headers } : {})
@@ -66,7 +66,7 @@ export function buildHttpClientConfigSnippet(
     return JSON.stringify(
       {
         mcpServers: {
-          flyenv: {
+          qtenvdev: {
             url,
             ...(headers ? { headers } : {})
           }
@@ -81,7 +81,7 @@ export function buildHttpClientConfigSnippet(
     return JSON.stringify(
       {
         mcpServers: {
-          flyenv: {
+          qtenvdev: {
             serverUrl: url,
             ...(headers ? { headers } : {})
           }
@@ -96,7 +96,7 @@ export function buildHttpClientConfigSnippet(
     return JSON.stringify(
       {
         mcpServers: {
-          flyenv: {
+          qtenvdev: {
             tools: ['*'],
             type: 'http',
             url,
@@ -113,7 +113,7 @@ export function buildHttpClientConfigSnippet(
   return JSON.stringify(
     {
       mcpServers: {
-        flyenv: {
+        qtenvdev: {
           type: 'http',
           url,
           ...(headers ? { headers } : {})
@@ -133,12 +133,12 @@ export function buildStdioClientConfigSnippet(
   return JSON.stringify(
     {
       mcpServers: {
-        flyenv: {
+        qtenvdev: {
           command: 'node',
           args: [bridgePath],
           env: {
-            FLYENV_MCP_URL: url,
-            FLYENV_MCP_TOKEN: token
+            QTENVDEV_MCP_URL: url,
+            QTENVDEV_MCP_TOKEN: token
           }
         }
       }

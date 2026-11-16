@@ -67,12 +67,12 @@ export const timeOperation = <T>(stage: string, action: () => T | PromiseLike<T>
 
 /** 只解析固定计时白名单；不将 stderr 标记当作认证/执行结果。 */
 export const acceptOperationTimingLine = (line: string, status: 'ok' | 'error' = 'ok') => {
-  if (line === 'FLYENV_TIMING|launcher.runas-requested') {
+  if (line === 'QTENVDEV_TIMING|launcher.runas-requested') {
     markOperationStage('launcher.runas-requested')
     return true
   }
   const match =
-    /^FLYENV_TIMING\|(broker\.compile|launcher\.runas|action\.execute)\|(\d+(?:\.\d+)?)$/u.exec(
+    /^QTENVDEV_TIMING\|(broker\.compile|launcher\.runas|action\.execute)\|(\d+(?:\.\d+)?)$/u.exec(
       line
     )
   const context = performanceDiagnosticValue(() => timing.getStore(), undefined)

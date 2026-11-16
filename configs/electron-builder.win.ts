@@ -2,8 +2,8 @@ import type { Configuration } from 'electron-builder'
 import AfterSign from '../build/afterSign'
 
 const conf: Configuration = {
-  productName: 'FlyEnv',
-  executableName: 'FlyEnv',
+  productName: 'QTEnvDev',
+  executableName: 'QTEnvDev',
   buildVersion: '4.21.0',
   electronVersion: '39.8.10',
   appId: 'phpstudy.xpfme.com',
@@ -23,14 +23,14 @@ const conf: Configuration = {
     '!**/node_modules/node-pty/prebuilds/{darwin-arm64,darwin-x64,linux-arm64,linux-x64,win32-arm64}/**',
     '!**/node_modules/node-pty/third_party/conpty/*/win10-arm64/**'
   ],
-  artifactName: 'FlyEnv-Setup-${version}.${ext}',
+  artifactName: 'QTEnvDev-Setup-${version}.${ext}',
   win: {
-    artifactName: 'FlyEnv-Setup-${version}.${ext}',
+    artifactName: 'QTEnvDev-Setup-${version}.${ext}',
     asarUnpack: ['**/*.node', '**/node_modules/sharp/**/*', '**/node_modules/@img/**/*'],
     extraResources: [
       {
-        from: 'src/helper-go/dist/flyenv-helper-windows-amd64-v1.exe',
-        to: 'app.asar.unpacked/node_modules/helper/flyenv-helper.exe'
+        from: 'src/helper-go/dist/qtenvdev-helper-windows-amd64-v1.exe',
+        to: 'app.asar.unpacked/node_modules/helper/qtenvdev-helper.exe'
       }
     ],
     // Windows release signing is performed from GitHub workflow artifacts via the
@@ -53,8 +53,8 @@ const conf: Configuration = {
     allowElevation: true
   },
   portable: {
-    artifactName: 'FlyEnv-Portable-${version}.${ext}',
-    unpackDirName: 'FlyEnv-Portable-${version}'
+    artifactName: 'QTEnvDev-Portable-${version}.${ext}',
+    unpackDirName: 'QTEnvDev-Portable-${version}'
   },
   publish: [],
   // Move the helper into its final path before the workflow collects unsigned PE files.

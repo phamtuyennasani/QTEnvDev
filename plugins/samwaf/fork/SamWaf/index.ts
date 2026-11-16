@@ -133,7 +133,7 @@ class SamWaf extends Base {
 
   /**
    * Readiness = a live process owned by THIS install, found the same way the
-   * rest of FlyEnv finds service processes: search by binary name, keep only
+   * rest of QTEnvDev finds service processes: search by binary name, keep only
    * rows whose command line carries this version's ownership markers (the
    * same `ownedProcessMarkers` Base's stop flow uses, so start/stop agree on
    * what "ours" means). A foreign SamWaf instance — manual start, leftover —
@@ -481,7 +481,7 @@ class SamWaf extends Base {
    * the dialog correctly reappears for genuinely fresh installs.
    */
   private _initialPasswordMarker(version: SoftInstalled): string {
-    return join(dirname(this._executable(version)), '.flyenv-initial-password-shown')
+    return join(dirname(this._executable(version)), '.qtenvdev-initial-password-shown')
   }
 
   /**

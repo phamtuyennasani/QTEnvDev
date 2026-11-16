@@ -30,7 +30,7 @@ export class CloudflareTunnel {
     this.run = false
     this.running = false
     if (this.apiToken && !this.tunnelName) {
-      this.tunnelName = `FlyEnv-Tunnel-${md5(this.apiToken).substring(0, 12)}`
+      this.tunnelName = `QTEnvDev-Tunnel-${md5(this.apiToken).substring(0, 12)}`
     }
   }
 

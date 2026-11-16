@@ -139,7 +139,7 @@ export const mergeLaunchOptions = (
     throw Error('Duplicate model loading option source')
   for (const option of extra) {
     if (controlledOptions.has(option.canonicalName))
-      throw Error('This option is managed by FlyEnv: ' + option.flag)
+      throw Error('This option is managed by QTEnvDev: ' + option.flag)
     const repeatable =
       [
         'lora',

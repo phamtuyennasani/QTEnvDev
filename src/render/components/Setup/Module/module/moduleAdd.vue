@@ -431,7 +431,7 @@
   })
 
   const toLicense = () => {
-    setupStore.tab = 'licenses'
+    setupStore.tab = 'module'
     appStore.currentPage = '/setup'
     Router.push({
       path: '/setup'

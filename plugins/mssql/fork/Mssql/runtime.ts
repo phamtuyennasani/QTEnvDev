@@ -93,7 +93,7 @@ export const windowsMediaDownloadArgs = (edition: string, mediaDir: string): str
 ]
 
 export function windowsSetupArgs(version: string, appRoot: string, serverRoot: string): string[] {
-  const instance = `FLYENV${version.split('-')[0]}`
+  const instance = `QTENVDEV${version.split('-')[0]}`
   const dataRoot = win32.join(serverRoot, 'mssql')
   const data = win32.join(dataRoot, `data-${instance}`)
   // Setup refuses existing tempdb files, including those preserved on uninstall.

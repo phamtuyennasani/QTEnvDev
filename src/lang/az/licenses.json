@@ -1,7 +1,7 @@
 {
-  "description": "FlyEnv lisenziyası layihənin davamlı inkişafını və saxlanmasını dəstəkləyir. Məqsədi əsas yerli inkişafı bloklamaq deyil — əsas mühitlər və mühit idarəetmə funksiyaları həmişə əlçatan qalacaq. Lisenziya premium alətlərin sınaq məhdudiyyətlərini aradan qaldırır və FlyEnv-in macOS, Windows və Linux platformalarında saxlanmasına kömək edir.",
+  "description": "QTEnvDev lisenziyası layihənin davamlı inkişafını və saxlanmasını dəstəkləyir. Məqsədi əsas yerli inkişafı bloklamaq deyil — əsas mühitlər və mühit idarəetmə funksiyaları həmişə əlçatan qalacaq. Lisenziya premium alətlərin sınaq məhdudiyyətlərini aradan qaldırır və QTEnvDev-in macOS, Windows və Linux platformalarında saxlanmasına kömək edir.",
   "restrictions": {
-    "title": "FlyEnv lisenziyasız da işlək qalır, lakin aşağıdakı sınaq məhdudiyyətləri tətbiq olunur:",
+    "title": "QTEnvDev lisenziyasız da işlək qalır, lakin aşağıdakı sınaq məhdudiyyətləri tətbiq olunur:",
     "items": {
       "0": "Sayt idarəetməsi maksimum 3 yerli saytla məhdudlaşır.",
       "1": "AI köməkçisi 3 günlük sınaq müddəti ilə məhdudlaşır.",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "Lisenziyanı Necə Əldə Etmək Olar",
-    "description": "FlyEnv lisenziya əldə etmək üçün aşağıdakı üç üsulu təklif edir. Lisenziyalar hələlik avtomatik verilə bilmir, buna görə bütün müraciətlər əl ilə yoxlanılır və verilir:",
+    "description": "QTEnvDev lisenziya əldə etmək üçün aşağıdakı üç üsulu təklif edir. Lisenziyalar hələlik avtomatik verilə bilmir, buna görə bütün müraciətlər əl ilə yoxlanılır və verilir:",
     "methods": {
       "0": {
         "title": "Şəxsi Lisenziya Alın",
-        "description": "FlyEnv Şəxsi Lisenziyası $10 USD dəyərindədir. O, bir aktiv cihazı əhatə edir (lisenziya idarəetməsi vasitəsilə cihaz köçürülməsi dəstəklənir) və bütün sınaq məhdudiyyətlərini aradan qaldırır. Ödəniş Paddle vasitəsilə həyata keçirilir. Aldıqdan sonra Paddle sifariş ID-nizi aşağıdakı müraciət formasında göndərin. Satınalma səhifəsi:"
+        "description": "QTEnvDev Şəxsi Lisenziyası $10 USD dəyərindədir. O, bir aktiv cihazı əhatə edir (lisenziya idarəetməsi vasitəsilə cihaz köçürülməsi dəstəklənir) və bütün sınaq məhdudiyyətlərini aradan qaldırır. Ödəniş Paddle vasitəsilə həyata keçirilir. Aldıqdan sonra Paddle sifariş ID-nizi aşağıdakı müraciət formasında göndərin. Satınalma səhifəsi:"
       },
       "1": {
         "title": "Kod Bazasına Töhfə Verin",
-        "description": "FlyEnv-i təkmilləşdirməyə kömək etmək üçün GitHub-da Pull Request göndərin. Böyük funksiyalardan sadə sənədləşdirmə düzəlişlərinə qədər hər bir mənalı töhfə nəzərə alınır."
+        "description": "QTEnvDev-i təkmilləşdirməyə kömək etmək üçün GitHub-da Pull Request göndərin. Böyük funksiyalardan sadə sənədləşdirmə düzəlişlərinə qədər hər bir mənalı töhfə nəzərə alınır."
       },
       "2": {
         "title": "Layihəni Tanıdın",
-        "description": "FlyEnv təcrübənizi istənilən platformada, istənilən dildə paylaşın — məqalələr, videolar, bloqlar və ya postlar. Məzmun orijinal və həqiqi olmalıdır; 3 aydan çox əvvəl dərc edilmiş məzmun artıq uyğun olmaya bilər."
+        "description": "QTEnvDev təcrübənizi istənilən platformada, istənilən dildə paylaşın — məqalələr, videolar, bloqlar və ya postlar. Məzmun orijinal və həqiqi olmalıdır; 3 aydan çox əvvəl dərc edilmiş məzmun artıq uyğun olmaya bilər."
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "Yetki Kodu Alınmadı",
   "oauthTimeout": "Yetki Müddəti Bitdi",
   "oauthSuccessTitle": "Yetki Uğurla Tamamlandı",
-  "oauthSuccessMessage": "Bu səhifə bağlana bilər. Lisenziya məlumatlarını görmək üçün FlyEnv-ə qayıtmaq əməliyyatını tamamlayın.",
+  "oauthSuccessMessage": "Bu səhifə bağlana bilər. Lisenziya məlumatlarını görmək üçün QTEnvDev-ə qayıtmaq əməliyyatını tamamlayın.",
   "trialExpiredTitle": "Lisenziya aktiv edilməyib",
-  "trialExpiredTips": "FlyEnv-i {days} gündür istifadə edirsiniz. Əgər FlyEnv sizə faydalı olubsa, layihəni dəstəkləmək üçün lisenziya əldə etməyi düşünün."
+  "trialExpiredTips": "QTEnvDev-i {days} gündür istifadə edirsiniz. Əgər QTEnvDev sizə faydalı olubsa, layihəni dəstəkləmək üçün lisenziya əldə etməyi düşünün."
 }

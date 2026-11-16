@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { AtomicFile, type AtomicFileIO } from '../fork/AtomicFile'
 
 async function fixture(t: { after: (fn: () => Promise<void>) => void }) {
-  const root = await mkdtemp(join(tmpdir(), 'flyenv-atomic-test-'))
+  const root = await mkdtemp(join(tmpdir(), 'qtenvdev-atomic-test-'))
   t.after(() => rm(root, { recursive: true, force: true }))
   const path = join(root, 'record.json')
   await writeFile(path, '{"revision":1}')

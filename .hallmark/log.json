@@ -1,0 +1,10 @@
+[
+  {
+    "date": "2026-11-17",
+    "scope": "app",
+    "macrostructure": "Workbench",
+    "theme": "QTEnvDev modern-minimal technical workbench",
+    "enrichment": "none",
+    "brief": "Refactor 71 module routes plus /setup and /customer-module with a shared Hallmark visual system."
+  }
+]

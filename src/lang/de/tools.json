@@ -4,7 +4,7 @@
   "inputTips": "//JSON, JavaScript Object/Array, PHP Array, URL, XML, YAML, PList. Automatische Konvertierung in das ausgewählte Format",
   "parseFailTips": "Parse fehlgeschlagen",
   "inputCheckFailTips": "Unidentifiziert",
-  "systemProxyCheck": "Festgestellt, dass das Netzwerk einen Proxy benutzt, ist FlyEnv darauf eingestellt, diesen Proxy zu verwenden?",
+  "systemProxyCheck": "Festgestellt, dass das Netzwerk einen Proxy benutzt, ist QTEnvDev darauf eingestellt, diesen Proxy zu verwenden?",
   "systemProxyUsed": "Einstellung erfolgreich. Wenn Sie sie ändern möchten, tun Sie dies bitte unter Einstellungen->Proxy-Einstellungen.",
   "windowCount": "Fenster-Anzahl",
   "codemake": "Codegenerierung",

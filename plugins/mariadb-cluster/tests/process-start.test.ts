@@ -443,7 +443,7 @@ test('Windows initialization uses mariadb-install-db.exe with --config arguments
       name: 'node1',
       port: 13307,
       serverId: 13307,
-      socket: 'FlyEnvMDBC-node1',
+      socket: 'QTEnvDevMDBC-node1',
       dataDir,
       engine: {
         bin: join(enginePath, 'bin', 'mariadbd.exe'),

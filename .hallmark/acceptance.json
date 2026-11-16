@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-17",
+  "scope": { "moduleRoutes": 71, "systemRoutes": 2, "totalRoutes": 73 },
+  "fixture": { "ipc": "stubbed-read-only", "nativeOperations": false, "platformHost": "windows" },
+  "fullRuns": {
+    "windows": {
+      "routeMeasurements": 983,
+      "tabViews": 252,
+      "stateViews": 6,
+      "errors": 0,
+      "issues": 0
+    },
+    "macos": {
+      "routeMeasurements": 1022,
+      "tabViews": 264,
+      "stateViews": 6,
+      "errors": 0,
+      "issues": 0
+    },
+    "linux": {
+      "routeMeasurements": 1022,
+      "tabViews": 264,
+      "stateViews": 6,
+      "errors": 0,
+      "issues": 0
+    }
+  },
+  "focusedStateAudit": {
+    "routes": 7,
+    "viewports": [320, 1280],
+    "themes": ["light", "dark"],
+    "errors": 0,
+    "issues": 0
+  },
+  "focusedTabAudit": {
+    "routes": ["/apache", "/nginx", "/mysql", "/setup"],
+    "tabViews": 80,
+    "errors": 0,
+    "issues": 0
+  },
+  "verification": {
+    "rendererOperationBoundaries": "passed",
+    "rendererProductionBuild": "passed",
+    "nativePlatformSmoke": "not run in visual fixture"
+  },
+  "knownLimits": [
+    "Platform flags were exercised in Windows-host Electron, not native macOS/Linux hosts.",
+    "The fixture does not validate real process, download, install or persistence behaviour.",
+    "The 58-gate Hallmark slop test is a human design review checklist; this record does not claim 58/58 automation."
+  ]
+}

@@ -4,7 +4,7 @@
   "inputTips": "//Unesi JSON, JavaScript Objekt/Niz, PHP Niz, URL, XML, YAML, PList. Automatska pretvorba u odabrani format",
   "parseFailTips": "Parsiranje nije uspjelo",
   "inputCheckFailTips": "Neidentificirano",
-  "systemProxyCheck": "Detektiran je proxy u mreži, je li FlyEnv postavljen za korištenje ovog proxyja?",
+  "systemProxyCheck": "Detektiran je proxy u mreži, je li QTEnvDev postavljen za korištenje ovog proxyja?",
   "systemProxyUsed": "Postavljanje uspješno. Ako ga želite izmijeniti, učinite to u Postavkama->Proxy Postavkama.",
   "windowCount": "Broj Prozora",
   "codemake": "Generiranje Koda",

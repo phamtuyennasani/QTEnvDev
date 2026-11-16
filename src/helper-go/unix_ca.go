@@ -13,21 +13,21 @@ import (
 	"syscall"
 )
 
-const unixCAName = "FlyEnv-Root-CA"
+const unixCAName = "QTEnvDev-Root-CA"
 const unixCAFile = unixCAName + ".crt"
 const unixCALimit = 256 * 1024
 
 var unixCAMutex sync.Mutex
 
-// Preserve the existing SSL RPCs, but only for FlyEnv's fixed public root CA.
+// Preserve the existing SSL RPCs, but only for QTEnvDev's fixed public root CA.
 func dispatchUnixCA(info TaskItem, p unixPolicy, snapshotDir string) (interface{}, error) {
 	cwd := filepath.Join(p.DataRoot, "server", "CA")
 	if len(info.Args) < 1 {
-		return nil, fmt.Errorf("expected FlyEnv CA directory")
+		return nil, fmt.Errorf("expected QTEnvDev CA directory")
 	}
 	requested, ok := info.Args[0].(string)
 	if !ok || !filepath.IsAbs(requested) {
-		return nil, fmt.Errorf("expected FlyEnv CA directory")
+		return nil, fmt.Errorf("expected QTEnvDev CA directory")
 	}
 	if requested != cwd {
 		// Installation records a canonical root on macOS; the UI may retain its alias.
@@ -40,7 +40,7 @@ func dispatchUnixCA(info TaskItem, p unixPolicy, snapshotDir string) (interface{
 			return nil, expectedErr
 		}
 		if actual != expected {
-			return nil, fmt.Errorf("expected FlyEnv CA directory")
+			return nil, fmt.Errorf("expected QTEnvDev CA directory")
 		}
 	}
 	unixCAMutex.Lock()
@@ -48,7 +48,7 @@ func dispatchUnixCA(info TaskItem, p unixPolicy, snapshotDir string) (interface{
 	switch info.Function {
 	case "sslFindCertificate":
 		if len(info.Args) > 2 || (len(info.Args) == 2 && info.Args[1] != unixCAName) {
-			return nil, fmt.Errorf("expected fixed FlyEnv CA name")
+			return nil, fmt.Errorf("expected fixed QTEnvDev CA name")
 		}
 		found, err := findUnixCA()
 		if err != nil {
@@ -61,7 +61,7 @@ func dispatchUnixCA(info TaskItem, p unixPolicy, snapshotDir string) (interface{
 		return map[string]string{"stdout": stdout, "stderr": ""}, nil
 	case "sslAddTrustedCert":
 		if len(info.Args) != 2 || info.Args[1] != unixCAFile {
-			return nil, fmt.Errorf("expected fixed FlyEnv CA filename")
+			return nil, fmt.Errorf("expected fixed QTEnvDev CA filename")
 		}
 		snapshot, err := snapshotUnixCA(cwd, snapshotDir)
 		if err != nil {
@@ -86,7 +86,7 @@ func validateUnixCA(data []byte) error {
 	}
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil || !cert.IsCA || cert.Subject.CommonName != unixCAName {
-		return fmt.Errorf("expected FlyEnv root CA certificate")
+		return fmt.Errorf("expected QTEnvDev root CA certificate")
 	}
 	return nil
 }

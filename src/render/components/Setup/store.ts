@@ -48,9 +48,13 @@ export const SetupStore = defineStore('setup', {
   actions: {
     init() {
       return new Promise<void>((resolve) => {
-        this.message = localStorage.getItem('flyenv-licenses-post-message') ?? ''
+        this.message = localStorage.getItem('qtenvdev-licenses-post-message') ?? ''
+        // License check removed — force active state immediately
+        this.isActive = true
+        this.activeCode = ''
+        this.uuid = ''
         localForage
-          .getItem('flyenv-user-github')
+          .getItem('qtenvdev-user-github')
           .then((res: any) => {
             if (res?.githubUser) {
               this.githubUser = reactive(res.githubUser)
@@ -59,114 +63,28 @@ export const SetupStore = defineStore('setup', {
               this.githubLicense = reactive(res.githubLicense)
             }
           })
-          .finally(() => this.githubUserRefresh())
-        let time = Number(localStorage.getItem('flyenv-init-time') ?? '0')
-        if (!time || isNaN(time)) {
-          time = Math.round(new Date().getTime() / 1000)
-          localStorage.setItem('flyenv-init-time', `${time}`)
-        }
-        IPC.send('app-fork:app', 'licensesInit').then((key: string, res?: any) => {
-          if (res?.code !== 200) {
-            IPC.off(key)
-          }
-          console.log('licensesInit: ', res)
-          if (res?.code === 0) {
-            const data: any = res?.data
-            if (data.requestSuccess) {
-              Object.assign(this, res?.data)
-              const store = AppStore()
-              store.config.setup.license = this.activeCode
-              store.saveConfig().then().catch()
-            } else {
-              this.uuid = data.uuid
-              this.isActive = data.isActive
-              this.activeCode = data.activeCode
-            }
-
-            if (!this.isActive) {
-              const currentTime = Math.round(new Date().getTime() / 1000)
-              const maxTime = 7 * 24 * 60 * 60
-              if (currentTime - time > maxTime) {
-                const today = new Date().toDateString()
-                const lastAlert = localStorage.getItem('flyenv-license-alert-date')
-                if (lastAlert !== today) {
-                  localStorage.setItem('flyenv-license-alert-date', today)
-                  const days = Math.floor((currentTime - time) / (24 * 60 * 60))
-                  const store = AppStore()
-                  const isZh = store.config.setup.lang?.startsWith('zh')
-                  const url = isZh
-                    ? 'https://flyenv.com/zh/guide/about-license.html'
-                    : 'https://flyenv.com/guide/about-license.html'
-                  setTimeout(() => {
-                    ElMessageBox.alert(
-                      I18nT('licenses.trialExpiredTips', { days }),
-                      I18nT('licenses.trialExpiredTitle'),
-                      {
-                        confirmButtonText: I18nT('base.confirm'),
-                        type: 'warning',
-                        showClose: false,
-                        closeOnClickModal: false,
-                        closeOnPressEscape: false
-                      }
-                    )
-                      .then(() => {
-                        shell.openExternal(url)
-                      })
-                      .catch(() => {})
-                  }, 3000)
-                }
-              }
-            }
-          }
-          resolve()
-        })
+          .finally(() => {
+            this.githubUserRefresh()
+            // Resolve only after all async init completes
+            resolve()
+          })
       })
     },
     refreshState() {
-      if (this.fetching) {
-        return
-      }
-      this.fetching = true
-      IPC.send('app-fork:app', 'licensesState').then((key: string, res?: any) => {
-        if (res?.code !== 200) {
-          IPC.off(key)
-        }
-        if (res?.code === 1) {
-          this.fetching = false
-          MessageError(res?.msg ?? I18nT('base.fail'))
-          return
-        }
-        console.log('refreshState: ', res)
-        Object.assign(this, res?.data)
-        const store = AppStore()
-        store.config.setup.license = this.activeCode
-        store.saveConfig().then().catch()
-        this.fetching = false
-        this.githubLicenseFetch()
-      })
+      // License check removed — no-op, always active
+      this.fetching = false
+      this.isActive = true
+      this.activeCode = ''
+      this.githubLicenseFetch()
     },
     postRequest() {
-      if (this.fetching) {
-        return
-      }
-      this.fetching = true
-      const msg = this.message.trim()
-      localStorage.setItem('flyenv-licenses-post-message', msg)
-      IPC.send('app-fork:app', 'licensesRequest', msg).then((key: string, res?: any) => {
-        IPC.off(key)
-        console.log('postRequest: ', res)
-        this.fetching = false
-        if (res?.code === 1) {
-          MessageError(res?.msg ?? I18nT('base.fail'))
-          return
-        }
-        ElMessage.success(I18nT('setup.requestedTips'))
-      })
+      // License check removed — no-op
+      this.fetching = false
     },
     githubInfoSave() {
       localForage
         .setItem(
-          'flyenv-user-github',
+          'qtenvdev-user-github',
           JSON.parse(
             JSON.stringify({ githubUser: this.githubUser, githubLicense: this.githubLicense })
           )
@@ -221,7 +139,7 @@ export const SetupStore = defineStore('setup', {
         const store = AppStore()
         store.config.setup.user_uuid = ''
         store.saveConfig().then().catch()
-        localForage.removeItem('flyenv-user-github').catch()
+        localForage.removeItem('qtenvdev-user-github').catch()
       })
     },
     githubLicenseFetch() {

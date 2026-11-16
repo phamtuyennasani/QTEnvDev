@@ -1,7 +1,7 @@
 {
   "pathSavedRefreshFailed": "Environment variables were saved, but the list could not be refreshed: {error}",
   "linuxSudoRequiresTerminal": "Start this privileged task interactively in the terminal; background sudo is unavailable.",
-  "linuxFtpUnmanagedRoot": "This root FTP process was not started by FlyEnv's managed service. Stop it with administrator privileges before starting again.",
+  "linuxFtpUnmanagedRoot": "This root FTP process was not started by QTEnvDev's managed service. Stop it with administrator privileges before starting again.",
   "linuxFtpUsersRefreshFailed": "FTP account changes were saved, but the running service could not apply them: {error}",
   "setaliase": "Set Alias",
   "env": "Env",
@@ -9,8 +9,8 @@
   "envTips": "Has the path been added to the environment variable",
   "aliasTips": "Alias used in the terminal",
   "useSysPHP": "Use default PHP version",
-  "setByApp": "Environment variables set by FlyEnv",
-  "setByNoApp": "Environment variables not set by FlyEnv",
+  "setByApp": "Environment variables set by QTEnvDev",
+  "setByNoApp": "Environment variables not set by QTEnvDev",
   "bundleinVersionDelTips": "This version is a built-in version, confirm not displayed?",
   "customDirVersionDelTips": "This version is a custom path version, confirm not displayed?",
   "ErrorTips": {

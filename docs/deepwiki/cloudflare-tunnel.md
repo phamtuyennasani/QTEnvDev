@@ -9,7 +9,7 @@
 
 ## Overview
 
-CloudflareTunnel 是 FlyEnv 中唯一一个**不依赖本地常驻配置文件的反向隧道模块**。它通过调用 Cloudflare API v4 在远端创建/管理 `cfd_tunnel`，并在本地 `spawn` 启动 `cloudflared` 守护进程，将用户定义的本地服务暴露到公网域名。与 Nginx/Apache 等本地 Web 服务不同，该模块的核心状态不在本地文件系统，而在 Cloudflare 边缘节点；本地仅保存 `apiToken`、`accountId`、DNS 规则列表以及 `cloudflared` 二进制路径。
+CloudflareTunnel 是 QTEnvDev 中唯一一个**不依赖本地常驻配置文件的反向隧道模块**。它通过调用 Cloudflare API v4 在远端创建/管理 `cfd_tunnel`，并在本地 `spawn` 启动 `cloudflared` 守护进程，将用户定义的本地服务暴露到公网域名。与 Nginx/Apache 等本地 Web 服务不同，该模块的核心状态不在本地文件系统，而在 Cloudflare 边缘节点；本地仅保存 `apiToken`、`accountId`、DNS 规则列表以及 `cloudflared` 二进制路径。
 
 Sources: `src/render/components/CloudflareTunnel/Module.ts:1-15`, `src/fork/module/CloudflareTunnel/index.ts:1-12`
 
@@ -78,7 +78,7 @@ export type CloudflareTunnelDnsRecord = {
 }
 ```
 
-每条 DNS 记录对应一条 Ingress 规则。`localService` 通常为 `localhost:port` 或 FlyEnv 中某个虚拟主机的域名。`protocol` 默认 `http`，在 Ingress 规则中被拼接为 `http://localService`。
+每条 DNS 记录对应一条 Ingress 规则。`localService` 通常为 `localhost:port` 或 QTEnvDev 中某个虚拟主机的域名。`protocol` 默认 `http`，在 Ingress 规则中被拼接为 `http://localService`。
 
 ### `CloudflareTunnel` (Renderer Model)
 
@@ -114,7 +114,7 @@ Sources: `src/render/core/CloudflareTunnel/type.ts:1-17`, `src/render/core/Cloud
 
 #### 机制概述
 
-CloudflareTunnel 模块的生命周期管理不遵循传统 FlyEnv 服务模块的 `_startServer` / `_stopService` 模板，而是通过自定义 IPC 函数 `start` / `stop` 直接驱动 Fork 进程中的 `CloudflareTunnel` 模型类。
+CloudflareTunnel 模块的生命周期管理不遵循传统 QTEnvDev 服务模块的 `_startServer` / `_stopService` 模板，而是通过自定义 IPC 函数 `start` / `stop` 直接驱动 Fork 进程中的 `CloudflareTunnel` 模型类。
 
 #### 启动调用链
 
@@ -217,7 +217,7 @@ Sources: `src/render/components/CloudflareTunnel/List.vue:148-171`, `src/render/
 
 #### 机制概述
 
-模块不依赖用户手动创建隧道，而是通过 `apiToken` 自动在 Cloudflare 账户中查找名为 `FlyEnv-Tunnel-{md5(apiToken).substring(0,12)}` 的隧道；若不存在则自动创建。这种设计确保同一 API Token 在多台设备上运行时，始终复用同一个隧道实体。
+模块不依赖用户手动创建隧道，而是通过 `apiToken` 自动在 Cloudflare 账户中查找名为 `QTEnvDev-Tunnel-{md5(apiToken).substring(0,12)}` 的隧道；若不存在则自动创建。这种设计确保同一 API Token 在多台设备上运行时，始终复用同一个隧道实体。
 
 #### fetchTunnel 调用链
 
@@ -253,7 +253,7 @@ fetchTunnel(): Promise<boolean> {
 ```typescript
 async fetchTunnel() {
   const tokenHash = crypto.createHash('md5').update(this.apiToken).digest('hex').substring(0, 12)
-  const tunnelName = `FlyEnv-Tunnel-${tokenHash}`
+  const tunnelName = `QTEnvDev-Tunnel-${tokenHash}`
   this.tunnelName = tunnelName
 
   const searchRes = await cfClient.get(`/accounts/${this.accountId}/cfd_tunnel`, {
@@ -462,7 +462,7 @@ private async startCloudflared(token: string): Promise<{ 'APP-Service-Start-PID'
 #### 关键设计解析
 
 1. **日志重定向**: 使用 `openSync` 获取文件描述符并传入 `stdio`，随后立即 `closeSync` — 子进程已继承 FD，父进程无需保持打开。
-2. **`--no-autoupdate`**: 禁用 cloudflared 自动更新，避免在 FlyEnv 管理期间出现不可控的进程替换。
+2. **`--no-autoupdate`**: 禁用 cloudflared 自动更新，避免在 QTEnvDev 管理期间出现不可控的进程替换。
 3. **`windowsHide: true`**: Windows 平台下隐藏 `cmd.exe` 弹窗。
 4. **2 秒崩溃检测**: `spawn` 后立即监听 `exit` 事件。若 2 秒内进程退出，判定为启动失败（常见原因：Token 无效、网络不通）；若存活超过 2 秒，移除 `exit` 监听，写入 PID 文件，调用 `cp.unref()` 让进程独立运行。
 
@@ -480,7 +480,7 @@ CloudflareTunnel 支持配置多个 API Token（即多个隧道组），所有�
 
 `src/render/core/CloudflareTunnel/CloudflareTunnelStore.ts:1-32`:
 ```typescript
-const storeKey = 'flyenv-cloudflare-tunnel-store'
+const storeKey = 'qtenvdev-cloudflare-tunnel-store'
 
 class CloudflareTunnelStore {
   items: CloudflareTunnel[] = []
@@ -564,7 +564,7 @@ const groupDo = (isRunning: boolean): Array<Promise<string | boolean>> => {
 
 关键逻辑：
 - `appStore.phpGroupStart` 被复用为"单条隧道是否参与全局启动"的开关（字段名历史遗留，实际与 PHP 无关）。
-- `groupDo` 被注册到 `AppServiceModule['cloudflare-tunnel']`，供 FlyEnv 全局"停止全部服务"功能调用。
+- `groupDo` 被注册到 `AppServiceModule['cloudflare-tunnel']`，供 QTEnvDev 全局"停止全部服务"功能调用。
 
 Sources: `src/render/core/CloudflareTunnel/CloudflareTunnelStore.ts:1-32`, `src/render/components/CloudflareTunnel/ASide.ts:35-103`, `src/render/components/CloudflareTunnel/aside.vue:45-52`
 
@@ -574,7 +574,7 @@ Sources: `src/render/core/CloudflareTunnel/CloudflareTunnelStore.ts:1-32`, `src/
 
 #### 机制概述
 
-CloudflareTunnel 模块集成了 FlyEnv 的许可证校验机制。未激活（`!setupStore.isActive`）时，用户只能创建 **1 个 Tunnel** 且每个 Tunnel 只能有 **1 条 DNS 记录**。
+CloudflareTunnel 模块集成了 QTEnvDev 的许可证校验机制。未激活（`!setupStore.isActive`）时，用户只能创建 **1 个 Tunnel** 且每个 Tunnel 只能有 **1 条 DNS 记录**。
 
 #### 代码解析
 
@@ -625,7 +625,7 @@ CloudflareTunnel 模块的 IPC 通信使用统一通道 `app-fork:cloudflare-tun
 | Event Name | Function Arg | Payload Type | Handler Location | Core Logic | Side Effects |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `app-fork:cloudflare-tunnel` | `fetchAllZone` | `{ apiToken: string }` | `src/fork/module/CloudflareTunnel/index.ts:14` | Axios GET `https://api.cloudflare.com/client/v4/zones` | 返回 Zone 列表 |
-| `app-fork:cloudflare-tunnel` | `fetchTunnel` | `CloudflareTunnel` | `src/fork/module/CloudflareTunnel/index.ts:27` | 查找/创建 `FlyEnv-Tunnel-*` | 回写 `tunnelId` / `tunnelToken` |
+| `app-fork:cloudflare-tunnel` | `fetchTunnel` | `CloudflareTunnel` | `src/fork/module/CloudflareTunnel/index.ts:27` | 查找/创建 `QTEnvDev-Tunnel-*` | 回写 `tunnelId` / `tunnelToken` |
 | `app-fork:cloudflare-tunnel` | `start` | `CloudflareTunnel` | `src/fork/module/CloudflareTunnel/index.ts:40` | API 同步 + `spawn cloudflared` | 写 `pid/cloudflare-tunnel.pid`、更新 `run` 状态 |
 | `app-fork:cloudflare-tunnel` | `stop` | `CloudflareTunnel` | `src/fork/module/CloudflareTunnel/index.ts:58` | `ProcessKill('-INT', [pid])` | 清空 `pid` / `run` 状态 |
 

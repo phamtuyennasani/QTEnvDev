@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Initialisierung des Datenordners, Datenordnerpfad: {dir}",
   "initDBDataDirFail": "Initialisierung des Datenordners fehlgeschlagen, Grund: {error}",
   "newProjectFail": "Fehler beim Erstellen des neuen Projekts",
-  "processListFail": "Abruf der Prozessliste fehlgeschlagen. Bitte installieren Sie FlyEnv Helper"
+  "processListFail": "Abruf der Prozessliste fehlgeschlagen. Bitte installieren Sie QTEnvDev Helper"
 }

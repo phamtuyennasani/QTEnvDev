@@ -17,7 +17,7 @@
   "passwordFormatError": "Hasło bazy danych nie może zawierać znaków chińskich lub specjalnych",
   "savePassword": "Zaktualizuj hasło",
   "resetPasswordTips": "Ta operacja zmieni hasło użytkownika bazy danych",
-  "savePasswordTips": "Aktualizuje tylko hasło przechowywane w FlyEnv, nie zmienia hasła użytkownika bazy danych. To hasło jest używane głównie do bezpiecznego zatrzymania wystąpień {app}.",
+  "savePasswordTips": "Aktualizuje tylko hasło przechowywane w QTEnvDev, nie zmienia hasła użytkownika bazy danych. To hasło jest używane głównie do bezpiecznego zatrzymania wystąpień {app}.",
   "resetPasswordConfirm": "Ta operacja zmieni hasło użytkownika bazy danych, czy na pewno chcesz kontynuować?",
   "mysqlNeedRunTips": "Najpierw uruchom {app}",
   "databaseName": "Nazwa bazy danych",

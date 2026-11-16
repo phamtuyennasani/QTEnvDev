@@ -252,11 +252,11 @@ export class XTerm implements XTermType {
           param.push(`echo "Task-${this.ptyKey}-End"`)
           param.push(`exit 0`)
         } else {
-          if (reportExitCode) param.push('flyenv_terminal_exit_code=$?')
+          if (reportExitCode) param.push('qtenvdev_terminal_exit_code=$?')
           param.push(`wait;`)
           param.push(
             reportExitCode
-              ? `echo "Task-${this.ptyKey}-END"; exit "$flyenv_terminal_exit_code";`
+              ? `echo "Task-${this.ptyKey}-END"; exit "$qtenvdev_terminal_exit_code";`
               : `echo "Task-${this.ptyKey}-END" && exit 0;`
           )
         }

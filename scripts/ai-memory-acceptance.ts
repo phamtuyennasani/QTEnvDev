@@ -14,10 +14,10 @@ import { buildPlugin } from './plugin-builder'
 const baselineOnly = process.argv.includes('--retrieval-baseline-only')
 const retrievalOnly = baselineOnly || process.argv.includes('--retrieval-only')
 const output = resolve(
-  `.superpowers/sdd/2026-11-03-flyenv-ai-memory/${baselineOnly ? 'acceptance-baseline' : retrievalOnly ? 'acceptance-retrieval' : 'acceptance'}`
+  `.superpowers/sdd/2026-11-03-qtenvdev-ai-memory/${baselineOnly ? 'acceptance-baseline' : retrievalOnly ? 'acceptance-retrieval' : 'acceptance'}`
 )
 await mkdir(output, { recursive: true })
-const root = await mkdtemp(join(tmpdir(), 'flyenv-memory-acceptance-'))
+const root = await mkdtemp(join(tmpdir(), 'qtenvdev-memory-acceptance-'))
 const checkpoints: string[] = []
 let child: ReturnType<typeof spawn> | undefined
 let exited: Promise<void> | undefined
@@ -58,8 +58,8 @@ const start = async () => {
   await rm(join(root, 'host-error.json'), { force: true })
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    FLYENV_DATA_ROOT: root,
-    FLYENV_PLUGIN_PATH: join(output, 'package')
+    QTENVDEV_DATA_ROOT: root,
+    QTENVDEV_PLUGIN_PATH: join(output, 'package')
   }
   delete env.ELECTRON_RUN_AS_NODE
   child = spawn(electron as unknown as string, [join(output, 'host/host.mjs')], {
@@ -80,7 +80,7 @@ const start = async () => {
     async () =>
       JSON.parse(await readFile(join(root, 'ready.json'), 'utf8').catch(() => 'null')) ?? undefined
   )
-  client = new Client({ name: 'flyenv', version: '1.0.0' })
+  client = new Client({ name: 'qtenvdev', version: '1.0.0' })
   await client.connect(
     new StreamableHTTPClientTransport(new URL(endpoint), {
       requestInit: { headers: { Authorization: `Bearer ${token}` } }
@@ -99,7 +99,7 @@ const stop = async () => {
 }
 const call = async (method: string, input: any) => {
   const envelope: any = await client!.callTool({
-    name: `flyenv_memory_${method}`,
+    name: `qtenvdev_memory_${method}`,
     arguments: input
   })
   return { ...JSON.parse(envelope.content[0].text), mcpIsError: !!envelope.isError }
@@ -135,7 +135,7 @@ try {
   const preload = join(output, 'preload.cjs')
   await writeFile(
     preload,
-    "const {contextBridge,ipcRenderer}=require('electron'); contextBridge.exposeInMainWorld('FlyEnvNodeAPI',{send:(command,key,...args)=>ipcRenderer.send('command',command,key,...args),receive:cb=>ipcRenderer.on('reply',(_event,...args)=>cb(...args))});"
+    "const {contextBridge,ipcRenderer}=require('electron'); contextBridge.exposeInMainWorld('QTEnvDevNodeAPI',{send:(command,key,...args)=>ipcRenderer.send('command',command,key,...args),receive:cb=>ipcRenderer.on('reply',(_event,...args)=>cb(...args))});"
   )
   const html = join(output, 'index.html')
   await writeFile(html, '<!doctype html><html><body>Isolated memory IPC acceptance</body></html>')

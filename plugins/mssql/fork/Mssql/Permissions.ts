@@ -2,10 +2,10 @@ const psString = (value: string) => `'${value.replaceAll("'", "''")}'`
 
 /** Windows-only primitives; callers provide the SID captured before elevation. */
 export const windowsAccessFunctions = String.raw`
-function Assert-FlyEnvSqlPath($Path, $Root) {
+function Assert-QTEnvDevSqlPath($Path, $Root) {
   $full=[IO.Path]::GetFullPath($Path)
   $base=[IO.Path]::GetFullPath($Root).TrimEnd('\')
-  if (!$full.StartsWith($base+'\', [StringComparison]::OrdinalIgnoreCase)) { throw "Path outside this FlyEnv installation: $full" }
+  if (!$full.StartsWith($base+'\', [StringComparison]::OrdinalIgnoreCase)) { throw "Path outside this QTEnvDev installation: $full" }
   $entry=Get-Item -LiteralPath $full -Force
   while ($entry) {
     if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Reparse target is not supported: $($entry.FullName)" }
@@ -15,13 +15,13 @@ function Assert-FlyEnvSqlPath($Path, $Root) {
     $entry=Get-Item -LiteralPath $parent -Force
   }
 }
-function Assert-FlyEnvSqlServiceSelector($Arguments, $Instance) {
+function Assert-QTEnvDevSqlServiceSelector($Arguments, $Instance) {
   if ($Arguments -notmatch '^\s*-s\s*(?:"([^"]+)"|([^\s"]+))\s*$') { throw 'SQL Server service arguments are not a single instance selector' }
   $selected=if ($Matches[1]) { $Matches[1] } else { $Matches[2] }
   if (!$selected.Equals($Instance,[StringComparison]::OrdinalIgnoreCase)) { throw 'SQL Server service instance selector does not match' }
 }
-function Get-FlyEnvSqlAccessTargets($Name, $AppRoot, $ServerRoot) {
-  if ($Name -notmatch '^MSSQL\$FLYENV(2019|2022|2025)$') { throw 'Only FlyEnv SQL Server instances can be granted access' }
+function Get-QTEnvDevSqlAccessTargets($Name, $AppRoot, $ServerRoot) {
+  if ($Name -notmatch '^MSSQL\$QTENVDEV(2019|2022|2025)$') { throw 'Only QTEnvDev SQL Server instances can be granted access' }
   $year=$Matches[1]
   $major=@{'2019'='15';'2022'='16';'2025'='17'}[$year]
   $instance=$Name.Substring(6)
@@ -41,18 +41,18 @@ function Get-FlyEnvSqlAccessTargets($Name, $AppRoot, $ServerRoot) {
       $expected=[IO.Path]::GetFullPath([IO.Path]::Combine([string[]]@($AppRoot,'mssql',($year+'-'+$edition),$id,'MSSQL','Binn','sqlservr.exe')))
       if ($bin.Equals($expected,[StringComparison]::OrdinalIgnoreCase)) { $ownedBin=$true }
     }
-    if (!$ownedBin) { throw 'SQL Server executable is not in its own FlyEnv instance directory' }
-    Assert-FlyEnvSqlPath $bin ([IO.Path]::Combine($AppRoot,'mssql'))
+    if (!$ownedBin) { throw 'SQL Server executable is not in its own QTEnvDev instance directory' }
+    Assert-QTEnvDevSqlPath $bin ([IO.Path]::Combine($AppRoot,'mssql'))
     $service=Get-CimInstance Win32_Service -Filter ("Name='"+$Name+"'")
     if (!$service -or $service.PathName -notmatch '^\s*(?:"([^"]+)"|([^\s]+))') { throw 'SQL Server service executable is unknown' }
     $arguments=$service.PathName.Substring($Matches[0].Length)
     $serviceBin=if ($Matches[1]) { $Matches[1] } else { $Matches[2] }
     if (![IO.Path]::GetFullPath($serviceBin).Equals($bin,[StringComparison]::OrdinalIgnoreCase)) { throw 'SQL Server service executable does not match' }
-    Assert-FlyEnvSqlServiceSelector $arguments $instance
+    Assert-QTEnvDevSqlServiceSelector $arguments $instance
     $data=[IO.Path]::GetFullPath([string]$setup.GetValue('SQLDataRoot'))
     $expectedData=[IO.Path]::GetFullPath([IO.Path]::Combine($ServerRoot,'mssql',$id,'MSSQL'))
     if (!$data.TrimEnd('\').Equals($expectedData.TrimEnd('\'),[StringComparison]::OrdinalIgnoreCase)) { throw 'SQL Server data directory does not match its own instance' }
-    Assert-FlyEnvSqlPath $data ([IO.Path]::Combine($ServerRoot,'mssql'))
+    Assert-QTEnvDevSqlPath $data ([IO.Path]::Combine($ServerRoot,'mssql'))
     $file=[IO.Path]::Combine($data,'Log','ERRORLOG')
     $parameters=$registry.OpenSubKey($key+'\MSSQLServer\Parameters')
     if ($parameters) {
@@ -65,7 +65,7 @@ function Get-FlyEnvSqlAccessTargets($Name, $AppRoot, $ServerRoot) {
     }
     $file=[IO.Path]::GetFullPath($file)
     $logRoot=[IO.Path]::Combine($data,'Log')
-    Assert-FlyEnvSqlPath $file $logRoot
+    Assert-QTEnvDevSqlPath $file $logRoot
     $dir=[IO.Path]::GetDirectoryName($file)
     if (!(Get-Item -LiteralPath $dir -Force).PSIsContainer -or (Get-Item -LiteralPath $file -Force).PSIsContainer) { throw 'Invalid SQL Server log target' }
     return @{Service=$Name; Directory=$dir; File=$file; Parameters=$key+'\MSSQLServer\Parameters'}
@@ -73,7 +73,7 @@ function Get-FlyEnvSqlAccessTargets($Name, $AppRoot, $ServerRoot) {
     if ($parameters) { $parameters.Dispose() }; if ($setup) { $setup.Dispose() }; if ($names) { $names.Dispose() }; $registry.Dispose()
   }
 }
-function Assert-FlyEnvSqlGrantedAccess($Dacl, $Required, $Kind) {
+function Assert-QTEnvDevSqlGrantedAccess($Dacl, $Required, $Kind) {
   if ($null -eq $Dacl) { return }
   $remaining=[long]$Required
   $principals=@($callerSid)+@($callerGroupSids)
@@ -97,7 +97,7 @@ function Assert-FlyEnvSqlGrantedAccess($Dacl, $Required, $Kind) {
   }
   throw 'Required access could not be verified for the initiating user'
 }
-function Grant-FlyEnvSqlServiceAccess($Name, $Sid) {
+function Grant-QTEnvDevSqlServiceAccess($Name, $Sid) {
   $sc=Join-Path $env:SystemRoot 'System32\sc.exe'
   $output=(& $sc sdshow $Name | Out-String)
   if ($LASTEXITCODE -ne 0) { throw "Reading service permissions failed: $output" }
@@ -115,15 +115,15 @@ function Grant-FlyEnvSqlServiceAccess($Name, $Sid) {
       if ($ace.AceQualifier -eq [Security.AccessControl.AceQualifier]::AccessAllowed -and $ace.AceFlags -eq [Security.AccessControl.AceFlags]::None) { $covered=$covered -bor $ace.AccessMask }
     }
   }
-  if (($covered -band $mask) -eq $mask) { Assert-FlyEnvSqlGrantedAccess $sd.DiscretionaryAcl $mask 'service'; return }
+  if (($covered -band $mask) -eq $mask) { Assert-QTEnvDevSqlGrantedAccess $sd.DiscretionaryAcl $mask 'service'; return }
   $grant=[Security.AccessControl.CommonAce]::new([Security.AccessControl.AceFlags]::None,[Security.AccessControl.AceQualifier]::AccessAllowed,($mask -band (-bnot $covered)),$identity,$false,$null)
   $sd.DiscretionaryAcl.InsertAce($index,$grant)
-  Assert-FlyEnvSqlGrantedAccess $sd.DiscretionaryAcl $mask 'service'
+  Assert-QTEnvDevSqlGrantedAccess $sd.DiscretionaryAcl $mask 'service'
   $updated=$sd.GetSddlForm([Security.AccessControl.AccessControlSections]::All)
   $output=(& $sc sdset $Name $updated | Out-String)
   if ($LASTEXITCODE -ne 0) { throw "Writing service permissions failed: $output" }
 }
-function Grant-FlyEnvSqlLogAccess($Path, $Sid, $Directory) {
+function Grant-QTEnvDevSqlLogAccess($Path, $Sid, $Directory) {
   $acl=Get-Acl -LiteralPath $Path
   $identity=[Security.Principal.SecurityIdentifier]::new($Sid)
   $rights=[Security.AccessControl.FileSystemRights]::Read -bor [Security.AccessControl.FileSystemRights]::Write
@@ -135,10 +135,10 @@ function Grant-FlyEnvSqlLogAccess($Path, $Sid, $Directory) {
   $rule=[Security.AccessControl.FileSystemAccessRule]::new($identity,$rights,$inheritance,[Security.AccessControl.PropagationFlags]::None,[Security.AccessControl.AccessControlType]::Allow)
   [void]$acl.AddAccessRule($rule)
   $sd=[Security.AccessControl.RawSecurityDescriptor]::new($acl.GetSecurityDescriptorSddlForm([Security.AccessControl.AccessControlSections]::Access))
-  Assert-FlyEnvSqlGrantedAccess $sd.DiscretionaryAcl $rule.FileSystemRights 'file'
+  Assert-QTEnvDevSqlGrantedAccess $sd.DiscretionaryAcl $rule.FileSystemRights 'file'
   Set-Acl -LiteralPath $Path -AclObject $acl
 }
-function Grant-FlyEnvSqlParameterRead($Path, $Sid) {
+function Grant-QTEnvDevSqlParameterRead($Path, $Sid) {
   $registry=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::LocalMachine,[Microsoft.Win32.RegistryView]::Registry64)
   $key=$null
   try {
@@ -148,21 +148,21 @@ function Grant-FlyEnvSqlParameterRead($Path, $Sid) {
     $rule=[Security.AccessControl.RegistryAccessRule]::new([Security.Principal.SecurityIdentifier]::new($Sid),[Security.AccessControl.RegistryRights]::ReadKey,[Security.AccessControl.InheritanceFlags]::None,[Security.AccessControl.PropagationFlags]::None,[Security.AccessControl.AccessControlType]::Allow)
     [void]$acl.AddAccessRule($rule)
     $sd=[Security.AccessControl.RawSecurityDescriptor]::new($acl.GetSecurityDescriptorSddlForm([Security.AccessControl.AccessControlSections]::Access))
-    Assert-FlyEnvSqlGrantedAccess $sd.DiscretionaryAcl ([Security.AccessControl.RegistryRights]::ReadKey) 'registry'
+    Assert-QTEnvDevSqlGrantedAccess $sd.DiscretionaryAcl ([Security.AccessControl.RegistryRights]::ReadKey) 'registry'
     $key.SetAccessControl($acl)
   } finally { if ($key) { $key.Dispose() }; $registry.Dispose() }
 }
-function Grant-FlyEnvSqlAccess($Name, $CallerSid, $AppRoot, $ServerRoot) {
+function Grant-QTEnvDevSqlAccess($Name, $CallerSid, $AppRoot, $ServerRoot) {
   if ($CallerSid -notmatch '^S-1-\d+(?:-\d+)+$') { throw 'Invalid initiating user SID' }
-  $targets=Get-FlyEnvSqlAccessTargets $Name $AppRoot $ServerRoot
+  $targets=Get-QTEnvDevSqlAccessTargets $Name $AppRoot $ServerRoot
   $errors=@(); $result.access=@{}
   foreach ($part in @('service','directory','file','parameters')) {
     try {
       switch ($part) {
-        'service' { Grant-FlyEnvSqlServiceAccess $targets.Service $CallerSid }
-        'directory' { Grant-FlyEnvSqlLogAccess $targets.Directory $CallerSid $true }
-        'file' { Grant-FlyEnvSqlLogAccess $targets.File $CallerSid $false }
-        'parameters' { Grant-FlyEnvSqlParameterRead $targets.Parameters $CallerSid }
+        'service' { Grant-QTEnvDevSqlServiceAccess $targets.Service $CallerSid }
+        'directory' { Grant-QTEnvDevSqlLogAccess $targets.Directory $CallerSid $true }
+        'file' { Grant-QTEnvDevSqlLogAccess $targets.File $CallerSid $false }
+        'parameters' { Grant-QTEnvDevSqlParameterRead $targets.Parameters $CallerSid }
       }
       $result.access[$part]='completed'
     } catch { $result.access[$part]='failed'; $errors+=($part+': '+$_.Exception.Message) }
@@ -172,22 +172,22 @@ function Grant-FlyEnvSqlAccess($Name, $CallerSid, $AppRoot, $ServerRoot) {
 `
 
 export function windowsGrantAccessBody(service: string, appRoot: string, serverRoot: string) {
-  if (!/^MSSQL\$FLYENV(?:2019|2022|2025)$/.test(service)) {
-    throw new Error('Only FlyEnv SQL Server instances can be granted access')
+  if (!/^MSSQL\$QTENVDEV(?:2019|2022|2025)$/.test(service)) {
+    throw new Error('Only QTEnvDev SQL Server instances can be granted access')
   }
-  return `${windowsAccessFunctions}\nGrant-FlyEnvSqlAccess ${psString(service)} $callerSid ${psString(appRoot)} ${psString(serverRoot)}`
+  return `${windowsAccessFunctions}\nGrant-QTEnvDevSqlAccess ${psString(service)} $callerSid ${psString(appRoot)} ${psString(serverRoot)}`
 }
 
 /** Open and close a handle with the exact requested rights; never control a service. */
 export function windowsServiceAccessCheckScript(service: string): string {
-  if (!/^MSSQL\$FLYENV(?:2019|2022|2025)$/.test(service)) {
-    throw new Error('Only FlyEnv SQL Server instances can be checked')
+  if (!/^MSSQL\$QTENVDEV(?:2019|2022|2025)$/.test(service)) {
+    throw new Error('Only QTEnvDev SQL Server instances can be checked')
   }
   return `$ErrorActionPreference='Stop'; Add-Type -TypeDefinition @'
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-public static class FlyEnvSqlServiceAccess {
+public static class QTEnvDevSqlServiceAccess {
   [DllImport("advapi32.dll", CharSet=CharSet.Unicode, ExactSpelling=true, SetLastError=true)]
   static extern IntPtr OpenSCManagerW(string machine, string database, uint access);
   [DllImport("advapi32.dll", CharSet=CharSet.Unicode, ExactSpelling=true, SetLastError=true)]
@@ -209,7 +209,7 @@ public static class FlyEnvSqlServiceAccess {
     } finally { CloseServiceHandle(manager); }
   }
 }
-'@; [FlyEnvSqlServiceAccess]::Check(${psString(service)}).ToString().ToLowerInvariant()`
+'@; [QTEnvDevSqlServiceAccess]::Check(${psString(service)}).ToString().ToLowerInvariant()`
 }
 
 /** Only instances created by this plugin are offered an access repair. */
@@ -219,7 +219,7 @@ export function canRepairWindowsPermissions(version: {
   instanceName?: string
 }): boolean {
   const service = version.serviceName ?? `MSSQL$${version.instanceName ?? ''}`
-  const year = service.match(/^MSSQL\$FLYENV(2019|2022|2025)$/)?.[1]
+  const year = service.match(/^MSSQL\$QTENVDEV(2019|2022|2025)$/)?.[1]
   return (
     !!year &&
     ({ '2019': '15', '2022': '16', '2025': '17' } as Record<string, string>)[year] ===

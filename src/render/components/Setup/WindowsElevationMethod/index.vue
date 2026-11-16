@@ -41,7 +41,7 @@
         v-if="method === 'helper' && !windowServer.WindowsProcessElevated"
         :loading="Controller.busy"
         @click="repair"
-        >{{ I18nT('setup.flyenvHelperBtn') }}</el-button
+        >{{ I18nT('setup.qtenvdevHelperBtn') }}</el-button
       >
       <!-- 偏好为 UAC 不代表曾安装 Helper；按钮只是维护入口，不显示推断的安装状态。 -->
       <el-tooltip v-if="method === 'uac'" placement="top" :show-after="200">

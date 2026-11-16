@@ -281,7 +281,7 @@ export const installRuntime = async (
     const bin = join(finalDir, relative(runtimeStage, stagedBin))
     if (variant.platform !== 'windows') await chmod(stagedBin, 0o755).catch(() => {})
     await deps.write(
-      join(runtimeStage, 'flyenv-runtime.json'),
+      join(runtimeStage, 'qtenvdev-runtime.json'),
       JSON.stringify({ ...variant, executable: relative(runtimeStage, stagedBin) }, null, 2)
     )
     if (await deps.exists(finalDir)) {

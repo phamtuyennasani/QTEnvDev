@@ -20,5 +20,5 @@
   "initDBDataDirSuccess": "Datakansion alustus onnistui, datakansion polku: {dir}",
   "initDBDataDirFail": "Datakansion alustus epäonnistui, syy: {error}",
   "newProjectFail": "Uuden projektin luonti epäonnistui",
-  "processListFail": "Prosessilistan nouto epäonnistui. Asenna FlyEnv Helper"
+  "processListFail": "Prosessilistan nouto epäonnistui. Asenna QTEnvDev Helper"
 }

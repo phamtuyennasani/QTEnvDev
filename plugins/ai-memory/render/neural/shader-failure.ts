@@ -8,12 +8,12 @@ export function routeShaderFailure<Shader>(
 ) {
   const vertexSource = gl.getShaderSource(vertex) ?? ''
   const fragmentSource = gl.getShaderSource(fragment) ?? ''
-  const fieldMarker = /^\s*#define\s+FLYENV_CIRCUIT_FIELD_LAYER\s+1\s*$/m
+  const fieldMarker = /^\s*#define\s+QTENVDEV_CIRCUIT_FIELD_LAYER\s+1\s*$/m
   if (fieldMarker.test(vertexSource) || fieldMarker.test(fragmentSource)) {
     onCircuit()
     return
   }
-  const marker = /^\s*#define\s+FLYENV_OUTER_ARC_LAYER\s+1\s*$/m
+  const marker = /^\s*#define\s+QTENVDEV_OUTER_ARC_LAYER\s+1\s*$/m
   if (marker.test(vertexSource) || marker.test(fragmentSource)) {
     onOuter()
   } else {

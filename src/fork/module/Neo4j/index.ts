@@ -184,7 +184,7 @@ class Neo4j extends Base {
       if (existsSync(distributionConfig)) {
         await copyFile(distributionConfig, paths.configFile)
       } else {
-        await writeFile(paths.configFile, '# FlyEnv Neo4j instance configuration\n')
+        await writeFile(paths.configFile, '# QTEnvDev Neo4j instance configuration\n')
       }
     }
 

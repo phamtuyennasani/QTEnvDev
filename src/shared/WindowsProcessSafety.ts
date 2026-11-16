@@ -42,7 +42,7 @@ if (-not [string]::IsNullOrWhiteSpace($targetPath)) {
  * 固定函数只接受已经过数字白名单验证的 PID，不接受命令、路径或进程名。
  */
 export const windowsStopProcessLookup = `
-function Get-FlyEnvStopTarget([int]$processId) {
+function Get-QTEnvDevStopTarget([int]$processId) {
   try { return Get-Process -Id $processId -ErrorAction Stop }
   catch {
     if ($_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound) { return $null }
@@ -58,7 +58,7 @@ function Get-FlyEnvStopTarget([int]$processId) {
  * 的端口归属变成停止成功。
  */
 export const windowsTcpConnectionLookup = `
-function Get-FlyEnvTcpConnections([int]$port, [bool]$listeningOnly = $false) {
+function Get-QTEnvDevTcpConnections([int]$port, [bool]$listeningOnly = $false) {
   try {
     if ($listeningOnly) {
       return @(Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction Stop)
@@ -75,15 +75,15 @@ function Get-FlyEnvTcpConnections([int]$port, [bool]$listeningOnly = $false) {
 `
 
 export const windowsStopListenerLookup = `${windowsTcpConnectionLookup}
-function Get-FlyEnvStopListenerPids([int]$port) {
-  $connections = @(Get-FlyEnvTcpConnections $port $true)
+function Get-QTEnvDevStopListenerPids([int]$port) {
+  $connections = @(Get-QTEnvDevTcpConnections $port $true)
   return @($connections | Select-Object -ExpandProperty OwningProcess)
 }
 `
 
 /** 真正执行停止前重查同一身份来源；包含普通权限拒绝后固定的 CIM 证据。 */
 export const windowsStopIdentityLookup = `
-function Get-FlyEnvStopIdentity([int]$processId, [string]$source) {
+function Get-QTEnvDevStopIdentity([int]$processId, [string]$source) {
   if ($source -eq 'cim') {
     $item = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $processId) -ErrorAction Stop
     if ($null -eq $item) { return $null }
@@ -93,7 +93,7 @@ function Get-FlyEnvStopIdentity([int]$processId, [string]$source) {
     $created = ([DateTime]$item.CreationDate).ToUniversalTime().ToString('o', [Globalization.CultureInfo]::InvariantCulture)
     return @{ created=$created; path=[string]$item.ExecutablePath }
   }
-  $item = Get-FlyEnvStopTarget $processId
+  $item = Get-QTEnvDevStopTarget $processId
   if ($null -eq $item) { return $null }
   try {
     return @{ created=$item.StartTime.ToUniversalTime().ToString('o', [Globalization.CultureInfo]::InvariantCulture); path='' }

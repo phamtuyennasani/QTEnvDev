@@ -13,7 +13,7 @@ if (process.platform === 'win32') {
   process.exit(0)
 }
 
-const root = await mkdtemp(join(tmpdir(), 'flyenv-cloudflare-stop-'))
+const root = await mkdtemp(join(tmpdir(), 'qtenvdev-cloudflare-stop-'))
 const previousServer = global.Server
 const children: ChildProcess[] = []
 const originalNow = Date.now

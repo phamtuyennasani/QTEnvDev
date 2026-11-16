@@ -165,8 +165,8 @@ class OpenSearch extends Base {
         }
         const windows = isWindows()
         if (windows) {
-          execEnv.FLYENV_OPENSEARCH_BIN = bin
-          execEnv.FLYENV_OPENSEARCH_PID = this.pidPath
+          execEnv.QTENVDEV_OPENSEARCH_BIN = bin
+          execEnv.QTENVDEV_OPENSEARCH_PID = this.pidPath
         }
         const started = await serviceStartSpawn({
           version,
@@ -180,7 +180,7 @@ class OpenSearch extends Base {
                 'Hidden',
                 '-EncodedCommand',
                 encodePowerShellCommand(
-                  '& $env:FLYENV_OPENSEARCH_BIN -s -p $env:FLYENV_OPENSEARCH_PID; exit $LASTEXITCODE'
+                  '& $env:QTENVDEV_OPENSEARCH_BIN -s -p $env:QTENVDEV_OPENSEARCH_PID; exit $LASTEXITCODE'
                 )
               ]
             : ['-p', this.pidPath],

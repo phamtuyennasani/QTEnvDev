@@ -8,7 +8,7 @@ import {
 
 test('groups built-in and plugin tools with display names and stable order', () => {
   const groups = groupMcpTools([
-    { name: 'flyenv_service', description: '', risky: false, readOnly: true },
+    { name: 'qtenvdev_service', description: '', risky: false, readOnly: true },
     {
       name: 'memory_get',
       description: '',
@@ -45,7 +45,7 @@ test('groups built-in and plugin tools with display names and stable order', () 
 })
 
 test('keeps an empty built-in group when no tools are available', () => {
-  assert.deepEqual(groupMcpTools([]), [{ id: 'builtin', label: 'FlyEnv', tools: [] }])
+  assert.deepEqual(groupMcpTools([]), [{ id: 'builtin', label: 'QTEnvDev', tools: [] }])
 })
 
 test('plugin descriptions follow UI locale, fall back to English and keep legacy descriptions', () => {

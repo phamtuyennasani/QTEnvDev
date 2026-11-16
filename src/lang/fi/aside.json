@@ -11,7 +11,7 @@
   "aiCoding": "Tekoälykoodaus",
   "ai": "AI",
   "objectStorage": "Objektin Tallennustila",
-  "appExit": "Pysäytä kaikki käynnissä olevat palvelut ja poistu FlyEnv",
+  "appExit": "Pysäytä kaikki käynnissä olevat palvelut ja poistu QTEnvDev",
   "groupStart": "Yhdellä napsautuksella käynnistetään kaikki paneelissa näytettävät palvelut",
   "networkTunnel": "Verkon Tunneli",
   "cacheAndQueue": "Välimuisti & Viestijono",

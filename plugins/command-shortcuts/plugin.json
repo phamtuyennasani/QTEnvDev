@@ -7,7 +7,7 @@
     "en": "Organize preset commands by folder and run them in your system terminal.",
     "zh": "按文件夹管理预设命令，一键在指定目录的系统终端中执行。"
   },
-  "author": "FlyEnv",
+  "author": "QTEnvDev",
   "module": {
     "typeFlag": "command-shortcuts",
     "moduleType": "console",

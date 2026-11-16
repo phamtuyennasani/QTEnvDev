@@ -359,7 +359,7 @@ with app.test_request_context():
     if postgresql_port is not None:
         server = Server.query.filter_by(
             user_id=user.id,
-            name='FlyEnv PostgreSQL',
+            name='QTEnvDev PostgreSQL',
             host='127.0.0.1',
             port=postgresql_port,
             maintenance_db='postgres',
@@ -401,7 +401,7 @@ with app.app_context():
 
     server = Server.query.filter_by(
         user_id=user.id,
-        name='FlyEnv PostgreSQL',
+        name='QTEnvDev PostgreSQL',
         host='127.0.0.1',
         port=postgresql_port,
         maintenance_db='postgres',
@@ -446,7 +446,7 @@ with app.app_context():
 
     server = Server.query.filter_by(
         user_id=user.id,
-        name='FlyEnv PostgreSQL',
+        name='QTEnvDev PostgreSQL',
         host='127.0.0.1',
         port=postgresql_port,
         maintenance_db='postgres',
@@ -488,19 +488,19 @@ with app.app_context():
         or user.auth_source != INTERNAL
         or not any(role.name == 'Administrator' for role in user.roles)
     ):
-        raise RuntimeError('pgAdmin FlyEnv PostgreSQL user was not found')
+        raise RuntimeError('pgAdmin QTEnvDev PostgreSQL user was not found')
     server = Server.query.filter_by(
         id=server_id,
         user_id=user.id,
-        name='FlyEnv PostgreSQL',
+        name='QTEnvDev PostgreSQL',
         host='127.0.0.1',
         maintenance_db='postgres',
         username='root',
     ).first()
     if server is None:
-        raise RuntimeError('pgAdmin FlyEnv PostgreSQL server was not found')
+        raise RuntimeError('pgAdmin QTEnvDev PostgreSQL server was not found')
     if server.servergroup is None or server.servergroup.name != 'Servers':
-        raise RuntimeError('pgAdmin FlyEnv PostgreSQL server was not found')
+        raise RuntimeError('pgAdmin QTEnvDev PostgreSQL server was not found')
     server.port = postgresql_port
     connection_params = server.connection_params or {}
     connection_params['sslmode'] = 'prefer'
@@ -584,7 +584,7 @@ function pgAdminMetadataIndependentScriptPattern(paths: PgAdminPaths, windows: b
 
 /**
  * Distribution metadata can be missing while a previous pgAdmin process is still running.
- * This deliberately accepts only FlyEnv's venv canonical pgAdmin entry point.
+ * This deliberately accepts only QTEnvDev's venv canonical pgAdmin entry point.
  */
 export function pgAdminCommandOwnedWithoutPackageMetadata(
   command: string,
@@ -708,7 +708,7 @@ export function pgAdminServersContent(port: number): string {
     {
       Servers: {
         1: {
-          Name: 'FlyEnv PostgreSQL',
+          Name: 'QTEnvDev PostgreSQL',
           Group: 'Servers',
           Host: '127.0.0.1',
           Port: port,

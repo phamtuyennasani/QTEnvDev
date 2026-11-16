@@ -53,7 +53,7 @@ import { groupMcpTools, resolveMcpToolGroup } from '../src/render/components/MCP
 
 test('groups built-in and plugin tools with display names and stable order', () => {
   const groups = groupMcpTools([
-    { name: 'flyenv_service', description: '', risky: false, readOnly: true },
+    { name: 'qtenvdev_service', description: '', risky: false, readOnly: true },
     { name: 'memory_get', description: '', risky: false, readOnly: true, pluginId: 'ai-memory', pluginName: 'AI Memory' },
     { name: 'memory_store', description: '', risky: true, readOnly: false, pluginId: 'ai-memory', pluginName: 'AI Memory' },
     { name: 'other_run', description: '', risky: true, readOnly: false, pluginId: 'other' }
@@ -90,7 +90,7 @@ import type { MCPRuntimeTool } from '@shared/mcpRuntimeCatalog'
 export type MCPToolGroup = { id: string; label: string; tools: MCPRuntimeTool[] }
 
 export function groupMcpTools(tools: MCPRuntimeTool[]): MCPToolGroup[] {
-  const groups: MCPToolGroup[] = [{ id: 'builtin', label: 'FlyEnv', tools: [] }]
+  const groups: MCPToolGroup[] = [{ id: 'builtin', label: 'QTEnvDev', tools: [] }]
   const plugins = new Map<string, MCPToolGroup>()
   for (const tool of tools) {
     if (!tool.pluginId) {

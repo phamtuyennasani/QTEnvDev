@@ -317,7 +317,7 @@ export default class WindowPresentation {
 
   private reportError(step: string, error: unknown) {
     try {
-      logger.error(`[FlyEnv][WindowPresentation] ${step}:`, error)
+      logger.error(`[QTEnvDev][WindowPresentation] ${step}:`, error)
     } catch {
       // Diagnostics cannot block window presentation or introduce unhandled rejections.
     }

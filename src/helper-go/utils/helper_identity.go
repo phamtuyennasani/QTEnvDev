@@ -41,16 +41,16 @@ func WindowsHelperInstancePaths(programData, sid string) (WindowsHelperPaths, er
 	if err := ValidateWindowsAbsolutePath(programData, false); err != nil {
 		return WindowsHelperPaths{}, fmt.Errorf("ProgramData must be a full local Windows path: %w", err)
 	}
-	instanceRoot := filepath.Join(programData, "FlyEnv", "Helper", "users", instanceID)
+	instanceRoot := filepath.Join(programData, "QTEnvDev", "Helper", "users", instanceID)
 	return WindowsHelperPaths{
 		InstanceID:         instanceID,
 		InstanceRoot:       instanceRoot,
-		Executable:         filepath.Join(instanceRoot, "bin", "flyenv-helper.exe"),
+		Executable:         filepath.Join(instanceRoot, "bin", "qtenvdev-helper.exe"),
 		KeyPath:            filepath.Join(instanceRoot, "helper.key"),
 		AllowedRootsPath:   filepath.Join(instanceRoot, "allowed-roots"),
 		InstanceConfigPath: filepath.Join(instanceRoot, "instance.json"),
 		DiagnosticsPath:    filepath.Join(instanceRoot, "startup.log"),
-		PipeName:           "FlyEnv.Helper." + instanceID,
+		PipeName:           "QTEnvDev.Helper." + instanceID,
 	}, nil
 }
 
@@ -62,7 +62,7 @@ func CurrentWindowsHelperInstancePaths(sid string) (WindowsHelperPaths, error) {
 	return WindowsHelperInstancePaths(programData, sid)
 }
 
-// The expected SID is captured by FlyEnv before UAC, never the helper's SYSTEM token.
+// The expected SID is captured by QTEnvDev before UAC, never the helper's SYSTEM token.
 func WindowsHelperPeerAllowed(expectedSID, peerSID string) bool {
 	return expectedSID != "" && peerSID != "" && strings.EqualFold(expectedSID, peerSID)
 }

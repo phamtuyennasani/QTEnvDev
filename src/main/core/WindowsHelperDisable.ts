@@ -33,7 +33,7 @@ if ($null -ne $task) {
   if ($principal -ne 'S-1-5-18' -or $definition.Principal.LogonType -ne 5 -or $definition.Principal.RunLevel -ne 1 -or $definition.Actions.Count -ne 1 -or $definition.Triggers.Count -ne 1 -or
       [IO.Path]::GetFullPath($definition.Actions.Item(1).Path) -ine ${quote(identity.executable)} -or
       $definition.Actions.Item(1).Arguments -cne ${quote(windowsHelperArguments(identity))}) {
-    throw 'Refusing to stop an unverified FlyEnv Helper task'
+    throw 'Refusing to stop an unverified QTEnvDev Helper task'
   }
   $triggerSid = [string]$definition.Triggers.Item(1).UserId
   if ($triggerSid -notmatch '^S-1-') { $triggerSid = (New-Object Security.Principal.NTAccount($triggerSid)).Translate([Security.Principal.SecurityIdentifier]).Value }
@@ -50,9 +50,9 @@ ${buildWindowsHelperProcessStopScript({
 if ($null -ne $task) {
   $deadline = [DateTime]::UtcNow.AddSeconds(10)
   while ($task.State -in @(2, 4) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 100 }
-  if ($task.State -in @(2, 4) -or $task.Enabled) { throw 'FlyEnv Helper did not stop' }
+  if ($task.State -in @(2, 4) -or $task.Enabled) { throw 'QTEnvDev Helper did not stop' }
 }
-$global:FlyEnvActionResult = $true
+$global:QTEnvDevActionResult = $true
 `
 
 /** 已提升进程直接维护任务；普通进程只为此维护命令申请一次受协调的 UAC。 */

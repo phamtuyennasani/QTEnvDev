@@ -18,7 +18,7 @@
   "sourcePath": "Sistem PATH'i",
   "sourceDefault": "Varsayılan SDK konumu",
   "sourceCustom": "Yapılandırılmış özel yol",
-  "sourceFlyenv": "FlyEnv tarafından yönetilen SDK",
+  "sourceQTEnvDev": "QTEnvDev tarafından yönetilen SDK",
   "sourceUnknown": "Bilinmiyor",
   "createProjectTitle": "Flutter Projesi Oluştur",
   "create": "Oluştur",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Mevcut bir Android/iOS uygulamasına gömülebilecek bir Flutter modülü.",
   "templateSkeletonDesc": "Material 3 ve Navigation 2.0 kullanan liste/detay Flutter uygulaması.",
   "androidSdkNotDetected": "Android SDK algılanmadı",
-  "androidSdkInstallHint": "FlyEnv, Android SDK'yı otomatik olarak yüklemez. SDK'yı Android Studio veya resmi Android komut satırı araçlarıyla yükleyin.",
+  "androidSdkInstallHint": "QTEnvDev, Android SDK'yı otomatik olarak yüklemez. SDK'yı Android Studio veya resmi Android komut satırı araçlarıyla yükleyin.",
   "installAndroidStudio": "Android Studio'yu yükle",
   "androidCommandLineTools": "Android komut satırı araçları",
-  "androidSdkAfterInstall": "SDK'yı yükledikten sonra FlyEnv'e dönün, Yenile'ye tıklayın ve ortamı yapılandırmak için otomatik düzeltmeyi (Auto-fix) kullanın."
+  "androidSdkAfterInstall": "SDK'yı yükledikten sonra QTEnvDev'e dönün, Yenile'ye tıklayın ve ortamı yapılandırmak için otomatik düzeltmeyi (Auto-fix) kullanın."
 }

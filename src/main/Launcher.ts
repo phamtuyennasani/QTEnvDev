@@ -70,8 +70,8 @@ export default class Launcher extends EventEmitter {
         gpuInfo
       }
       const message = JSON.stringify(payload)
-      logger.error(`[FlyEnv][ChildProcessGone] ${message}`)
-      appDebugLog('[FlyEnv-ChildProcessGone]', message).catch()
+      logger.error(`[QTEnvDev][ChildProcessGone] ${message}`)
+      appDebugLog('[QTEnvDev-ChildProcessGone]', message).catch()
     })
   }
 
@@ -89,8 +89,8 @@ export default class Launcher extends EventEmitter {
           Menu.setApplicationMenu(null)
         }
       } catch (error) {
-        logger.error('[FlyEnv] Startup failed:', error)
-        dialog.showErrorBox('FlyEnv', error instanceof Error ? error.message : String(error))
+        logger.error('[QTEnvDev] Startup failed:', error)
+        dialog.showErrorBox('QTEnvDev', error instanceof Error ? error.message : String(error))
         app.quit()
       }
     })
@@ -98,22 +98,22 @@ export default class Launcher extends EventEmitter {
     app.on('activate', () => {
       console.log('app on activate !!!!!!')
       if (global.application) {
-        logger.info('[FlyEnv] activate')
+        logger.info('[QTEnvDev] activate')
         global.application.showPage('index')
       }
     })
   }
 
   private async loadDebugExtension() {
-    const extensionPath = process.env.FLYENV_DEBUG_EXTENSION_PATH
+    const extensionPath = process.env.QTENVDEV_DEBUG_EXTENSION_PATH
     if (!extensionPath) return
     try {
       const extension = await session.defaultSession.extensions.loadExtension(extensionPath, {
         allowFileAccess: true
       })
-      console.log(`[FlyEnv] loaded debug extension: ${extension.name} ${extension.version}`)
+      console.log(`[QTEnvDev] loaded debug extension: ${extension.name} ${extension.version}`)
     } catch (error) {
-      logger.error(`[FlyEnv] failed to load debug extension: ${extensionPath}`, error)
+      logger.error(`[QTEnvDev] failed to load debug extension: ${extensionPath}`, error)
     }
   }
 
@@ -124,15 +124,15 @@ export default class Launcher extends EventEmitter {
       event.preventDefault()
       if (this.isQuitting) return
       this.isQuitting = true
-      logger.info('[FlyEnv] before-quit')
+      logger.info('[QTEnvDev] before-quit')
       try {
         if (global.application) {
           await global.application.stop()
         } else {
-          logger.info('[FlyEnv] global.application is null !!!')
+          logger.info('[QTEnvDev] global.application is null !!!')
         }
       } catch (e) {
-        logger.error('[FlyEnv] before-quit stop error:', e)
+        logger.error('[QTEnvDev] before-quit stop error:', e)
       }
       this.quitReady = true
       app.quit()

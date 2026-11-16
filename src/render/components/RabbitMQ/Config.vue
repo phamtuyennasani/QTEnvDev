@@ -47,10 +47,11 @@
   watch(
     () => currentVersion?.value?.bin,
     (v) => {
+      if (!v) return
       IPC.send('app-fork:rabbitmq', 'initConfig', JSON.parse(JSON.stringify(v))).then(
         (key: string) => {
           IPC.off(key)
-          conf.value.update()
+          conf.value?.update()
         }
       )
     },

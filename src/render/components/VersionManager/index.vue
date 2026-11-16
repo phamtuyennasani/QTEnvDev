@@ -1,5 +1,5 @@
 <template>
-  <el-card class="version-manager">
+  <el-card class="version-manager app-service-surface">
     <template #header>
       <div class="card-header">
         <div class="left">

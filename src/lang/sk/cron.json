@@ -101,7 +101,7 @@
   "allTasks": "Všetky úlohy",
   "systemTasks": "Systémové úlohy",
   "systemTask": "Systémová úloha",
-  "flyenvTask": "Úloha FlyEnv",
+  "qtenvdevTask": "Úloha QTEnvDev",
   "otherTask": "Iná úloha",
   "taskTrigger": "Spúšťač",
   "deleteSystemTaskTips": "Odstrániť túto systémovú naplánovanú úlohu?",

@@ -1,6 +1,6 @@
 <template>
   <el-config-provider :locale="locale">
-    <el-container id="container" class="overflow-hidden h-screen">
+    <el-container id="container" class="overflow-hidden min-h-0 h-[100dvh]">
       <Aside />
       <router-view />
       <el-drawer

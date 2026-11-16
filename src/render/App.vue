@@ -7,7 +7,6 @@
     @resolved="handleOnboardingResolved"
   />
   <router-view />
-  <FloatButton />
 </template>
 
 <script lang="ts" setup>
@@ -19,7 +18,6 @@
   import { I18nT } from '@lang/index'
   import Base from '@/core/Base'
   import { MessageSuccess } from '@/util/Element'
-  import FloatButton from '@/components/FloatBtn/index.vue'
   import { AppModules } from '@/core/App'
   import VueSvg from '@/components/VueSvgIcon/svg.vue'
   import { Module } from '@/core/Module/Module'
@@ -36,9 +34,9 @@
   import Router from '@/router'
   import { createModuleOnboardingStartupGate } from '@/components/ModuleOnboarding/startupGate'
 
-  ;(globalThis as any).__FLYENV_PLUGIN_ROUTER__ = Router
-  ;(globalThis as any).__FLYENV_PLUGIN_APP_STORE__ = AppStore
-  ;(globalThis as any).__FLYENV_PLUGIN_BREW_STORE__ = BrewStore
+  ;(globalThis as any).__QTENVDEV_PLUGIN_ROUTER__ = Router
+  ;(globalThis as any).__QTENVDEV_PLUGIN_APP_STORE__ = AppStore
+  ;(globalThis as any).__QTENVDEV_PLUGIN_BREW_STORE__ = BrewStore
 
   const appStore = AppStore()
   const brewStore = BrewStore()
@@ -209,7 +207,7 @@
     if (appStore?.config?.setup?.proxy?.on) {
       return
     }
-    const checked = localStorage.getItem('FlyEnv-Checked-Proxy')
+    const checked = localStorage.getItem('QTEnvDev-Checked-Proxy')
     if (checked) {
       return
     }
@@ -230,7 +228,7 @@
           appStore.saveConfig()
           MessageSuccess(I18nT('tools.systemProxyUsed'))
         })
-        localStorage.setItem('FlyEnv-Checked-Proxy', 'true')
+        localStorage.setItem('QTEnvDev-Checked-Proxy', 'true')
       }
     })
   }

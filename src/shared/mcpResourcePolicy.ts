@@ -1,5 +1,5 @@
 export type MCPResourceDef = {
-  uri: 'flyenv://services' | 'flyenv://sites'
+  uri: 'qtenvdev://services' | 'qtenvdev://sites'
   name: string
   mimeType: 'application/json'
   requiredTool: 'list_services' | 'list_sites'
@@ -7,14 +7,14 @@ export type MCPResourceDef = {
 
 const RESOURCE_DEFS: MCPResourceDef[] = [
   {
-    uri: 'flyenv://services',
-    name: 'FlyEnv services',
+    uri: 'qtenvdev://services',
+    name: 'QTEnvDev services',
     mimeType: 'application/json',
     requiredTool: 'list_services'
   },
   {
-    uri: 'flyenv://sites',
-    name: 'FlyEnv local sites',
+    uri: 'qtenvdev://sites',
+    name: 'QTEnvDev local sites',
     mimeType: 'application/json',
     requiredTool: 'list_sites'
   }

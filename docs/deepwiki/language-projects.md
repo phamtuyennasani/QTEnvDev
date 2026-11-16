@@ -6,11 +6,11 @@
 
 ## Overview
 
-LanguageProjects 是 FlyEnv 中用于管理**多语言运行时项目**（Node.js、Python、Go、Rust、Java、PHP、Ruby、Erlang、Deno、Bun、Perl、Zig 等）的模块化基础设施。它不是一个传统意义上的"服务模块"（如 Nginx/MySQL 那样继承 `Base` 类并管理单一二进制守护进程），而是一套**项目级运行时编排系统**：
+LanguageProjects 是 QTEnvDev 中用于管理**多语言运行时项目**（Node.js、Python、Go、Rust、Java、PHP、Ruby、Erlang、Deno、Bun、Perl、Zig 等）的模块化基础设施。它不是一个传统意义上的"服务模块"（如 Nginx/MySQL 那样继承 `Base` 类并管理单一二进制守护进程），而是一套**项目级运行时编排系统**：
 
 - 每个项目绑定一个独立目录、一个可选的语言版本（`binBin`）、一组环境变量和启动命令
 - 核心痛点解决：在多版本语言环境中，不同项目依赖不同运行时版本，传统全局 PATH 会导致版本冲突
-- 通过**项目目录级 `.flyenv` 文件 + Shell 钩子（chpwd/Prompt）+ 白名单目录校验**的三层机制，实现"进入项目目录即自动切换环境"的隔离效果
+- 通过**项目目录级 `.qtenvdev` 文件 + Shell 钩子（chpwd/Prompt）+ 白名单目录校验**的三层机制，实现"进入项目目录即自动切换环境"的隔离效果
 - 启动时通过 Fork 进程的 `customerServiceStartExec`/`customerServiceStartExecWin` 生成临时 Shell 脚本，在子进程中注入隔离后的 PATH 与环境变量
 
 Sources: `src/fork/module/LanguageProject/index.ts:1-313`, `src/render/components/LanguageProjects/Project.ts:1-281`, `src/render/core/LanguageProjectRunner.ts:1-239`
@@ -32,7 +32,7 @@ graph TD
     G -->|module='language-project'| H[LanguageProject/index.ts<br/>startService / stopService]
     H -->|生成脚本| I[临时 .sh/.ps1 文件]
     I -->|spawn / exec| J[操作系统子进程]
-    D -->|setDirEnv| K[项目目录 .flyenv 文件]
+    D -->|setDirEnv| K[项目目录 .qtenvdev 文件]
     K -->|Shell Hook| L[.zshrc / .bashrc / PowerShell Profile]
 ```
 
@@ -107,7 +107,7 @@ export type ModuleExecItem = {
 | 前端状态 | 物理进程映射 | 说明 |
 | :-- | :-- | :-- |
 | `ProjectItem.state.isRun` | PID 文件存在且进程存活 | 由 IPC 回调中的 `APP-Service-Start-PID` 设置 |
-| `ProjectItem.state.pid` | 操作系统进程 PID | 从 Shell 输出提取 `FlyEnv-Process-ID${pid}FlyEnv-Process-ID` |
+| `ProjectItem.state.pid` | 操作系统进程 PID | 从 Shell 输出提取 `QTEnvDev-Process-ID${pid}QTEnvDev-Process-ID` |
 | `ProjectItem.state.running` | 启动/停止操作进行中 | 纯前端状态，无后端对应 |
 
 Sources: `src/render/components/LanguageProjects/ProjectItem.ts:11-39`, `src/render/core/LanguageProjectRunner.ts:10-24`, `src/shared/app.d.ts:113-124`
@@ -118,39 +118,39 @@ Sources: `src/render/components/LanguageProjects/ProjectItem.ts:11-39`, `src/ren
 
 ### 3.1 项目级环境隔离（Project-Level Environment Isolation）
 
-> **机制概述**: 解决多版本语言运行时在同一系统中的冲突问题。通过"项目目录 `.flyenv` 文件 + Shell 自动加载钩子 + FlyEnv 内部 PATH 注入"的三层防御，确保每个项目在启动时和终端交互时都使用正确的运行时版本。
+> **机制概述**: 解决多版本语言运行时在同一系统中的冲突问题。通过"项目目录 `.qtenvdev` 文件 + Shell 自动加载钩子 + QTEnvDev 内部 PATH 注入"的三层防御，确保每个项目在启动时和终端交互时都使用正确的运行时版本。
 
 #### 3.1.1 调用链：环境隔离文件生成
 
-**场景**: 用户为一个项目选择语言版本后，FlyEnv 自动生成/更新项目目录下的 `.flyenv` 文件
+**场景**: 用户为一个项目选择语言版本后，QTEnvDev 自动生成/更新项目目录下的 `.qtenvdev` 文件
 
-**路径**: `index.vue` -> `docClick()` 行内编辑版本切换→ `Project.ts` -> `setDirEnv(item)` → `fs.writeFile(join(item.path, '.flyenv'), ...)`
+**路径**: `index.vue` -> `docClick()` 行内编辑版本切换→ `Project.ts` -> `setDirEnv(item)` → `fs.writeFile(join(item.path, '.qtenvdev'), ...)`
 
 **关键代码解析**（`src/render/components/LanguageProjects/Project.ts:160-273`）：
 
 ```typescript
 async setDirEnv(item: ProjectItem) {
-  // Windows: 生成 PowerShell 语法的 .flyenv 文件
+  // Windows: 生成 PowerShell 语法的 .qtenvdev 文件
   if (window.Server.isWindows) {
-    const envFile = join(item.path, '.flyenv')
-    // 检测已存在的行，按 #FlyEnv-ID-{item.id} 标签过滤旧配置
+    const envFile = join(item.path, '.qtenvdev')
+    // 检测已存在的行，按 #QTEnvDev-ID-{item.id} 标签过滤旧配置
     const lines = content
       .trim()
       .split('\n')
       .filter((s: string) => {
         const line = s.trim()
-        return !!line && !line.includes(`#FlyEnv-ID-${item.id}`)
+        return !!line && !line.includes(`#QTEnvDev-ID-${item.id}`)
       })
     // 将 binPath/bin/sbin 加入 PATH
     const list = [item.binPath, join(item.binPath, 'bin'), join(item.binPath, 'sbin')]
     if (arr.length) {
-      lines.push(`$env:PATH = "${arr.join(';')};" + $env:PATH #FlyEnv-ID-${item.id}`)
+      lines.push(`$env:PATH = "${arr.join(';')};" + $env:PATH #QTEnvDev-ID-${item.id}`)
     }
     await fs.writeFile(envFile, lines.join('\n'))
   } else {
-    // macOS/Linux: 生成 Shell 语法的 .flyenv 文件
-    const envFile = join(item.path, '.flyenv')
-    lines.push(`export PATH="${arr.join(':')}:$PATH" #FlyEnv-ID-${item.id}`)
+    // macOS/Linux: 生成 Shell 语法的 .qtenvdev 文件
+    const envFile = join(item.path, '.qtenvdev')
+    lines.push(`export PATH="${arr.join(':')}:$PATH" #QTEnvDev-ID-${item.id}`)
     await fs.writeFile(envFile, lines.join('\n'))
   }
 }
@@ -158,30 +158,30 @@ async setDirEnv(item: ProjectItem) {
 
 **核心设计点**：
 
-- **ID 标签过滤**：每个项目的 PATH 注入行末尾带有 `#FlyEnv-ID-${item.id}` 注释。当用户切换版本时，`setDirEnv` 先读取现有 `.flyenv`，用正则过滤掉带当前项目 ID 的旧行，再追加新行。实现版本切换的无残留更新。
+- **ID 标签过滤**：每个项目的 PATH 注入行末尾带有 `#QTEnvDev-ID-${item.id}` 注释。当用户切换版本时，`setDirEnv` 先读取现有 `.qtenvdev`，用正则过滤掉带当前项目 ID 的旧行，再追加新行。实现版本切换的无残留更新。
 - **路径探测**：不只是 `binPath`，还会探测 `binPath/bin` 和 `binPath/sbin`，确保绝大多数语言安装结构的 PATH 覆盖。
 - **幂等写入**：如果 `binVersion` 为空（使用系统版本），则写入空文件或清空对应 ID 的行。
 
 #### 3.1.2 调用链：Shell 自动加载钩子注入
 
-**场景**: FlyEnv 首次启动或用户点击"环境设置"时，向用户 Shell 配置注入自动加载脚本
+**场景**: QTEnvDev 首次启动或用户点击"环境设置"时，向用户 Shell 配置注入自动加载脚本
 
 **路径**:
 
-- macOS/Linux：`Project.ts` -> `initDirs()` / `setDirEnv()` → `IPC.send('app-fork:tools', 'initFlyEnvSH')` → `src/fork/module/Tool/index.ts` -> `initFlyEnvSH()`；
-- Windows：`Project.ts` -> `initDirs()` → `ShellInitController.syncAllowedDirs()`，同步成功后 `ShellInitController.ensure()` → `IPC.send('app-fork:tools', 'initFlyEnvSH')` → `src/fork/module/Tool.win/init.ts` -> `initFlyEnvSH()` → Go Helper 或受限 UAC fallback。
+- macOS/Linux：`Project.ts` -> `initDirs()` / `setDirEnv()` → `IPC.send('app-fork:tools', 'initQTEnvDevSH')` → `src/fork/module/Tool/index.ts` -> `initQTEnvDevSH()`；
+- Windows：`Project.ts` -> `initDirs()` → `ShellInitController.syncAllowedDirs()`，同步成功后 `ShellInitController.ensure()` → `IPC.send('app-fork:tools', 'initQTEnvDevSH')` → `src/fork/module/Tool.win/init.ts` -> `initQTEnvDevSH()` → Go Helper 或受限 UAC fallback。
 
 Windows controller 是 module-local 单例，拥有 IPC 监听、进度、错误提示和 `inFlight` 合并；`Project.ts` 不再直接持有这段操作的 IPC 生命周期。
 
 **macOS/Linux 实现**（`src/fork/module/Tool/index.ts:642-721`）：
 
 ```typescript
-initFlyEnvSH() {
+initQTEnvDevSH() {
   const file = join(global.Server.UserHome!, isMacOS() ? '.zshrc' : '.bashrc')
-  // macOS: 将 flyenv.sh 拷贝到 /Applications/FlyEnv.app/Contents/Resources/helper/flyenv.sh
-  // Linux: 将 flyenv.sh 拷贝到 AppDir/helper/flyenv.sh
+  // macOS: 将 qtenvdev.sh 拷贝到 /Applications/QTEnvDev.app/Contents/Resources/helper/qtenvdev.sh
+  // Linux: 将 qtenvdev.sh 拷贝到 AppDir/helper/qtenvdev.sh
   const regex = new RegExp(
-    `^(?!\\s*#)\\s*source\\s*"/Applications/FlyEnv\\.app/Contents/Resources/helper/flyenv\\.sh"`,
+    `^(?!\\s*#)\\s*source\\s*"/Applications/QTEnvDev\\.app/Contents/Resources/helper/qtenvdev\\.sh"`,
     'gmu'
   )
   if (!content.match(regex) && existsSync(file)) {
@@ -191,37 +191,37 @@ initFlyEnvSH() {
 }
 ```
 
-**`fly-env.sh` 核心逻辑**（`static/sh/macOS/fly-env.sh:1-81`）：
+**`qt-env-dev.sh` 核心逻辑**（`static/sh/macOS/qt-env-dev.sh:1-81`）：
 
 ```bash
-_flyenv_reload() {
-  # 读取 ~/.flyenv.dir（白名单目录列表，由 initAllowDir 生成）
-  config_file="$HOME/Library/FlyEnv/bin/.flyenv.dir"
-  new_hash=$(_flyenv_hash "$config_file") || return
-  [[ "$new_hash" == "$_flyenv_config_hash" ]] && return
-  # 缓存目录列表到数组 _flyenv_allowed_paths
+_qtenvdev_reload() {
+  # 读取 ~/.qtenvdev.dir（白名单目录列表，由 initAllowDir 生成）
+  config_file="$HOME/Library/QTEnvDev/bin/.qtenvdev.dir"
+  new_hash=$(_qtenvdev_hash "$config_file") || return
+  [[ "$new_hash" == "$_qtenvdev_config_hash" ]] && return
+  # 缓存目录列表到数组 _qtenvdev_allowed_paths
 }
 
-flyenv_autoload() {
-  _flyenv_reload || return
+qtenvdev_autoload() {
+  _qtenvdev_reload || return
   local current_path="${PWD}" found=0
-  for allow_path in "${_flyenv_allowed_paths[@]}"; do
+  for allow_path in "${_qtenvdev_allowed_paths[@]}"; do
     [[ "$allow_path" == "$current_path" ]] && { found=1; break; }
   done
   (( found )) || return
-  # 只有在白名单目录中，才 source .flyenv
-  if [[ -f ".flyenv" ]]; then
-    source ".flyenv"
+  # 只有在白名单目录中，才 source .qtenvdev
+  if [[ -f ".qtenvdev" ]]; then
+    source ".qtenvdev"
   fi
 }
 
 # zsh: 通过 chpwd 钩子触发
 autoload -Uz add-zsh-hook
-add-zsh-hook chpwd flyenv_autoload
+add-zsh-hook chpwd qtenvdev_autoload
 
 # bash: 通过覆盖 cd 命令触发
 cd() {
-  builtin cd "$@" && flyenv_autoload
+  builtin cd "$@" && qtenvdev_autoload
 }
 ```
 
@@ -238,75 +238,75 @@ const profiles = buildPowerShellProfileTargets(
 // 这里只写固定配置，不发现或启动 pwsh.exe；UAC 负载才使用系统 Windows PowerShell 启动器。
 // 初始化另行检查 CurrentUser 执行策略，Restricted 时设置 RemoteSigned。
 
-initFlyEnvSH() {
-  // 以 initFlyEnvSHInFlight 合并并发调用，并记录各步骤耗时。
-  const integration = await Helper.send('tools', 'installFlyEnvPowerShellIntegration', {
-    scriptPath: join(dirname(global.Server.AppDir!), 'bin/flyenv.ps1'),
-    scriptBase64: Buffer.from(await readFile(join(global.Server.Static!, 'sh/fly-env.ps1'))).toString('base64'),
+initQTEnvDevSH() {
+  // 以 initQTEnvDevSHInFlight 合并并发调用，并记录各步骤耗时。
+  const integration = await Helper.send('tools', 'installQTEnvDevPowerShellIntegration', {
+    scriptPath: join(dirname(global.Server.AppDir!), 'bin/qtenvdev.ps1'),
+    scriptBase64: Buffer.from(await readFile(join(global.Server.Static!, 'sh/qt-env-dev.ps1'))).toString('base64'),
     profiles
   })
   // 使用实际返回的 scriptState/profile states；执行策略修复失败只产生 warning。
 }
 ```
 
-`tools/installFlyEnvPowerShellIntegration` 是独立 Helper 合约。它只允许 `<allowed-root>\\bin\\flyenv.ps1` 与 Electron `app.getPath('documents')` 派生的两个固定 Profile 目标；Go Helper 与 UAC 回退都会拒绝 reparse point、路径遍历、重复 edition 和超过 1 MiB 的脚本，但不检查 Profile 或祖先目录 Owner，也不要求 Documents 位于用户 home 内。UAC 回退把校验后的 payload 直接嵌入提升进程参数，不复用通用临时 data-file；提升后还会复验 allowed-roots 文件及父目录的 owner/DACL。返回的 JSON 状态由 renderer 保留，不会以文件存在与否猜测成功。
+`tools/installQTEnvDevPowerShellIntegration` 是独立 Helper 合约。它只允许 `<allowed-root>\\bin\\qtenvdev.ps1` 与 Electron `app.getPath('documents')` 派生的两个固定 Profile 目标；Go Helper 与 UAC 回退都会拒绝 reparse point、路径遍历、重复 edition 和超过 1 MiB 的脚本，但不检查 Profile 或祖先目录 Owner，也不要求 Documents 位于用户 home 内。UAC 回退把校验后的 payload 直接嵌入提升进程参数，不复用通用临时 data-file；提升后还会复验 allowed-roots 文件及父目录的 owner/DACL。返回的 JSON 状态由 renderer 保留，不会以文件存在与否猜测成功。
 
-Profile block 由固定 marker 管理。旧的 `# FlyEnv Auto-Load` 两行 block 会迁移；不完整、重复或歧义 marker 会失败而不是覆盖用户 Profile：
+Profile block 由固定 marker 管理。旧的 `# QTEnvDev Auto-Load` 两行 block 会迁移；不完整、重复或歧义 marker 会失败而不是覆盖用户 Profile：
 
 ```powershell
-# >>> FlyEnv shell integration >>>
-$flyenvScript = '...\\bin\\flyenv.ps1'
-if (Test-Path -LiteralPath $flyenvScript) {
-  . $flyenvScript
+# >>> QTEnvDev shell integration >>>
+$qtenvdevScript = '...\\bin\\qtenvdev.ps1'
+if (Test-Path -LiteralPath $qtenvdevScript) {
+  . $qtenvdevScript
 }
-# <<< FlyEnv shell integration <<<
+# <<< QTEnvDev shell integration <<<
 ```
 
-**`fly-env.ps1` 核心逻辑**（`static/sh/Windows/fly-env.ps1:1-45`）：
+**`qt-env-dev.ps1` 核心逻辑**（`static/sh/Windows/qt-env-dev.ps1:1-45`）：
 
 ```powershell
 function global:Prompt {
   $currentPath = $PWD.Path.Replace('/', '\').TrimEnd('\')
   $isAllowed = $script:allowedPathsCache -contains $currentPath
-  if ($isAllowed -and (Test-Path ".flyenv") -and ($currentPath -ne $script:lastFlyenvDir)) {
-    Get-Content ".flyenv" -Encoding UTF8 | Invoke-Expression
-    $script:lastFlyenvDir = $currentPath
+  if ($isAllowed -and (Test-Path ".qtenvdev") -and ($currentPath -ne $script:lastQTEnvDevDir)) {
+    Get-Content ".qtenvdev" -Encoding UTF8 | Invoke-Expression
+    $script:lastQTEnvDevDir = $currentPath
   }
   # ... 返回正常 prompt
 }
 
-function Get-FlyEnvAllowedPaths {
-  $configFile = Join-Path $PSScriptRoot ".flyenv.dir"
+function Get-QTEnvDevAllowedPaths {
+  $configFile = Join-Path $PSScriptRoot ".qtenvdev.dir"
   $jsonContent = Get-Content $configFile -Encoding UTF8 | ConvertFrom-Json
 }
 ```
 
 **关键差异**：
 
-- **macOS**: 使用 `add-zsh-hook chpwd` 监听目录切换，触发 `source .flyenv`
-- **Linux**: 覆盖 `cd` 内置命令，切换目录后触发 `source .flyenv`
-- **Windows**: 重写 `global:Prompt` 函数，每次显示提示符时检测当前目录是否在白名单中，首次进入时执行 `.flyenv` 中的 PowerShell 命令
+- **macOS**: 使用 `add-zsh-hook chpwd` 监听目录切换，触发 `source .qtenvdev`
+- **Linux**: 覆盖 `cd` 内置命令，切换目录后触发 `source .qtenvdev`
+- **Windows**: 重写 `global:Prompt` 函数，每次显示提示符时检测当前目录是否在白名单中，首次进入时执行 `.qtenvdev` 中的 PowerShell 命令
 
 #### 3.1.3 调用链：白名单目录同步
 
 **场景**: 项目目录列表变更时，更新 Shell 可识别的白名单
 
-**路径**: `Project.ts` -> `saveDirs()` / `initDirs()` → `IPC.send('app-fork:tools', 'initAllowDir', dirs)` → `src/fork/module/Tool/index.ts` -> `initAllowDir(json)` → `writeFile(join(dirname(global.Server.AppDir!), 'bin/.flyenv.dir'), json)`
+**路径**: `Project.ts` -> `saveDirs()` / `initDirs()` → `IPC.send('app-fork:tools', 'initAllowDir', dirs)` → `src/fork/module/Tool/index.ts` -> `initAllowDir(json)` → `writeFile(join(dirname(global.Server.AppDir!), 'bin/.qtenvdev.dir'), json)`
 
 **平台差异**：
 
 | 平台    | 白名单文件路径                     | 格式                               |
 | :------ | :--------------------------------- | :--------------------------------- |
-| macOS   | `~/Library/FlyEnv/bin/.flyenv.dir` | 每行一个绝对路径（`\n` 分隔）      |
-| Linux   | `~/.config/FlyEnv/bin/.flyenv.dir` | 每行一个绝对路径（`\n` 分隔）      |
-| Windows | `{AppDir}/bin/.flyenv.dir`         | JSON 数组（`JSON.stringify(res)`） |
+| macOS   | `~/Library/QTEnvDev/bin/.qtenvdev.dir` | 每行一个绝对路径（`\n` 分隔）      |
+| Linux   | `~/.config/QTEnvDev/bin/.qtenvdev.dir` | 每行一个绝对路径（`\n` 分隔）      |
+| Windows | `{AppDir}/bin/.qtenvdev.dir`         | JSON 数组（`JSON.stringify(res)`） |
 
 **边缘情况处理**：
 
-- `flyenv_autoload` 在读取 `.flyenv.dir` 前先计算 SHA256 hash，若文件未变更则直接返回，避免重复解析
+- `qtenvdev_autoload` 在读取 `.qtenvdev.dir` 前先计算 SHA256 hash，若文件未变更则直接返回，避免重复解析
 - 路径过滤：忽略不以 `/` 开头的行，去除尾部 `/`，Linux 使用 `realpath -m` 规范化
 
-Sources: `src/render/components/LanguageProjects/Project.ts:121-139`, `src/fork/module/Tool/index.ts:633-639`, `static/sh/macOS/fly-env.sh:1-81`, `static/sh/Linux/fly-env.sh:1-98`, `static/sh/Windows/fly-env.ps1:1-45`
+Sources: `src/render/components/LanguageProjects/Project.ts:121-139`, `src/fork/module/Tool/index.ts:633-639`, `static/sh/macOS/qt-env-dev.sh:1-81`, `static/sh/Linux/qt-env-dev.sh:1-98`, `static/sh/Windows/qt-env-dev.ps1:1-45`
 
 ---
 
@@ -379,7 +379,7 @@ export async function customerServiceStartExec(version: ModuleExecItem, isServic
   await mkdirp(baseDir)
 
   // 生成启动脚本
-  let psScript = await readFile(join(global.Server.Static!, 'sh/flyenv-async-exec.sh'), 'utf8')
+  let psScript = await readFile(join(global.Server.Static!, 'sh/qtenvdev-async-exec.sh'), 'utf8')
   let bin = ''
   if (version.commandType === 'file') {
     bin = version.commandFile
@@ -415,21 +415,21 @@ export async function customerServiceStartExec(version: ModuleExecItem, isServic
 }
 ```
 
-**脚本模板**（`static/sh/macOS/flyenv-async-exec.sh`）：
+**脚本模板**（`static/sh/macOS/qtenvdev-async-exec.sh`）：
 
 ```bash
 #!/bin/zsh
 #ENV#
 cd "#CWD#"
 nohup "#BIN#" #ARGS# > "#OUTLOG#" 2>"#ERRLOG#" &
-echo "##FlyEnv-Process-ID$!FlyEnv-Process-ID##"
+echo "##QTEnvDev-Process-ID$!QTEnvDev-Process-ID##"
 ```
 
 **数据清洗点 - PID 提取**：
 
 ```typescript
 const stdout = res.stdout.trim() + '\n' + res.stderr.trim()
-const regex = /FlyEnv-Process-ID(.*?)FlyEnv-Process-ID/g
+const regex = /QTEnvDev-Process-ID(.*?)QTEnvDev-Process-ID/g
 const match = regex.exec(stdout)
 if (match) {
   pid = match[1]
@@ -440,7 +440,7 @@ if (match) {
 
 ```typescript
 export async function customerServiceStartExec(version: ModuleExecItem, isService: boolean) {
-  let psScript = await readFile(join(global.Server.Static!, 'sh/flyenv-customer-exec.ps1'), 'utf8')
+  let psScript = await readFile(join(global.Server.Static!, 'sh/qtenvdev-customer-exec.ps1'), 'utf8')
   let bin = ''
   if (version.commandType === 'file') {
     bin = version.commandFile
@@ -462,14 +462,14 @@ export async function customerServiceStartExec(version: ModuleExecItem, isServic
 }
 ```
 
-**Windows 脚本模板**（`static/sh/Windows/flyenv-customer-exec.ps1`）：
+**Windows 脚本模板**（`static/sh/Windows/qtenvdev-customer-exec.ps1`）：
 
 ```powershell
 $process = Start-Process -FilePath "powershell.exe" `
     -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$BIN`"" `
     -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput "$OUTLOG" -RedirectStandardError "$ERRLOG"
-Write-Host "##FlyEnv-Process-ID$($process.Id)FlyEnv-Process-ID##"
+Write-Host "##QTEnvDev-Process-ID$($process.Id)QTEnvDev-Process-ID##"
 ```
 
 #### 3.2.2 调用链：终端模式启动
@@ -542,7 +542,7 @@ await execPromise(`powershell.exe -ExecutionPolicy Bypass -File "${exePS}" "${co
 - 按优先级尝试 `wt` (Windows Terminal), `pwsh` (PowerShell 7), `powershell` (PowerShell 5.1)
 - 终端保持打开状态，执行完毕后提示"Press any key to close"
 
-Sources: `src/fork/module/LanguageProject/index.ts:71-309`, `src/fork/util/ServiceStart.ts:181-335`, `src/fork/util/ServiceStart.win.ts:316-434`, `static/sh/macOS/flyenv-async-exec.sh`, `static/sh/Windows/flyenv-customer-exec.ps1`, `static/sh/Linux/exec-by-terminal.sh`, `static/sh/Windows/exec-by-terminal.ps1`
+Sources: `src/fork/module/LanguageProject/index.ts:71-309`, `src/fork/util/ServiceStart.ts:181-335`, `src/fork/util/ServiceStart.win.ts:316-434`, `static/sh/macOS/qtenvdev-async-exec.sh`, `static/sh/Windows/qtenvdev-customer-exec.ps1`, `static/sh/Linux/exec-by-terminal.sh`, `static/sh/Windows/exec-by-terminal.ps1`
 
 ---
 
@@ -600,11 +600,11 @@ Sources: `src/fork/module/LanguageProject/index.ts:34-69`, `src/shared/Process.t
 
 ### 3.4 多版本运行时路由（Multi-Version Runtime Routing）
 
-> **机制概述**: 同一台机器上安装了多个版本的 Node.js / PHP / Python 等，不同项目需要绑定不同版本。LanguageProjects 通过三层 PATH 注入实现运行时路由：Shell 脚本 ENV 注入 → .flyenv 文件注入 → 前端版本选择绑定。
+> **机制概述**: 同一台机器上安装了多个版本的 Node.js / PHP / Python 等，不同项目需要绑定不同版本。LanguageProjects 通过三层 PATH 注入实现运行时路由：Shell 脚本 ENV 注入 → .qtenvdev 文件注入 → 前端版本选择绑定。
 
 #### 3.4.1 调用链：版本选择到 PATH 注入
 
-**路径**: `ProjectEdit.vue` -> `el-select v-model="item.binBin"` → `watch(() => item.value.binBin, ...)` 更新 `binVersion` / `binPath` → 保存后 `index.vue` -> `docClick()` 检测到 `nodeChanged` → `Project.setDirEnv(item)` 重写 `.flyenv` → 启动时 `customerServiceStartExec` 再次在脚本中注入 `export PATH="${dirname(binBin)}:$PATH"`
+**路径**: `ProjectEdit.vue` -> `el-select v-model="item.binBin"` → `watch(() => item.value.binBin, ...)` 更新 `binVersion` / `binPath` → 保存后 `index.vue` -> `docClick()` 检测到 `nodeChanged` → `Project.setDirEnv(item)` 重写 `.qtenvdev` → 启动时 `customerServiceStartExec` 再次在脚本中注入 `export PATH="${dirname(binBin)}:$PATH"`
 
 **前端版本列表构建**（`index.vue:355-361`）：
 
@@ -623,8 +623,8 @@ const binVersions = computed(() => {
 
 | 层级 | 注入位置 | 生效范围 | 代码位置 |
 | :-- | :-- | :-- | :-- |
-| L1 - 运行时脚本 | `flyenv-async-exec.sh` 的 `#ENV#` 占位符 | 当前服务进程 | `src/fork/util/ServiceStart.ts:228-230` |
-| L2 - 终端自动加载 | 项目目录 `.flyenv` 文件 | 用户在该目录打开的终端会话 | `src/render/components/LanguageProjects/Project.ts:240-266` |
+| L1 - 运行时脚本 | `qtenvdev-async-exec.sh` 的 `#ENV#` 占位符 | 当前服务进程 | `src/fork/util/ServiceStart.ts:228-230` |
+| L2 - 终端自动加载 | 项目目录 `.qtenvdev` 文件 | 用户在该目录打开的终端会话 | `src/render/components/LanguageProjects/Project.ts:240-266` |
 | L3 - 终端手动打开 | `openInTerminal` 模式下的命令前缀 | 单次终端会话 | `src/fork/module/LanguageProject/index.ts:134-136` |
 
 **关键代码**：
@@ -637,8 +637,8 @@ if (version.binBin && existsSync(version.binBin)) {
 }
 psScript = psScript.replace('#ENV#', env)
 
-// L2: 项目目录 .flyenv 文件注入（macOS/Linux）
-lines.push(`export PATH="${arr.join(':')}:$PATH" #FlyEnv-ID-${item.id}`)
+// L2: 项目目录 .qtenvdev 文件注入（macOS/Linux）
+lines.push(`export PATH="${arr.join(':')}:$PATH" #QTEnvDev-ID-${item.id}`)
 
 // L3: 终端模式直接前缀命令
 command = `export PATH="${dirname(project.binBin)}:$PATH"\n${command}`
@@ -765,8 +765,8 @@ Sources: `src/render/components/LanguageProjects/ProjectItem.ts:124-220`, `src/r
 | :-- | :-- | :-- | :-- | :-- | :-- |
 | `app-fork:language-project:startService` | `{ project: RunProjectItem, typeFlag: string, password?: string, openInTerminal?: boolean }` | `{ 'APP-Service-Start-PID': string }` | `src/fork/module/LanguageProject/index.ts:71` | 解析 env → 生成脚本 → `spawnPromiseWithEnv` / `execPromiseSudo` / 终端模式 | 更新 `ProjectItem.state.isRun/pid` |
 | `app-fork:language-project:stopService` | `{ pid: string, typeFlag: string }` | `{ 'APP-Service-Stop-PID': string[] }` | `src/fork/module/LanguageProject/index.ts:34` | `ProcessPidsByPid` / `ProcessPidListByPid` → `ProcessKill` | 更新 `ProjectItem.state.isRun=false, pid=''` |
-| `app-fork:tools:initAllowDir` | `dirs: string`（Windows JSON / Unix 换行分隔） | `boolean` | `src/fork/module/Tool/index.ts:633` | 写入 `.flyenv.dir` 白名单文件 | Shell 钩子下次读取时生效 |
-| `app-fork:tools:initFlyEnvSH` | 无 | Unix：`boolean`；Windows：`FlyEnvShellInitResult` | `src/fork/module/Tool/index.ts` / `src/fork/module/Tool.win/init.ts` | Unix 修改 shell rc；Windows 推导固定 Profile、调用 Helper/UAC | Windows 返回 runtime/Profile 实际状态与降级 warning |
+| `app-fork:tools:initAllowDir` | `dirs: string`（Windows JSON / Unix 换行分隔） | `boolean` | `src/fork/module/Tool/index.ts:633` | 写入 `.qtenvdev.dir` 白名单文件 | Shell 钩子下次读取时生效 |
+| `app-fork:tools:initQTEnvDevSH` | 无 | Unix：`boolean`；Windows：`QTEnvDevShellInitResult` | `src/fork/module/Tool/index.ts` / `src/fork/module/Tool.win/init.ts` | Unix 修改 shell rc；Windows 推导固定 Profile、调用 Helper/UAC | Windows 返回 runtime/Profile 实际状态与降级 warning |
 | `app:password-check` | `password: string` | `{ code: 0, data: string }` | Main Process（非 Fork） | 验证 sudo 密码 | 设置 `window.Server.Password` |
 
 Sources: `src/fork/module/LanguageProject/index.ts:20-313`, `src/fork/module/Tool/index.ts:633-721`, `src/fork/module/Tool.win/index.ts:970-1028`
@@ -779,13 +779,13 @@ Sources: `src/fork/module/LanguageProject/index.ts:20-313`, `src/fork/module/Too
 
 | 功能域 | macOS | Linux | Windows | 关键文件 |
 | :-- | :-- | :-- | :-- | :-- |
-| **.flyenv 文件语法** | `export PATH="..."` | `export PATH="..."` | `$env:PATH = "..."` | `Project.ts:192-268` |
-| **Shell 钩子机制** | `add-zsh-hook chpwd` | 覆盖 `cd` 内置命令 | 重写 `global:Prompt` | `fly-env.sh`, `fly-env.ps1` |
-| **白名单文件路径** | `~/Library/FlyEnv/bin/.flyenv.dir` | `~/.config/FlyEnv/bin/.flyenv.dir` | `{AppDir}/bin/.flyenv.dir` | `Tool/index.ts:635`, `Tool.win/index.ts:972` |
-| **白名单文件格式** | 换行分隔 | 换行分隔 | JSON 数组 | `Project.ts:127`, `fly-env.ps1:35` |
-| **标准启动脚本模板** | `flyenv-async-exec.sh` (zsh) | `flyenv-async-exec.sh` (bash) | `flyenv-customer-exec.ps1` | `static/sh/macOS/`, `static/sh/Linux/`, `static/sh/Windows/` |
+| **.qtenvdev 文件语法** | `export PATH="..."` | `export PATH="..."` | `$env:PATH = "..."` | `Project.ts:192-268` |
+| **Shell 钩子机制** | `add-zsh-hook chpwd` | 覆盖 `cd` 内置命令 | 重写 `global:Prompt` | `qt-env-dev.sh`, `qt-env-dev.ps1` |
+| **白名单文件路径** | `~/Library/QTEnvDev/bin/.qtenvdev.dir` | `~/.config/QTEnvDev/bin/.qtenvdev.dir` | `{AppDir}/bin/.qtenvdev.dir` | `Tool/index.ts:635`, `Tool.win/index.ts:972` |
+| **白名单文件格式** | 换行分隔 | 换行分隔 | JSON 数组 | `Project.ts:127`, `qt-env-dev.ps1:35` |
+| **标准启动脚本模板** | `qtenvdev-async-exec.sh` (zsh) | `qtenvdev-async-exec.sh` (bash) | `qtenvdev-customer-exec.ps1` | `static/sh/macOS/`, `static/sh/Linux/`, `static/sh/Windows/` |
 | **终端打开方式** | `osascript` + `Terminal.app` | `exec-by-terminal.sh` 遍历桌面终端 | `exec-by-terminal.ps1` 打开 WT/PowerShell | `LanguageProject/index.ts:127-293` |
-| **PID 提取正则** | `FlyEnv-Process-ID(.*?)FlyEnv-Process-ID` | 同上 | 同上 | `ServiceStart.ts:128`, `ServiceStart.win.ts:397` |
+| **PID 提取正则** | `QTEnvDev-Process-ID(.*?)QTEnvDev-Process-ID` | 同上 | 同上 | `ServiceStart.ts:128`, `ServiceStart.win.ts:397` |
 | **进程停止信号** | `SIGTERM` → 500ms → `SIGINT` | 同上 | `ProcessKill('-INT', pids)` | `LanguageProject/index.ts:34-69` |
 | **ENV 注入方式** | `spawnPromiseWithEnv({ env })` | 同上 | 同上 | `ServiceStart.ts:266`, `ServiceStart.win.ts:369` |
 | **sudo 支持** | `execPromiseSudo` | 同上 | 无（Windows 无 sudo 概念） | `ServiceStart.ts:260` |
@@ -799,13 +799,13 @@ Sources: `src/fork/module/LanguageProject/index.ts:20-313`, `src/fork/module/Too
 
 **在服务启动中**：
 
-- macOS/Linux 使用 `nohup` + `&` 后台运行，通过 `$!` 获取 PID；Windows 使用 `Start-Process -PassThru` 获取进程对象，再提取 `$process.Id`。Windows 的 `flyenv-customer-exec.ps1` 额外启动一层 `powershell.exe` 子进程来执行用户命令，而 macOS/Linux 直接执行用户命令。
+- macOS/Linux 使用 `nohup` + `&` 后台运行，通过 `$!` 获取 PID；Windows 使用 `Start-Process -PassThru` 获取进程对象，再提取 `$process.Id`。Windows 的 `qtenvdev-customer-exec.ps1` 额外启动一层 `powershell.exe` 子进程来执行用户命令，而 macOS/Linux 直接执行用户命令。
 
 **在终端模式中**：
 
 - macOS 生成 `.scpt` AppleScript 文件调用 `Terminal.app`；Linux 需要遍历 10+ 种终端模拟器并适配各自的命令行参数；Windows 通过 Base64 编码命令避免转义问题，并优先尝试 Windows Terminal (`wt`)。
 
-Sources: `src/render/components/LanguageProjects/Project.ts:121-273`, `src/fork/module/LanguageProject/index.ts:127-293`, `static/sh/macOS/fly-env.sh`, `static/sh/Linux/fly-env.sh`, `static/sh/Windows/fly-env.ps1`, `static/sh/Linux/exec-by-terminal.sh`, `static/sh/Windows/exec-by-terminal.ps1`
+Sources: `src/render/components/LanguageProjects/Project.ts:121-273`, `src/fork/module/LanguageProject/index.ts:127-293`, `static/sh/macOS/qt-env-dev.sh`, `static/sh/Linux/qt-env-dev.sh`, `static/sh/Windows/qt-env-dev.ps1`, `static/sh/Linux/exec-by-terminal.sh`, `static/sh/Windows/exec-by-terminal.ps1`
 
 ---
 

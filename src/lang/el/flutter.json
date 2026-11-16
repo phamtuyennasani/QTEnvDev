@@ -18,7 +18,7 @@
   "sourcePath": "PATH Συστήματος",
   "sourceDefault": "Προεπιλεγμένη τοποθεσία SDK",
   "sourceCustom": "Διαμορφωμένη προσαρμοσμένη διαδρομή",
-  "sourceFlyenv": "Το FlyEnv διαχειρίζεται SDK",
+  "sourceQTEnvDev": "Το QTEnvDev διαχειρίζεται SDK",
   "sourceUnknown": "Άγνωστο",
   "createProjectTitle": "Δημιουργία Έργου Flutter",
   "create": "Δημιουργία",
@@ -80,8 +80,8 @@
   "templateModuleDesc": "Μια ενότητα Flutter για ενσωμάτωση σε μια υπάρχουσα εφαρμογή Android / iOS.",
   "templateSkeletonDesc": "Ένας κατάλογος/λεπτομέρεια Flutter εφαρμογή με Υλικό 3 και Πλοήγηση 2.0.",
   "androidSdkNotDetected": "Δεν εντοπίστηκε Android SDK",
-  "androidSdkInstallHint": "Το FlyEnv δεν εγκαθιστά αυτόματα το Android SDK. Εγκαταστήστε το SDK μέσω του Android Studio ή των επίσημων εργαλείων γραμμής εντολών του Android.",
+  "androidSdkInstallHint": "Το QTEnvDev δεν εγκαθιστά αυτόματα το Android SDK. Εγκαταστήστε το SDK μέσω του Android Studio ή των επίσημων εργαλείων γραμμής εντολών του Android.",
   "installAndroidStudio": "Εγκατάσταση Android Studio",
   "androidCommandLineTools": "Εργαλεία γραμμής εντολών Android",
-  "androidSdkAfterInstall": "Μετά την εγκατάσταση του SDK, επιστρέψτε στο FlyEnv, πατήστε Ανανέωση (Refresh) και στη συνέχεια χρησιμοποιήστε το Auto-fix για να ρυθμίσετε το περιβάλλον."
+  "androidSdkAfterInstall": "Μετά την εγκατάσταση του SDK, επιστρέψτε στο QTEnvDev, πατήστε Ανανέωση (Refresh) και στη συνέχεια χρησιμοποιήστε το Auto-fix για να ρυθμίσετε το περιβάλλον."
 }

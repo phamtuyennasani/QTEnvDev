@@ -1,6 +1,6 @@
-# FlyEnv Plugins
+# QTEnvDev Plugins
 
-Plugins live in `plugins/<plugin-name>` while developing in the FlyEnv repository.
+Plugins live in `plugins/<plugin-name>` while developing in the QTEnvDev repository.
 
 A plugin contains a `plugin.json` manifest and may provide both Renderer and Fork entries.
 
@@ -41,7 +41,7 @@ Each side binds the factory to its host i18n instance:
   `@lang/runtime` in render code, that would bundle a second i18n instance).
 - `plugins/<plugin-name>/fork/lang.ts` — same factory with `AppI18n` from `@lang/runtime`.
   On the Fork side `@lang/runtime` is also host-bridged: the fork process exposes its live
-  i18n instance on `globalThis.__FLYENV_PLUGIN_HOST__.lang` (`src/fork/index.ts`) and the
+  i18n instance on `globalThis.__QTENVDEV_PLUGIN_HOST__.lang` (`src/fork/index.ts`) and the
   builder rewrites `@lang/runtime` imports to that bridge, so fork bundles share the host
   instance instead of bundling a stale copy that never receives language updates. Guard the
   call (`AppI18n?.()?.global?.locale ?? 'en'`) so the plugin still loads on hosts that
@@ -93,7 +93,7 @@ alone does not update their bundled code.
 
 `plugins/mailpit` is intentionally a real service plugin rather than a Hello World example.
 
-The plugin owns a complete copy of FlyEnv's Mailpit module: the Fork module lives in
+The plugin owns a complete copy of QTEnvDev's Mailpit module: the Fork module lives in
 `plugins/mailpit/fork/MailPit/index.ts` and the Renderer pages (`Index.vue`, `aside.vue`,
 `Config.vue`, `Logs.vue`) live in `plugins/mailpit/render/`. The built-in `mailpit` module in
 `src/` is untouched; the plugin copy uses the module id `mailpit-plugin` so both can coexist.
@@ -102,7 +102,7 @@ Reference rules for plugin module code:
 
 - **Module-specific code** belongs in the plugin directory (the fork module class, the module's
   own Vue pages).
-- **FlyEnv framework code** is referenced via build aliases and bundled into the plugin
+- **QTEnvDev framework code** is referenced via build aliases and bundled into the plugin
   artifact during `plugin:build`: `@fork/*`, `@shared/*` on the Fork side;
   `@/util/*` and `@/svg/*.svg?raw` on the Renderer side. A plugin bundle should only contain
   the plugin's own files plus small utility libraries (for example `lodash-es`, `dompurify`);
@@ -128,9 +128,9 @@ Reference rules for plugin module code:
   (app factory), `@/core/App` and `@/core/AppModules` (built-in module registry), `@/router`,
   `@/core/Plugin`. Bundling any of these would drag the entire built-in renderer (via
   `import.meta.glob`) and a second plugin-host runtime into the artifact, and a bundled
-  `core/Plugin` copy would overwrite the host's `globalThis.__FLYENV_PLUGIN_HOST__` at load
+  `core/Plugin` copy would overwrite the host's `globalThis.__QTENVDEV_PLUGIN_HOST__` at load
   time. The bridge list is verified against the built artifact (`render/index.mjs` must not
-  contain `__FLYENV_PLUGIN_HOST__ = pluginHost`, `__vite_glob`, or `createWebHashHistory`).
+  contain `__QTENVDEV_PLUGIN_HOST__ = pluginHost`, `__vite_glob`, or `createWebHashHistory`).
 - **Host runtime packages** `vue`, `pinia`, `vue-router`, `element-plus`, and
   `@element-plus/icons-vue` are also served from the host so the plugin does not ship a second,
   divergent copy.
@@ -167,7 +167,7 @@ untouched. Install/start operations have a five-minute budget inside the host de
 Panel configuration, data, logs and PID records belong to the plugin. The renderer
 singleton owns IPC progress across page changes; the fork runtime owns process health
 and cleanup. Main receives the existing companion registration/stop arguments.
-Stopping or restarting OpenSearch also stops its companions, and FlyEnv exit can stop
+Stopping or restarting OpenSearch also stops its companions, and QTEnvDev exit can stop
 the panel independently. A panel failure does not stop a healthy OpenSearch backend.
 
 Validate with `yarn plugin:test opensearch`.
@@ -176,7 +176,7 @@ Validate with `yarn plugin:test opensearch`.
 
 `plugins/llamacpp` is a separate service plugin with ID/type flag `llama-cpp`. It discovers the official `ggml-org/llama.cpp` GitHub Releases API, then offers only assets matching the current OS, architecture, and supported CPU, CUDA, Vulkan, or Apple Silicon Metal build. CUDA runtime archives are paired by exact release asset name. Runtime identity is release tag + platform + architecture + backend + CUDA runtime version when present.
 
-The plugin's distributable contains renderer/Fork code only. Installed binaries, staging files, GGUF weights, secret key files, and server logs are kept beneath `<FlyEnv data directory>/llama-cpp/` in `runtimes/`, `staging/`, `models/`, `secrets/`, and `logs/`. Structured launch settings and the local-model index use the host `StorageGetAsync`/`StorageSetAsync` store. Plugin disable, update, and uninstall leave these user files in place; runtime and model removal is an explicit operation.
+The plugin's distributable contains renderer/Fork code only. Installed binaries, staging files, GGUF weights, secret key files, and server logs are kept beneath `<QTEnvDev data directory>/llama-cpp/` in `runtimes/`, `staging/`, `models/`, `secrets/`, and `logs/`. Structured launch settings and the local-model index use the host `StorageGetAsync`/`StorageSetAsync` store. Plugin disable, update, and uninstall leave these user files in place; runtime and model removal is an explicit operation.
 
 The Models page opens on a browsable list of popular public Hugging Face GGUF repositories; users can search by model name or `organization/repository`, expand a repository to compare GGUF variants and file sizes, or switch to their local models. It downloads one non-sharded text `.gguf` file at a time, checks the advertised size and SHA-256/LFS digest when available, then atomically activates the completed file. Private/gated repositories, multi-shard bundles, `mmproj` files, and persistent Hub credentials are not supported.
 
@@ -205,15 +205,15 @@ yarn plugin:test
 yarn plugin:runtime-smoke
 ```
 
-- `plugin:dev` builds an unminified plugin into `tmp/plugins/<id>` and launches FlyEnv with only that development plugin registered. The dev directory is outside `dist`, so a normal development clean does not remove it.
-- `plugin:build` creates the minified distributable plugin under the per-plugin-folder output directory `dist/plugins/<plugin-folder>/`: the plugin payload in `dist/plugins/<plugin-folder>/<id>`, a `.flyenv-plugin` archive beside it, an upserted entry in the official `plugins/registry.json`, and a copy of that registry at `dist/plugins/<plugin-folder>/registry.json` next to the archive. Default-path builds wipe the plugin's own `dist/plugins/<plugin-folder>/` first, so stale versioned archives never accumulate; other plugins' folders are untouched.
+- `plugin:dev` builds an unminified plugin into `tmp/plugins/<id>` and launches QTEnvDev with only that development plugin registered. The dev directory is outside `dist`, so a normal development clean does not remove it.
+- `plugin:build` creates the minified distributable plugin under the per-plugin-folder output directory `dist/plugins/<plugin-folder>/`: the plugin payload in `dist/plugins/<plugin-folder>/<id>`, a `.qtenvdev-plugin` archive beside it, an upserted entry in the official `plugins/registry.json`, and a copy of that registry at `dist/plugins/<plugin-folder>/registry.json` next to the archive. Default-path builds wipe the plugin's own `dist/plugins/<plugin-folder>/` first, so stale versioned archives never accumulate; other plugins' folders are untouched.
 - `plugin:build:all` (or `yarn plugin:build --all`) builds every folder under `plugins/` that contains a `plugin.json`, serially, printing a success/failure summary; any failure exits non-zero.
-- `plugin:release <name> [...more]` (or `--all`) builds the plugin(s) and assembles an upload-ready directory at `dist/plugins-release/` containing only the `.flyenv-plugin` archives and a `registry.json` — upload its contents to the hosting bucket as-is. Artifact URLs in that registry are derived as `--base-url` + `<id>-<version>.flyenv-plugin` (default base `https://oss.macphpstudy.com/plugins/`); entries whose archives were published earlier keep their existing URL, and entries never published and not built now are dropped with a warning. `--all` wipes the release directory first; a partial release updates it in place, replacing stale archives of the same plugin id. Note archives are byte-different on every build (embedded timestamps change the sha256), so always upload the archive together with the `registry.json` produced in the same run.
-- `plugin:debug` launches FlyEnv against the already-built artifact in `dist/plugins/<plugin-folder>/<id>` (run `plugin:build` first).
+- `plugin:release <name> [...more]` (or `--all`) builds the plugin(s) and assembles an upload-ready directory at `dist/plugins-release/` containing only the `.qtenvdev-plugin` archives and a `registry.json` — upload its contents to the hosting bucket as-is. Artifact URLs in that registry are derived as `--base-url` + `<id>-<version>.qtenvdev-plugin` (default base `https://oss.macphpstudy.com/plugins/`); entries whose archives were published earlier keep their existing URL, and entries never published and not built now are dropped with a warning. `--all` wipes the release directory first; a partial release updates it in place, replacing stale archives of the same plugin id. Note archives are byte-different on every build (embedded timestamps change the sha256), so always upload the archive together with the `registry.json` produced in the same run.
+- `plugin:debug` launches QTEnvDev against the already-built artifact in `dist/plugins/<plugin-folder>/<id>` (run `plugin:build` first).
 - `plugin:test` builds the Mailpit example, inspects the archive, and checks the runtime wiring.
 - `plugin:runtime-smoke` starts a real Electron process twice against an isolated data directory. It verifies install, relaunch, renderer route registration, Fork version discovery, start/stop, update, disable/re-enable, uninstall, deferred cleanup, and runtime data preservation.
 
-Installed plugins are discovered from `<FlyEnv Data Directory>/plugins/<plugin-id>/<version>`. FlyEnv keeps active versions and enabled state in `<FlyEnv Data Directory>/plugins.json`.
+Installed plugins are discovered from `<QTEnvDev Data Directory>/plugins/<plugin-id>/<version>`. QTEnvDev keeps active versions and enabled state in `<QTEnvDev Data Directory>/plugins.json`.
 
 Discovery is gated: a plugin directory only loads when it was installed through the Plugin
 Manager. The scan requires a `plugins.json` state record with a matching `installToken`
@@ -221,7 +221,7 @@ Manager. The scan requires a `plugins.json` state record with a matching `instal
 written at install time), so copying plugin files into the directory directly does not
 activate the plugin. The secret is generated once and stored in `.plugin-install-secret`
 outside both the plugins directory and `plugins.json`, so copying the plugin files together
-with the state file into another FlyEnv installation fails the token check as well. In the
+with the state file into another QTEnvDev installation fails the token check as well. In the
 app the secret is additionally encrypted with the OS account keychain (Electron
 `safeStorage`: Keychain / DPAPI / system keyring), so even copying the secret file yields
 ciphertext that cannot be decrypted on another machine and the copied plugins are rejected;
@@ -230,9 +230,9 @@ secret is deliberately not derived from the machine id, which can change. State 
 written before install tokens existed (version 1) are migrated only while an active license
 is available; a missing or unreadable install secret never skips verification. Once all legacy
 records have tokens, the state file is rewritten at the current version. Development mode
-(`FLYENV_PLUGIN_PATH`) bypasses this guard.
+(`QTENVDEV_PLUGIN_PATH`) bypasses this guard.
 
-Plugin changes take effect **without restarting FlyEnv**. Install, update, disable, re-enable,
+Plugin changes take effect **without restarting QTEnvDev**. Install, update, disable, re-enable,
 and uninstall all broadcast the refreshed plugin snapshot to the fork process (whose loader
 cache is invalidated via a version+mtime import-URL cache buster) and hot-sync the renderer:
 new modules appear in the menu and get their routes registered; disabled/uninstalled modules
@@ -244,7 +244,7 @@ restart — behavior is fully reset, only the memory lingers.
 
 The Settings → Plugin Market page reads the official registry and lets users add third-party registry JSON URLs. A registry can contain either `{ "plugins": [...] }` or one plugin object; each item needs an `artifact.url` (or `url`/`downloadUrl`) and an exact SHA-256 checksum. Catalog installs without a checksum are rejected. Third-party registries are explicitly acknowledged before their plugins can be installed because a plugin can execute native Renderer and Fork code.
 
-Installing and updating plugins requires an active FlyEnv license. Without one, the
+Installing and updating plugins requires an active QTEnvDev license. Without one, the
 install/update buttons render in warning color with a lock icon and route to the license
 page, and the main process independently verifies the license (RSA-signed machine id,
 `@shared/license`) before any download starts. Plugins with a current install token keep
@@ -255,7 +255,7 @@ token migration.
 
 `yarn plugin:build <name>` automatically upserts the plugin's entry in the checked-in official
 registry `plugins/registry.json` (the file the Plugin Market fetches from
-`https://raw.githubusercontent.com/xpf0000/FlyEnv/master/plugins/registry.json`) and copies the
+`https://raw.githubusercontent.com/xpf0000/QTEnvDev/master/plugins/registry.json`) and copies the
 updated registry next to the archive (`dist/plugins/<plugin-folder>/registry.json`) for release
 upload. Everything is
 generated from `plugin.json` and the freshly built archive: id/name/version/description/author/
@@ -272,7 +272,7 @@ The release checklist is:
 ```bash
 yarn plugin:build mailpit        # builds archive + upserts registry.json (sha256 included)
 yarn plugin:runtime-smoke
-# upload dist/plugins/mailpit/mailpit-example-<version>.flyenv-plugin as a release asset
+# upload dist/plugins/mailpit/mailpit-example-<version>.qtenvdev-plugin as a release asset
 # fill the asset URL into the entry's artifact.url in plugins/registry.json
 # verify the URL is reachable over HTTPS, then commit
 ```
@@ -281,7 +281,7 @@ The registry must only be published after the artifact is reachable over HTTPS a
 whose SHA-256 matches the entry byte-for-byte. Rebuilding the archive with different bytes
 requires re-uploading the asset; the next `plugin:build` updates the checksum automatically.
 
-Renderer plugin bundles share FlyEnv's Vue, Pinia, and Vue Router runtime instances instead of bundling isolated copies. This is required for real FlyEnv components/stores to behave correctly.
+Renderer plugin bundles share QTEnvDev's Vue, Pinia, and Vue Router runtime instances instead of bundling isolated copies. This is required for real QTEnvDev components/stores to behave correctly.
 
 The current MVP intentionally keeps built-in modules unchanged. Fork dispatch falls back to a plugin only when no built-in module matches the requested module id.
 

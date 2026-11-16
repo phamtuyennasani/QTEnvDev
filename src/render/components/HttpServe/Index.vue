@@ -1,5 +1,5 @@
 <template>
-  <div class="soft-index-panel main-right-panel">
+  <div class="soft-index-panel main-right-panel app-workbench-page">
     <el-radio-group v-model="tab" class="mt-3">
       <el-radio-button
         :label="I18nT('common.action.add')"

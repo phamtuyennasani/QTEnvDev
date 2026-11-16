@@ -13,7 +13,7 @@ import {
   type Neo4jJavaCandidate
 } from './policy'
 
-const storageKey = 'flyenv-neo4j-java-bindings'
+const storageKey = 'qtenvdev-neo4j-java-bindings'
 
 export type Neo4jJavaBinding = {
   javaHome: string

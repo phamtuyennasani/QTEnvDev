@@ -17,7 +17,7 @@
 ### 文档、代码和画面
 
 - 前一轮方案：[全息记忆体问题分析与优化方案](2026-11-10-ai-memory-holographic-refinement-design.md)。本文件是针对新版的补充，不覆盖前一轮记录。
-- 原始任务：[flyenv-ai-mem-star-map.md](../../task/flyenv-ai-mem-star-map.md)。
+- 原始任务：[qtenvdev-ai-mem-star-map.md](../../task/qtenvdev-ai-mem-star-map.md)。
 - 参考视频：`/Users/x/Desktop/Kapture 2026-11-09 at 21.57.41.mp4`。
 - 本轮画面：[全局截图](../../../tmp/neural-visual-analysis/revision3-global.png)、[分类聚焦截图](../../../tmp/neural-visual-analysis/revision3-focus.png)、[参考连续帧](../../../tmp/neural-visual-analysis/reference-contact.png)。这些文件属于本机临时评审证据。
 - 代码工作树：`.worktrees/ai-memory-neural-preview/`。下文预览代码路径均相对于该工作树的 `tmp/ai-memory-neural-preview/`。

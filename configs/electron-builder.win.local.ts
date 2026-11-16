@@ -7,7 +7,7 @@ const config: Configuration = {
     ...productionConfig.directories,
     output: 'release'
   },
-  artifactName: 'FlyEnv-Local-Setup-${version}.${ext}',
+  artifactName: 'QTEnvDev-Local-Setup-${version}.${ext}',
   win: {
     ...productionConfig.win,
     signExecutable: false,
@@ -18,7 +18,7 @@ const config: Configuration = {
   },
   portable: {
     ...productionConfig.portable,
-    artifactName: 'FlyEnv-Local-Portable-${version}.${ext}'
+    artifactName: 'QTEnvDev-Local-Portable-${version}.${ext}'
   }
 }
 

@@ -88,7 +88,7 @@ test('adapts actual Unix host installed entries to the real server while retaini
   for (const [path, flag, source] of [
     ['/opt/homebrew/Cellar/mariadb@10.11/10.11.10/', '', 'Homebrew'],
     ['/opt/local/lib/mariadb-10.11/', 'macports', 'Macports'],
-    ['/Applications/FlyEnv/mariadb/', '', 'Static']
+    ['/Applications/QTEnvDev/mariadb/', '', 'Static']
   ]) {
     const candidate = {
       path,

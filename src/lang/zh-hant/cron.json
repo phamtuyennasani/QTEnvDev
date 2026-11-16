@@ -101,7 +101,7 @@
   "allTasks": "全部任務",
   "systemTasks": "系統排程任務",
   "systemTask": "系統任務",
-  "flyenvTask": "FlyEnv 任務",
+  "qtenvdevTask": "QTEnvDev 任務",
   "otherTask": "其他任務",
   "taskTrigger": "觸發器",
   "deleteSystemTaskTips": "確定刪除此系統排程任務嗎？",

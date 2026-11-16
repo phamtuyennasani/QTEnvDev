@@ -2,7 +2,7 @@
   "podmanInstall": "Asenna Podman",
   "installPodmanByHomebrew": "Asenna Podman Homebrew'n kautta",
   "noPodmanFound": "<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a> ei havaittu.\nAsentaaksesi Podmanin, voit klikata asennuspainiketta.\nVoit myös klikata tätä linkkiä\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nja asenna se manuaalisesti.",
-  "podmanErrorTips": "Sijainnissa {bin} havaittiin Podman-suoritettava tiedosto.\nMutta FlyEnv ei pysty kaynnistamaan sita. Virheviesti:\n{error}",
+  "podmanErrorTips": "Sijainnissa {bin} havaittiin Podman-suoritettava tiedosto.\nMutta QTEnvDev ei pysty kaynnistamaan sita. Virheviesti:\n{error}",
   "removeContainerTips": "Oletko varma, että haluat poistaa tämän astian?",
   "removeMachineTips": "Oletko varma, että haluat poistaa tämän virtuaalisen koneen?",
   "removeImageTips": "Oletko varma, että haluat poistaa tämän kuvan?",

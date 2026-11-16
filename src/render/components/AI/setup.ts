@@ -58,7 +58,7 @@ export const AISetup = reactive<{
 }>({
   trialStartTime: 0,
   aiShow: false,
-  tab: 'flyenv',
+  tab: 'qtenvdev',
   ollamaServer: {
     url: '',
     model: ''
@@ -77,7 +77,7 @@ export const AISetup = reactive<{
   },
   init() {
     localForage
-      .getItem('flyenv-ai-chat-list')
+      .getItem('qtenvdev-ai-chat-list')
       .then((res: any) => {
         if (res && res?.tab) {
           AISetup.tab = res.tab
@@ -97,7 +97,7 @@ export const AISetup = reactive<{
   save() {
     localForage
       .setItem(
-        'flyenv-ai-chat-list',
+        'qtenvdev-ai-chat-list',
         JSON.parse(
           JSON.stringify({
             tab: AISetup.tab,
@@ -109,7 +109,7 @@ export const AISetup = reactive<{
       )
       .then()
       .catch((e: any) => {
-        console.log('flyenv-ai-chat-list save err: ', e)
+        console.log('qtenvdev-ai-chat-list save err: ', e)
       })
   },
   initCompositionEvent() {
@@ -129,7 +129,7 @@ export const Setup = () => {
     if (!setupStore.isActive) {
       const showTips = () => {
         const time = Math.round(new Date().getTime() / 1000)
-        localForage.setItem('flyenv-ai-start-try-time', time).then().catch()
+        localForage.setItem('qtenvdev-ai-start-try-time', time).then().catch()
         AISetup.trialStartTime = time
         AISetup.save()
         ElMessageBox.alert(I18nT('ai.noLiencesTips'), I18nT('ai.alert'), {
@@ -139,9 +139,9 @@ export const Setup = () => {
           .catch()
       }
       localForage
-        .getItem('flyenv-ai-start-try-time')
+        .getItem('qtenvdev-ai-start-try-time')
         .then((res: number) => {
-          console.log('flyenv-ai-start-try-time: ', res)
+          console.log('qtenvdev-ai-start-try-time: ', res)
           if (res) {
             AISetup.trialStartTime = res
             AISetup.save()
@@ -169,7 +169,7 @@ export const Setup = () => {
 
   const toChat = (item?: ModelChatItem) => {
     if (!item) {
-      AISetup.tab = 'flyenv'
+      AISetup.tab = 'qtenvdev'
     } else {
       AISetup.tab = item.id
     }
@@ -187,7 +187,7 @@ export const Setup = () => {
       if (fitem) {
         AISetup.tab = fitem.id
       } else {
-        AISetup.tab = 'flyenv'
+        AISetup.tab = 'qtenvdev'
       }
     }
     AISetup.save()

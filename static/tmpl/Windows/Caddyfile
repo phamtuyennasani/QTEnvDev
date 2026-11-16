@@ -14,7 +14,7 @@
 
   pki {
       ca {
-          name "FlyEnv-Root-CA"
+          name "QTEnvDev-Root-CA"
       }
   }
 }

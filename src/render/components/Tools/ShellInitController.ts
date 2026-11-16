@@ -3,7 +3,7 @@ import { reactiveBind } from '@/util/Index'
 import IPC from '@/util/IPC'
 import { appHelperErrorFromIPC, isAppHelperUnavailableError } from '@shared/WindowsHelperState'
 
-export type FlyEnvShellInitResult = {
+export type QTEnvDevShellInitResult = {
   status: 'ready' | 'degraded'
   scriptPath: string
   scriptState: 'updated' | 'unchanged'
@@ -18,20 +18,20 @@ export type FlyEnvShellInitResult = {
 }
 
 /**
- * Owns the FlyEnv PowerShell integration IPC lifecycle. It deliberately lives
+ * Owns the QTEnvDev PowerShell integration IPC lifecycle. It deliberately lives
  * in Tools because writing Profiles is not state owned by a language-project
  * page and can outlive that page.
  */
 export class ShellInitController {
   running = false
   phase = 'idle'
-  lastResult?: FlyEnvShellInitResult
+  lastResult?: QTEnvDevShellInitResult
   error = ''
-  private inFlight?: Promise<FlyEnvShellInitResult | undefined>
+  private inFlight?: Promise<QTEnvDevShellInitResult | undefined>
   private lastWarningKey = ''
   private lastDirectoryWarningKey = ''
 
-  ensure(): Promise<FlyEnvShellInitResult | undefined> {
+  ensure(): Promise<QTEnvDevShellInitResult | undefined> {
     if (this.inFlight) return this.inFlight
     this.running = true
     this.phase = 'starting'
@@ -86,7 +86,7 @@ export class ShellInitController {
             resolve()
             return
           }
-          reject(new Error(response?.msg ?? 'FlyEnv shell directory sync failed'))
+          reject(new Error(response?.msg ?? 'QTEnvDev shell directory sync failed'))
         })
       })
     } catch (error) {
@@ -95,9 +95,9 @@ export class ShellInitController {
     }
   }
 
-  private invoke(): Promise<FlyEnvShellInitResult> {
+  private invoke(): Promise<QTEnvDevShellInitResult> {
     return new Promise((resolve, reject) => {
-      IPC.send('app-fork:tools', 'initFlyEnvSH').then((key: string, response: any) => {
+      IPC.send('app-fork:tools', 'initQTEnvDevSH').then((key: string, response: any) => {
         if (response?.code === 200) {
           this.phase = response.msg || 'working'
           return
@@ -115,12 +115,12 @@ export class ShellInitController {
           return
         }
         if (response?.code === 0 && response.data) {
-          resolve(response.data as FlyEnvShellInitResult)
+          resolve(response.data as QTEnvDevShellInitResult)
           return
         }
         reject(
           appHelperErrorFromIPC(response) ??
-            new Error(response?.msg ?? 'FlyEnv PowerShell integration failed')
+            new Error(response?.msg ?? 'QTEnvDev PowerShell integration failed')
         )
       })
     })

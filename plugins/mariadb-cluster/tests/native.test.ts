@@ -69,8 +69,8 @@ test(
         port: base + n,
         socket:
           platform === 'Windows'
-            ? `flyenv_native_${group}_${n}`
-            : `/tmp/flyenv-native-${group}_${n}.sock`,
+            ? `qtenvdev_native_${group}_${n}`
+            : `/tmp/qtenvdev-native-${group}_${n}.sock`,
         dataDir: join(root, 'data', `${group}_${n}`),
         serverId: base + n
       }))

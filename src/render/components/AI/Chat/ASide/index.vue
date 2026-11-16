@@ -6,11 +6,11 @@
     <div class="h-full overflow-hidden bg-white dark:bg-slate-900">
       <el-scrollbar>
         <div class="w-full flex flex-col p-2 pt-4 gap-3">
-          <template v-if="AISetup.tab === 'flyenv'">
-            <el-button round type="primary">FlyEnv</el-button>
+          <template v-if="AISetup.tab === 'qtenvdev'">
+            <el-button round type="primary">QTEnvDev</el-button>
           </template>
           <template v-else>
-            <el-button round @click.stop="toChat(undefined)">FlyEnv</el-button>
+            <el-button round @click.stop="toChat(undefined)">QTEnvDev</el-button>
           </template>
           <div
             class="pb-1 pl-1 text-sm mb-3 flex items-center justify-between mt-5 text-zinc-600 dark:text-gray-300 border-b border-zinc-200 dark:border-zinc-700"

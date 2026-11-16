@@ -15,10 +15,10 @@ import (
 	"syscall"
 )
 
-const darwinPolicyDir = "/Library/Application Support/FlyEnv/Helper"
+const darwinPolicyDir = "/Library/Application Support/QTEnvDev/Helper"
 const darwinPolicyPath = darwinPolicyDir + "/policy.json"
 const darwinKeyPath = darwinPolicyDir + "/client.key"
-const darwinSocketPath = "/private/var/run/flyenv-helper/helper.sock"
+const darwinSocketPath = "/private/var/run/qtenvdev-helper/helper.sock"
 
 type darwinPolicy = unixPolicy
 

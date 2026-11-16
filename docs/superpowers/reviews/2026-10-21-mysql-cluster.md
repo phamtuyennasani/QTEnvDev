@@ -44,7 +44,7 @@ The following ledger preserves implementation decisions, review dispositions and
 Test-file consolidation costs only navigation; the shared management drawer costs a UI layout difference.
 Singleton/controller and persistent journal choices add a small amount of module-local state but prevent
 lifetime and partial-edit errors. Data/config/log retention requires manual disk cleanup after deletion.
-The paired-host requirement means the plugin alone does not upgrade an older FlyEnv installation.
+The paired-host requirement means the plugin alone does not upgrade an older QTEnvDev installation.
 
 ```text
 # SDD ledger — plan: docs/superpowers/plans/2026-10-20-mysql-cluster.md

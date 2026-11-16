@@ -1,7 +1,7 @@
 {
-  "description": "FlyEnv 許可證支持專案的持續開發與維護。其目的並非阻礙核心本地開發——核心執行環境與環境管理功能將永遠保持可用。購買許可證可移除進階工具的試用限制，並協助 FlyEnv 在 macOS、Windows 和 Linux 上持續維護。",
+  "description": "QTEnvDev 許可證支持專案的持續開發與維護。其目的並非阻礙核心本地開發——核心執行環境與環境管理功能將永遠保持可用。購買許可證可移除進階工具的試用限制，並協助 QTEnvDev 在 macOS、Windows 和 Linux 上持續維護。",
   "restrictions": {
-    "title": "未取得許可證時 FlyEnv 仍可正常使用，但適用以下試用限制：",
+    "title": "未取得許可證時 QTEnvDev 仍可正常使用，但適用以下試用限制：",
     "items": {
       "0": "站台管理最多僅限 3 個本地站台。",
       "1": "AI 助手僅可試用 3 天。",
@@ -12,19 +12,19 @@
   },
   "howToObtain": {
     "title": "如何取得許可證",
-    "description": "FlyEnv 提供以下三種取得許可證的方式。目前許可證尚無法自動發放，所有申請均經人工審核後手動發放：",
+    "description": "QTEnvDev 提供以下三種取得許可證的方式。目前許可證尚無法自動發放，所有申請均經人工審核後手動發放：",
     "methods": {
       "0": {
         "title": "購買個人許可證",
-        "description": "FlyEnv 個人許可證售價為 $10 USD。一個許可證對應一台使用中的設備（可透過許可證管理轉移設備），並移除所有試用限制。結帳由 Paddle 處理。購買後，請在下方申請表單中提交您的 Paddle 訂單 ID。購買頁面："
+        "description": "QTEnvDev 個人許可證售價為 $10 USD。一個許可證對應一台使用中的設備（可透過許可證管理轉移設備），並移除所有試用限制。結帳由 Paddle 處理。購買後，請在下方申請表單中提交您的 Paddle 訂單 ID。購買頁面："
       },
       "1": {
         "title": "參與程式碼貢獻",
-        "description": "在 GitHub 上提交 Pull Request，協助改進 FlyEnv。每一份有意義的貢獻都算數——從重大功能到簡單的文件修正皆可。"
+        "description": "在 GitHub 上提交 Pull Request，協助改進 QTEnvDev。每一份有意義的貢獻都算數——從重大功能到簡單的文件修正皆可。"
       },
       "2": {
         "title": "協助推廣",
-        "description": "在任何平台、以任何語言分享您的 FlyEnv 使用體驗——文章、影片、部落格或貼文皆可。內容必須為原創且真實；發布超過 3 個月的內容可能不再符合資格。"
+        "description": "在任何平台、以任何語言分享您的 QTEnvDev 使用體驗——文章、影片、部落格或貼文皆可。內容必須為原創且真實；發布超過 3 個月的內容可能不再符合資格。"
       }
     }
   },
@@ -56,7 +56,7 @@
   "oauthFailedByNoAuthCode": "未收到授權碼",
   "oauthTimeout": "授權已逾時",
   "oauthSuccessTitle": "授權成功",
-  "oauthSuccessMessage": "此頁面可關閉。請回到 FlyEnv 中檢視許可證資訊",
+  "oauthSuccessMessage": "此頁面可關閉。請回到 QTEnvDev 中檢視許可證資訊",
   "trialExpiredTitle": "許可證未激活",
-  "trialExpiredTips": "這是你使用 FlyEnv 的第 {days} 天，如果 FlyEnv 對你有幫助，請取得許可證支持專案發展。"
+  "trialExpiredTips": "這是你使用 QTEnvDev 的第 {days} 天，如果 QTEnvDev 對你有幫助，請取得許可證支持專案發展。"
 }

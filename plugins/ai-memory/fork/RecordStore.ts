@@ -35,7 +35,7 @@ const isDeleted = (value: MemoryRecord | MemoryTombstone): value is MemoryTombst
   'operation' in value
 export function memoryStoreId(scope: string, request: string) {
   const bytes = Buffer.from(
-    sha(`flyenv-ai-memory/store/v1\0${scope}\0${request}`).slice(0, 32),
+    sha(`qtenvdev-ai-memory/store/v1\0${scope}\0${request}`).slice(0, 32),
     'hex'
   )
   bytes[6] = (bytes[6] & 15) | 128

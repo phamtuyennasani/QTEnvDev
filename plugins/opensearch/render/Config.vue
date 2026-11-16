@@ -88,8 +88,8 @@
   const conf = ref()
   const confDir = ref('')
   const tlsInput = ref({
-    caCert: join(window.Server.BaseDir!, 'CA', 'FlyEnv-Root-CA.crt'),
-    caKey: join(window.Server.BaseDir!, 'CA', 'FlyEnv-Root-CA.key')
+    caCert: join(window.Server.BaseDir!, 'CA', 'QTEnvDev-Root-CA.crt'),
+    caKey: join(window.Server.BaseDir!, 'CA', 'QTEnvDev-Root-CA.key')
   })
   const tlsDisabled = computed(
     () =>

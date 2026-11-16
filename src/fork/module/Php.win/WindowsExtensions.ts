@@ -97,7 +97,7 @@ export function parsePhpExtensionProfile(
 ): PhpExtensionProfile {
   const field = (name: string) =>
     info.match(new RegExp(`^${name} => (.+)$`, 'm'))?.[1]?.trim() ?? ''
-  const marker = info.match(/FLYENV_EXT_PROFILE=(\{[^\r\n]+\})/)
+  const marker = info.match(/QTENVDEV_EXT_PROFILE=(\{[^\r\n]+\})/)
   if (!marker) throw new Error('Could not read the selected PHP build')
   const data = JSON.parse(marker[1])
   const build = field('PHP Extension Build')
@@ -120,7 +120,7 @@ export function parsePhpExtensionProfile(
 
 export function phpExtensionProfileScript() {
   // INFO_GENERAL contains build metadata without dumping extensions or environment variables.
-  return `ob_start();phpinfo(INFO_GENERAL);$info=ob_get_clean();echo $info,"\\nFLYENV_EXT_PROFILE=",json_encode(['version'=>PHP_VERSION,'ini'=>php_ini_loaded_file(),'dir'=>ini_get('extension_dir'),'loaded'=>array_values(array_unique(array_merge(get_loaded_extensions(),get_loaded_extensions(true))))]);`
+  return `ob_start();phpinfo(INFO_GENERAL);$info=ob_get_clean();echo $info,"\\nQTENVDEV_EXT_PROFILE=",json_encode(['version'=>PHP_VERSION,'ini'=>php_ini_loaded_file(),'dir'=>ini_get('extension_dir'),'loaded'=>array_values(array_unique(array_merge(get_loaded_extensions(),get_loaded_extensions(true))))]);`
 }
 
 export function verifyPieDownload(bytes: Buffer, digest: string) {

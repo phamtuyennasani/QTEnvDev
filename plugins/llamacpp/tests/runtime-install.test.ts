@@ -115,7 +115,7 @@ test('Windows staging rename retries a short sharing failure without replaying d
   assert.equal(f.counts.probes, 1)
   assert.ok(f.counts.waits.length > 0)
   assert.equal(
-    JSON.parse(await readFile(join(f.final, 'flyenv-runtime.json'), 'utf8')).executable,
+    JSON.parse(await readFile(join(f.final, 'qtenvdev-runtime.json'), 'utf8')).executable,
     join('bin', 'llama-server.exe')
   )
   assert.deepEqual(await readdir(f.paths.stagingRoot), [])

@@ -131,7 +131,7 @@ console.log(
 const originalAdapter = axios.defaults.adapter
 const server = global.Server
 try {
-  global.Server = { ...server, Proxy: {}, Cache: 'C:\\FlyEnv-test-cache' }
+  global.Server = { ...server, Proxy: {}, Cache: 'C:\\QTEnvDev-test-cache' }
   let peclFailed = false
   const urls: string[] = []
   axios.defaults.adapter = async (config) => {

@@ -36,7 +36,7 @@ export interface MCPAuditEntry {
  * MCP 工具调用审计日志。
  *
  * 所有 tool 调用与 resource 读取（无论成败）都会追加到 `global.Server.BaseDir/mcp/audit.log`，
- * 方便用户在 Audit.vue 中查看 AI 客户端对 FlyEnv 做了什么操作。
+ * 方便用户在 Audit.vue 中查看 AI 客户端对 QTEnvDev 做了什么操作。
  */
 class MCPAudit {
   private get logFile(): string {
@@ -116,7 +116,7 @@ class MCPAudit {
     if (Number.isFinite(input.durationMs) && input.durationMs! >= 0)
       entry.duration_ms = Math.round(input.durationMs!)
     if (input.client) {
-      const name = ['codex', 'kimi', 'claude', 'claude-code', 'flyenv'].includes(
+      const name = ['codex', 'kimi', 'claude', 'claude-code', 'qtenvdev'].includes(
         input.client.name?.toLowerCase() ?? ''
       )
         ? input.client.name!.toLowerCase()

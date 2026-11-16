@@ -13,10 +13,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
-const script = readFileSync('static/sh/Linux/flyenv-helper-init.sh', 'utf8')
+const script = readFileSync('static/sh/Linux/qtenvdev-helper-init.sh', 'utf8')
 const check = script.match(/^check_directory\(\) \{[\s\S]*?^\}/m)?.[0]
 assert.ok(check, 'The installer must check its actual destination directory type')
-const root = mkdtempSync(join(tmpdir(), 'flyenv-linux-directory-'))
+const root = mkdtempSync(join(tmpdir(), 'qtenvdev-linux-directory-'))
 try {
   const directory = join(root, 'helper')
   const file = join(root, 'file')

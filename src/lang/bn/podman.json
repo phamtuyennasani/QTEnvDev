@@ -2,7 +2,7 @@
   "podmanInstall": "পোডম্যান ইনস্টল করুন",
   "installPodmanByHomebrew": "Homebrew এর মাধ্যমে পোডম্যান ইনস্টল করুন",
   "noPodmanFound": "<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">পোডম্যান</a> পাওয়া যায়নি।\nপোডম্যান ইনস্টল করতে ইনস্টল বাটনে ক্লিক করুন।\nআপনি এই লিংকে ক্লিক করতে পারেন\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\nএবং নির্দেশনা অনুযায়ী নিজে ইনস্টল করতে পারেন।",
-  "podmanErrorTips": "{bin} অবস্থানে পোডম্যান এক্সিকিউটেবল পাওয়া গেছে।\nকিন্তু FlyEnv এটি কল করতে পারছে না। ত্রুটি বার্তা:\n{error}",
+  "podmanErrorTips": "{bin} অবস্থানে পোডম্যান এক্সিকিউটেবল পাওয়া গেছে।\nকিন্তু QTEnvDev এটি কল করতে পারছে না। ত্রুটি বার্তা:\n{error}",
   "removeContainerTips": "আপনি কি এই কন্টেইনারটি মুছে ফেলতে চান?",
   "removeMachineTips": "আপনি কি এই ভার্চুয়াল মেশিনটি মুছে ফেলতে চান?",
   "removeImageTips": "আপনি কি এই ইমেজটি মুছে ফেলতে চান?",

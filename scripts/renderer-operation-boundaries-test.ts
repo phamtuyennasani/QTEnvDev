@@ -86,7 +86,7 @@ assert.match(
   /Fork modules own child processes, PID\/port state, and companion shutdown/
 )
 assert.match(agentsSource, /generic loading-state map cannot replace a controller/)
-assert.match(agentsSource, /\.codex\/skills\/flyenv-module-boundaries\/SKILL\.md/)
+assert.match(agentsSource, /\.codex\/skills\/qtenvdev-module-boundaries\/SKILL\.md/)
 
 assert.equal(
   packageJson.scripts?.['test:renderer-operation-boundaries'],
@@ -200,10 +200,10 @@ assert.equal(englishCommon.session.lastSession, 'Last Session')
 assert.equal(chineseCommon.session.newSession, '新会话')
 assert.equal(chineseCommon.session.lastSession, '上次会话')
 
-const skillPath = join(root, '.codex', 'skills', 'flyenv-module-boundaries', 'SKILL.md')
+const skillPath = join(root, '.codex', 'skills', 'qtenvdev-module-boundaries', 'SKILL.md')
 assert.equal(existsSync(skillPath), true)
 const skillSource = readFileSync(skillPath, 'utf-8')
-assert.match(skillSource, /^---\nname: flyenv-module-boundaries\n/m)
+assert.match(skillSource, /^---\nname: qtenvdev-module-boundaries\n/m)
 assert.match(skillSource, /^description: Use when /m)
 assert.match(skillSource, /AGENTS\.md/)
 assert.match(skillSource, /view, domain, renderer operation, or fork process state/)
@@ -219,7 +219,7 @@ const skillMetadataPath = join(
   root,
   '.codex',
   'skills',
-  'flyenv-module-boundaries',
+  'qtenvdev-module-boundaries',
   'agents',
   'openai.yaml'
 )
@@ -346,9 +346,9 @@ assert.match(versionDeleteOperation, /stopped !== true/)
 const redisPage = readFileSync(join(componentsDir, 'Redis/Index.vue'), 'utf-8')
 const redisPanel = readFileSync(join(componentsDir, 'Redis/RedisCommanderPanel.ts'), 'utf-8')
 const pgAdminPythonCandidates = [
-  { version: '3.14.3', bin: 'C:/FlyEnv/python-3.14/python.exe', path: 'C:/FlyEnv/python-3.14' },
-  { version: '3.13.15', bin: 'C:/FlyEnv/python-3.13/python.exe', path: 'C:/FlyEnv/python-3.13' },
-  { version: '3.9.13', bin: 'C:/FlyEnv/python-3.9/python.exe', path: 'C:/FlyEnv/python-3.9' }
+  { version: '3.14.3', bin: 'C:/QTEnvDev/python-3.14/python.exe', path: 'C:/QTEnvDev/python-3.14' },
+  { version: '3.13.15', bin: 'C:/QTEnvDev/python-3.13/python.exe', path: 'C:/QTEnvDev/python-3.13' },
+  { version: '3.9.13', bin: 'C:/QTEnvDev/python-3.9/python.exe', path: 'C:/QTEnvDev/python-3.9' }
 ]
 assert.equal(
   selectPgAdminPython(pgAdminPythonCandidates, (candidate) => candidate.version === '3.13.15')
@@ -459,7 +459,7 @@ assert.match(appNodeFnSource, /appDebugLog\(flag, info\)/)
 assert.match(shellInitControllerSource, /export class ShellInitController\b/)
 assert.match(
   shellInitControllerSource,
-  /private inFlight\?: Promise<FlyEnvShellInitResult \| undefined>/
+  /private inFlight\?: Promise<QTEnvDevShellInitResult \| undefined>/
 )
 assert.match(shellInitControllerSource, /response\?\.code === 200/)
 assert.match(shellInitControllerSource, /IPC\.off\(key\)/)

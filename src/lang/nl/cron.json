@@ -101,7 +101,7 @@
   "allTasks": "Alle taken",
   "systemTasks": "Systeemtaken",
   "systemTask": "Systeemtaak",
-  "flyenvTask": "FlyEnv-taak",
+  "qtenvdevTask": "QTEnvDev-taak",
   "otherTask": "Andere taak",
   "taskTrigger": "Trigger",
   "deleteSystemTaskTips": "Deze geplande systeemtaak verwijderen?",

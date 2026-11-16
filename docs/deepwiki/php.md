@@ -9,13 +9,13 @@
 
 ## Overview
 
-PHP 模块在 FlyEnv 中是一个**双形态模块**：对外表现为语言运行时（`moduleType: 'language'`），对内实际作为常驻后台服务（`isService: true`）运行 PHP-FPM（macOS/Linux）或 php-cgi-spawner（Windows）。它是 Web 服务栈的核心纽带——Nginx/Apache/Caddy 的 FastCGI 请求均通过 FlyEnv 动态生成的 `enable-php.conf` 路由到当前激活的 PHP 版本。
+PHP 模块在 QTEnvDev 中是一个**双形态模块**：对外表现为语言运行时（`moduleType: 'language'`），对内实际作为常驻后台服务（`isService: true`）运行 PHP-FPM（macOS/Linux）或 php-cgi-spawner（Windows）。它是 Web 服务栈的核心纽带——Nginx/Apache/Caddy 的 FastCGI 请求均通过 QTEnvDev 动态生成的 `enable-php.conf` 路由到当前激活的 PHP 版本。
 
 该模块的核心复杂度来自**跨平台双轨实现**：
 - **Unix 系**（macOS/Linux）：直接驱动 `php-fpm` 二进制，依赖 PID 文件与进程信号进行生命周期管理。
 - **Windows**：使用内嵌的 `php-cgi-spawner.exe` 启动多个 `php-cgi.exe` 工作进程，通过进程名前缀匹配实现停止逻辑。
 
-此外，PHP 模块拥有 FlyEnv 所有模块中最复杂的**扩展管理体系**，支持 6 种异构来源：已加载扩展（`php -m`）、Homebrew 预编译包、MacPorts 预编译包、Windows 本地 DLL、Windows 在线 DLL 库、FlyEnv 内置扩展。
+此外，PHP 模块拥有 QTEnvDev 所有模块中最复杂的**扩展管理体系**，支持 6 种异构来源：已加载扩展（`php -m`）、Homebrew 预编译包、MacPorts 预编译包、Windows 本地 DLL、Windows 在线 DLL 库、QTEnvDev 内置扩展。
 
 Sources: `src/render/components/PHP/Module.ts:1-16`, `src/fork/module/Php/index.ts:42-46`, `src/fork/module/Php.win/index.ts:31-35`
 
@@ -78,7 +78,7 @@ sequenceDiagram
 - `ModuleInstalledItem.run` → 服务是否正在运行（UI 绿灯）
 - `ModuleInstalledItem.running` → 服务是否正在启停中（UI 加载态）
 - `ModuleInstalledItem.pid` → 从 Fork 返回的 `APP-Service-Start-PID`
-- `appStore.config.setup.phpGroupStart` → 分组启动配置（哪些版本随 FlyEnv 一起启动）
+- `appStore.config.setup.phpGroupStart` → 分组启动配置（哪些版本随 QTEnvDev 一起启动）
 
 Sources: `src/render/core/Module/ModuleInstalledItem.ts:44-93`, `src/render/components/ServiceManager/setup.ts:69-120`, `src/fork/module/Php/index.ts:273-306`, `src/fork/module/Php.win/index.ts:218-252`
 
@@ -143,7 +143,7 @@ Sources: `src/shared/app.d.ts:4`, `src/render/components/PHP/store.ts:11-34`, `s
 
 #### 机制概述
 
-PHP 模块需要解决的核心痛点是：**同一台机器上安装多个 PHP 版本，FlyEnv 必须能精确启动/停止指定版本，并防止版本间进程冲突**。实现上采用平台分支：Unix 直接操作 `php-fpm` 二进制；Windows 使用自研的 `php-cgi-spawner.exe` 启动 CGI 进程池。
+PHP 模块需要解决的核心痛点是：**同一台机器上安装多个 PHP 版本，QTEnvDev 必须能精确启动/停止指定版本，并防止版本间进程冲突**。实现上采用平台分支：Unix 直接操作 `php-fpm` 二进制；Windows 使用自研的 `php-cgi-spawner.exe` 启动 CGI 进程池。
 
 #### 完整调用链：启动服务
 
@@ -247,7 +247,7 @@ Sources: `src/render/components/PHP/List.vue`, `src/render/components/ServiceMan
 
 #### 机制概述
 
-FlyEnv 不假设 `php.ini` 一定存在或位于标准路径。`getIniPath(version)` 实现了一个**探测 → 回退 → 自动创建 → 标准化**的完整引擎，确保每个 PHP 版本都有可用且经过 FlyEnv 调优的 `php.ini`。
+QTEnvDev 不假设 `php.ini` 一定存在或位于标准路径。`getIniPath(version)` 实现了一个**探测 → 回退 → 自动创建 → 标准化**的完整引擎，确保每个 PHP 版本都有可用且经过 QTEnvDev 调优的 `php.ini`。
 
 #### 源码级调用链
 
@@ -268,7 +268,7 @@ FlyEnv 不假设 `php.ini` 一定存在或位于标准路径。`getIniPath(versi
 **自动创建逻辑（macOS/Linux）**：
 - 若 `ini` 是目录，则尝试使用 `php.ini-development` 创建 `php.ini`
 - 若不存在，从 `static/tmpl/php.ini` 复制
-- 创建 `php.ini.default` 备份，并注入 FlyEnv 默认配置：
+- 创建 `php.ini.default` 备份，并注入 QTEnvDev 默认配置：
 ```typescript
 parse.set('user_ini.filename', 'user_ini.filename = ', 'PHP')
 parse.set('max_execution_time', 'max_execution_time = 120', 'PHP')
@@ -304,7 +304,7 @@ Sources: `src/fork/module/Php/index.ts:65-164`, `src/fork/module/Php.win/index.t
 
 #### 机制概述
 
-当用户启动某个 PHP 版本时，FlyEnv 必须**原子性地**将该版本设为 Nginx FastCGI 的目标。这是通过重写 `enable-php.conf` 实现的，该文件被 Nginx 的 `include` 指令引用。
+当用户启动某个 PHP 版本时，QTEnvDev 必须**原子性地**将该版本设为 Nginx FastCGI 的目标。这是通过重写 `enable-php.conf` 实现的，该文件被 Nginx 的 `include` 指令引用。
 
 #### 调用链
 
@@ -340,7 +340,7 @@ Sources: `src/fork/module/Php/index.ts:294-306`, `src/fork/module/Php.win/index.
 
 #### 机制概述
 
-PHP 扩展管理是 FlyEnv 中最复杂的子系统。扩展来源涵盖：**已加载扩展（`php -m`）、Homebrew 预编译包、MacPorts 预编译包、Windows 本地 DLL、Windows 在线 DLL 库、FlyEnv 内置扩展**。每种来源的获取方式、安装方式、ini 写入方式均不同。
+PHP 扩展管理是 QTEnvDev 中最复杂的子系统。扩展来源涵盖：**已加载扩展（`php -m`）、Homebrew 预编译包、MacPorts 预编译包、Windows 本地 DLL、Windows 在线 DLL 库、QTEnvDev 内置扩展**。每种来源的获取方式、安装方式、ini 写入方式均不同。
 
 #### 3.4.1 已加载扩展（Loaded）
 
@@ -381,7 +381,7 @@ PHP 扩展管理是 FlyEnv 中最复杂的子系统。扩展来源涵盖：**已
    - 使用 `new XTerm()` 执行 `sudo -S "${copyfile}"`
    - XTerm 完成后，调用 `IPC.send('app-fork:php', 'extensionIni', row, version)`
    - Fork 层：`src/fork/module/Php/index.ts:181-220` → 自动在 `php.ini` 中写入/删除 `extension=` 或 `zend_extension=` 行
-   - 对 `xdebug.so` 会附带完整的 FlyEnv xdebug 配置块
+   - 对 `xdebug.so` 会附带完整的 QTEnvDev xdebug 配置块
 
 #### 3.4.4 Windows 本地 DLL 扩展
 
@@ -412,7 +412,7 @@ PHP 扩展管理是 FlyEnv 中最复杂的子系统。扩展来源涵盖：**已
 1. `fetchLib(item)` → `IPC.send('app-fork:php', 'fetchLibExtend')`
 2. Fork 层：`src/fork/module/Php.win/index.ts:536-549` → `fetchLibExtend()`
    - HTTP POST `https://api.macphpstudy.com/api/version/php_extension`
-   - 有 24 小时 localStorage 缓存（`flyenv-php-extend`）
+   - 有 24 小时 localStorage 缓存（`qtenvdev-php-extend`）
 
 3. `libExec(item, version)` → `IPC.send('app-fork:php', 'libExec', item, version)`
 4. Fork 层：`src/fork/module/Php.win/index.ts:551-694` → `libExec(item, version)`
@@ -435,7 +435,7 @@ if (item.installed) {
   content = content.replace(regex, ``).trim()
   if (name === 'xdebug.so') {
     content = content
-      .replace(/;\[FlyEnv-xdebug-ini-begin\]([\s\S]*?);\[FlyEnv-xdebug-ini-end\]/g, ``)
+      .replace(/;\[QTEnvDev-xdebug-ini-begin\]([\s\S]*?);\[QTEnvDev-xdebug-ini-end\]/g, ``)
       .trim()
   }
 } else {
@@ -452,7 +452,7 @@ Sources: `src/render/components/PHP/Extension/Homebrew/setup.ts`, `src/render/co
 
 #### 机制概述
 
-Homebrew 和 MacPorts 的扩展安装需要执行外部包管理器命令，这些命令可能耗时较长且需要交互（如 `sudo` 密码输入）。FlyEnv 使用 `XTerm` 类在 UI 中打开一个真实终端会话，让用户看到实时输出并可输入密码。
+Homebrew 和 MacPorts 的扩展安装需要执行外部包管理器命令，这些命令可能耗时较长且需要交互（如 `sudo` 密码输入）。QTEnvDev 使用 `XTerm` 类在 UI 中打开一个真实终端会话，让用户看到实时输出并可输入密码。
 
 #### 调用链（以 Homebrew 为例）
 

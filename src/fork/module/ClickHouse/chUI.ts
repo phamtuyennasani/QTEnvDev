@@ -1,5 +1,5 @@
 export const CH_UI_PORT = 3488
-export const CH_UI_CONNECTION_NAME = 'FlyEnv ClickHouse'
+export const CH_UI_CONNECTION_NAME = 'QTEnvDev ClickHouse'
 
 export function chUIAssetName(platform: NodeJS.Platform, arch: string): string {
   if (platform !== 'darwin' && platform !== 'linux') {

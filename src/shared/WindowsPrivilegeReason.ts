@@ -7,7 +7,7 @@ const reasonKinds = [
   'writeBufferBase64ByRoot',
   'readFileByRoot',
   'rm',
-  'ensureFlyEnvDataDirectory',
+  'ensureQTEnvDevDataDirectory',
   'setSystemPath',
   'setSystemEnv',
   'pathAdd',
@@ -109,7 +109,7 @@ export const buildWindowsPrivilegeReason = (
         'writeBufferBase64ByRoot',
         'readFileByRoot',
         'rm',
-        'ensureFlyEnvDataDirectory'
+        'ensureQTEnvDevDataDirectory'
       ].includes(fn)
     ) {
       add(fn as WindowsPrivilegeReasonKind, args[0])
@@ -141,7 +141,7 @@ export const buildWindowsPrivilegeReason = (
     } else if (fn === 'setSystemEnv' && typeof args[0] === 'string') {
       addEnv(args[0], args[1])
     } else if (
-      fn === 'installFlyEnvPowerShellIntegration' &&
+      fn === 'installQTEnvDevPowerShellIntegration' &&
       args[0] &&
       typeof args[0] === 'object'
     ) {
@@ -169,7 +169,7 @@ export const buildWindowsPrivilegeReason = (
     // DNS 是固定系统缓存动作，没有文件/业务载荷；具体含义由本地化标签说明。
     add('dnsRefresh', '')
   } else if (module === 'host' && fn === 'sslFindCertificate') {
-    add('sslFindCertificate', String(args[1] ?? 'FlyEnv-Root-CA'))
+    add('sslFindCertificate', String(args[1] ?? 'QTEnvDev-Root-CA'))
   }
   return sanitizeWindowsPrivilegeReason({ items })
 }

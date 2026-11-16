@@ -2,7 +2,7 @@
   "podmanInstall": "Podman 설치",
   "installPodmanByHomebrew": "Homebrew로 Podman 설치",
   "noPodmanFound": "Podman이 감지되지 않았습니다. <a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/')\">Podman</a>을(를) 설치하려면 설치 버튼을 클릭하세요.\n또는 다음 링크를 클릭하여\n<a href=\"javascript:void();\" onclick=\"openUrl('https://podman.io/docs/installation')\">https://podman.io/docs/installation</a>\n의 설명서를 따라 수동으로 설치할 수 있습니다.",
-  "podmanErrorTips": "{bin} 위치에서 Podman 실행 파일이 감지되었지만 FlyEnv에서 이를 실행할 수 없습니다. 오류 메시지:\n{error}",
+  "podmanErrorTips": "{bin} 위치에서 Podman 실행 파일이 감지되었지만 QTEnvDev에서 이를 실행할 수 없습니다. 오류 메시지:\n{error}",
   "removeContainerTips": "이 컨테이너를 삭제하시겠습니까?",
   "removeMachineTips": "이 가상 머신을 삭제하시겠습니까?",
   "removeImageTips": "이 이미지를 삭제하시겠습니까?",
