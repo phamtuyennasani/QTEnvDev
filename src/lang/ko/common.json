@@ -82,7 +82,6 @@
     "basicInfo": "기본 정보",
     "configuration": "구성",
     "favorites": "즐겨찾기",
-    "plugins": "Plugins",
     "backupUpdate": "백업 & 업데이트"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "기본",
     "none": "없음",
     "local": "로컬"
-  },
-  "plugin": {
-    "search": "플러그인 검색",
-    "removed": "플러그인이 제거되었습니다"
   },
   "schedule": {
     "everyHour": "매시간",

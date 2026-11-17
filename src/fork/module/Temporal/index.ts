@@ -287,6 +287,7 @@ class Temporal extends Base {
   /** UI 可独立打开，其停止请求仍由模块执行，不影响服务父实例的登记。 */
   companionStopArgs(command: string, pid: string, args: any[]): any[] | undefined {
     if (command === 'startUiServer') return [{ ...args[0], pid }, { uiOnly: true }]
+    return undefined
   }
 
   _stopServer(version: SoftInstalled, ...args: any) {

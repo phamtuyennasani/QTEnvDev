@@ -82,7 +82,6 @@
     "basicInfo": "Základné informácie",
     "configuration": "Konfigurácia",
     "favorites": "Obľúbené",
-    "plugins": "Pluginy",
     "backupUpdate": "Záloha a aktualizácia"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Predvolené",
     "none": "Žiadne",
     "local": "Lokálne"
-  },
-  "plugin": {
-    "search": "Hľadať pluginy",
-    "removed": "Plugin bol odstránený"
   },
   "schedule": {
     "everyHour": "Každú hodinu",

@@ -12,8 +12,6 @@ export enum AppModuleTypeEnum {
   ftpServer = 'ftpServer',
   other = 'other',
   objectStorage = 'objectStorage',
-  aiCoding = 'aiCoding',
-  ai = 'ai',
   containerRuntime = 'containerRuntime',
   networkTunnel = 'networkTunnel'
 }
@@ -23,8 +21,6 @@ export type AllAppModuleType = keyof typeof AppModuleTypeEnum
 export const AppModuleTypeList: AllAppModuleType[] = [
   'console',
   'site',
-  'aiCoding',
-  'ai',
   'containerRuntime',
   'networkTunnel',
   'webServer',
@@ -73,7 +69,6 @@ export enum AppModuleEnum {
   erlang = 'erlang',
   ruby = 'ruby',
   elasticsearch = 'elasticsearch',
-  ollama = 'ollama',
   minio = 'minio',
   rust = 'rust',
   meilisearch = 'meilisearch',
@@ -91,8 +86,6 @@ export enum AppModuleEnum {
   qdrant = 'qdrant',
   'cloudflare-tunnel' = 'cloudflare-tunnel',
   cloudflared = 'cloudflared',
-  openclaw = 'openclaw',
-  hermes = 'hermes',
   n8n = 'n8n',
   rustfs = 'rustfs',
   mkcert = 'mkcert',
@@ -105,23 +98,12 @@ export enum AppModuleEnum {
   flutter = 'flutter',
   git = 'git',
   dotnet = 'dotnet',
-  kimi = 'kimi',
-  claudeCode = 'claudeCode',
-  codex = 'codex',
-  openCode = 'openCode',
-  antigravity = 'antigravity',
-  copilotCli = 'copilotCli',
   temporal = 'temporal',
   'temporal-cli' = 'temporal-cli',
   mcp = 'mcp'
 }
 
-/**
- * Module type flag. Built-in modules are keys of `AppModuleEnum`; plugins
- * installed from the Plugin Market bring their own dynamic ids (for example
- * `kafka`), so the union also accepts any string. The `(string & {})` form
- * keeps editor autocomplete for the built-in flags.
- */
+/** Built-in module flags and identifiers for user-defined service modules. */
 export type AllAppModule = keyof typeof AppModuleEnum | (string & {})
 
 export const AppWithRoot = [
@@ -175,14 +157,6 @@ export type AppModuleItem = {
   isTray?: boolean
 
   isOnlyRunOne?: boolean
-
-  /**
-   * Present only for dynamically loaded QTEnvDev plugins.
-   */
-  plugin?: {
-    id: string
-    version: string
-  }
 
   platform?: Array<'macOS' | 'Windows' | 'Linux'>
 }

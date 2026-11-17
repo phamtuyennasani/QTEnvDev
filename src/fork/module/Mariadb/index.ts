@@ -888,7 +888,7 @@ datadir=${dataDir}`
           }
           on(I18nT('fork.postgresqlInit', { dir: dataDir }))
           resolve(res)
-        } catch {
+        } catch (e) {
           await unlinkDirOnFail()
           reject(e)
         }

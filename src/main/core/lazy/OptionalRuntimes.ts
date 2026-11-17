@@ -33,4 +33,3 @@ export const httpServerRuntime = new LazyRuntime(
 export const siteSuckerRuntime = new LazyRuntime(
   async () => (await import('../../ui/SiteSucker')).default
 )
-export const mcpAuditRuntime = new LazyRuntime(async () => (await import('../MCPAudit')).default)

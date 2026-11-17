@@ -82,7 +82,6 @@
     "basicInfo": "Informasi Dasar",
     "configuration": "Konfigurasi",
     "favorites": "Favorit",
-    "plugins": "Plugin",
     "backupUpdate": "Cadangan & Pembaruan"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Default",
     "none": "Tidak ada",
     "local": "Lokal"
-  },
-  "plugin": {
-    "search": "Cari plugin",
-    "removed": "Plugin dihapus"
   },
   "schedule": {
     "everyHour": "Setiap jam",

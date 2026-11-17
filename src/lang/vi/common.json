@@ -82,7 +82,6 @@
     "basicInfo": "Thông tin cơ bản",
     "configuration": "Cấu hình",
     "favorites": "Yêu thích",
-    "plugins": "Plugins",
     "backupUpdate": "Sao lưu & Cập nhật"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Mặc định",
     "none": "Không có",
     "local": "Local"
-  },
-  "plugin": {
-    "search": "Tìm kiếm plugin",
-    "removed": "Plugin đã bị xóa"
   },
   "schedule": {
     "everyHour": "Mỗi giờ",

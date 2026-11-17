@@ -81,7 +81,9 @@
               :model-value="hostsSet.write"
               :loading="hostsSettings.saving"
               :disabled="hostsSettings.saving"
-              @update:model-value="(value) => hostsSettings.setWrite(value === true)"
+              @update:model-value="
+                (value: string | number | boolean) => hostsSettings.setWrite(value === true)
+              "
             ></el-switch>
           </div>
         </template>
@@ -96,7 +98,9 @@
             :model-value="ipv6"
             :loading="hostsSettings.saving"
             :disabled="hostsSettings.saving"
-            @update:model-value="(value) => hostsSettings.setIPv6(value === true)"
+            @update:model-value="
+              (value: string | number | boolean) => hostsSettings.setIPv6(value === true)
+            "
           ></el-switch>
         </div>
       </template>

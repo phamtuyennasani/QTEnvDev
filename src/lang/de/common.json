@@ -82,7 +82,6 @@
     "basicInfo": "Grundlegende Info",
     "configuration": "Konfiguration",
     "favorites": "Favoriten",
-    "plugins": "Plugins",
     "backupUpdate": "Sicherung und Aktualisierung"
   },
   "skills": {
@@ -124,10 +123,6 @@
     "none": "Keine",
     "local": "Lokal"
   },
-  "plugin": {
-    "search": "Plugins durchsuchen",
-    "removed": "Plugin entfernt"
-  },
   "schedule": {
     "everyHour": "Jede Stunde",
     "everyMinute": "Jede Minute"
@@ -163,14 +158,14 @@
     "hideConfirm": "Beim Ausblenden der Startgruppen werden alle darin enthaltenen Dienste gestoppt. Fortfahren?",
     "hideFailed": "Die Startgruppen bleiben sichtbar, da folgende Dienste nicht gestoppt werden konnten:",
     "hideBusy": "Warten Sie, bis der aktuelle Vorgang der Startgruppe abgeschlossen ist.",
-    "state":   {
+    "state": {
       "stopped": "Gestoppt",
       "running": "Aktiv",
       "partial-running": "Teilweise aktiv",
       "executing": "Vorgang läuft",
       "invalid": "Ungültige Konfiguration"
     },
-    "outcome":   {
+    "outcome": {
       "started": "Gestartet",
       "stopped": "Gestoppt",
       "skipped": "Übersprungen",

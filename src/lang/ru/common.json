@@ -82,7 +82,6 @@
     "basicInfo": "Основная информация",
     "configuration": "Конфигурация",
     "favorites": "Избранное",
-    "plugins": "Plugins",
     "backupUpdate": "Резервное копирование и обновление"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "По умолчанию",
     "none": "Нет",
     "local": "Локальный"
-  },
-  "plugin": {
-    "search": "Поиск плагинов",
-    "removed": "Плагин удалён"
   },
   "schedule": {
     "everyHour": "Каждый час",

@@ -82,7 +82,6 @@
     "basicInfo": "Temel Bilgiler",
     "configuration": "Yapılandırma",
     "favorites": "Favoriler",
-    "plugins": "Eklentiler",
     "backupUpdate": "Yedekleme & Güncelleme"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Varsayılan",
     "none": "Hiçbiri",
     "local": "Yerel"
-  },
-  "plugin": {
-    "search": "Eklenti ara",
-    "removed": "Eklenti kaldırıldı"
   },
   "schedule": {
     "everyHour": "Her saat",

@@ -1,6 +1,6 @@
 # Hallmark state matrix
 
-This matrix is the acceptance contract for the 71 module routes and the two system routes. It is intentionally separate from the fixture report: a route may render safely in the IPC fixture while still needing visual review for its business states.
+This matrix is the acceptance contract for the current module and system routes. It is intentionally separate from the fixture report: a route may render safely in the IPC fixture while still needing visual review for its business states.
 
 ## Shared states
 
@@ -18,12 +18,11 @@ Every interactive surface is reviewed for:
 | --- | --- | --- | --- |
 | Service workbench | web servers, databases, queues, governance, email, DNS, FTP, search, storage, tunnels | ServiceManager + VersionManager | service table, running row, start/stop/restart, unavailable version, refresh/loading |
 | Language project | Bun, Deno, .NET, Erlang, Flutter, Go, Java, Node, Perl, PHP, Python, RoadRunner, Ruby, Rust, Swoole, Zig | LanguageProjects + VersionManager | project list, empty projects, create flow entry, version source tabs |
-| AI workspace | AI coding routes, AI service routes, MCP, Ollama, Hermes, OpenClaw, n8n | module-local workspace components | installed/uninstalled, conversation/config tabs, session empty/error |
 | Site workbench | Hosts, MkCert | Host and certificate stores | empty hosts, add/edit, sort, SSL/error notices |
 | Console | Startup Group | StartupGroupManager | empty groups, reorder, partial failure, running state |
 | Container runtime | Podman | Podman singleton controller | loading, install, terminal, machine list, compose empty state |
 | Focused utility | Tools, Cron, Git, HTTP Server | module-local controllers | focused empty/loading/error and touch targets |
-| System | Setup, CustomerModule | existing Pinia/module owners | settings navigation, module list, plugin state, custom module empty state |
+| System | Setup, CustomerModule | existing Pinia/module owners | settings navigation, module list, custom module empty state |
 
 ## Operation contract
 

@@ -169,19 +169,19 @@
       return
     }
     updating.value = true
-    const selectRows: Dependency[] = table.value!.getSelectionRows()
+    const selectedNames = new Set(table.value!.getSelectionRows().map((row) => row.name as string))
     const file = join(props.item.path, 'package.json')
     try {
       const content = await fs.readFile(file)
       const json = JSON.parse(content)
       for (const p in json.dependencies) {
-        if (updateDict?.value?.[p] && selectRows.some((s) => s.name === p)) {
+        if (updateDict?.value?.[p] && selectedNames.has(p)) {
           json.dependencies[p] = updateDict?.value?.[p]
           delete updateDict?.value?.[p]
         }
       }
       for (const p in json.devDependencies) {
-        if (updateDict?.value?.[p] && selectRows.some((s) => s.name === p)) {
+        if (updateDict?.value?.[p] && selectedNames.has(p)) {
           json.devDependencies[p] = updateDict?.value?.[p]
           delete updateDict?.value?.[p]
         }

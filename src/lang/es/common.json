@@ -82,7 +82,6 @@
     "basicInfo": "Información básica",
     "configuration": "Configuración",
     "favorites": "Favoritos",
-    "plugins": "Plugins",
     "backupUpdate": "Copia de seguridad y actualización"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Predeterminado",
     "none": "Ninguno",
     "local": "Local"
-  },
-  "plugin": {
-    "search": "Buscar complementos",
-    "removed": "Complemento eliminado"
   },
   "schedule": {
     "everyHour": "Cada hora",

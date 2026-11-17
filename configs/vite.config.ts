@@ -18,6 +18,20 @@ const langPath = path.resolve(__dirname, '../src/lang/')
 
 const monacoEditorPlugin = require('vite-plugin-monaco-editor').default
 
+// Monaco injects an inline worker map; Shiki and formatters use WebAssembly.
+const rendererContentSecurityPolicy = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: file: http: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' http: https: ws: wss:",
+  "worker-src 'self' blob:",
+  "media-src 'self' data: blob: file:",
+  "object-src 'none'",
+  "base-uri 'self'"
+].join('; ')
+
 const config: UserConfig = {
   base: './',
   plugins: [
@@ -29,7 +43,23 @@ const config: UserConfig = {
     vueJsx({
       transformOn: true,
       mergeProps: true
-    })
+    }),
+    {
+      name: 'renderer-content-security-policy',
+      transformIndexHtml: {
+        order: 'post',
+        handler: () => [
+          {
+            tag: 'meta',
+            attrs: {
+              'http-equiv': 'Content-Security-Policy',
+              content: rendererContentSecurityPolicy
+            },
+            injectTo: 'head-prepend'
+          }
+        ]
+      }
+    }
   ],
   esbuild: {
     jsx: 'preserve',

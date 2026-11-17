@@ -108,7 +108,7 @@ const checker = createAppHelperChecker({
       pipeAvailable ? client.emit('connect') : client.emit('error', new Error('pipe is stopped'))
     )
     return client
-  }) as typeof createConnection
+  }) as unknown as typeof createConnection
 })
 
 try {
@@ -147,7 +147,7 @@ try {
     { helperSha256: '0'.repeat(64) }
   ]) {
     await saveInstallation({ ...installation, ...patch })
-    const before = requests
+    const before: number = requests
     await assert.rejects(checker, { code: 'helper_task_invalid' })
     assert.equal(requests, before, 'invalid installations must fail before RPC')
     await assert.rejects(readWindowsHelperTask(identity, HelperVersion, true), /Refusing to start/)

@@ -4,8 +4,6 @@ import {
   writePerformanceLog
 } from '@shared/PerformanceDiagnostics'
 import { utilityProcess } from 'electron'
-import { PluginWorkerRegistry } from './PluginWorkerRegistry'
-import type { ForkPluginSnapshot } from '@shared/plugin/PluginRuntime'
 import { cpus } from 'os'
 import { currentServiceStopContext, withServiceStopContext } from '@shared/ServiceStopContext'
 import ServiceProcessManager from './ServiceProcess'
@@ -46,29 +44,10 @@ type Callback = (...args: any) => void
 const CupCount = cpus().length
 
 export class ForkManager {
-  readonly pluginWorkers = new PluginWorkerRegistry(
-    () => ((global.Server as any)?.Plugins ?? {}) as ForkPluginSnapshot,
-    () => {
-      const worker = this.createForkItem(TRANSIENT_FORK_IDLE_TIMEOUT_MS, false, true)
-      worker._on = this._on
-      return worker
-    }
-  )
-
-  closePluginWorker(module: string) {
-    return this.pluginWorkers.close(module)
-  }
-
-  reopenPluginWorker(module: string) {
-    return this.pluginWorkers.reopen(module)
-  }
-
   file: string
   forks: Array<ForkItem> = []
   ftpsrvFork?: ForkItem
   dnsFork?: ForkItem
-  ollamaChatFork?: ForkItem
-  llamaCppModelFork?: ForkItem
 
   _on: Callback = () => {}
   private readonly envSyncCoordinator = new EnvSyncCoordinator(fetchEnvSyncLocal, {
@@ -239,13 +218,12 @@ export class ForkManager {
     return this.stopProcessListCache.get()
   }
 
-  private createForkItem(idleTimeoutMs: number, primary = false, dedicated = false) {
+  private createForkItem(idleTimeoutMs: number, primary = false) {
     return new ForkItem(
       this.file,
       {
         idleTimeoutMs,
         primary,
-        dedicated,
         forkProcess: (forkFile) => utilityProcess.fork(forkFile)
       },
       this.envSyncBridge,
@@ -271,15 +249,9 @@ export class ForkManager {
   private broadcastEnvSyncInvalidated(revision: number) {
     const message: EnvSyncInvalidated = { type: 'env-sync-invalidated', revision }
     const forks = new Set(
-      [
-        this.brewFork,
-        this.ftpsrvFork,
-        this.dnsFork,
-        this.ollamaChatFork,
-        this.llamaCppModelFork,
-        ...this.forks,
-        ...(this.pluginWorkers.workers() as ForkItem[])
-      ].filter((item): item is ForkItem => !!item)
+      [this.brewFork, this.ftpsrvFork, this.dnsFork, ...this.forks].filter(
+        (item): item is ForkItem => !!item
+      )
     )
     for (const fork of forks) {
       if (fork.childExited) continue
@@ -295,13 +267,7 @@ export class ForkManager {
 
   /** 偏好变更覆盖普通池及专用 worker；退出中的 worker 不影响其他进程同步。 */
   broadcastWindowsPrivilege(snapshot: WindowsPrivilegeSnapshot) {
-    for (const fork of new Set([
-      this.ftpsrvFork,
-      this.dnsFork,
-      this.ollamaChatFork,
-      ...this.forks,
-      ...(this.pluginWorkers.workers() as ForkItem[])
-    ])) {
+    for (const fork of new Set([this.ftpsrvFork, this.dnsFork, ...this.forks])) {
       if (!fork || fork.childExited) continue
       try {
         fork.child.postMessage({ type: 'windows-privilege-changed', snapshot })
@@ -423,9 +389,6 @@ export class ForkManager {
       if (lifecycleAction) this.rawLifecycleRequests.add(settled)
       return request
     }
-    if (this.pluginWorkers.isDedicated(module)) {
-      return track(this.pluginWorkers.dispatch(module, param[0], param.slice(1)))
-    }
     if (module === 'ftp-srv') {
       if (!this.ftpsrvFork) {
         this.ftpsrvFork = this.createForkItem(TRANSIENT_FORK_IDLE_TIMEOUT_MS)
@@ -441,18 +404,6 @@ export class ForkManager {
       return track(this.sendDedicatedService(this.dnsFork, module, args))
     }
     const fn = param.shift()
-    if (module === 'ollama' && ['chat', 'stopOutput'].includes(fn)) {
-      if (!this.ollamaChatFork) {
-        this.ollamaChatFork = this.createForkItem(TRANSIENT_FORK_IDLE_TIMEOUT_MS)
-      }
-      return track(this.ollamaChatFork.send(...args))
-    }
-    if (module === 'llama-cpp' && ['downloadHubModelFile', 'cancelModelDownload'].includes(fn)) {
-      if (!this.llamaCppModelFork) {
-        this.llamaCppModelFork = this.createForkItem(TRANSIENT_FORK_IDLE_TIMEOUT_MS)
-      }
-      return this.llamaCppModelFork.send(...args)
-    }
     /**
      * Find a thread with no tasks.
      * The first generic item is always the three-minute primary. Every additional generic item
@@ -505,7 +456,6 @@ export class ForkManager {
   /** 关闭全部原始请求入口，已受理操作仍可凭异步许可完成。 */
   beginServiceLifecycleShutdown() {
     this.serviceLifecycleClosing = true
-    this.pluginWorkers.beginShutdown()
   }
 
   async drainServiceLifecycleRequests() {
@@ -531,43 +481,25 @@ export class ForkManager {
 
   /** 只结束仍有请求的 worker；之后退出自己的 stop 可以创建新 worker 重试已登记实例。 */
   cancelPendingRequests(reason: string) {
-    for (const fork of new Set([
-      this.ftpsrvFork,
-      this.dnsFork,
-      this.ollamaChatFork,
-      ...this.forks,
-      ...(this.pluginWorkers.workers() as ForkItem[])
-    ])) {
+    for (const fork of new Set([this.ftpsrvFork, this.dnsFork, ...this.forks])) {
       fork?.cancelPendingRequests(reason)
     }
   }
 
   async broadcastLanguage(message: LanguageChanged) {
     const forks = new Set(
-      [
-        this.brewFork,
-        this.ftpsrvFork,
-        this.dnsFork,
-        this.ollamaChatFork,
-        this.llamaCppModelFork,
-        ...this.forks,
-        ...(this.pluginWorkers.workers() as ForkItem[])
-      ].filter((item): item is ForkItem => !!item && !item.childExited)
+      [this.brewFork, this.ftpsrvFork, this.dnsFork, ...this.forks].filter(
+        (item): item is ForkItem => !!item && !item.childExited
+      )
     )
     return Promise.all([...forks].map((fork) => fork.sendLanguage(message)))
   }
 
   broadcastServer(server: unknown) {
     const forks = new Set(
-      [
-        this.brewFork,
-        this.ftpsrvFork,
-        this.dnsFork,
-        this.ollamaChatFork,
-        this.llamaCppModelFork,
-        ...this.forks,
-        ...(this.pluginWorkers.workers() as ForkItem[])
-      ].filter((item): item is ForkItem => !!item && !item.childExited)
+      [this.brewFork, this.ftpsrvFork, this.dnsFork, ...this.forks].filter(
+        (item): item is ForkItem => !!item && !item.childExited
+      )
     )
     for (const fork of forks) {
       try {
@@ -580,16 +512,12 @@ export class ForkManager {
     await Promise.allSettled([...this.brewFlights])
     this.brewFork?.destroy()
     // Independent workers still close when another worker or cache flush fails.
-    const cleanup = await Promise.allSettled([
-      this.pluginWorkers.closeAll(),
-      this.binVersionCacheStore.flush()
-    ])
+    const cleanup = await Promise.allSettled([this.binVersionCacheStore.flush()])
     this.unsubscribeEnvSync()
     EnvSync.setProvider(undefined)
     this.dnsFork?.destroy()
     this.ftpsrvFork?.destroy()
-    this.ollamaChatFork?.destroy()
-    this.llamaCppModelFork?.destroy()
+
     this.forks.forEach((fork) => {
       fork.destroy()
     })

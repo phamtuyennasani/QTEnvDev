@@ -12,7 +12,6 @@ import menuAZ from './menu.json'
 import mysqlAZ from './mysql.json'
 import nginxAZ from './nginx.json'
 import nodejsAZ from './nodejs.json'
-import ollamaAZ from './ollama.json'
 import phpAZ from './php.json'
 import promptAZ from './prompt.json'
 import redisAZ from './redis.json'
@@ -30,38 +29,20 @@ import requestTimerAZ from './requestTimer.json'
 import meilisearchAZ from './meilisearch.json'
 import minioAZ from './minio.json'
 import podman from './podman.json'
-import openclawAZ from './openclaw.json'
 import n8n from './n8n.json'
 import rustfsAZ from './rustfs.json'
 import mkcert from './mkcert.json'
-import hermes from './hermes.json'
 import flutter from './flutter.json'
 import cronAZ from './cron.json'
-import kimi from './kimi.json'
-import claudeCode from './claude-code.json'
-import codex from './codex.json'
-import openCode from './opencode.json'
-import antigravity from './antigravity.json'
-import copilotCli from './copilot-cli.json'
 import common from './common.json'
-import mcp from './mcp.json'
 export default {
   az: {
     common,
-    kimi,
-    claudeCode,
-    codex,
-    openCode,
-    antigravity,
-    copilotCli,
-    mcp,
     cron: cronAZ,
     rustfs: rustfsAZ,
     mkcert,
     flutter,
-    hermes,
     n8n,
-    openclaw: openclawAZ,
     podman,
     minio: minioAZ,
     meilisearch: meilisearchAZ,
@@ -81,7 +62,6 @@ export default {
     mysql: mysqlAZ,
     nginx: nginxAZ,
     nodejs: nodejsAZ,
-    ollama: ollamaAZ,
     php: phpAZ,
     prompt: promptAZ,
     redis: redisAZ,

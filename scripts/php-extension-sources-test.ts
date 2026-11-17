@@ -181,14 +181,20 @@ try {
     !urls.some((url) => url.includes('/pdo_oci/')),
     'unknown publisher never probes same-name PECL'
   )
-  await assert.rejects(installer.prepare(version, 'other/pdo_oci', 'v9.9.9'), /release/)
+  await assert.rejects(
+    Promise.resolve(installer.prepare(version, 'other/pdo_oci', 'v9.9.9')),
+    /release/
+  )
   assert.deepEqual(pieInstallArguments('C:\\PHP\\php.exe', 'other/pdo_oci', 'v1.2.0').slice(-1), [
     'other/pdo_oci:v1.2.0'
   ])
   assert.throws(() => pieInstallArguments('bin', 'other/pdo_oci', '1.2.0 --help'), /release/)
   const official = await installer.prepare(version, 'pecl:pdo_oci')
   assert.equal(official.releases[0].compatible, false)
-  await assert.rejects(installer.install(version, 'pecl:pdo_oci', '1.3.0'), /compatible/)
+  await assert.rejects(
+    Promise.resolve(installer.install(version, 'pecl:pdo_oci', '1.3.0')),
+    /compatible/
+  )
   peclFailed = true
   const partialCatalog = await installer.catalog(version, 'pdo', true)
   assert.equal(partialCatalog.partial, true)

@@ -30,6 +30,7 @@ const resolveOptKeg = (formulaName: string, cellarDirs: string[]) => {
       }
     } catch {}
   }
+  return undefined
 }
 
 export const brewFormulaInstalledForTap = async (item: BrewFormulaInfo, cellarDirs: string[]) => {

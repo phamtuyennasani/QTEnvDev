@@ -82,7 +82,6 @@
     "basicInfo": "基本信息",
     "configuration": "配置",
     "favorites": "我的收藏",
-    "plugins": "插件",
     "backupUpdate": "备份与更新"
   },
   "skills": {
@@ -124,10 +123,6 @@
     "none": "无",
     "local": "本地"
   },
-  "plugin": {
-    "search": "搜索插件",
-    "removed": "插件已移除"
-  },
   "schedule": {
     "everyHour": "每小时",
     "everyMinute": "每分钟"
@@ -164,14 +159,14 @@
     "hideConfirm": "隐藏启动组会停止任意启动组包含的所有服务，是否继续？",
     "hideFailed": "以下服务停止失败，启动组模块将保持显示：",
     "hideBusy": "请等待当前启动组操作完成。",
-    "state":   {
+    "state": {
       "stopped": "已停止",
       "running": "运行中",
       "partial-running": "部分运行",
       "executing": "执行中",
       "invalid": "配置异常"
     },
-    "outcome":   {
+    "outcome": {
       "started": "已启动",
       "stopped": "已停止",
       "skipped": "已跳过",

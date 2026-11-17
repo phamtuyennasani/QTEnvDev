@@ -1,5 +1,8 @@
 import type { FitEnum, KernelEnum, FormatEnum } from 'sharp'
 
+// Sharp encoder aliases differ from the keys used to report format capabilities.
+export type ImageOutputFormat = keyof FormatEnum | 'jpg' | 'avif'
+
 /**
  * 文字水印配置
  */
@@ -139,7 +142,7 @@ export type SharpConfig = {
   fastShrinkOnLoad?: boolean
 
   /** 输出图片格式 (默认 'jpeg') */
-  format?: 'none' | keyof FormatEnum
+  format?: 'none' | ImageOutputFormat
 
   compressOpen?: boolean
 

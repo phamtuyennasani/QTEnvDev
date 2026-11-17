@@ -105,7 +105,6 @@ type StateBase = SetupBase & {
   theme?: string
   autoCheck: boolean
   forceStart: boolean
-  showAIRobot: boolean
   showTool?: boolean
   consulBrewInitiated?: boolean
   typesenseBrewInitiated?: boolean
@@ -179,13 +178,10 @@ const state: State = {
       autoCheck: true,
       windowsElevationMethod: DEFAULT_WINDOWS_ELEVATION_METHOD,
       forceStart: false,
-      showAIRobot: true,
       phpBrewInitiated: false,
       mongodbBrewInitiated: false,
       editorConfig: EditorBaseConfig,
       currentNodeTool: 'default'
-      // SetupBase gained a module-flag index signature for plugin ids; the
-      // named keys above legitimately don't match it.
     } as any
   },
   httpServe: [],

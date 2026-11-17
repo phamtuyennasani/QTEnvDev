@@ -3,7 +3,7 @@ import {
   performanceDiagnosticElapsed
 } from '@shared/PerformanceDiagnostics'
 import { EventEmitter } from 'events'
-import { app, BrowserWindow, globalShortcut, safeStorage, session } from 'electron'
+import { app, BrowserWindow, globalShortcut, session } from 'electron'
 import is from 'electron-is'
 import WindowManager from './ui/WindowManager'
 import MenuManager from './ui/MenuManager'
@@ -24,18 +24,13 @@ import {
 import { WINDOWS_ELEVATION_CHOICE_VERSION } from '@shared/WindowsHelperState'
 import ScreenManager from './core/ScreenManager'
 import AppLog from './core/AppLog'
-import { join, resolve } from 'node:path'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import AppNodeFnManager from './core/AppNodeFn'
 import ServiceProcessManager from './core/ServiceProcess'
 import ServiceVersionManager from './core/ServiceVersionManager'
 import { AppHelperCheck } from '@shared/AppHelperCheck'
 import Helper from '../fork/Helper'
 import ConfigManager from './core/ConfigManager'
-import MCPConfigManager from './core/MCPConfigManager'
-import MCPBridgeManager from './core/MCPBridgeManager'
-import { MCPRuntime } from './core/MCPRuntime'
-import { PluginMCPRegistry } from './core/PluginMCPRegistry'
 import ServerManager from './core/ServerManager'
 import IPCHandler from './core/IPCHandler'
 import { CheckBrewOrPort } from './utils/CheckBrew'
@@ -58,7 +53,6 @@ import {
 } from './core/lazy/OptionalRuntimes'
 import { getElectronResourcePath } from './utils/AppRuntimePath'
 import type { TrayAction, TrayPopupSide } from '@shared/Tray'
-import PluginManager from './plugins/PluginManager'
 import { appDebugLog, isLinux, isWindows } from '@shared/utils'
 import { randomUUID } from 'node:crypto'
 import {
@@ -70,9 +64,6 @@ import {
 export default class Application extends EventEmitter {
   isReady: boolean = false
   configManager: ConfigManager
-  mcpConfigManager: MCPConfigManager
-  mcpRuntime?: MCPRuntime
-  mcpBridgeManager?: MCPBridgeManager
   menuManager!: MenuManager
   trayManager!: TrayManager
   windowManager!: WindowManager
@@ -81,8 +72,6 @@ export default class Application extends EventEmitter {
   forkManager?: ForkManager
   languageRepository: LanguageRepository
   languageCoordinator: LanguageCoordinator
-  pluginManager: PluginManager
-
   // 新提取的管理器
   private serverManager: ServerManager
   private ipcHandler!: IPCHandler
@@ -143,28 +132,7 @@ export default class Application extends EventEmitter {
       // 清理无法申请 UAC。正常路径在 doStop 末尾释放，真正退出时再幂等兜底。
       app.once('will-quit', () => this.windowsPrivilege.dispose())
     }
-    this.mcpConfigManager = new MCPConfigManager()
-    this.mcpBridgeManager = new MCPBridgeManager()
     this.serverManager = new ServerManager(this.configManager)
-    this.pluginManager = new PluginManager({
-      stopPluginServices: (moduleId) => this.stopPluginServices(moduleId),
-      recoverPluginRuntime: (moduleId) =>
-        this.forkManager?.reopenPluginWorker(moduleId) ?? Promise.resolve(),
-      licenseCheck: process.env.QTENVDEV_PLUGIN_SMOKE === '1' ? async () => true : undefined,
-      // OS account keychain (Keychain / DPAPI / system keyring) encryption for
-      // the plugin install secret, so copying the secret file to another
-      // machine yields undecryptable ciphertext. Falls back to plain storage
-      // where no system encryption is available.
-      // Resolve only when a plugin secret needs encryption/decryption: checking
-      // availability itself can prompt for Keychain access on macOS.
-      secretProtect: () =>
-        safeStorage.isEncryptionAvailable()
-          ? {
-              encrypt: (text) => safeStorage.encryptString(text).toString('base64'),
-              decrypt: (data) => safeStorage.decryptString(Buffer.from(data, 'base64'))
-            }
-          : undefined
-    })
     setServerDirectoryPermissionDeniedHandler((reason) => {
       this.serverDirectoryHelperInstall.notifyPermissionDenied(reason)
     })
@@ -200,23 +168,9 @@ export default class Application extends EventEmitter {
     await this.languageRepository.ready()
     await this.languageCoordinator.initialize(requestedLocale)
     await this.serverDirectoryInitialization
-    // Plugin scans may migrate legacy install records using the saved license.
-    // Publish it before scanning, rather than after invalidating those records.
     this.serverManager.updateGlobalConfig()
     this.serverManager.setProxy()
     if (isWindows()) this.publishWindowsPrivilege(await this.windowsPrivilege.snapshot())
-    await this.pluginManager.refresh().catch((error) => {
-      // Keep the application usable; market requests report the registry error
-      // instead of advertising an empty, writable installation.
-      logger.warn('[PluginManager] unable to load installed plugins', error)
-    })
-    for (const diagnostic of this.pluginManager.getDiagnostics()) {
-      logger.warn('[PluginManager] plugin skipped at startup', diagnostic)
-    }
-    if (process.env.QTENVDEV_PLUGIN_SMOKE === '1') {
-      await this.preparePluginRuntimeSmoke()
-    }
-    ;(global.Server as any).Plugins = this.pluginManager.getForkSnapshot()
 
     AppNodeFnManager.nativeTheme_watch()
     AppNodeFnManager.configManager = this.configManager
@@ -235,15 +189,11 @@ export default class Application extends EventEmitter {
 
     this.ipcHandler = new IPCHandler({
       configManager: this.configManager,
-      mcpConfigManager: this.mcpConfigManager,
-      mcpBridgeManager: this.mcpBridgeManager,
       windowManager: this.windowManager,
       trayManager: this.trayManager,
       serverManager: this.serverManager,
       languageCoordinator: this.languageCoordinator,
       appNodeFnManager: AppNodeFnManager,
-      pluginManager: this.pluginManager,
-      onPluginsChanged: () => this.syncPlugins(),
       retryDataDirectory: () => this.retryServerDataDirectory(),
       windowsPrivilege: this.windowsPrivilege
     })
@@ -253,9 +203,6 @@ export default class Application extends EventEmitter {
     this.initFontAccessPermission()
     this.initAppHelper()
     this.initForkManager()
-    if (process.env.QTENVDEV_PLUGIN_SMOKE === '1') {
-      void this.runPluginRuntimeSmoke()
-    }
 
     if (!is.dev()) {
       this.ipcHandler.handleCommand('app-fork:app', 'App-Start', 'start', app.getVersion())
@@ -304,363 +251,6 @@ export default class Application extends EventEmitter {
     this.windowManager.on('window-closed', (data) => {
       this.storeWindowState(data)
     })
-  }
-
-  private async stopPluginServices(moduleId: string): Promise<{ stopped: true }> {
-    return ServiceProcessManager.runLifecycle(moduleId, 'stop', () =>
-      this.stopPluginServicesImpl(moduleId)
-    )
-  }
-
-  private async stopPluginServicesImpl(moduleId: string): Promise<{ stopped: true }> {
-    // statusOf 只用于界面展示，会隐藏单独打开的伴随面板；插件卸载/禁用必须清掉原始登记中的
-    // 服务和 companion 两类进程，否则模块代码被移除后仍可能遗留一个无法再管理的面板。
-    const registered = [...(ServiceProcessManager.servicePID[moduleId] ?? [])].filter(
-      ({ pid }) => !!pid
-    )
-    if (!registered.length) {
-      // Dedicated data runtimes have no service PID, but still own their data directory.
-      await this.forkManager?.closePluginWorker(moduleId)
-      return { stopped: true }
-    }
-    if (!this.forkManager) throw new Error(`Fork manager is not ready for ${moduleId}`)
-
-    // 模块屏障已等待所有旧生命周期请求；与退出/MCP 共用并行停止及派发代次保护。
-    // 全部项结算后才决定是否允许卸载，不能因一项失败提前撤掉其他项的模块代码。
-    const results = await ServiceProcessManager.stopRegisteredInstances([moduleId])
-    const failures = results
-      .filter(({ status }) => status === 'failed')
-      .map(({ pid, error }) => `PID=${pid}: ${error}`)
-
-    if (failures.length || ServiceProcessManager.servicePID[moduleId]?.some(({ pid }) => !!pid)) {
-      throw new Error(`Service or companion ${moduleId} is still running: ${failures.join('\n')}`)
-    }
-    await this.forkManager.closePluginWorker(moduleId)
-    return { stopped: true }
-  }
-
-  private async preparePluginRuntimeSmoke() {
-    if (process.env.QTENVDEV_PLUGIN_SMOKE_PHASE !== 'install') return
-    const resultPath = process.env.QTENVDEV_PLUGIN_SMOKE_RESULT
-    try {
-      const item = (await this.pluginManager.listCatalog()).find(
-        (candidate) => candidate.id === 'runtime-smoke-plugin'
-      )
-      if (!item?.artifact.sha256) throw new Error('runtime smoke catalog item is missing checksum')
-      await this.pluginManager.install({
-        id: item.id,
-        version: item.version,
-        url: item.artifact.url,
-        sha256: item.artifact.sha256,
-        source: 'official'
-      })
-      const dataPath = join(global.Server.BaseDir!, 'plugins-data/runtime-smoke-plugin/state.txt')
-      await mkdir(resolve(dataPath, '..'), { recursive: true })
-      await writeFile(dataPath, 'preserve-me\n')
-      if (resultPath) {
-        await writeFile(
-          resultPath,
-          JSON.stringify({ ok: true, phase: 'installed', checkpoints: ['install'] })
-        )
-      }
-      setTimeout(() => app.quit(), 250)
-    } catch (error) {
-      if (resultPath) {
-        await writeFile(
-          resultPath,
-          JSON.stringify({ ok: false, phase: 'install', checkpoints: [], error: String(error) })
-        )
-      }
-      setTimeout(() => app.quit(), 250)
-    }
-  }
-
-  private async runPluginRuntimeSmoke() {
-    if (process.env.QTENVDEV_PLUGIN_SMOKE_PHASE !== 'verify') return
-    const resultPath = process.env.QTENVDEV_PLUGIN_SMOKE_RESULT
-    const checkpoints: string[] = ['install', 'relaunch']
-    try {
-      await new Promise<void>((resolveReady) => {
-        if (this.isReady) {
-          resolveReady()
-          return
-        }
-        this.once('ready', () => resolveReady())
-        setTimeout(resolveReady, 30_000)
-      })
-      const routeResult = await this.mainWindow?.webContents.executeJavaScript(
-        `(async () => { let routes = []; for (let i = 0; i < 40; i += 1) { const router = window.__QTENVDEV_PLUGIN_ROUTER__; routes = router?.getRoutes?.().map((item) => item.path) ?? []; if (routes.includes('/runtime-smoke-plugin')) break; await new Promise((r) => setTimeout(r, 250)); } const route = routes.includes('/runtime-smoke-plugin'); location.hash = '#/runtime-smoke-plugin'; return { hash: location.hash, ready: route === true, routes } })()`,
-        true
-      )
-      if (!routeResult?.ready || !String(routeResult.hash).includes('runtime-smoke-plugin')) {
-        throw new Error(`renderer plugin route was not loaded: ${JSON.stringify(routeResult)}`)
-      }
-      checkpoints.push('renderer-route')
-
-      ;(global.Server as any).Plugins = this.pluginManager.getForkSnapshot()
-      const versions = await this.runPluginRuntimeFork('allInstalledVersions', {
-        runtime: true
-      })
-      if (!Array.isArray(versions) || versions[0]?.version !== '1.0.0') {
-        throw new Error(`Fork plugin version scan did not return v1: ${JSON.stringify(versions)}`)
-      }
-      checkpoints.push('fork-version-scan')
-      // 烟雾验证也走正式服务登记链：start 终态拿到 PID 与原样 stop 参数后先登记，随后
-      // 才发送 stop。退出若恰好并发开始，会等待整个消费者；stop 失败则登记保留给退出重试。
-      await ServiceProcessManager.runLifecycle('runtime-smoke-plugin', 'start', async () => {
-        const startItem = { version: '1.0.0', bin: 'runtime-smoke' }
-        const startResult = await this.runPluginRuntimeFork('startService', startItem)
-        const pid = startResult?.['APP-Service-Start-PID']
-        if (pid) {
-          ServiceProcessManager.addPid(
-            'runtime-smoke-plugin',
-            `${pid}`,
-            startResult?.['APP-Service-Start-Item'] ?? startItem,
-            startResult?.['APP-Service-Stop-Args'] ?? [{ ...startItem, pid: `${pid}` }]
-          )
-        }
-        const snapshot = pid
-          ? ServiceProcessManager.stopSnapshotFor('runtime-smoke-plugin', `${pid}`)
-          : undefined
-        const stopResult = await this.runPluginRuntimeForkArgs(
-          'stopService',
-          ...(snapshot?.args ?? [startItem])
-        )
-        if (snapshot)
-          ServiceProcessManager.finishStopSnapshot(
-            'runtime-smoke-plugin',
-            snapshot,
-            (stopResult?.['APP-Service-Stop-PID'] ?? []).map(String)
-          )
-      })
-      checkpoints.push('start-stop')
-
-      // VersionManager data flow (renderer): the static version list must load
-      // through brewStore.module(typeFlag).fetchStatic() while the plugin is enabled.
-      await this.expectPluginSmokeVersionList('enabled')
-      checkpoints.push('version-list')
-
-      await this.pluginManager.update('runtime-smoke-plugin')
-      await this.syncPlugins()
-      if (
-        (await this.pluginManager.listInstalled()).find(
-          (item) => item.id === 'runtime-smoke-plugin'
-        )?.version !== '2.0.0'
-      ) {
-        throw new Error('plugin update did not activate v2')
-      }
-      checkpoints.push('update')
-
-      // Hot reload, no restart: fork dispatch must pick up the updated plugin
-      // code (Node import() cache busted), and the renderer route must stay.
-      const hotVersions = await this.runPluginRuntimeFork('allInstalledVersions', {
-        runtime: true
-      })
-      if (!Array.isArray(hotVersions) || hotVersions[0]?.version !== '2.0.0') {
-        throw new Error(`Fork plugin hot update did not return v2: ${JSON.stringify(hotVersions)}`)
-      }
-      await this.expectPluginSmokeRoute(true)
-      checkpoints.push('hot-fork-update')
-
-      await this.pluginManager.setEnabled('runtime-smoke-plugin', false)
-      await this.syncPlugins()
-      checkpoints.push('disable')
-      // Disabled without restart: fork dispatch must stop resolving the module
-      // and the renderer route must disappear.
-      await this.expectPluginSmokeForkRejected('allInstalledVersions')
-      await this.expectPluginSmokeRoute(false)
-      checkpoints.push('hot-disable')
-      // Regression guard: while the plugin is disabled, any still-alive caller
-      // (a not-yet-unmounted computed, a group card, ...) can recreate the
-      // BrewStore module record with isPlugin=false. Re-enable must heal that
-      // stale record instead of leaving every fetch on the wrong fork channel.
-      await this.poisonPluginSmokeBrewModule()
-      checkpoints.push('poison-brew-module')
-
-      await this.pluginManager.setEnabled('runtime-smoke-plugin', true)
-      await this.syncPlugins()
-      checkpoints.push('re-enable')
-      const reenabledVersions = await this.runPluginRuntimeFork('allInstalledVersions', {
-        runtime: true
-      })
-      if (!Array.isArray(reenabledVersions) || reenabledVersions[0]?.version !== '2.0.0') {
-        throw new Error(
-          `Fork plugin re-enable did not restore dispatch: ${JSON.stringify(reenabledVersions)}`
-        )
-      }
-      await this.expectPluginSmokeRoute(true)
-      checkpoints.push('hot-reenable')
-      // Re-enabled without restart: the renderer module record was dropped on
-      // disable, so the VersionManager fetch path must rebuild it and still
-      // load the version list.
-      await this.expectPluginSmokeVersionList('re-enabled')
-      checkpoints.push('hot-reenable-version-list')
-      await this.expectPluginSmokeInstalledList('re-enabled')
-      checkpoints.push('hot-reenable-installed-list')
-
-      await this.pluginManager.uninstall('runtime-smoke-plugin')
-      await this.syncPlugins()
-      checkpoints.push('uninstall')
-      await this.expectPluginSmokeForkRejected('allInstalledVersions')
-      await this.expectPluginSmokeRoute(false)
-      checkpoints.push('hot-uninstall')
-      await this.pluginManager.refresh()
-      if (
-        (await this.pluginManager.listInstalled()).some(
-          (item) => item.id === 'runtime-smoke-plugin'
-        )
-      ) {
-        throw new Error('plugin remained installed after uninstall')
-      }
-      checkpoints.push('pending-cleanup')
-
-      const dataPath = join(global.Server.BaseDir!, 'plugins-data/runtime-smoke-plugin/state.txt')
-      if ((await readFile(dataPath, 'utf8')) !== 'preserve-me\n') {
-        throw new Error('plugin runtime data was not preserved')
-      }
-      checkpoints.push('runtime-data-preserved')
-      if (resultPath) await writeFile(resultPath, JSON.stringify({ ok: true, checkpoints }))
-    } catch (error) {
-      if (resultPath)
-        await writeFile(
-          resultPath,
-          JSON.stringify({ ok: false, checkpoints, error: String(error) })
-        )
-    } finally {
-      setTimeout(() => app.quit(), 250)
-    }
-  }
-
-  private runPluginRuntimeFork(fn: string, item: unknown) {
-    return this.runPluginRuntimeForkArgs(fn, item)
-  }
-
-  private runPluginRuntimeForkArgs(fn: string, ...args: unknown[]) {
-    if (!this.forkManager) return Promise.reject(new Error('Fork manager is not initialized'))
-    return new Promise<any>((resolveFork, rejectFork) => {
-      this.forkManager!.send('runtime-smoke-plugin', fn, ...args)
-        .on(() => {})
-        .then((result: any) => {
-          if (result?.code === 0) {
-            resolveFork(result?.data?.code !== undefined ? result.data.data : result.data)
-          } else rejectFork(new Error(result?.msg ?? `Fork ${fn} failed`))
-        })
-        .catch(rejectFork)
-    })
-  }
-
-  private async expectPluginSmokeForkRejected(fn: string) {
-    let resolved = false
-    try {
-      await this.runPluginRuntimeFork(fn, { runtime: true })
-      resolved = true
-    } catch {}
-    if (resolved) {
-      throw new Error(`Fork ${fn} unexpectedly resolved after the plugin was disabled/removed`)
-    }
-  }
-
-  private async expectPluginSmokeRoute(expectPresent: boolean) {
-    const result = await this.mainWindow?.webContents.executeJavaScript(
-      `(async () => { for (let i = 0; i < 40; i += 1) { const router = window.__QTENVDEV_PLUGIN_ROUTER__; const routes = router?.getRoutes?.().map((item) => item.path) ?? []; if (routes.includes('/runtime-smoke-plugin') === ${expectPresent}) return { ok: true }; await new Promise((r) => setTimeout(r, 250)); } const router = window.__QTENVDEV_PLUGIN_ROUTER__; return { ok: false, routes: router?.getRoutes?.().map((item) => item.path) ?? [] } })()`,
-      true
-    )
-    if (!result?.ok) {
-      throw new Error(
-        `renderer plugin route hot-sync failed (expectPresent=${expectPresent}): ${JSON.stringify(result)}`
-      )
-    }
-  }
-
-  /**
-   * Drives the same renderer data flow the VersionManager static tab uses:
-   * brewStore.module(typeFlag).fetchStatic() -> IPC fetchAllOnlineVersion.
-   * The localStorage fetchVerion cache is cleared first so the assertion always
-   * exercises the live IPC path, not a cached response.
-   */
-  private async expectPluginSmokeVersionList(label: string) {
-    const result = await this.mainWindow?.webContents.executeJavaScript(
-      `(async () => {
-        try {
-          localStorage.removeItem('fetchVerion-runtime-smoke-plugin')
-          const storeFn = window.__QTENVDEV_PLUGIN_BREW_STORE__
-          if (!storeFn) return { ok: false, error: 'BrewStore global missing' }
-          const brewStore = storeFn()
-          const mod = brewStore.module('runtime-smoke-plugin')
-          if (!mod.isPlugin) return { ok: false, error: 'module was not recreated as a plugin module', isPlugin: mod.isPlugin }
-          mod.fetchStatic()
-          for (let i = 0; i < 40; i += 1) {
-            if (!mod.staticFetching) break
-            await new Promise((r) => setTimeout(r, 250))
-          }
-          return { ok: true, count: mod.static.length, fetching: mod.staticFetching }
-        } catch (e) {
-          return { ok: false, error: String(e) }
-        }
-      })()`,
-      true
-    )
-    if (!result?.ok || !(result?.count > 0)) {
-      throw new Error(
-        `renderer plugin version list failed to load (${label}): ${JSON.stringify(result)}`
-      )
-    }
-  }
-
-  /**
-   * Simulates the renderer state that caused the disable/re-enable installed
-   * version bug: while the plugin is disabled, a still-alive caller recreates
-   * the BrewStore module record, and because AppModules no longer contains the
-   * plugin the record is created with isPlugin=false.
-   */
-  private async poisonPluginSmokeBrewModule() {
-    const result = await this.mainWindow?.webContents.executeJavaScript(
-      `(async () => {
-        try {
-          const storeFn = window.__QTENVDEV_PLUGIN_BREW_STORE__
-          if (!storeFn) return { ok: false, error: 'BrewStore global missing' }
-          const mod = storeFn().module('runtime-smoke-plugin')
-          return { ok: mod.isPlugin === false, isPlugin: mod.isPlugin }
-        } catch (e) {
-          return { ok: false, error: String(e) }
-        }
-      })()`,
-      true
-    )
-    if (!result?.ok) {
-      throw new Error(`failed to poison brew module while disabled: ${JSON.stringify(result)}`)
-    }
-  }
-
-  /**
-   * After re-enable, the poisoned BrewStore record must be reconciled back to a
-   * plugin module and fetchInstalled must go through the plugin fork channel
-   * (app-fork:<typeFlag>) again, returning the installed versions.
-   */
-  private async expectPluginSmokeInstalledList(label: string) {
-    const result = await this.mainWindow?.webContents.executeJavaScript(
-      `(async () => {
-        try {
-          const storeFn = window.__QTENVDEV_PLUGIN_BREW_STORE__
-          if (!storeFn) return { ok: false, error: 'BrewStore global missing' }
-          const mod = storeFn().module('runtime-smoke-plugin')
-          if (!mod.isPlugin) {
-            return { ok: false, error: 'stale module record was not reconciled to a plugin module' }
-          }
-          mod.installedFetched = false
-          await mod.fetchInstalled()
-          return { ok: mod.installed.length > 0, count: mod.installed.length }
-        } catch (e) {
-          return { ok: false, error: String(e) }
-        }
-      })()`,
-      true
-    )
-    if (!result?.ok) {
-      throw new Error(
-        `renderer plugin installed list failed to load (${label}): ${JSON.stringify(result)}`
-      )
-    }
   }
 
   /**
@@ -848,6 +438,7 @@ export default class Application extends EventEmitter {
       this.windowManager.sendCommandTo(this.mainWindow!, key, key, info)
     })
     ServiceProcessManager.forkManager = this.forkManager
+    this.ipcHandler.updateDependencies({ forkManager: this.forkManager })
 
     // 服务运行态变更时，广播给 render，使「非本端发起」（MCP / 托盘 / 其它窗口）的启停也能同步到 UI
     ServiceProcessManager.onStatusChange((status) => {
@@ -859,30 +450,6 @@ export default class Application extends EventEmitter {
         ...status
       })
     })
-
-    // MCP Server 需要 forkManager 句柄；仅在自动启动或首次手动启动时加载实现。
-    const pluginMCP = new PluginMCPRegistry(this.forkManager.pluginWorkers, (key, fallback) =>
-      this.mcpConfigManager.getConfig(key, fallback)
-    )
-    pluginMCP.replace(this.pluginManager.getMCPRegistrations())
-    this.mcpRuntime = new MCPRuntime(
-      this.mcpConfigManager,
-      async () => {
-        const { default: MCPServer } = await import('./core/MCPServer')
-        return new MCPServer(
-          this.forkManager!,
-          this.mcpConfigManager,
-          this.configManager,
-          pluginMCP
-        )
-      },
-      pluginMCP
-    )
-    this.ipcHandler.updateDependencies({
-      forkManager: this.forkManager,
-      mcpRuntime: this.mcpRuntime
-    })
-    void this.mcpRuntime.startOnLaunch()
 
     // MCP 通知统一通过 ServiceVersionManager 中转，再广播给渲染进程
     ServiceVersionManager.onMcpNotify((payload) => {
@@ -1031,56 +598,6 @@ export default class Application extends EventEmitter {
     })
   }
 
-  /**
-   * 发送全局服务器配置更新
-   */
-  private sendGlobalServerUpdate() {
-    if (!this.windowManager || !this.mainWindow || !this.serverManager) {
-      return
-    }
-    this.windowManager.sendCommandTo(
-      this.mainWindow!,
-      'APP-Update-Global-Server',
-      'APP-Update-Global-Server',
-      this.serverManager.getGlobalServer()
-    )
-  }
-
-  private async syncPlugins() {
-    await this.pluginManager.refresh()
-    ;(global.Server as any).Plugins = this.pluginManager.getForkSnapshot()
-    this.mcpRuntime?.plugins?.replace(this.pluginManager.getMCPRegistrations())
-    if (this.forkManager) {
-      this.forkManager.broadcastServer(this.serverManager.getGlobalServer())
-    }
-    this.sendGlobalServerUpdate()
-  }
-
-  show(page = 'index') {
-    if (page === 'index') {
-      this.trayManager?.closePopup()
-    }
-    this.windowManager.showWindow(page)
-  }
-
-  hide(page: string) {
-    if (page) {
-      this.windowManager.hideWindow(page)
-    } else {
-      this.windowManager.hideAllWindow()
-    }
-  }
-
-  toggle(page = 'index') {
-    this.windowManager.toggleWindow(page)
-  }
-
-  closePage(page: string) {
-    this.windowManager.destroyWindow(page)
-  }
-
-  // ===== 托盘管理 =====
-
   private initTrayManager() {
     this.trayManager.on('style-changed', (style: 'modern' | 'classic') => {
       console.log('style-changed !!!', style)
@@ -1106,6 +623,39 @@ export default class Application extends EventEmitter {
     const style =
       this.configManager.getConfig('setup.trayMenuBarStyle') ?? (isLinux() ? 'classic' : 'modern')
     this.trayManager.setStyle(style)
+  }
+
+  /**
+   * 发送全局服务器配置更新
+   */
+  private sendGlobalServerUpdate() {
+    if (!this.windowManager || !this.mainWindow || !this.serverManager) {
+      return
+    }
+    this.windowManager.sendCommandTo(
+      this.mainWindow!,
+      'APP-Update-Global-Server',
+      'APP-Update-Global-Server',
+      this.serverManager.getGlobalServer()
+    )
+  }
+
+  show(page = 'index') {
+    if (page === 'index') this.trayManager?.closePopup()
+    this.windowManager.showWindow(page)
+  }
+
+  hide(page: string) {
+    if (page) this.windowManager.hideWindow(page)
+    else this.windowManager.hideAllWindow()
+  }
+
+  toggle(page = 'index') {
+    this.windowManager.toggleWindow(page)
+  }
+
+  closePage(page: string) {
+    this.windowManager.destroyWindow(page)
   }
 
   private setupModernTray() {
@@ -1280,15 +830,6 @@ export default class Application extends EventEmitter {
               )
             } catch (e) {
               console.log('HttpServer.stopAll e: ', e)
-            }
-          })(),
-          (async () => {
-            try {
-              await timeServiceStopBoundary('quit.mcp-stop', quitData, () =>
-                this.mcpRuntime?.stopLoaded()
-              )
-            } catch (e) {
-              console.log('mcpRuntime.stop e: ', e)
             }
           })(),
           (async () => {

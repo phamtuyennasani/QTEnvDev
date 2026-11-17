@@ -562,6 +562,7 @@
       if (ready) {
         return fs.mkdirp(nginxRewriteTemplateDir)
       }
+      return undefined
     })
     .catch(() => {})
 

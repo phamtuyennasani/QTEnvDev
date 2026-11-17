@@ -82,7 +82,6 @@
     "basicInfo": "Grundlæggende Info",
     "configuration": "Konfiguration",
     "favorites": "Favoritter",
-    "plugins": "Plugins",
     "backupUpdate": "Sikkerhedskopiér Og Opdatér"
   },
   "skills": {
@@ -124,10 +123,6 @@
     "none": "Ingen",
     "local": "Lokal"
   },
-  "plugin": {
-    "search": "Søg plugins",
-    "removed": "Plugin fjernet"
-  },
   "schedule": {
     "everyHour": "Hver time",
     "everyMinute": "Hvert minut"
@@ -163,14 +158,14 @@
     "hideConfirm": "Hvis startgrupper skjules, stoppes alle tjenester i dem. Vil du fortsætte?",
     "hideFailed": "Startgrupper forbliver synlige, fordi disse tjenester ikke kunne stoppes:",
     "hideBusy": "Vent, til den aktuelle startgruppehandling er afsluttet.",
-    "state":   {
+    "state": {
       "stopped": "Stoppet",
       "running": "Kører",
       "partial-running": "Kører delvist",
       "executing": "Udfører",
       "invalid": "Ugyldig konfiguration"
     },
-    "outcome":   {
+    "outcome": {
       "started": "Startet",
       "stopped": "Stoppet",
       "skipped": "Sprunget over",

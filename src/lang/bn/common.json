@@ -82,7 +82,6 @@
     "basicInfo": "মৌলিক তথ্য",
     "configuration": "Configuration",
     "favorites": "প্রিয়",
-    "plugins": "Plugins",
     "backupUpdate": "ব্যাকআপ ও আপডেট"
   },
   "skills": {
@@ -124,10 +123,6 @@
     "none": "কিছু নেই",
     "local": "Local"
   },
-  "plugin": {
-    "search": "প্লাগইন খুঁজুন",
-    "removed": "প্লাগইন সরানো হয়েছে"
-  },
   "schedule": {
     "everyHour": "প্রতি ঘণ্টায়",
     "everyMinute": "প্রতি মিনিটে"
@@ -163,14 +158,14 @@
     "hideConfirm": "স্টার্টআপ গ্রুপ লুকালে যেকোনো গ্রুপে থাকা সব সার্ভিস বন্ধ হবে। চালিয়ে যাবেন?",
     "hideFailed": "নিচের সার্ভিসগুলো বন্ধ করা যায়নি বলে স্টার্টআপ গ্রুপ দৃশ্যমান থাকবে:",
     "hideBusy": "বর্তমান স্টার্টআপ গ্রুপের কাজ শেষ হওয়া পর্যন্ত অপেক্ষা করুন।",
-    "state":   {
+    "state": {
       "stopped": "বন্ধ",
       "running": "চলমান",
       "partial-running": "আংশিক চলমান",
       "executing": "কার্যকর হচ্ছে",
       "invalid": "কনফিগারেশন অবৈধ"
     },
-    "outcome":   {
+    "outcome": {
       "started": "চালু হয়েছে",
       "stopped": "বন্ধ হয়েছে",
       "skipped": "এড়িয়ে যাওয়া হয়েছে",

@@ -8,7 +8,7 @@ export default {
   quoteProps: 'as-needed',
   bracketSpacing: true,
   trailingComma: 'none', // No trailing comma
-  jsxBracketSameLine: false,
+  bracketSameLine: false,
   jsxSingleQuote: false,
   arrowParens: 'always',
   insertPragma: false,

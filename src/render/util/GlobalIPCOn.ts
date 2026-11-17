@@ -8,7 +8,6 @@ import { isEqual } from 'lodash-es'
 import { AppStore } from '@/store/app'
 import { SetupStore } from '@/components/Setup/store'
 import { I18nT } from '@lang/index'
-import { syncRendererPluginModules } from '@/core/AppModules'
 import WindowsPrivilegeController from '@/components/Setup/WindowsElevationMethod/Controller'
 import { WINDOWS_ELEVATION_CHOICE_VERSION } from '@shared/WindowsHelperState'
 
@@ -27,7 +26,6 @@ class GlobalIPCOn {
       if (isEqual(server, res)) {
         return
       }
-      const pluginsChanged = !isEqual(server?.Plugins, res?.Plugins)
       // 全量 Server 广播也可能晚于专用权限广播。替换其他字段后恢复更高
       // revision 的权限快照，避免系统设置刷新把偏好/管理员展示状态退回旧值。
       const privilege = {
@@ -53,14 +51,6 @@ class GlobalIPCOn {
       }
       const store = AppStore()
       store.envIndex += 1
-      if (pluginsChanged) {
-        // Plugin install/update/toggle/uninstall: hot-sync renderer modules and
-        // routes without a restart. The fork side is already refreshed by the
-        // same broadcast. Failure here only means the change applies on restart.
-        syncRendererPluginModules().catch((error) => {
-          console.error('[Plugin] hot sync failed; restart to apply plugin changes', error)
-        })
-      }
     })
     IPC.on('APP-License-Need-Update').then(() => {
       SetupStore().init()

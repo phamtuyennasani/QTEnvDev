@@ -6,7 +6,7 @@ import type {
   TextureOptions,
   WatermarkConfig
 } from '../../../../fork/module/Image/imageCompress.type'
-import type { FitEnum, FormatEnum, KernelEnum } from 'sharp'
+import type { FitEnum, KernelEnum } from 'sharp'
 import { dialog, fs, shell } from '@/util/NodeFn'
 import { MessageError } from '@/util/Element'
 import { I18nT } from '@lang/index'
@@ -26,7 +26,7 @@ class ImageCompressSetup implements SharpConfig {
   withoutEnlargement: boolean = true
   withoutReduction: boolean = false
   fastShrinkOnLoad: boolean = true
-  format: 'none' | keyof FormatEnum = 'none'
+  format: NonNullable<SharpConfig['format']> = 'none'
   compressOpen: boolean = true
   // 裁剪配置
   trim?: boolean

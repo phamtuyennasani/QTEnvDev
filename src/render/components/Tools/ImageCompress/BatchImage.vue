@@ -163,11 +163,9 @@
   import { ImageBatch } from './setup'
   import { Delete, FolderOpened, Lock, Plus, Picture, Folder } from '@element-plus/icons-vue'
   import BatchImageTablePathCell from '@/components/Tools/ImageCompress/BatchImageTablePathCell.vue'
-  import { SetupStore } from '@/components/Setup/store'
   import { I18nT } from '@lang/index'
   import { initFileDroper } from '@/util/File'
 
-  const setupStore = SetupStore()
   const choosed = ref([])
   const card = ref()
   const onDrag = ref(false)

@@ -2,11 +2,7 @@
   "name": "QTEnvDev",
   "version": "4.21.0",
   "description": "All-In-One Full-Stack Environment Management Tool",
-  "author": {
-    "name": "Pengfei Xu",
-    "email": "250881478@qq.com"
-  },
-  "copyright": "Copyright © Pengfei Xu",
+  "author": "",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -43,14 +39,8 @@
     "test:helper:admin": "yarn run test:helper:contract && yarn run test:helper:go:admin && yarn run test:helper:go:vet:admin",
     "test:helper": "yarn run test:helper:contract && yarn run test:helper:go && yarn run test:helper:go:vet",
     "postinstall": "patch-package && electron-builder install-app-deps",
-    "plugin:dev": "tsx scripts/plugin-runner.ts dev",
-    "plugin:build": "tsx scripts/plugin-builder.ts",
-    "plugin:build:all": "tsx scripts/plugin-builder.ts --all",
-    "plugin:release": "tsx scripts/plugin-release.ts",
-    "plugin:debug": "tsx scripts/plugin-runner.ts debug",
-    "plugin:test": "tsx scripts/plugin-test.ts",
-    "plugin:runtime-smoke": "tsx scripts/plugin-runtime-smoke.ts",
-    "test:hermes-providers": "tsx scripts/hermes-providers-test.ts"
+    "typecheck": "vue-tsc --noEmit",
+    "test:custom-module-lifecycle": "tsx scripts/custom-module-lifecycle-test.ts"
   },
   "type": "module",
   "main": "./dist/electron/main.mjs",
@@ -66,7 +56,6 @@
     "@mdit-vue/plugin-title": "^2.1.4",
     "@mdit-vue/plugin-toc": "^2.1.4",
     "@mdit-vue/shared": "^2.1.4",
-    "@modelcontextprotocol/sdk": "1.32.0",
     "@regexper/render": "^1.0.0",
     "@shikijs/core": "^3.4.2",
     "@shikijs/transformers": "^3.4.2",
@@ -85,7 +74,6 @@
     "electron-updater": "^6.6.5",
     "fast-xml-parser": "^5.12.0",
     "fs-extra": "^11.3.0",
-    "fs-native-extensions": "1.5.3",
     "ftp-srv": "^4.6.3",
     "hpagent": "^1.2.0",
     "ini": "^5.0.0",

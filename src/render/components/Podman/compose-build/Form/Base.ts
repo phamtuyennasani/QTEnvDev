@@ -42,7 +42,7 @@ const base = reactive({
       .then((res) => {
         const mirrors: string[] = this.mirrors as any
         mirrors.splice(0)
-        mirrors.push(...res)
+        mirrors.push(...(res ?? []))
       })
       .catch(() => {
         const mirrors: string[] = this.mirrors as any

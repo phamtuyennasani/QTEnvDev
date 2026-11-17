@@ -10,10 +10,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "lib": [
-      "esnext",
-      "dom"
-    ],
+    "lib": ["esnext", "dom"],
     "sourceMap": false,
     "strictFunctionTypes": false,
     "verbatimModuleSyntax": false,
@@ -23,24 +20,13 @@
     "noImplicitAny": true,
     "allowJs": false,
     "noEmit": true,
-    "types": [
-      "vite/client",
-      "node"
-    ],
+    "types": ["vite/client", "node"],
     "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "src/render/*"
-      ],
-      "@shared/*": [
-        "src/shared/*"
-      ],
-      "@lang/*": [
-        "src/lang/*"
-      ],
-      "@fork/*": [
-        "src/fork/*"
-      ]
+      "@/*": ["src/render/*"],
+      "@shared/*": ["src/shared/*"],
+      "@lang/*": ["src/lang/*"],
+      "@fork/*": ["src/fork/*"]
     }
   },
   "include": [
@@ -53,9 +39,6 @@
     "configs/**/*.ts",
     "configs/**/*.js",
     "scripts/**/*.ts",
-    "scripts/**/*.js",
-    "plugins/**/*.ts",
-    "plugins/**/*.tsx",
-    "plugins/**/*.vue"
+    "scripts/**/*.js"
   ]
 }

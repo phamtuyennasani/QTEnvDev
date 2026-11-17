@@ -71,6 +71,7 @@ class Podman extends Base {
     } catch (e) {
       console.log('applyRosettaConfig error: ', e)
     }
+    return undefined
   }
 
   private async getComposeCommand(): Promise<string> {

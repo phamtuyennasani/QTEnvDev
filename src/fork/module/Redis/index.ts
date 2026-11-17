@@ -119,6 +119,7 @@ class Redis extends Base {
   /** Commander 独立登记时只回收面板，不能用其 Node bin 去停止 Redis。 */
   companionStopArgs(command: string, pid: string, args: any[]): any[] | undefined {
     if (command === 'openRedisCommander') return [{ ...args[0], pid }, { commanderOnly: true }]
+    return undefined
   }
 
   _stopServer(

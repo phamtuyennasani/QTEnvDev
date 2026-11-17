@@ -82,7 +82,6 @@
     "basicInfo": "Grunnleggende info",
     "configuration": "Konfigurasjon",
     "favorites": "Favoritter",
-    "plugins": "Plugins",
     "backupUpdate": "Sikkerhetskopier og oppdater"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Standard",
     "none": "Ingen",
     "local": "Lokal"
-  },
-  "plugin": {
-    "search": "Søk i plugins",
-    "removed": "Plugin fjernet"
   },
   "schedule": {
     "everyHour": "Hver time",

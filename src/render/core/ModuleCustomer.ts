@@ -25,6 +25,58 @@ const ModuleDefaultIcon = `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="htt
 const stopOperations = new WeakMap<object, Promise<boolean | string>>()
 const startOperations = new WeakMap<object, Promise<boolean | string>>()
 
+async function stopAfterStart(
+  item: ModuleCustomerExecItem,
+  interactive: boolean
+): Promise<boolean | string> {
+  const starting = startOperations.get(item)
+  if (starting) {
+    const started = await starting
+    if (started !== true) return started
+  }
+  return stopInternal(item, interactive)
+}
+
+function stopInternal(
+  item: ModuleCustomerExecItem,
+  interactive: boolean
+): Promise<boolean | string> {
+  return new Promise<boolean | string>((resolve) => {
+    if (!item.run) {
+      return resolve(true)
+    }
+    item.running = true
+    item.run = false
+    const finishPending = beginServiceStatusPending('module-customer')
+    void forkTerminalRequest(
+      `${interactive ? 'app-fork' : 'app-fork-background'}:module-customer`,
+      ['stopService', item.pid],
+      I18nT('setup.windowsPrivilege.timeout')
+    )
+      .then((result: any) => {
+        finishPending()
+        noteServiceStatusRevision('module-customer', result?.serviceStatusRevision)
+        if (result?.code !== 0) {
+          item.run = true
+          item.running = false
+          resolve(result?.msg ?? 'Operation failed')
+          return
+        }
+        item.run = false
+        item.pid = ''
+        item.running = false
+        resolve(true)
+      })
+      .catch((error) => {
+        finishPending()
+        // 超时/同步发送异常是未知停止结果；保留 PID 与 run，让用户仍能重试或退出清理。
+        item.run = true
+        item.running = false
+        resolve(error instanceof Error ? error.message : String(error))
+      })
+  })
+}
+
 class ModuleCustomerExecItem implements CustomerModuleExecItem {
   command: string = ''
   comment: string = ''
@@ -64,58 +116,12 @@ class ModuleCustomerExecItem implements CustomerModuleExecItem {
     const current = stopOperations.get(this)
     // 首次 stop 会先置 run=false；重复调用仍须等待同一终态，不能提前让版本切换继续。
     if (current) return current
-    const task = waitForStart ? this.stopAfterStart(interactive) : this.stopInternal(interactive)
+    const task = waitForStart ? stopAfterStart(this, interactive) : stopInternal(this, interactive)
     const pending = task.finally(() => {
       if (stopOperations.get(this) === pending) stopOperations.delete(this)
     })
     stopOperations.set(this, pending)
     return pending
-  }
-
-  private async stopAfterStart(interactive: boolean): Promise<boolean | string> {
-    const starting = startOperations.get(this)
-    if (starting) {
-      const started = await starting
-      if (started !== true) return started
-    }
-    return this.stopInternal(interactive)
-  }
-
-  private stopInternal(interactive: boolean): Promise<boolean | string> {
-    return new Promise<boolean | string>((resolve) => {
-      if (!this.run) {
-        return resolve(true)
-      }
-      this.running = true
-      this.run = false
-      const finishPending = beginServiceStatusPending('module-customer')
-      void forkTerminalRequest(
-        `${interactive ? 'app-fork' : 'app-fork-background'}:module-customer`,
-        ['stopService', this.pid],
-        I18nT('setup.windowsPrivilege.timeout')
-      )
-        .then((result: any) => {
-          finishPending()
-          noteServiceStatusRevision('module-customer', result?.serviceStatusRevision)
-          if (result?.code !== 0) {
-            this.run = true
-            this.running = false
-            resolve(result?.msg ?? 'Operation failed')
-            return
-          }
-          this.run = false
-          this.pid = ''
-          this.running = false
-          resolve(true)
-        })
-        .catch((error) => {
-          finishPending()
-          // 超时/同步发送异常是未知停止结果；保留 PID 与 run，让用户仍能重试或退出清理。
-          this.run = true
-          this.running = false
-          resolve(error instanceof Error ? error.message : String(error))
-        })
-    })
   }
 
   /** 列表重启必须先确认旧 PID 已停；失败时把实际错误留给 UI 展示。 */

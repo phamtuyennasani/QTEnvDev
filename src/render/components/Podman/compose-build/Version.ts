@@ -19,10 +19,12 @@ const VersionManager: VersionManagerType = reactiveBindObject({
   async init(image: string) {
     this.fetching[image] = true
     try {
-      const arr: string[] = await StorageGetAsync(`qtenvdev-podman-image-${image}-versions`)
-      this.versions[image] = reactive(arr)
-      delete this.fetching[image]
-      return
+      const arr = await StorageGetAsync<string[]>(`qtenvdev-podman-image-${image}-versions`)
+      if (arr) {
+        this.versions[image] = reactive(arr)
+        delete this.fetching[image]
+        return
+      }
     } catch {}
     IPC.send('app-fork:podman', 'composeImageVersion', image).then((key, res) => {
       IPC.off(key)

@@ -82,7 +82,6 @@
     "basicInfo": "Základní informace",
     "configuration": "Konfigurace",
     "favorites": "Oblíbené",
-    "plugins": "Pluginy",
     "backupUpdate": "Zálohování a aktualizace"
   },
   "skills": {
@@ -124,10 +123,6 @@
     "none": "Nic",
     "local": "Místní"
   },
-  "plugin": {
-    "search": "Hledat pluginy",
-    "removed": "Plugin byl odstraněn"
-  },
   "schedule": {
     "everyHour": "Každou hodinu",
     "everyMinute": "Každou minutu"
@@ -163,14 +158,14 @@
     "hideConfirm": "Skrytím spouštěcích skupin se zastaví všechny služby, které obsahují. Pokračovat?",
     "hideFailed": "Spouštěcí skupiny zůstanou zobrazené, protože tyto služby se nepodařilo zastavit:",
     "hideBusy": "Počkejte na dokončení aktuální operace se spouštěcí skupinou.",
-    "state":   {
+    "state": {
       "stopped": "Zastaveno",
       "running": "Běží",
       "partial-running": "Částečně spuštěno",
       "executing": "Provádí se",
       "invalid": "Neplatná konfigurace"
     },
-    "outcome":   {
+    "outcome": {
       "started": "Spuštěno",
       "stopped": "Zastaveno",
       "skipped": "Přeskočeno",

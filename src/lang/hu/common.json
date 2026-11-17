@@ -82,7 +82,6 @@
     "basicInfo": "Alapadatok",
     "configuration": "Konfiguráció",
     "favorites": "Kedvencek",
-    "plugins": "Plugins",
     "backupUpdate": "Biztonsági mentés és frissítés"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Alapértelmezett",
     "none": "Nincs",
     "local": "Helyi"
-  },
-  "plugin": {
-    "search": "Bővítmények keresése",
-    "removed": "Bővítmény eltávolítva"
   },
   "schedule": {
     "everyHour": "Minden órában",

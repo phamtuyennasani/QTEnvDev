@@ -131,11 +131,8 @@ app.whenReady().then(async () => {
     }
     if (process.env.HALLMARK_SCENARIOS === '1') {
       const scenarios = {
-        '/codex': ['cli-installed', 'cli-loading', 'cli-sessions', 'cli-sessions-loading'],
-        '/mcp': ['mcp-running', 'mcp-starting'],
         '/node': ['project-populated', 'project-loading'],
         '/podman': ['podman-empty', 'podman-stopped', 'podman-compose', 'podman-loading'],
-        '/setup': ['plugins-loading', 'plugins-error', 'plugins-success', 'plugins-populated'],
         '/customer-module': ['custom-populated'],
         '/startup-group': ['groups-populated']
       }

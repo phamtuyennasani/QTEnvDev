@@ -82,7 +82,6 @@
     "basicInfo": "Informations de base",
     "configuration": "Configuration",
     "favorites": "Favoris",
-    "plugins": "Plugins",
     "backupUpdate": "Sauvegarde et mise à jour"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Par défaut",
     "none": "Aucun",
     "local": "Locale"
-  },
-  "plugin": {
-    "search": "Rechercher des plugins",
-    "removed": "Plugin supprimé"
   },
   "schedule": {
     "everyHour": "Chaque heure",

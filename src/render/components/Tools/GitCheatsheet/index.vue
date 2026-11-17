@@ -105,8 +105,7 @@
   }
 
   const memo = computed(() => {
-    // Ensure i18n.global.locale is reactive. For example, if it's a ref, use i18n.global.locale.value
-    const locale = i18n.global.locale as keyof typeof memos
+    const locale = i18n.global.locale.value as keyof typeof memos
     return memos[locale] ?? MemoEn
   })
 

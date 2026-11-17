@@ -1,7 +1,8 @@
 import type { TaskItem } from '@shared/TaskQueue'
-import sharp, { Sharp, FitEnum, KernelEnum, OverlayOptions, FormatEnum } from 'sharp'
+import sharp, { Sharp, FitEnum, KernelEnum, OverlayOptions } from 'sharp'
 import type {
   ImageWatermarkOptions,
+  ImageOutputFormat,
   SharpConfig,
   TextureOptions,
   TextWatermarkOptions,
@@ -865,7 +866,7 @@ export class ImageCompressTask implements TaskItem {
     return pipeline
   }
 
-  private applyFormatOptions(pipeline: Sharp, format: keyof FormatEnum): Sharp {
+  private applyFormatOptions(pipeline: Sharp, format: ImageOutputFormat): Sharp {
     switch (format) {
       case 'jpeg':
       case 'jpg':
@@ -959,13 +960,13 @@ export class ImageCompressTask implements TaskItem {
       const outputDir = dirname(this.path)
       await mkdir(outputDir, { recursive: true })
 
-      let format: 'none' | keyof FormatEnum = 'jpeg'
+      let format: ImageOutputFormat = 'jpeg'
       if (this.config.format && this.config.format !== 'none') {
         format = this.config.format
       } else {
         const ext = extname(this.path).toLowerCase().replace('.', '')
         if (['jpeg', 'jpg', 'png', 'webp', 'avif', 'gif', 'tiff', 'heif'].includes(ext)) {
-          format = ext as keyof FormatEnum
+          format = ext as ImageOutputFormat
         }
       }
 

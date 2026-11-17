@@ -82,7 +82,6 @@
     "basicInfo": "Basic Info",
     "configuration": "Configuration",
     "favorites": "Favorites",
-    "plugins": "Plugins",
     "backupUpdate": "Backup & Update"
   },
   "skills": {
@@ -124,10 +123,6 @@
     "none": "None",
     "local": "Local"
   },
-  "plugin": {
-    "search": "Search plugins",
-    "removed": "Plugin removed"
-  },
   "schedule": {
     "everyHour": "Every hour",
     "everyMinute": "Every minute"
@@ -164,14 +159,14 @@
     "hideConfirm": "Hiding Startup Groups stops every service contained in any startup group. Continue?",
     "hideFailed": "Startup Groups stays visible because these services could not be stopped:",
     "hideBusy": "Wait for the current startup group operation to finish.",
-    "state":   {
+    "state": {
       "stopped": "Stopped",
       "running": "Running",
       "partial-running": "Partially running",
       "executing": "Executing",
       "invalid": "Configuration invalid"
     },
-    "outcome":   {
+    "outcome": {
       "started": "Started",
       "stopped": "Stopped",
       "skipped": "Skipped",

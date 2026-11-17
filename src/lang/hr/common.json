@@ -82,7 +82,6 @@
     "basicInfo": "Osnovne Informacije",
     "configuration": "Konfiguracija",
     "favorites": "Favoriti",
-    "plugins": "Plugins",
     "backupUpdate": "Sigurnosna Kopija i Ažuriranje"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Zadano",
     "none": "Ništa",
     "local": "Lokalno"
-  },
-  "plugin": {
-    "search": "Pretraži dodatke",
-    "removed": "Dodatak je uklonjen"
   },
   "schedule": {
     "everyHour": "Svakog sata",

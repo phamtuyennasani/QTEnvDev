@@ -7,7 +7,6 @@ import {
   hostAlias,
   uuid,
   writeFile,
-  machineId,
   readdir,
   remove,
   removeByRoot,
@@ -30,7 +29,6 @@ import {
 } from '../Nginx/Host'
 import { setDirRole, updateAutoSSL, updateRootRule } from './Host'
 import { TaskAddPhpMyAdminSite, TaskAddRandomSite } from './Task'
-import { publicDecrypt } from 'crypto'
 import { fetchHostList, saveHostList } from './HostFile'
 import { validateTomcatSite, type TomcatSiteHost } from '../Tomcat/Site'
 import { appDebugLog, isMacOS, isWindows } from '@shared/utils'

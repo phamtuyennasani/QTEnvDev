@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { MysqlGroupItem } from '@shared/app'
 import { join } from '@/util/path-browserify'
 import { fs } from '@/util/NodeFn'
-import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
+import { forkTerminalRequest, isPositiveHostPid } from '@/util/ForkTerminalRequest'
 import { beginServiceStatusPending, noteServiceStatusRevision } from '@/util/mcpServiceStatus'
 import { I18nT } from '@lang/index'
 

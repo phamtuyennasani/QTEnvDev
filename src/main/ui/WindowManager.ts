@@ -45,8 +45,7 @@ const trayBrowserOptions: BrowserWindowConstructorOptions = {
   webPreferences: {
     nodeIntegration: false,
     contextIsolation: true,
-    webSecurity: true,
-    allowRunningInsecureContent: true
+    webSecurity: true
   }
 }
 export default class WindowManager extends EventEmitter {

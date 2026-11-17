@@ -15,7 +15,6 @@ export const MCP_LIFECYCLE_FLAGS = [
   'rabbitmq',
   'mailpit',
   'elasticsearch',
-  'ollama',
   'minio',
   'meilisearch',
   'zincsearch',
@@ -66,7 +65,6 @@ export const MCP_QUERYABLE_FLAGS = [
   'nginx',
   'node',
   'numa',
-  'ollama',
   'perl',
   'php',
   'postgresql',
@@ -129,7 +127,6 @@ export const MCP_INSTALLABLE_FLAGS = [
   'n8n',
   'nginx',
   'numa',
-  'ollama',
   'perl',
   'php',
   'postgresql',
@@ -214,7 +211,7 @@ export const MCP_FLAG_DESCRIPTIONS = {
   lifecycle:
     'Lifecycle-managed QTEnvDev service flag. Examples: nginx, mysql, php, redis. Excludes runtime/toolchain modules such as bun, node, python, golang, java, rust, deno, and zig.',
   queryable:
-    'Version-managed QTEnvDev module flag for read-only inspection tools. Examples: bun, node, php, nginx, mysql, python, golang, redis, pure-ftpd. Excludes UI-only modules such as hosts, tools, mcp, codex, kimi, and openCode.',
+    'Version-managed QTEnvDev module flag for read-only inspection tools. Examples: bun, node, php, nginx, mysql, python, golang, redis, pure-ftpd. Excludes UI-only modules such as hosts and tools.',
   database:
     'Database/cache module flag. Allowed values: mysql, mariadb, postgresql, clickhouse, redis, mongodb, memcached.',
   installable:

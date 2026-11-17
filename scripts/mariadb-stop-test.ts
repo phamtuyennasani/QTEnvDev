@@ -185,7 +185,7 @@ try {
       assert.ok(observed?.COMMAND.includes(`"--defaults-file=${config}"`))
       const liveVersion = { ...version, bin, path: dirname(dirname(bin)), pid }
       const stopped = await mariadb.stopService(liveVersion, { processList, reason: 'quit' })
-      assert.ok(stopped['APP-Service-Stop-PID'].map(String).includes(pid))
+      assert.ok(stopped['APP-Service-Stop-PID']?.map(String).includes(pid))
       await exited
       const finalList = await fetchStopProcessListLocal()
       assert.equal(

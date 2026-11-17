@@ -122,7 +122,7 @@ function logPrinter(data: string[]) {
 
 function runElectronApp() {
   const args = [
-    ...(process.env.QTENVDEV_PLUGIN_SMOKE ? [] : ['--inspect=5858']),
+    '--inspect=5858',
     ...(process.env.QTENVDEV_DATA_ROOT
       ? [`--user-data-dir=${_path.resolve(process.env.QTENVDEV_DATA_ROOT, 'electron-user-data')}`]
       : []),

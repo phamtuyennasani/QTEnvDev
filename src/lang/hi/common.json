@@ -82,7 +82,6 @@
     "basicInfo": "मूल जानकारी",
     "configuration": "कॉन्फ़िगरेशन",
     "favorites": "पसंदीदा",
-    "plugins": "प्लगइन",
     "backupUpdate": "बैकअप और अपडेट"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "डिफ़ॉल्ट",
     "none": "कोई नहीं",
     "local": "स्थानीय"
-  },
-  "plugin": {
-    "search": "प्लगइन खोजें",
-    "removed": "प्लगइन हटाया गया"
   },
   "schedule": {
     "everyHour": "हर घंटे",

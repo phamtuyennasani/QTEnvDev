@@ -12,7 +12,6 @@ import menuES from './menu.json'
 import mysqlES from './mysql.json'
 import nginxES from './nginx.json'
 import nodejsES from './nodejs.json'
-import ollamaES from './ollama.json'
 import phpES from './php.json'
 import promptES from './prompt.json'
 import redisES from './redis.json'
@@ -30,38 +29,20 @@ import requestTimer from './requestTimer.json'
 import meilisearch from './meilisearch.json'
 import minio from './minio.json'
 import podman from './podman.json'
-import openclawES from './openclaw.json'
 import n8n from './n8n.json'
 import rustfsES from './rustfs.json'
 import mkcert from './mkcert.json'
-import hermes from './hermes.json'
 import flutter from './flutter.json'
 import cronES from './cron.json'
-import kimi from './kimi.json'
-import claudeCode from './claude-code.json'
-import codex from './codex.json'
-import openCode from './opencode.json'
-import antigravity from './antigravity.json'
-import copilotCli from './copilot-cli.json'
 import common from './common.json'
-import mcp from './mcp.json'
 export default {
   es: {
     common,
-    kimi,
-    claudeCode,
-    codex,
-    openCode,
-    antigravity,
-    copilotCli,
-    mcp,
     cron: cronES,
     rustfs: rustfsES,
     mkcert,
     flutter,
-    hermes,
     n8n,
-    openclaw: openclawES,
     podman,
     minio,
     meilisearch,
@@ -81,7 +62,6 @@ export default {
     mysql: mysqlES,
     nginx: nginxES,
     nodejs: nodejsES,
-    ollama: ollamaES,
     php: phpES,
     prompt: promptES,
     redis: redisES,

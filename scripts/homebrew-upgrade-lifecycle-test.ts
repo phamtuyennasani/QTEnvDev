@@ -39,7 +39,6 @@ const fmMocks: any = {
     writePerformanceLog: noop
   },
   electron: {},
-  './PluginWorkerRegistry': {},
   './ServiceProcess': service,
   './HomebrewOperationCoordinator': { HomebrewOperationCoordinator },
   '@shared/StopProcessList': {},
@@ -77,7 +76,6 @@ Object.assign(fm, {
   rawLifecycleRequests: new Set(),
   unknownServiceStarts: new Map(),
   forks: [{ activeTaskCount: 0, isPrimary: true, send: () => raw }],
-  pluginWorkers: { isDedicated: () => false },
   invalidateStopProcessList: noop,
   brewQuery: async () => snapshot,
   runBrewPackage: async (id: any, action: any) => {
@@ -153,7 +151,6 @@ Object.assign(uncertainManager, {
       send: () => Promise.resolve({ code: 1, outcome: 'unknown' })
     }
   ],
-  pluginWorkers: { isDedicated: () => false },
   invalidateStopProcessList: noop,
   brewQuery: async () => snapshot
 })

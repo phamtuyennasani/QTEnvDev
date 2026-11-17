@@ -82,7 +82,6 @@
     "basicInfo": "Informații de bază",
     "configuration": "Configurare",
     "favorites": "Favorite",
-    "plugins": "Plugins",
     "backupUpdate": "Backup & Actualizare"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Implicit",
     "none": "Niciunul",
     "local": "Local"
-  },
-  "plugin": {
-    "search": "Caută pluginuri",
-    "removed": "Plugin eliminat"
   },
   "schedule": {
     "everyHour": "În fiecare oră",

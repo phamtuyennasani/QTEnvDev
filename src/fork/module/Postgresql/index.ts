@@ -239,12 +239,6 @@ class Manager extends Base {
     return pgAdminOwnedPids(processList, paths, packageRoot, isWindows())
   }
 
-  private async pgAdminFallbackOwnedProcessPids(): Promise<string[]> {
-    const paths = this.pgAdminPaths()
-    const processList = await fetchStopProcessListLocal()
-    return pgAdminOwnedPidsWithoutPackageMetadata(processList, paths, isWindows())
-  }
-
   private async pgAdminPortOwnedByPid(port: number, pid: string): Promise<boolean> {
     const listeningPids = isWindows()
       ? await fetchLoopbackListeningPidsWindows(`${port}`)
@@ -600,6 +594,7 @@ class Manager extends Base {
   /** pgAdmin 可独立打开，单独停止不会关闭 PostgreSQL 数据目录。 */
   companionStopArgs(command: string, pid: string, args: any[]): any[] | undefined {
     if (command === 'openPGAdmin') return [{ ...args[0], pid }, args[1], true]
+    return undefined
   }
 
   _stopServer(

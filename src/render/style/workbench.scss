@@ -431,51 +431,7 @@ html:is(.light, .dark) #app {
   color: var(--color-success);
 }
 
-.app-plugin-market {
-  .el-radio-group {
-    flex-wrap: wrap;
-    gap: var(--space-3xs);
-  }
-  .app-plugin-avatar {
-    color: var(--color-accent);
-    background: var(--color-accent-soft);
-  }
-  [class*='opacity-'] {
-    opacity: 1;
-    color: var(--color-ink-muted);
-  }
-  .el-radio-button__inner {
-    border-radius: var(--radius-sm);
-  }
-}
-
 @media (max-width: 60rem) {
-  .app-plugin-market {
-    overflow-y: auto;
-    > div {
-      padding-inline: var(--space-xs);
-    }
-    > div:first-child > div > div:first-child {
-      align-items: flex-start;
-    }
-    > div:nth-child(2) {
-      min-height: 24rem;
-      flex-shrink: 0;
-    }
-    .flex:has(> .app-plugin-avatar) {
-      flex-wrap: wrap;
-      padding: var(--space-xs);
-    }
-    .app-plugin-avatar {
-      width: 2rem;
-      height: 2rem;
-    }
-    .flex:has(> .app-plugin-avatar) > div:last-child {
-      width: 100%;
-      flex-direction: row;
-      align-items: center;
-    }
-  }
   .app-container-workspace {
     flex-direction: column;
     overflow-y: auto;

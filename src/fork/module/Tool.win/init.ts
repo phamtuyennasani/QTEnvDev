@@ -155,7 +155,7 @@ export function initQTEnvDevSH(): ForkPromise<QTEnvDevShellInitResult> {
         const gitBashScriptContent = await measureShellInitStep(
           timings,
           'read-git-bash-script',
-          () => readFile(join(global.Server.Static!, 'sh/qt-env-dev.sh'))
+          () => readFile(join(global.Server.Static!, 'sh/qt-env-dev.sh'), 'utf8')
         )
         gitBashState = await measureShellInitStep(timings, 'install-git-bash-hook', () =>
           installGitBashIntegration(

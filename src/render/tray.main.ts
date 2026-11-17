@@ -7,7 +7,6 @@ import './index.scss'
 import './style/theme/base-tokens.scss'
 import './style/theme/light-tokens.scss'
 import './style/tokens.css'
-import { createPinia } from 'pinia'
 import IPC from './util/IPC'
 import { AppStore } from './tray/store/app'
 import { ThemeInit } from '@/tray/Theme'
@@ -15,9 +14,7 @@ import { nativeTheme } from '@/util/NodeFn'
 import { RendererLanguage } from '@/core/LanguageService'
 import type { LanguageRuntimePayload } from '@shared/LanguageProtocol'
 
-const pinia = createPinia()
 const app = VueExtend(App)
-app.use(pinia)
 let mounted = false
 let storeReady = false
 let languageReady = false

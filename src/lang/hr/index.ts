@@ -12,7 +12,6 @@ import menuHR from './menu.json'
 import mysqlHR from './mysql.json'
 import nginxHR from './nginx.json'
 import nodejsHR from './nodejs.json'
-import ollamaHR from './ollama.json'
 import phpHR from './php.json'
 import promptHR from './prompt.json'
 import redisHR from './redis.json'
@@ -30,38 +29,20 @@ import requestTimer from './requestTimer.json'
 import meilisearch from './meilisearch.json'
 import minio from './minio.json'
 import podman from './podman.json'
-import openclaw from './openclaw.json'
 import n8n from './n8n.json'
 import rustfs from './rustfs.json'
 import mkcert from './mkcert.json'
-import hermes from './hermes.json'
 import cronHR from './cron.json'
 import flutter from './flutter.json'
-import kimi from './kimi.json'
-import claudeCode from './claude-code.json'
-import codex from './codex.json'
-import openCode from './opencode.json'
-import antigravity from './antigravity.json'
-import copilotCli from './copilot-cli.json'
 import common from './common.json'
-import mcp from './mcp.json'
 export default {
   hr: {
     common,
-    kimi,
-    claudeCode,
-    codex,
-    openCode,
-    antigravity,
-    copilotCli,
-    mcp,
     cron: cronHR,
     rustfs,
     mkcert,
     flutter,
-    hermes,
     n8n,
-    openclaw,
     podman,
     minio,
     meilisearch,
@@ -81,7 +62,6 @@ export default {
     mysql: mysqlHR,
     nginx: nginxHR,
     nodejs: nodejsHR,
-    ollama: ollamaHR,
     php: phpHR,
     prompt: promptHR,
     redis: redisHR,

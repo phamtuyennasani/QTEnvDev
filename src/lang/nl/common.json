@@ -82,7 +82,6 @@
     "basicInfo": "Algemene gegevens",
     "configuration": "Configuratie",
     "favorites": "Favorieten",
-    "plugins": "Plugins",
     "backupUpdate": "Back-up en update"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "Standaard",
     "none": "Geen",
     "local": "lokaal"
-  },
-  "plugin": {
-    "search": "Plugins zoeken",
-    "removed": "Plugin verwijderd"
   },
   "schedule": {
     "everyHour": "Elk uur",

@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
 import IPC from '@/util/IPC'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
 import { I18nT } from '@lang/index'
 import { AppStore } from '@/store/app'
 import { MessageError } from '@/util/Element'
 import { reactive } from 'vue'
 import localForage from 'localforage'
-import { shell } from '@/util/NodeFn'
 
 type GitHubUser = {
   uuid: string

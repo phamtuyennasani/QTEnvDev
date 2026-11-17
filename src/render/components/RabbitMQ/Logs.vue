@@ -27,7 +27,8 @@
   const filepath = ref('')
 
   const findFile = async () => {
-    const v = currentVersion?.value?.version?.split('.')?.[0] ?? ''
+    const version = currentVersion.value?.version ?? ''
+    const v = version.split('.')[0]
     if (!v) {
       filepath.value = ''
       return
@@ -43,15 +44,11 @@
       return
     }
     const logDir = join(window.Server.BaseDir!, 'rabbitmq', `log-${v}`)
-    const startOut = join(
-      window.Server.BaseDir!,
-      'rabbitmq',
-      `rabbitmq-${currentVersion.value.version}-start-out.log`
-    )
+    const startOut = join(window.Server.BaseDir!, 'rabbitmq', `rabbitmq-${version}-start-out.log`)
     const startError = join(
       window.Server.BaseDir!,
       'rabbitmq',
-      `rabbitmq-${currentVersion.value.version}-start-error.log`
+      `rabbitmq-${version}-start-error.log`
     )
     const content = await fs.readFile(confFile)
     const name =

@@ -58,11 +58,7 @@
     </template>
     <template v-for="(i, _j) in item.sub" :key="_j">
       <div class="flex items-center justify-center w-full">
-        <ModuleShowHide
-          :label="i.label"
-          :type-flag="i.typeFlag"
-          :plugin="i.plugin"
-        ></ModuleShowHide>
+        <ModuleShowHide :label="i.label" :type-flag="i.typeFlag"></ModuleShowHide>
       </div>
     </template>
   </div>

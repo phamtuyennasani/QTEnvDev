@@ -61,7 +61,7 @@ class CloudflareTunnelBase extends Base {
   }
 
   stop(item: CloudflareTunnel) {
-    return new ForkPromise(async (resolve, reject) => {
+    return new ForkPromise<{ 'APP-Service-Stop-PID': string[] }>(async (resolve, reject) => {
       try {
         const model = new CloudflareTunnel()
         Object.assign(model, item)

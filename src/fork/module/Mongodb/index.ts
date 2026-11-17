@@ -148,6 +148,7 @@ class Manager extends Base {
   /** 面板可以单独打开；它只关闭 DbGate，不能把 Node 版本传给 mongod 的停止策略。 */
   companionStopArgs(command: string, pid: string, args: any[]): any[] | undefined {
     if (command === 'openDbGate') return [{ ...args[0], pid }, { dbGateOnly: true }]
+    return undefined
   }
 
   _stopServer(

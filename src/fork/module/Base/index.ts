@@ -163,19 +163,21 @@ export class Base {
     return withServiceStopDiagnostics(
       { module: this.type, version: version?.version, bin: version?.bin, rootPid: version?.pid },
       () =>
-        new ForkPromise(async (resolve, reject, on) => {
-          await logServiceStop('module.stop-begin')
-          try {
-            const result = await this._stopServer(version, ...args).on(on)
-            await logServiceStop('module.stop-completed', {
-              stoppedPids: result?.['APP-Service-Stop-PID'] ?? []
-            })
-            resolve(result)
-          } catch (error) {
-            await logServiceStop('module.stop-failed', { error: String(error) })
-            reject(error)
+        new ForkPromise<{ 'APP-Service-Stop-PID'?: Array<string | number> }>(
+          async (resolve, reject, on) => {
+            await logServiceStop('module.stop-begin')
+            try {
+              const result = await this._stopServer(version, ...args).on(on)
+              await logServiceStop('module.stop-completed', {
+                stoppedPids: result?.['APP-Service-Stop-PID'] ?? []
+              })
+              resolve(result)
+            } catch (error) {
+              await logServiceStop('module.stop-failed', { error: String(error) })
+              reject(error)
+            }
           }
-        })
+        )
     )
   }
 
@@ -506,7 +508,7 @@ export class Base {
 
   /**
    * Process-name search key used by `_stopServer` to find orphaned service
-   * processes. Subclasses (including plugin-bundled modules) can override
+   * processes. Subclasses can override
    * this hook instead of duplicating the whole stop flow.
    */
   protected _stopSearchName(): string | undefined {
@@ -524,7 +526,6 @@ export class Base {
       tomcat: 'org.apache.catalina.startup.Bootstrap',
       rabbitmq: 'rabbit',
       elasticsearch: 'org.elasticsearch.server/org.elasticsearch.bootstrap.Elasticsearch',
-      ollama: 'ollama',
       cliproxyapi: 'cli-proxy-api',
       rnacos: 'rnacos',
       frankenphp: 'frankenphp',

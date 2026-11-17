@@ -26,7 +26,6 @@ import {
   writeFile,
   chmod,
   remove,
-  spawnPromise,
   readFile
 } from '../../Fn'
 import { serviceStartSpawn } from '../../util/ServiceStart'
@@ -36,13 +35,11 @@ import { isWindows, pathFixedToUnix } from '@shared/utils'
 import { ProcessListByExactPid, fetchLoopbackListeningPids } from '@shared/Process'
 import { StopProcessListFetch } from '@shared/StopProcessList'
 import { isReadableServiceStopRoot } from '@shared/ProcessSnapshot'
-import { EOL } from 'os'
 import { createConnection } from 'mysql2/promise'
 import type { Connection } from 'mysql2/promise'
 import { parse as iniParse } from 'ini'
 import { compareVersions } from '@shared/compare-versions'
 import { format } from 'date-fns'
-import EnvSync from '@shared/EnvSync'
 
 const execFileAsync = promisify(execFile)
 
@@ -113,8 +110,8 @@ class Mysql extends Base {
 
   startService(version: SoftInstalled, options?: { group?: MysqlGroupItem }) {
     if (!options?.group) return super.startService(version)
+    const group = { ...options.group, version: { ...options.group.version } }
     return new ForkPromise(async (resolve, reject, on) => {
-      const group = { ...options.group, version: { ...options.group.version } }
       const configPath = join(global.Server.MysqlDir!, `group/my-group-${group.id}.cnf`)
       try {
         const started: any = await this.startGroupServer(group).on(on)
@@ -637,7 +634,7 @@ datadir=${pathFixedToUnix(dataDir)}`
   }
 
   stopGroupService(version: MysqlGroupItem, registeredPid = '') {
-    return new ForkPromise(async (resolve, reject) => {
+    return new ForkPromise<{ 'APP-Service-Stop-PID': string[] }>(async (resolve, reject) => {
       const id = version?.id ?? ''
       const configPath = join(global.Server.MysqlDir!, `group/my-group-${id}.cnf`)
       const pidFile = join(global.Server.MysqlDir!, `group/my-group-${id}.pid`)
@@ -716,7 +713,7 @@ sql-mode=NO_ENGINE_SUBSTITUTION`
 
       const doStart = () => {
         const execEnv = ''
-        return new Promise(async (resolve, reject) => {
+        return new Promise<{ 'APP-Service-Start-PID': string }>(async (resolve, reject) => {
           if (isWindows()) {
             const execArgs = [
               `--defaults-file="${m}"`,
@@ -786,73 +783,6 @@ sql-mode=NO_ENGINE_SUBSTITUTION`
               return
             }
           }
-
-          if (existsSync(p)) {
-            try {
-              await remove(p)
-            } catch {}
-          }
-
-          const startLogFile = join(global.Server.MysqlDir!, `group/start.${id}.log`)
-          const startErrLogFile = join(global.Server.MysqlDir!, `start.error.${id}.log`)
-          if (existsSync(startErrLogFile)) {
-            try {
-              await remove(startErrLogFile)
-            } catch {}
-          }
-          const params = [
-            `--defaults-file="${m}"`,
-            `--datadir="${dataDir}"`,
-            `--port="${version.port}"`,
-            `--pid-file="${p}"`,
-            '--user=mysql',
-            '--slow-query-log=ON',
-            `--slow-query-log-file="${s}"`,
-            `--log-error="${e}"`,
-            `--socket="${sock}"`,
-            '--standalone'
-          ]
-
-          const commands: string[] = [
-            '@echo off',
-            'chcp 65001>nul',
-            `cd /d "${dirname(bin!)}"`,
-            `start /B ./${basename(bin!)} ${params.join(' ')} > "${startLogFile}" 2>"${startErrLogFile}"`
-          ]
-
-          command = commands.join(EOL)
-          console.log('command: ', command)
-
-          const cmdName = `start-${id}.cmd`
-          const sh = join(global.Server.MysqlDir!, cmdName)
-          await writeFile(sh, command)
-
-          process.chdir(global.Server.MysqlDir!)
-          try {
-            await EnvSync.sync()
-            await spawnPromise(cmdName, [], {
-              shell: EnvSync.CMDPath || 'cmd.exe',
-              cwd: global.Server.MysqlDir!
-            })
-          } catch (e: any) {
-            console.log('-k start err: ', e)
-            reject(e)
-            return
-          }
-          const res = await this.waitPidFile(p)
-          if (res) {
-            if (res?.pid) {
-              resolve(true)
-              return
-            }
-            reject(new Error(res?.error ?? 'Start Fail'))
-            return
-          }
-          let msg = 'Start Fail'
-          if (existsSync(startLogFile)) {
-            msg = await readFile(startLogFile, 'utf-8')
-          }
-          reject(new Error(msg))
         })
       }
 

@@ -21,9 +21,6 @@ import {
 } from '@shared/WindowsPathDiagnostics'
 import { timeOperationSync } from '@shared/OperationTiming'
 import ConfigManager from './ConfigManager'
-import type MCPConfigManager from './MCPConfigManager'
-import type { MCPRuntime } from './MCPRuntime'
-import type MCPBridgeManager from './MCPBridgeManager'
 import type WindowManager from '../ui/WindowManager'
 import type TrayManager from '../ui/TrayManager'
 import type { ForkManager } from './ForkManager'
@@ -40,14 +37,11 @@ import {
 import ServiceVersionManager from './ServiceVersionManager'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { existsSync, readFileSync } from 'node:fs'
 import { CheckBrewOrPort } from '../utils/CheckBrew'
 import type { LanguageCoordinator } from './LanguageCoordinator'
-import type PluginManager from '../plugins/PluginManager'
 import {
   capturerRuntime,
   httpServerRuntime,
-  mcpAuditRuntime,
   nodePtyRuntime,
   oauthRuntime,
   siteSuckerRuntime,
@@ -56,9 +50,6 @@ import {
 
 export interface IPCHandlerDependencies {
   configManager: ConfigManager
-  mcpConfigManager?: MCPConfigManager
-  mcpRuntime?: MCPRuntime
-  mcpBridgeManager?: MCPBridgeManager
   windowManager: WindowManager
   trayManager: TrayManager
   forkManager?: ForkManager
@@ -67,8 +58,6 @@ export interface IPCHandlerDependencies {
   mainWindow?: BrowserWindow
   trayWindow?: BrowserWindow
   appNodeFnManager: typeof AppNodeFnManager
-  pluginManager?: PluginManager
-  onPluginsChanged?: () => Promise<void> | void
   retryDataDirectory?: () => Promise<boolean>
   windowsPrivilege?: WindowsPrivilegeCoordinator
 }
@@ -76,7 +65,6 @@ export interface IPCHandlerDependencies {
 export default class IPCHandler extends EventEmitter {
   private deps: IPCHandlerDependencies
   private capturerConfig?: any
-  private pluginRecovery?: Promise<void>
 
   constructor(dependencies: IPCHandlerDependencies) {
     super()
@@ -516,48 +504,6 @@ export default class IPCHandler extends EventEmitter {
         this.deps.languageCoordinator.invalidate(args[0])
         this.sendToMainWindow(command, key, { code: 0, data: true })
         break
-      case 'application:plugins':
-        if (!this.deps.pluginManager) {
-          this.sendToMainWindow(command, key, { code: 0, data: [] })
-          break
-        }
-        this.deps.pluginManager
-          .getRendererPlugins()
-          .then((plugins) => this.sendToMainWindow(command, key, { code: 0, data: plugins }))
-          .catch((error) =>
-            this.sendToMainWindow(command, key, {
-              code: 1,
-              msg: error instanceof Error ? error.message : String(error)
-            })
-          )
-        break
-      case 'application:plugin-installed':
-        this.handlePluginInstalled(command, key)
-        break
-      case 'application:plugin-market-list':
-        this.handlePluginMarketList(command, key)
-        break
-      case 'application:plugin-sources':
-        this.handlePluginSources(command, key)
-        break
-      case 'application:plugin-source-add':
-        this.handlePluginSourceAdd(command, key, args[0])
-        break
-      case 'application:plugin-source-remove':
-        this.handlePluginSourceRemove(command, key, args[0])
-        break
-      case 'application:plugin-install':
-        this.handlePluginInstall(command, key, args[0])
-        break
-      case 'application:plugin-update':
-        this.handlePluginUpdate(command, key, args[0])
-        break
-      case 'application:plugin-toggle':
-        this.handlePluginToggle(command, key, args[0], args[1])
-        break
-      case 'application:plugin-uninstall':
-        this.handlePluginUninstall(command, key, args[0])
-        break
       case 'application:data-directory-retry':
         if (!this.deps.retryDataDirectory) {
           this.sendToMainWindow(command, key, { code: 0, data: false })
@@ -715,73 +661,6 @@ export default class IPCHandler extends EventEmitter {
         break
       case 'GitHub-OAuth-License-Add-Bind':
         this.handleOAuthLicenseAddBind(command, key, args)
-        break
-
-      // MCP Server
-      case 'mcp:listTools':
-        this.sendToMainWindow(command, key, {
-          code: 0,
-          data: this.deps.mcpRuntime?.listTools() ?? []
-        })
-        break
-      case 'plugin:diagnostics':
-        this.sendToMainWindow(command, key, {
-          code: 0,
-          data: this.deps.mcpRuntime?.plugins?.diagnostics(String(args[0] ?? '')) ?? []
-        })
-        break
-      case 'mcp:start':
-        this.handleMcpStart(command, key)
-        break
-      case 'mcp:stop':
-        this.handleMcpStop(command, key)
-        break
-      case 'mcp:status':
-        this.handleMcpStatus(command, key)
-        break
-      case 'mcp:getConfig':
-        this.handleMcpGetConfig(command, key)
-        break
-      case 'mcp:setConfig':
-        this.handleMcpSetConfig(command, key, args)
-        break
-      case 'mcp:setToolsEnabled': {
-        const names = args[0]
-        const enabled = args[1]
-        const config = this.deps.mcpConfigManager
-        const available = new Set(this.deps.mcpRuntime?.listTools().map((tool) => tool.name) ?? [])
-        if (
-          !config ||
-          !Array.isArray(names) ||
-          !names.length ||
-          typeof enabled !== 'boolean' ||
-          names.some((name) => typeof name !== 'string' || !available.has(name))
-        ) {
-          this.sendToMainWindow(command, key, { code: 1, msg: 'Invalid MCP tools' })
-          break
-        }
-        try {
-          const tools = new Set<string>(config.getConfig('enabledTools', []))
-          for (const name of names) {
-            if (enabled) tools.add(name)
-            else tools.delete(name)
-          }
-          const enabledTools = [...tools]
-          config.setConfig('enabledTools', enabledTools)
-          this.sendToMainWindow(command, key, { code: 0, data: { enabledTools } })
-        } catch {
-          this.sendToMainWindow(command, key, { code: 1, msg: 'Unable to update MCP tools' })
-        }
-        break
-      }
-      case 'mcp:getBridgePath':
-        this.handleMcpGetBridgePath(command, key)
-        break
-      case 'mcp:getAuditLog':
-        this.handleMcpGetAuditLog(command, key)
-        break
-      case 'mcp:getAuditLogFile':
-        this.handleMcpGetAuditLogFile(command, key)
         break
 
       default:
@@ -1233,232 +1112,11 @@ export default class IPCHandler extends EventEmitter {
     this.dispatchForkCommand(command, key, 'app', ['githubLicenseAdd', args[0], args[1]])
   }
 
-  // ===== MCP Server =====
-
-  private handleMcpStart(command: string, key: string) {
-    const runtime = this.deps.mcpRuntime
-    if (!runtime) {
-      this.sendToMainWindow(command, key, { code: 1, msg: 'MCP not initialized' })
-      return
-    }
-    runtime
-      .start()
-      .then((res) => {
-        this.sendToMainWindow(command, key, { code: 0, data: res })
-      })
-      .catch((e: any) => {
-        this.sendToMainWindow(command, key, { code: 1, msg: `${e?.message ?? e}` })
-      })
-  }
-
-  // ===== QTEnvDev plugins =====
-
-  private pluginManagerOrError(command: string, key: string) {
-    const manager = this.deps.pluginManager
-    if (!manager) {
-      this.sendToMainWindow(command, key, { code: 1, msg: 'Plugin manager not initialized' })
-      return undefined
-    }
-    return manager
-  }
-
-  private finishPluginChange(command: string, key: string, data: unknown) {
-    Promise.resolve(this.deps.onPluginsChanged?.())
-      .then(() => this.sendToMainWindow(command, key, { code: 0, data }))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private async queryPlugins<T>(manager: PluginManager, query: () => T | Promise<T>): Promise<T> {
-    if (!this.pluginRecovery && manager.hasLoadError) {
-      this.pluginRecovery = Promise.resolve()
-        .then(async () => {
-          if (this.deps.onPluginsChanged) await this.deps.onPluginsChanged()
-          else await manager.refresh()
-        })
-        .finally(() => {
-          this.pluginRecovery = undefined
-        })
-    }
-    if (this.pluginRecovery) await this.pluginRecovery
-    return query()
-  }
-
-  private handlePluginInstalled(command: string, key: string) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    this.queryPlugins(manager, () => manager.listInstalled())
-      .then((data) => this.sendToMainWindow(command, key, { code: 0, data }))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handlePluginMarketList(command: string, key: string) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    this.queryPlugins(manager, () => manager.listCatalog())
-      .then((data) => this.sendToMainWindow(command, key, { code: 0, data }))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handlePluginSources(command: string, key: string) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    this.queryPlugins(manager, () => manager.listSources())
-      .then((data) => this.sendToMainWindow(command, key, { code: 0, data }))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handlePluginSourceAdd(command: string, key: string, url: unknown) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    manager
-      .addSource(String(url ?? ''))
-      .then((data) => this.sendToMainWindow(command, key, { code: 0, data }))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handlePluginSourceRemove(command: string, key: string, url: unknown) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    manager
-      .removeSource(String(url ?? ''))
-      .then((data) => this.sendToMainWindow(command, key, { code: 0, data }))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handlePluginInstall(command: string, key: string, input: unknown) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    if (!input || typeof input !== 'object') {
-      this.sendToMainWindow(command, key, { code: 1, msg: 'Plugin install information is invalid' })
-      return
-    }
-    manager
-      .install(input as any)
-      .then((data) => this.finishPluginChange(command, key, data))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handlePluginToggle(command: string, key: string, id: unknown, enabled: unknown) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    manager
-      .setEnabled(String(id ?? ''), enabled === true)
-      .then((data) => this.finishPluginChange(command, key, data))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handlePluginUpdate(command: string, key: string, id: unknown) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    manager
-      .update(String(id ?? ''))
-      .then((data) => this.finishPluginChange(command, key, data))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handlePluginUninstall(command: string, key: string, id: unknown) {
-    const manager = this.pluginManagerOrError(command, key)
-    if (!manager) return
-    manager
-      .uninstall(String(id ?? ''))
-      .then((data) => this.finishPluginChange(command, key, data))
-      .catch((error) => this.sendToMainWindow(command, key, { code: 1, msg: String(error) }))
-  }
-
-  private handleMcpStop(command: string, key: string) {
-    const runtime = this.deps.mcpRuntime
-    if (!runtime) {
-      this.sendToMainWindow(command, key, { code: 1, msg: 'MCP not initialized' })
-      return
-    }
-    runtime
-      .stopLoaded()
-      .then((res) => {
-        this.sendToMainWindow(command, key, { code: 0, data: res })
-      })
-      .catch((e: any) => {
-        this.sendToMainWindow(command, key, { code: 1, msg: `${e?.message ?? e}` })
-      })
-  }
-
-  private handleMcpStatus(command: string, key: string) {
-    const runtime = this.deps.mcpRuntime
-    if (!runtime) {
-      this.sendToMainWindow(command, key, { code: 1, msg: 'MCP not initialized' })
-      return
-    }
-    this.sendToMainWindow(command, key, { code: 0, data: runtime.status() })
-  }
-
-  private handleMcpGetConfig(command: string, key: string) {
-    const mcpConfig = this.deps.mcpConfigManager
-    if (!mcpConfig) {
-      this.sendToMainWindow(command, key, { code: 1, msg: 'MCP not initialized' })
-      return
-    }
-    this.sendToMainWindow(command, key, { code: 0, data: mcpConfig.getConfig() })
-  }
-
-  private handleMcpSetConfig(command: string, key: string, args: any[]) {
-    const mcpConfig = this.deps.mcpConfigManager
-    if (!mcpConfig) {
-      this.sendToMainWindow(command, key, { code: 1, msg: 'MCP not initialized' })
-      return
-    }
-    const patch = args?.[0]
-    if (patch && typeof patch === 'object') {
-      mcpConfig.setConfig(patch)
-    }
-    this.sendToMainWindow(command, key, { code: 0, data: mcpConfig.getConfig() })
-  }
-
-  private handleMcpGetBridgePath(command: string, key: string) {
-    const bridgeManager = this.deps.mcpBridgeManager
-    if (!bridgeManager) {
-      this.sendToMainWindow(command, key, { code: 1, msg: 'MCP bridge not initialized' })
-      return
-    }
-    this.sendToMainWindow(command, key, {
-      code: 0,
-      data: bridgeManager.getBridgePath()
-    })
-  }
-
-  private handleMcpGetAuditLog(command: string, key: string) {
-    mcpAuditRuntime
-      .load()
-      .then((audit) => {
-        const file = audit.getLogFile()
-        let data = ''
-        try {
-          if (existsSync(file)) data = readFileSync(file, 'utf-8')
-        } catch (e) {
-          console.log('handleMcpGetAuditLog error: ', e)
-        }
-        this.sendToMainWindow(command, key, { code: 0, data })
-      })
-      .catch((error) => this.sendRuntimeError(command, key, error))
-  }
-
-  private handleMcpGetAuditLogFile(command: string, key: string) {
-    mcpAuditRuntime
-      .load()
-      .then((audit) => {
-        this.sendToMainWindow(command, key, { code: 0, data: audit.getLogFile() })
-      })
-      .catch((error) => this.sendRuntimeError(command, key, error))
-  }
-
-  // ===== 工具方法 =====
-
   private sendToMainWindow(command: string, key: string, data?: any) {
     if (!this.deps.mainWindow) return
     this.deps.windowManager.sendCommandTo(this.deps.mainWindow, command, key, data)
   }
 
-  /**
-   * 更新依赖中的窗口引用
-   */
   updateDependencies(deps: Partial<IPCHandlerDependencies>) {
     this.deps = { ...this.deps, ...deps }
   }

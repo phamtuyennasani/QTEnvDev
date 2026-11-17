@@ -5,13 +5,6 @@
     <div class="flex items-center">
       <div class="w-[130px] flex items-center gap-1">
         <div class="truncate">{{ title }}</div>
-        <el-tooltip
-          v-if="plugin"
-          :content="`Plugin: ${plugin.id} @ ${plugin.version}`"
-          placement="top"
-        >
-          <el-tag size="small" effect="plain" type="info">Plugin</el-tag>
-        </el-tooltip>
         <el-tooltip v-if="description" :content="description" placement="top">
           <InfoFilled class="w-[14px] h-[14px] shrink-0 cursor-help text-zinc-400" />
         </el-tooltip>
@@ -36,10 +29,6 @@
   const props = defineProps<{
     label: string | StringFn | undefined
     typeFlag: string
-    plugin?: {
-      id: string
-      version: string
-    }
   }>()
 
   const title = computed(() => {

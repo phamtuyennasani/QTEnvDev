@@ -3,14 +3,12 @@ import { machineId } from '../../Fn'
 import { ForkPromise } from '@shared/ForkPromise'
 import { arch } from 'os'
 import axios from 'axios'
-import { publicDecrypt } from 'crypto'
-import { appDebugLog, isLinux, isMacOS, isWindows } from '@shared/utils'
+import { isLinux, isMacOS, isWindows } from '@shared/utils'
 import YAML from 'yamljs'
 import { compareVersions } from '@shared/compare-versions'
 import type { SoftInstalled } from '@shared/app'
 import { isDEB } from '../../util/Linux'
 import { GitHubAccountService } from './GitHubAccount'
-import { getLicensePublicKey } from '@shared/license'
 
 class App extends Base {
   private readonly githubAccount = new GitHubAccountService()
@@ -41,10 +39,6 @@ class App extends Base {
     return new ForkPromise(async (resolve) => {
       resolve(await this.githubAccount.addBinding(global.Server.UserUUID ?? '', uuid, license))
     })
-  }
-
-  private getRSAKey() {
-    return getLicensePublicKey()
   }
 
   start(version: string) {

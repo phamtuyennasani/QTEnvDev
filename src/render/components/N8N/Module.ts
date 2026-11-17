@@ -2,7 +2,7 @@ import { defineAsyncComponent } from 'vue'
 import type { AppModuleItem } from '@/core/type'
 
 const module: AppModuleItem = {
-  moduleType: 'ai',
+  moduleType: 'other',
   typeFlag: 'n8n',
   label: 'n8n',
   icon: import('@/svg/n8n.svg?raw'),

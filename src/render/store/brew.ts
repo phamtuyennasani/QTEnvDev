@@ -64,27 +64,11 @@ export const BrewStore = defineStore('brew', {
     module(flag: AllAppModule): Module {
       const find = AppModules?.find((f) => f.typeFlag === flag)
       const existing = this?.modules?.[flag]
-      if (existing) {
-        // Plugin modules are hot-removed/re-added on disable/enable. A record
-        // created while the plugin was absent from AppModules has isPlugin=false
-        // and fetches through the wrong fork channel (app-fork:version), which
-        // never returns data for the plugin. Reconcile the flags in place so
-        // live component references stay valid.
-        const isPlugin = !!find?.plugin
-        if (existing.isPlugin !== isPlugin) {
-          existing.isPlugin = isPlugin
-          existing.isService = find?.isService ?? false
-          existing.isOnlyRunOne = find?.isOnlyRunOne !== false
-          existing.installed.splice(0)
-          existing.installedFetched = false
-        }
-        return existing as any
-      }
+      if (existing) return existing as any
       const module = reactive(new Module())
       module.typeFlag = flag
       module.isService = find?.isService ?? false
       module.isOnlyRunOne = find?.isOnlyRunOne !== false
-      module.isPlugin = !!find?.plugin
       module.fetchInstalled = module.fetchInstalled.bind(module)
       module.onItemStart = module.onItemStart.bind(module)
       module.fetchBrew = module.fetchBrew.bind(module)

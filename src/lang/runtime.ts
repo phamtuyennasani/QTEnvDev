@@ -4,7 +4,8 @@ import type { LangKey } from './types'
 import type { LanguageRuntimePayload } from '@shared/LanguageProtocol'
 
 const i18n = createI18n({
-  legacy: true,
+  legacy: false,
+  globalInjection: true,
   locale: FALLBACK_LOCALE,
   fallbackLocale: FALLBACK_LOCALE,
   messages: {}
@@ -27,8 +28,8 @@ export const applyLanguagePayload = (payload: LanguageRuntimePayload) => {
   const previousLocale = activeLocale
   i18n.global.setLocaleMessage(payload.fallbackLocale, payload.fallbackMessages)
   i18n.global.setLocaleMessage(payload.locale, payload.messages)
-  i18n.global.fallbackLocale = payload.fallbackLocale
-  i18n.global.locale = payload.locale
+  i18n.global.fallbackLocale.value = payload.fallbackLocale
+  i18n.global.locale.value = payload.locale
   activeLocale = payload.locale
   if (previousLocale !== payload.fallbackLocale && previousLocale !== payload.locale) {
     i18n.global.setLocaleMessage(previousLocale, {})

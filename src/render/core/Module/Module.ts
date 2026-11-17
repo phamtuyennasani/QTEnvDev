@@ -32,7 +32,6 @@ export class Module {
   typeFlag: AllAppModule = 'dns'
   isService: boolean = true
   isOnlyRunOne: boolean = true
-  isPlugin: boolean = false
 
   installedFetched: boolean = false
 
@@ -253,10 +252,7 @@ export class Module {
       console.trace('fetchInstalled run: ', this.typeFlag)
       this.fetchInstalleding = true
       const setup = JSON.parse(JSON.stringify(appStore.config.setup))
-      const requestedAsPlugin = this.isPlugin
-      const request = requestedAsPlugin
-        ? IPC.send(`app-fork:${this.typeFlag}`, 'allInstalledVersions', setup)
-        : IPC.send('app-fork:version', 'allInstalledVersions', [this.typeFlag], setup)
+      const request = IPC.send('app-fork:version', 'allInstalledVersions', [this.typeFlag], setup)
       let settled = false
       this._fetchInstalledTimer = setTimeout(() => {
         if (settled) return
@@ -271,31 +267,15 @@ export class Module {
       request.then(async (key: string, res: any) => {
         if (settled) return
         IPC.off(key)
-        if (requestedAsPlugin !== this.isPlugin) {
-          // The record was reconciled (plugin disabled/enabled) while the
-          // request was in flight; this response belongs to the old channel.
-          settled = true
-          this._settleFetchInstalled(resolve, false)
-          return
-        }
         let fetched = false
         try {
-          if (requestedAsPlugin) {
-            if (res?.code !== 0 || !Array.isArray(res?.data)) {
-              console.error('fetchInstalled plugin response error: ', this.typeFlag, res?.msg)
-              return
-            }
-            await this.applyInstalledVersions(res.data, this._installedRefreshOptions)
+          const versions: Record<string, Array<SoftInstalled>> = res?.data ?? {}
+          if (Object.prototype.hasOwnProperty.call(versions, this.typeFlag)) {
+            await this.applyInstalledVersions(
+              versions[this.typeFlag] ?? [],
+              this._installedRefreshOptions
+            )
             fetched = true
-          } else {
-            const versions: Record<string, Array<SoftInstalled>> = res?.data ?? {}
-            if (Object.prototype.hasOwnProperty.call(versions, this.typeFlag)) {
-              await this.applyInstalledVersions(
-                versions[this.typeFlag] ?? [],
-                this._installedRefreshOptions
-              )
-              fetched = true
-            }
           }
         } catch (error) {
           console.error('fetchInstalled response error: ', error)

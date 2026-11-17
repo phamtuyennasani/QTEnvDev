@@ -82,7 +82,6 @@
     "basicInfo": "基本情報",
     "configuration": "設定",
     "favorites": "お気に入り",
-    "plugins": "Plugins",
     "backupUpdate": "バックアップと更新"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "デフォルト",
     "none": "なし",
     "local": "ローカル"
-  },
-  "plugin": {
-    "search": "プラグインを検索",
-    "removed": "プラグインを削除しました"
   },
   "schedule": {
     "everyHour": "毎時",

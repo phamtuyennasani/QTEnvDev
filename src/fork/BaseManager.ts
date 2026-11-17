@@ -5,8 +5,7 @@ import {
 // dispatcher 只需发送 IPC 结果，不应为此提前加载 Fn 的安装、版本、解压等工具。
 import { ProcessSendError, ProcessSendLog, ProcessSendSuccess } from './ProcessSend'
 import { isWindows } from '@shared/utils'
-import PluginLoader from './PluginLoader'
-import { withServiceStopContext, type ServiceStopContext } from '@shared/ServiceStopContext'
+import type { ServiceStopContext } from '@shared/ServiceStopContext'
 import { logServiceStopBoundary, withServiceStopDiagnostics } from '@shared/ServiceStopDiagnostics'
 import { logWindowsPath } from '@shared/WindowsPathDiagnostics'
 
@@ -93,16 +92,11 @@ class BaseManager {
   TemporalCli: any
 
   modules: Set<string> = new Set()
-  private readonly pluginLoader = new PluginLoader()
 
   constructor() {}
 
-  // 通用 worker 初始化只清理插件缓存；模块必须在 exec 收到对应命令后按需加载。
-  // Cron 任务由系统调度，元数据查询由自身请求负责；这里提前导入会让每个服务
-  // worker 重复加载其依赖，并推迟随后服务命令的处理。
-  init() {
-    this.pluginLoader.clear()
-  }
+  // 模块必须在 exec 收到对应命令后按需加载，避免 worker 提前加载业务依赖。
+  init() {}
 
   async exec(commands: Array<any>, stopOptions?: ServiceStopContext) {
     const ipcCommandKey = commands.shift()
@@ -137,7 +131,7 @@ class BaseManager {
     const module: string = commands.shift()
     const fn: string = commands.shift()
     const resolveStarted = performanceDiagnosticNow()
-    // 所有内建/插件分支集中记录解析阶段，避免只给 PHP 加日志；缓存命中也记真实耗时。
+    // 所有模块分支集中记录解析阶段，避免只给 PHP 加日志；缓存命中也记真实耗时。
     // requestKey 使用原 IPC key，不额外生成批次 ID，也不展开可能含密码的 commands。
     const trace = (stage: string, data: Record<string, unknown> = {}) => {
       // 相同 dispatcher 解析/初始化只执行一次；PATH 范围复用它，不建立另一个分派体系。
@@ -157,10 +151,9 @@ class BaseManager {
 
     this.modules.add(module)
 
-    const doRun = (target: any, acceptsStopOptions = true) => {
+    const doRun = (target: any) => {
       trace('fork.module-resolve-completed', {
-        durationMs: performanceDiagnosticElapsed(resolveStarted),
-        plugin: !acceptsStopOptions
+        durationMs: performanceDiagnosticElapsed(resolveStarted)
       })
       const initStarted = performanceDiagnosticNow()
       trace('fork.module-init-begin')
@@ -174,15 +167,10 @@ class BaseManager {
       }
       // 内建 stopService 的可选第二参数统一在此插入，原有分组/目录/语言/身份参数
       // 顺延且内容不变。单独停止也插入 undefined，避免原第二业务参数被当成列表。
-      // 插件保留外部旧签名，仅在本次调用范围绑定随请求发送的表，不破坏自定义参数。
-      // 重新构建的插件与宿主通过 ServiceStopContext 的固定 Symbol 共用范围容器；
-      // 旧插件包继续执行原实现，不能保证复用新首表，但不会因此发生业务参数错位。
       const invoke = () =>
         target.exec(
           fn,
-          ...(fn === 'stopService' && acceptsStopOptions
-            ? [commands[0], stopOptions, ...commands.slice(1)]
-            : commands)
+          ...(fn === 'stopService' ? [commands[0], stopOptions, ...commands.slice(1)] : commands)
         )
       // 从 dispatcher 到公共停止日志沿用同一个 requestKey；仅抽取公开实例标识。
       // 公共 Base 将复用此诊断范围，进度/成功/失败仍由原 ForkPromise 回调结算。
@@ -202,9 +190,7 @@ class BaseManager {
             )
           : invoke()
       }
-      const operation = acceptsStopOptions
-        ? invokeWithTrace()
-        : withServiceStopContext(stopOptions, invokeWithTrace)
+      const operation = invokeWithTrace()
       operation
         ?.on(onData)
         ?.then(async (res: any) => {
@@ -453,18 +439,6 @@ class BaseManager {
         this.Elasticsearch = res.default
       }
       doRun(this.Elasticsearch)
-    } else if (module === 'ollama') {
-      if (!this.Ollama) {
-        const res = await import('./module/Ollama')
-        this.Ollama = res.default
-      }
-      doRun(this.Ollama)
-    } else if (module === 'ai') {
-      if (!this.Ai) {
-        const res = await import('./module/Ai')
-        this.Ai = res.default
-      }
-      doRun(this.Ai)
     } else if (module === 'minio') {
       if (!this.Minio) {
         const res = await import('./module/Minio')
@@ -611,18 +585,6 @@ class BaseManager {
         this.Cloudflared = res.default
       }
       doRun(this.Cloudflared)
-    } else if (module === 'openclaw') {
-      if (!this.OpenClaw) {
-        const res = await import('./module/OpenClaw')
-        this.OpenClaw = res.default
-      }
-      doRun(this.OpenClaw)
-    } else if (module === 'hermes') {
-      if (!this.Hermes) {
-        const res = await import('./module/Hermes')
-        this.Hermes = res.default
-      }
-      doRun(this.Hermes)
     } else if (module === 'n8n') {
       if (!this.N8N) {
         const res = await import('./module/N8N')
@@ -709,50 +671,9 @@ class BaseManager {
         this.DotNet = res.default
       }
       doRun(this.DotNet)
-    } else if (module === 'kimi') {
-      if (!this.Kimi) {
-        const res = await import('./module/Kimi')
-        this.Kimi = res.default
-      }
-      doRun(this.Kimi)
-    } else if (module === 'claudeCode') {
-      if (!this.ClaudeCode) {
-        const res = await import('./module/ClaudeCode')
-        this.ClaudeCode = res.default
-      }
-      doRun(this.ClaudeCode)
-    } else if (module === 'codex') {
-      if (!this.Codex) {
-        const res = await import('./module/Codex')
-        this.Codex = res.default
-      }
-      doRun(this.Codex)
-    } else if (module === 'openCode') {
-      if (!this.OpenCode) {
-        const res = await import('./module/OpenCode')
-        this.OpenCode = res.default
-      }
-      doRun(this.OpenCode)
-    } else if (module === 'antigravity') {
-      if (!this.Antigravity) {
-        const res = await import('./module/Antigravity')
-        this.Antigravity = res.default
-      }
-      doRun(this.Antigravity)
-    } else if (module === 'copilotCli') {
-      if (!this.CopilotCli) {
-        const res = await import('./module/CopilotCli')
-        this.CopilotCli = res.default
-      }
-      doRun(this.CopilotCli)
     } else {
-      const target = await this.pluginLoader.load(module)
-      if (target) {
-        doRun(target, false)
-      } else {
-        trace('fork.module-resolve-failed', { reason: 'module-not-found' })
-        ProcessSendError(ipcCommandKey, 'No Found Module')
-      }
+      trace('fork.module-resolve-failed', { reason: 'module-not-found' })
+      ProcessSendError(ipcCommandKey, 'No Found Module')
     }
   }
 

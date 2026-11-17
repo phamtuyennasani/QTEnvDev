@@ -2,7 +2,7 @@ import { defineAsyncComponent } from 'vue'
 import type { AppModuleItem } from '@/core/type'
 
 const module: AppModuleItem = {
-  moduleType: 'ai',
+  moduleType: 'other',
   typeFlag: 'cliproxyapi',
   label: 'CLIProxyAPI',
   icon: import('@/svg/cliproxyapi.svg?raw'),

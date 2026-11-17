@@ -1,5 +1,4 @@
 import { publicDecrypt } from 'crypto'
-import { machineId } from './machineId'
 
 export function getLicensePublicKey() {
   const a = '0+u/eiBrB/DAskp9HnoIgq1MDwwbQRv6rNxiBK/qYvvdXJHKBmAtbe0+SW8clzne'

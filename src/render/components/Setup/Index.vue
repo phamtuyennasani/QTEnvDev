@@ -13,7 +13,6 @@
     <div class="main-block">
       <Common v-if="store.tab === 'base'"></Common>
       <ModuleVM v-else-if="store.tab === 'module'" />
-      <Plugins v-else-if="store.tab === 'plugins'" />
       <UIConfig v-else-if="store.tab === 'editor'"></UIConfig>
     </div>
   </div>
@@ -26,7 +25,6 @@
   import { I18nT } from '@lang/index'
   import { SetupStore } from '@/components/Setup/store'
   import ModuleVM from './Module/index.vue'
-  import Plugins from './Plugins/index.vue'
   import AppPageHeader from '@/components/AppShell/AppPageHeader.vue'
 
   const store = SetupStore()
@@ -44,10 +42,6 @@
       {
         value: 'editor',
         label: 'UI'
-      },
-      {
-        value: 'plugins',
-        label: I18nT('setup.pluginsTitle')
       }
     ]
   })

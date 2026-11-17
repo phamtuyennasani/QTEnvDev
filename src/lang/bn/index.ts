@@ -12,7 +12,6 @@ import menuBN from './menu.json'
 import mysqlBN from './mysql.json'
 import nginxBN from './nginx.json'
 import nodejsBN from './nodejs.json'
-import ollamaBN from './ollama.json'
 import phpBN from './php.json'
 import promptBN from './prompt.json'
 import redisBN from './redis.json'
@@ -30,38 +29,20 @@ import requestTimerBN from './requestTimer.json'
 import meilisearchBN from './meilisearch.json'
 import minioBN from './minio.json'
 import podmanBN from './podman.json'
-import openclawBN from './openclaw.json'
 import n8n from './n8n.json'
 import rustfsBN from './rustfs.json'
 import mkcert from './mkcert.json'
-import hermes from './hermes.json'
 import flutter from './flutter.json'
 import cronBN from './cron.json'
-import kimi from './kimi.json'
-import claudeCode from './claude-code.json'
-import codex from './codex.json'
-import openCode from './opencode.json'
-import antigravity from './antigravity.json'
-import copilotCli from './copilot-cli.json'
 import common from './common.json'
-import mcp from './mcp.json'
 export default {
   bn: {
     common,
-    kimi,
-    claudeCode,
-    codex,
-    openCode,
-    antigravity,
-    copilotCli,
-    mcp,
     cron: cronBN,
     rustfs: rustfsBN,
     mkcert,
     flutter,
-    hermes,
     n8n,
-    openclaw: openclawBN,
     podman: podmanBN,
     minio: minioBN,
     meilisearch: meilisearchBN,
@@ -81,7 +62,6 @@ export default {
     mysql: mysqlBN,
     nginx: nginxBN,
     nodejs: nodejsBN,
-    ollama: ollamaBN,
     php: phpBN,
     prompt: promptBN,
     redis: redisBN,

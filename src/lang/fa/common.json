@@ -82,7 +82,6 @@
     "basicInfo": "اطلاعات پایه",
     "configuration": "پیکربندی",
     "favorites": "علاقه‌مندی‌ها",
-    "plugins": "افزونه‌ها",
     "backupUpdate": "پشتیبان‌گیری و بروزرسانی"
   },
   "skills": {
@@ -123,10 +122,6 @@
     "default": "پیش‌فرض",
     "none": "هیچ‌کدام",
     "local": "محلی (Local)"
-  },
-  "plugin": {
-    "search": "جستجوی افزونه‌ها",
-    "removed": "افزونه حذف شد"
   },
   "schedule": {
     "everyHour": "هر ساعت",
