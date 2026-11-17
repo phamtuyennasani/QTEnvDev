@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - main
       - master
 
 permissions:
@@ -11,7 +12,9 @@ permissions:
 
 jobs:
   build-windows:
-    if: github.ref == 'refs/heads/master'
+    # Manual runs may be started from any branch; push builds stay limited to
+    # the repository's release branches above.
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     name: Build Windows Packages (x64)
     runs-on: windows-2022
     # Two release-signing requests may each wait for manual approval.
