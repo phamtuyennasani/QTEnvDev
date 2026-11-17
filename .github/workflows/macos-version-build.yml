@@ -3,10 +3,13 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - main
       - master
 
 jobs:
   build-macos:
+    # Manual runs may be started from any branch; push builds stay limited to release branches.
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     name: Build (${{ matrix.arch }})
     # 使用 strategy matrix 实现分架构并行构建
     runs-on: ${{ matrix.os }}
