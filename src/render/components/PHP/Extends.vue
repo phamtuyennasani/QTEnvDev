@@ -2,6 +2,7 @@
   <el-drawer
     v-model="show"
     size="80%"
+    class="app-workbench-drawer"
     :destroy-on-close="true"
     :with-header="false"
     :close-on-click-modal="false"
@@ -9,19 +10,34 @@
   >
     <div class="php-extensions">
       <div class="nav pl-3 pr-5">
-        <div class="left" @click="show = false">
+        <button
+          type="button"
+          class="left app-drawer-close"
+          :aria-label="I18nT('base.cancel')"
+          @click="show = false"
+        >
           <yb-icon :svg="import('@/svg/delete.svg?raw')" class="top-back-icon" />
           <span class="ml-3">{{ I18nT('php.phpExtensions') }}</span>
-        </div>
+        </button>
         <el-button-group class="flex-shrink-0">
-          <el-tooltip content="php.ini" :show-after="600">
-            <el-button :icon="Memo" @click.stop="showIni"></el-button>
+          <el-tooltip content="php.ini" :show-after="600" :trigger-keys="[]">
+            <el-button :aria-label="'php.ini'" :icon="Memo" @click.stop="showIni"></el-button>
           </el-tooltip>
           <el-tooltip v-if="extensionDir" :content="I18nT('base.open')" :show-after="600">
-            <el-button :icon="Folder" :disabled="!extensionDir" @click.stop="openDir"></el-button>
+            <el-button
+              :aria-label="I18nT('base.open')"
+              :icon="Folder"
+              :disabled="!extensionDir"
+              @click.stop="openDir"
+            ></el-button>
           </el-tooltip>
           <el-tooltip v-else-if="extensionDirError" :content="extensionDirError">
-            <el-button disabled :icon="Folder" type="danger"></el-button>
+            <el-button
+              disabled
+              :aria-label="I18nT('base.open')"
+              :icon="Folder"
+              type="danger"
+            ></el-button>
           </el-tooltip>
         </el-button-group>
       </div>
@@ -76,7 +92,13 @@
                   </el-radio-group>
                 </template>
               </div>
-              <el-button class="button" :disabled="loading" link @click="reFetch">
+              <el-button
+                class="button"
+                :aria-label="I18nT('common.action.refresh')"
+                :disabled="loading"
+                link
+                @click="reFetch"
+              >
                 <yb-icon
                   :svg="import('@/svg/icon_refresh.svg?raw')"
                   class="refresh-icon"

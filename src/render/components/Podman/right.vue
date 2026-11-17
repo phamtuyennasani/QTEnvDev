@@ -12,21 +12,23 @@
           </template>
           <template v-else>
             <template v-if="machine.run">
-              <div class="service status running" :class="{ disabled: machine.running }">
-                <yb-icon
-                  class="w-[21px] h-[21px]"
-                  :svg="import('@/svg/stop2.svg?raw')"
-                  @click.stop="machine.stop()"
-                />
-              </div>
+              <el-button
+                :disabled="machine.running"
+                :aria-label="I18nT('common.action.stop')"
+                @click.stop="machine.stop()"
+              >
+                <yb-icon class="w-[21px] h-[21px]" :svg="import('@/svg/stop2.svg?raw')" />
+              </el-button>
             </template>
-            <div v-else class="service status" :class="{ disabled: machine.running }">
-              <yb-icon
-                class="w-[21px] h-[21px]"
-                :svg="import('@/svg/play.svg?raw')"
-                @click.stop="machine.start()"
-              />
-            </div>
+            <el-button
+              v-else
+              type="primary"
+              :disabled="machine.running"
+              :aria-label="I18nT('common.action.start')"
+              @click.stop="machine.start()"
+            >
+              <yb-icon class="w-[21px] h-[21px]" :svg="import('@/svg/play.svg?raw')" />
+            </el-button>
           </template>
           <el-radio-group v-model="machine.tab" size="small">
             <el-radio-button value="Dashboard" :label="I18nT('podman.Dashboard')"></el-radio-button>
@@ -35,7 +37,13 @@
             <el-radio-button value="Container" :label="I18nT('podman.Container')"></el-radio-button>
           </el-radio-group>
         </div>
-        <el-button class="button" :disabled="refreshDisabled" link @click="doRefresh">
+        <el-button
+          class="button"
+          :disabled="refreshDisabled"
+          :aria-label="I18nT('common.action.refresh')"
+          link
+          @click="doRefresh"
+        >
           <yb-icon
             :svg="import('@/svg/icon_refresh.svg?raw')"
             class="refresh-icon w-[24px] h-[24px]"

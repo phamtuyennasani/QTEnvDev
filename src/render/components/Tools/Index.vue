@@ -1,6 +1,6 @@
 <template>
   <div class="main-right-panel p-5 overflow-hidden h-screen app-workbench-page">
-    <el-card class="h-full app-tools-surface" body-class="h-full" style="--el-card-padding: 0px">
+    <section class="h-full app-tools-surface" :aria-label="I18nT('base.leftTools')">
       <div class="app-tools-layout flex h-full w-full relative overflow-hidden p-3">
         <div class="app-tools-aside h-full w-60 flex-shrink-0 px-3 relative" :style="asideStyle">
           <el-scrollbar>
@@ -17,7 +17,7 @@
             >
               <template #default="{ data }">
                 <template v-if="data.isTop">
-                  <span class="text-gray-400 select-none">{{
+                  <span class="text-muted select-none">{{
                     data.i18nKey ? I18nT(data.i18nKey) : I18nT(`toolType.${data.label}`)
                   }}</span>
                 </template>
@@ -117,34 +117,39 @@
                   <template v-for="(item, _index) in likeData" :key="_index">
                     <div
                       class="app-tool-tile overflow-hidden p-2 group relative flex flex-col items-center justify-center py-6 gap-2 cursor-pointer"
-                      role="button"
-                      tabindex="0"
-                      @keydown.enter.self.prevent="AppToolStore.id = item.id"
-                      @keydown.space.self.prevent="AppToolStore.id = item.id"
-                      @click.stop="AppToolStore.id = item.id"
                     >
-                      <yb-icon
-                        :svg="item?.icon ?? import('@/svg/custom_tool.svg?raw')"
-                        width="30"
-                        height="30"
-                      />
-                      <span class="truncate px-1 max-w-full">{{
-                        typeof item.label === 'function' ? item.label() : item.label
-                      }}</span>
-                      <StarFilled
-                        class="absolute left-2 top-2 w-6 h-6 text-emerald-500 hidden group-hover:inline-block"
+                      <button
+                        type="button"
+                        class="app-tool-open"
+                        :title="typeof item.label === 'function' ? item.label() : item.label"
+                        @click.stop="AppToolStore.id = item.id"
+                        ><yb-icon
+                          :svg="item?.icon ?? import('@/svg/custom_tool.svg?raw')"
+                          width="30"
+                          height="30"
+                        />
+                        <span class="truncate px-1 max-w-full">{{
+                          typeof item.label === 'function' ? item.label() : item.label
+                        }}</span></button
+                      >
+                      <button
+                        type="button"
+                        class="app-tool-favorite is-favorite"
+                        :aria-label="I18nT('common.category.favorites')"
+                        aria-pressed="true"
                         @click.stop="AppToolStore.doUnLike(item)"
-                      />
+                        ><StarFilled
+                      /></button>
                       <template v-if="item.isCustom">
-                        <div
-                          class="absolute right-2 top-2 w-5 h-5 rounded-full border items-center justify-center border-slate-700 hidden group-hover:flex hover:border-amber-500"
-                        >
+                        <div class="app-tool-custom-menu">
                           <el-dropdown placement="top-start" @command="doCustomAction">
-                            <div
-                              class="outline-0 w-5 h-5 flex items-center justify-center hover:text-amber-500"
-                            >
-                              <MoreFilled class="w-3 h-3 outline-0" />
-                            </div>
+                            <button
+                              type="button"
+                              class="app-tool-menu"
+                              :aria-label="I18nT('common.label.action')"
+                              @click.stop
+                              ><MoreFilled class="w-3 h-3 outline-0"
+                            /></button>
                             <template #dropdown>
                               <el-dropdown-menu>
                                 <el-dropdown-item :command="{ action: 'edit', item }"
@@ -173,42 +178,51 @@
                 <template v-for="(item, _index) in homeData" :key="_index">
                   <div
                     class="app-tool-tile overflow-hidden p-2 group flex flex-col items-center justify-center py-6 gap-2 cursor-pointer relative"
-                    role="button"
-                    tabindex="0"
-                    @keydown.enter.self.prevent="AppToolStore.id = item.id"
-                    @keydown.space.self.prevent="AppToolStore.id = item.id"
-                    @click.stop="AppToolStore.id = item.id"
                   >
-                    <yb-icon
-                      :svg="item?.icon ?? import('@/svg/custom_tool.svg?raw')"
-                      width="30"
-                      height="30"
-                    />
-                    <span class="truncate px-1 max-w-full">{{
-                      typeof item.label === 'function' ? item.label() : item.label
-                    }}</span>
-                    <template v-if="likeID.includes(item.id)">
-                      <StarFilled
-                        class="absolute left-2 top-2 w-6 h-6 text-emerald-500 hidden group-hover:inline-block"
-                        @click.stop="AppToolStore.doUnLike(item)"
+                    <button
+                      type="button"
+                      class="app-tool-open"
+                      :title="typeof item.label === 'function' ? item.label() : item.label"
+                      @click.stop="AppToolStore.id = item.id"
+                      ><yb-icon
+                        :svg="item?.icon ?? import('@/svg/custom_tool.svg?raw')"
+                        width="30"
+                        height="30"
                       />
+                      <span class="truncate px-1 max-w-full">{{
+                        typeof item.label === 'function' ? item.label() : item.label
+                      }}</span></button
+                    >
+                    <template v-if="likeID.includes(item.id)">
+                      <button
+                        type="button"
+                        class="app-tool-favorite is-favorite"
+                        :aria-label="I18nT('common.category.favorites')"
+                        aria-pressed="true"
+                        @click.stop="AppToolStore.doUnLike(item)"
+                        ><StarFilled
+                      /></button>
                     </template>
                     <template v-else>
-                      <Star
-                        class="absolute left-3 top-3 w-5 h-5 hover:text-emerald-500 hidden group-hover:inline-block"
+                      <button
+                        type="button"
+                        class="app-tool-favorite"
+                        :aria-label="I18nT('common.category.favorites')"
+                        aria-pressed="false"
                         @click.stop="AppToolStore.doLike(item)"
-                      />
+                        ><Star
+                      /></button>
                     </template>
                     <template v-if="item.isCustom">
-                      <div
-                        class="absolute right-2 top-2 w-5 h-5 rounded-full border items-center justify-center border-slate-700 hidden group-hover:flex hover:border-amber-500"
-                      >
+                      <div class="app-tool-custom-menu">
                         <el-dropdown placement="top-start" @command="doCustomAction">
-                          <div
-                            class="outline-0 w-5 h-5 flex items-center justify-center hover:text-amber-500"
-                          >
-                            <MoreFilled class="w-3 h-3 outline-0" />
-                          </div>
+                          <button
+                            type="button"
+                            class="app-tool-menu"
+                            :aria-label="I18nT('common.label.action')"
+                            @click.stop
+                            ><MoreFilled class="w-3 h-3 outline-0"
+                          /></button>
                           <template #dropdown>
                             <el-dropdown-menu>
                               <el-dropdown-item :command="{ action: 'edit', item }"
@@ -256,7 +270,7 @@
           </template>
         </div>
       </div>
-    </el-card>
+    </section>
   </div>
 </template>
 

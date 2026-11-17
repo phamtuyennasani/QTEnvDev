@@ -17,5 +17,7 @@
   "cacheAndQueue": "Bộ Nhớ Đệm & Hàng Đợi Tin Nhắn",
   "serviceGovernance": "Quản Trị Dịch Vụ",
   "other": "Khác",
-  "console": "Bảng điều khiển"
+  "console": "Bảng điều khiển",
+  "collapseNavigation": "Thu gọn điều hướng",
+  "expandNavigation": "Mở rộng điều hướng"
 }

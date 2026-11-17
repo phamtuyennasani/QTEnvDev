@@ -1,0 +1,1456 @@
+{
+  "platform": "macos-renderer-fixture",
+  "scope": "Production launchers and AsyncComponentShow; native effects stubbed",
+  "errorCoverage": "Root Vue/window errors plus Electron renderer console errors, including separately mounted overlays",
+  "cases": [
+    {
+      "name": "hosts-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Add\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdomai",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Add\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdomai",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-edit-menu",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Edit\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdoma",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Edit"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-edit-menu",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Edit\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdoma",
+        "errors": []
+      },
+      "restored": {
+        "exact": false,
+        "launcherConnected": true,
+        "launcherVisible": false,
+        "fallback": true,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Action: qtenvdev.test"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": []
+    },
+    {
+      "name": "podman-machine-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Virtual MachineAdd\nName\nCPU Cores\nMemory\nMB\nDisk Size\nGiB\nSet as Default\nRootful Mode\nRemote User\nOK",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "Add"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "podman-machine-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Virtual MachineAdd\nName\nCPU Cores\nMemory\nMB\nDisk Size\nGiB\nSet as Default\nRootful Mode\nRemote User\nOK",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "svg"
+        }
+      ]
+    },
+    {
+      "name": "podman-container-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "ContainerAdd\nCompose File Save Location\nName\nImage\nSelect\nCommand\nCommand Arguments\nPort Binding\nVol",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "podman-container-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "ContainerAdd\nCompose File Save Location\nName\nImage\nSelect\nCommand\nCommand Arguments\nPort Binding\nVol",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "svg"
+        }
+      ]
+    },
+    {
+      "name": "php-config-nested",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "php.ini - 8.4.0 - /visual-fixture/php\n1\n2\n3\n4\n5\n; Visual fixture only\n[PHP]\nmemory_limit = 256M\ndisp",
+        "errors": []
+      },
+      "openedScreenshot": "php-config-nested-dark-1200x800-opened.png",
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "php.ini"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "parentRemainedOpen": true,
+      "restoredScreenshot": "php-config-nested-dark-1200x800-restored.png",
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "php.ini"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "php-config-nested",
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "php.ini - 8.4.0 - /visual-fixture/php\n1\n2\n3\n4\n5\n; Visual fixture only\n[PHP]\nmemory_limit = 256M\ndisp",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "php.ini"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "parentRemainedOpen": true,
+      "inputEvents": []
+    },
+    {
+      "name": "hosts-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Add\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdomai",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Add\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdomai",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-edit-menu",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Edit\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdoma",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Edit"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-edit-menu",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Edit\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdoma",
+        "errors": []
+      },
+      "restored": {
+        "exact": false,
+        "launcherConnected": true,
+        "launcherVisible": false,
+        "fallback": true,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Action: qtenvdev.test"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": []
+    },
+    {
+      "name": "podman-machine-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Virtual MachineAdd\nName\nCPU Cores\nMemory\nMB\nDisk Size\nGiB\nSet as Default\nRootful Mode\nRemote User\nOK",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "Add"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "podman-machine-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Virtual MachineAdd\nName\nCPU Cores\nMemory\nMB\nDisk Size\nGiB\nSet as Default\nRootful Mode\nRemote User\nOK",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "svg"
+        }
+      ]
+    },
+    {
+      "name": "podman-container-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "ContainerAdd\nCompose File Save Location\nName\nImage\nSelect\nCommand\nCommand Arguments\nPort Binding\nVol",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "podman-container-add",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "ContainerAdd\nCompose File Save Location\nName\nImage\nSelect\nCommand\nCommand Arguments\nPort Binding\nVol",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "svg"
+        }
+      ]
+    },
+    {
+      "name": "php-config-nested",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "php.ini - 8.4.0 - /visual-fixture/php\n1\n2\n3\n4\n5\n; Visual fixture only\n[PHP]\nmemory_limit = 256M\ndisp",
+        "errors": []
+      },
+      "openedScreenshot": "php-config-nested-light-1200x800-opened.png",
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "php.ini"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "parentRemainedOpen": true,
+      "restoredScreenshot": "php-config-nested-light-1200x800-restored.png",
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "php.ini"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "php-config-nested",
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "php.ini - 8.4.0 - /visual-fixture/php\n1\n2\n3\n4\n5\n; Visual fixture only\n[PHP]\nmemory_limit = 256M\ndisp",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "php.ini"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "parentRemainedOpen": true,
+      "inputEvents": []
+    },
+    {
+      "name": "hosts-add",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Add\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdomai",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-add",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Add\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdomai",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-edit-menu",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Edit\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdoma",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Edit"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-edit-menu",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Edit\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdoma",
+        "errors": []
+      },
+      "restored": {
+        "exact": false,
+        "launcherConnected": true,
+        "launcherVisible": false,
+        "fallback": true,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Action: qtenvdev.test"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": []
+    },
+    {
+      "name": "podman-machine-add",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Virtual MachineAdd\nName\nCPU Cores\nMemory\nMB\nDisk Size\nGiB\nSet as Default\nRootful Mode\nRemote User\nOK",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "Add"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "podman-machine-add",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Virtual MachineAdd\nName\nCPU Cores\nMemory\nMB\nDisk Size\nGiB\nSet as Default\nRootful Mode\nRemote User\nOK",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "svg"
+        }
+      ]
+    },
+    {
+      "name": "podman-container-add",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "ContainerAdd\nCompose File Save Location\nName\nImage\nSelect\nCommand\nCommand Arguments\nPort Binding\nVol",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "podman-container-add",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "ContainerAdd\nCompose File Save Location\nName\nImage\nSelect\nCommand\nCommand Arguments\nPort Binding\nVol",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "svg"
+        }
+      ]
+    },
+    {
+      "name": "php-config-nested",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "php.ini - 8.4.0 - /visual-fixture/php\n1\n2\n3\n4\n5\n; Visual fixture only\n[PHP]\nmemory_limit = 256M\ndisp",
+        "errors": []
+      },
+      "openedScreenshot": "php-config-nested-dark-800x600-opened.png",
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "php.ini"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "parentRemainedOpen": true,
+      "restoredScreenshot": "php-config-nested-dark-800x600-restored.png",
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "php.ini"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "php-config-nested",
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "php.ini - 8.4.0 - /visual-fixture/php\n1\n2\n3\n4\n5\n; Visual fixture only\n[PHP]\nmemory_limit = 256M\ndisp",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "php.ini"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "parentRemainedOpen": true,
+      "inputEvents": []
+    },
+    {
+      "name": "hosts-add",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Add\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdomai",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-add",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Add\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdomai",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-edit-menu",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Edit\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdoma",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Edit"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "hosts-edit-menu",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Edit\nSave\nName\nDomain Aliases (Example: www.mydomain.tld)\nComment\nDocument Root Path\nResolve subdoma",
+        "errors": []
+      },
+      "restored": {
+        "exact": false,
+        "launcherConnected": true,
+        "launcherVisible": false,
+        "fallback": true,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Action: qtenvdev.test"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": []
+    },
+    {
+      "name": "podman-machine-add",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Virtual MachineAdd\nName\nCPU Cores\nMemory\nMB\nDisk Size\nGiB\nSet as Default\nRootful Mode\nRemote User\nOK",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "Add"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "podman-machine-add",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "Virtual MachineAdd\nName\nCPU Cores\nMemory\nMB\nDisk Size\nGiB\nSet as Default\nRootful Mode\nRemote User\nOK",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "svg"
+        }
+      ]
+    },
+    {
+      "name": "podman-container-add",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "ContainerAdd\nCompose File Save Location\nName\nImage\nSelect\nCommand\nCommand Arguments\nPort Binding\nVol",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "BUTTON"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "podman-container-add",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "ContainerAdd\nCompose File Save Location\nName\nImage\nSelect\nCommand\nCommand Arguments\nPort Binding\nVol",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "Add"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "inputEvents": [
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        },
+        {
+          "type": "click",
+          "defaultPrevented": false,
+          "target": "svg"
+        }
+      ]
+    },
+    {
+      "name": "php-config-nested",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "escape",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "php.ini - 8.4.0 - /visual-fixture/php\n1\n2\n3\n4\n5\n; Visual fixture only\n[PHP]\nmemory_limit = 256M\ndisp",
+        "errors": []
+      },
+      "openedScreenshot": "php-config-nested-light-800x600-opened.png",
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "php.ini"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "parentRemainedOpen": true,
+      "restoredScreenshot": "php-config-nested-light-800x600-restored.png",
+      "inputEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "code": "Enter",
+          "defaultPrevented": false,
+          "target": "php.ini"
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "code": "Escape",
+          "defaultPrevented": false,
+          "target": "SPAN"
+        }
+      ]
+    },
+    {
+      "name": "php-config-nested",
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "close": "button",
+      "pass": true,
+      "opened": {
+        "focusedInside": true,
+        "title": "php.ini - 8.4.0 - /visual-fixture/php\n1\n2\n3\n4\n5\n; Visual fixture only\n[PHP]\nmemory_limit = 256M\ndisp",
+        "errors": []
+      },
+      "restored": {
+        "exact": true,
+        "launcherConnected": true,
+        "launcherVisible": true,
+        "fallback": false,
+        "focusedVisible": true,
+        "focusedTag": "BUTTON",
+        "focusedName": "php.ini"
+      },
+      "errors": [],
+      "consoleErrors": [],
+      "parentRemainedOpen": true,
+      "inputEvents": []
+    }
+  ],
+  "errors": []
+}

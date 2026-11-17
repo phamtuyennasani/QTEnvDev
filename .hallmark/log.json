@@ -5,6 +5,11 @@
     "macrostructure": "Workbench",
     "theme": "QTEnvDev modern-minimal technical workbench",
     "enrichment": "none",
-    "brief": "Refactor 71 module routes plus /setup and /customer-module with a shared Hallmark visual system."
+    "brief": "Refactor 103 principal screens (63 routes, 38 tools, 2 auxiliary windows) with 222 page view slots and 99 overlay placements; six representative pilots before broad rollout.",
+    "status": "six pilot workspaces implemented for design review; technical acceptance incomplete; broad rollout pending",
+    "design_system": "design.md",
+    "pilot_review": "docs/ui-redesign-pilot-review.md",
+    "pilot_workspaces": ["StartupGroup", "PHP", "Hosts", "Podman", "Tools/JSON", "Settings"],
+    "pilot_inventory_ids": ["R53", "R39", "R23", "R42", "R58", "T18", "R62"]
   }
 ]

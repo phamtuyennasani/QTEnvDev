@@ -1,0 +1,60 @@
+{
+  "platform": "darwin",
+  "cases": [
+    {
+      "name": "destroy without instance preserves live models",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: destroy without instance preserves live models: {\"pass\":false}\n\nfalse !== true\n",
+      "errors": []
+    },
+    {
+      "name": "destroy one editor preserves its sibling",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: destroy one editor preserves its sibling: {\"pass\":false,\"firstDisposed\":true,\"siblingDisposed\":true,\"editable\":false}\n\nfalse !== true\n",
+      "errors": []
+    },
+    {
+      "name": "same DOM creates a fresh editor after disposal",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: same DOM creates a fresh editor after disposal: {\"pass\":false}\n\nfalse !== true\n",
+      "errors": []
+    },
+    {
+      "name": "borrowed model remains owned by its original editor",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: borrowed model remains owned by its original editor: {\"pass\":false,\"disposedAfterOwnerClose\":true}\n\nfalse !== true\n",
+      "errors": []
+    },
+    {
+      "name": "direct dispose clears DOM cache",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: direct dispose clears DOM cache: {\"pass\":false}\n\nfalse !== true\n",
+      "errors": []
+    },
+    {
+      "name": "pending word highlight cancels safely on immediate close",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: pending word highlight cancels safely on immediate close must not raise renderer errors\n+ actual - expected\n\n+ [\n+   'Canceled: Canceled\\n' +\n+     '    at Delayer.cancel (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/async.js?v=2e0f5a39:251:29)\\n' +\n+     '    at Delayer.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/async.js?v=2e0f5a39:260:14)\\n' +\n+     '    at dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:24:23)\\n' +\n+     '    at DisposableStore.clear (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:114:13)\\n' +\n+     '    at DisposableStore.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:98:14)\\n' +\n+     '    at WordHighlighter.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js?v=2e0f5a39:652:23)\\n' +\n+     '    at WordHighlighterContribution.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js?v=2e0f5a39:709:35)\\n' +\n+     '    at dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:24:23)\\n' +\n+     '    at DisposableMap.clearAndDisposeAll (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:278:13)\\n' +\n+     '    at DisposableMap.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:268:14)'\n+ ]\n- []\n",
+      "errors": [
+        "Canceled: Canceled\n    at Delayer.cancel (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/async.js?v=2e0f5a39:251:29)\n    at Delayer.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/async.js?v=2e0f5a39:260:14)\n    at dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:24:23)\n    at DisposableStore.clear (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:114:13)\n    at DisposableStore.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:98:14)\n    at WordHighlighter.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js?v=2e0f5a39:652:23)\n    at WordHighlighterContribution.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js?v=2e0f5a39:709:35)\n    at dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:24:23)\n    at DisposableMap.clearAndDisposeAll (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:278:13)\n    at DisposableMap.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:268:14)"
+      ]
+    },
+    {
+      "name": "Settings UI to Hosts repeated navigation",
+      "pass": true,
+      "transitions": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "errors": []
+    }
+  ],
+  "rendererErrors": [
+    "Canceled: Canceled\n    at Delayer.cancel (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/async.js?v=2e0f5a39:251:29)\n    at Delayer.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/async.js?v=2e0f5a39:260:14)\n    at dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:24:23)\n    at DisposableStore.clear (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:114:13)\n    at DisposableStore.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:98:14)\n    at WordHighlighter.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js?v=2e0f5a39:652:23)\n    at WordHighlighterContribution.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js?v=2e0f5a39:709:35)\n    at dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:24:23)\n    at DisposableMap.clearAndDisposeAll (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:278:13)\n    at DisposableMap.dispose (http://127.0.0.1:5201/@fs/Users/phamtuyen/Sites/localhost/QTEnvDev/node_modules/monaco-editor/esm/vs/base/common/lifecycle.js?v=2e0f5a39:268:14)"
+  ],
+  "errors": []
+}

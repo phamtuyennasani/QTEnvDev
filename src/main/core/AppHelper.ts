@@ -27,6 +27,12 @@ import { existsSync, readFile } from '@shared/fs-extra'
 import type { CallbackFn } from '@shared/app'
 import { statSync, realpathSync } from 'node:fs'
 
+// Only the internal macOS builder defines this flag; runtime environment variables
+// cannot downgrade the installation policy of a production build.
+declare const __QTENVDEV_MAC_INTERNAL_BUILD__: boolean
+const macOSInternalBuild =
+  typeof __QTENVDEV_MAC_INTERNAL_BUILD__ !== 'undefined' && __QTENVDEV_MAC_INTERNAL_BUILD__
+
 type AppHelperMessage = {
   state:
     'needInstall' | 'installing' | 'installed' | 'installFaild' | 'checkSuccess' | 'fallbackToUac'
@@ -176,12 +182,18 @@ trap '/bin/rm -rf "$stage"' EXIT HUP INT TERM
 # This newly created staging directory is private to the elevated operation.
 # Remove inherited ACLs before creating the files that will run as root.
 /bin/chmod -N "$stage"
-if [ "$mode" = production ]; then
+if [ "$mode" = production ] || [ "$mode" = internal ]; then
   resources="$source/Contents/Resources"
   for path in "$source" "$source/Contents" "$resources" "$resources/helper" "$resources/plist" "$resources/helper/qtenvdev-helper-init.sh" "$resources/helper/qtenvdev-helper" "$resources/plist/com.qtenvdev.helper.plist"; do
     [ ! -L "$path" ] || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:Symlink in installer resource path' >&2; exit 1; }
   done
-  /usr/bin/codesign --verify --deep --strict --all-architectures -R '=identifier "phpstudy.xpfme.com" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] and certificate leaf[field.1.2.840.113635.100.6.1.13] and certificate leaf[subject.OU] = "956BZQ2F2P"' "$source" || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:QTEnvDev application signature or resources are invalid. Use an officially signed build.' >&2; exit 1; }
+  if [ "$mode" = production ]; then
+    /usr/bin/codesign --verify --deep --strict --all-architectures -R '=identifier "phpstudy.xpfme.com" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] and certificate leaf[field.1.2.840.113635.100.6.1.13] and certificate leaf[subject.OU] = "956BZQ2F2P"' "$source" || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:QTEnvDev application signature or resources are invalid. Use an officially signed build.' >&2; exit 1; }
+  else
+    echo 'Explicit administrator installation from an internal QTEnvDev build.' >&2
+    /usr/bin/codesign --verify --deep --strict --all-architectures -R '=identifier "phpstudy.xpfme.com"' "$source" || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:Internal QTEnvDev application resources are invalid. Rebuild or reinstall the internal build.' >&2; exit 1; }
+    [ "$(/usr/libexec/PlistBuddy -c 'Print :QTEnvDevInternalBuild' "$source/Contents/Info.plist")" = true ] || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:Application is not an internal QTEnvDev build.' >&2; exit 1; }
+  fi
   [ "$(/usr/libexec/PlistBuddy -c 'Print :QTEnvDevHelperProtocolVersion' "$source/Contents/Info.plist")" = ${HelperVersion} ] || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_version_mismatch:Unsupported signed helper installation protocol' >&2; exit 1; }
   binary_source="$resources/helper/qtenvdev-helper"
   installer_source="$resources/helper/qtenvdev-helper-init.sh"
@@ -208,12 +220,14 @@ done
 /usr/bin/xattr -dr com.apple.quarantine "$binary" "$installer" "$plist"
 if [ "$mode" = production ]; then
   /usr/bin/codesign --verify --strict --all-architectures -R '=identifier "qtenvdev-helper" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] and certificate leaf[field.1.2.840.113635.100.6.1.13] and certificate leaf[subject.OU] = "956BZQ2F2P"' "$binary" || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:QTEnvDev helper signature is invalid. Use an officially signed build.' >&2; exit 1; }
+elif [ "$mode" = internal ]; then
+  /usr/bin/codesign --verify --strict --all-architectures -R '=identifier "qtenvdev-helper"' "$binary" || { echo 'QTENVDEV_HELPER_INSTALL_ERROR:helper_signature_invalid:Internal QTEnvDev helper signature is invalid. Rebuild or reinstall the internal build.' >&2; exit 1; }
 fi
 /bin/sh "$installer" "$binary" "$plist" "$role" "$data"
 `
 
 type MacOSHelperInstallOptions = {
-  mode: 'production' | 'development'
+  mode: 'production' | 'internal' | 'development'
   source: string
   binary: string
   installer: string
@@ -356,7 +370,7 @@ export class AppHelper {
         : 'qtenvdev-helper-darwin-amd64'
       return {
         command: buildMacOSHelperInstallCommand({
-          mode: production ? 'production' : 'development',
+          mode: production ? (macOSInternalBuild ? 'internal' : 'production') : 'development',
           source: production ? dirname(dirname(appRoot)) : '',
           binary: production
             ? ''

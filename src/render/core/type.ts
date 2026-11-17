@@ -54,7 +54,6 @@ export enum AppModuleEnum {
   tomcat = 'tomcat',
   'pure-ftpd' = 'pure-ftpd',
   java = 'java',
-  composer = 'composer',
   node = 'node',
   dns = 'dns',
   hosts = 'hosts',
@@ -64,7 +63,6 @@ export enum AppModuleEnum {
   golang = 'golang',
   rabbitmq = 'rabbitmq',
   python = 'python',
-  maven = 'maven',
   mailpit = 'mailpit',
   erlang = 'erlang',
   ruby = 'ruby',
@@ -99,8 +97,7 @@ export enum AppModuleEnum {
   git = 'git',
   dotnet = 'dotnet',
   temporal = 'temporal',
-  'temporal-cli' = 'temporal-cli',
-  mcp = 'mcp'
+  'temporal-cli' = 'temporal-cli'
 }
 
 /** Built-in module flags and identifiers for user-defined service modules. */

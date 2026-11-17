@@ -7,7 +7,7 @@
         : I18nT('podman.Machine') + I18nT('common.action.add')
     "
     width="600px"
-    class="el-dialog-content-flex-1 h-[75%] dark:bg-[#1d2033]"
+    class="el-dialog-content-flex-1 app-workbench-dialog h-[75%]"
     @closed="closedFn"
   >
     <el-scrollbar class="px-2">

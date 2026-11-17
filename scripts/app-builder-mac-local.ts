@@ -19,7 +19,10 @@ async function packMain() {
     sourceRoot: path.resolve(__dirname, '../src/lang'),
     outputRoot: path.resolve(__dirname, '../dist/electron/static/lang')
   })
-  await esbuild(esbuildConfig.dist)
+  await esbuild({
+    ...esbuildConfig.dist,
+    define: { ...esbuildConfig.dist.define, __QTENVDEV_MAC_INTERNAL_BUILD__: 'true' }
+  })
   await esbuild(esbuildConfig.distFork)
 }
 
@@ -36,14 +39,14 @@ async function main() {
     config: electronBuilderConfig
   })
   console.log(
-    '\nUnsigned macOS ARM64 build completed in',
+    '\nInternal macOS ARM64 build (ad-hoc signed) completed in',
     Math.floor((Date.now() - buildStart) / 1000),
     's.'
   )
 }
 
 main().catch((error) => {
-  console.error('\nUnsigned macOS ARM64 build failed')
+  console.error('\nInternal macOS ARM64 build failed')
   console.error(error)
   process.exitCode = 1
 })

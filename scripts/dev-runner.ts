@@ -128,9 +128,15 @@ function runElectronApp() {
       : []),
     'dist/electron/main.mjs'
   ]
+  // Some development shells (and Electron smoke harnesses) export this flag
+  // for Node-based scripts. It makes the Electron executable run as plain
+  // Node, where Chromium flags such as --user-data-dir are rejected.
+  const electronEnv = { ...process.env }
+  delete electronEnv.ELECTRON_RUN_AS_NODE
   electronProcess = spawn('electron', args, {
     stdio: 'pipe',
-    shell: isWindows()
+    shell: isWindows(),
+    env: electronEnv
   })
   electronProcess?.stderr?.on('data', (data) => {
     // console.log('electronProcess error', data.toString())

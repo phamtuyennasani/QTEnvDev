@@ -2,6 +2,7 @@
   <el-drawer
     v-model="show"
     size="75%"
+    class="app-workbench-drawer"
     :destroy-on-close="true"
     :with-header="false"
     :close-on-click-modal="false"
@@ -9,12 +10,17 @@
   >
     <div class="host-vhost">
       <div class="nav pl-3 pr-5">
-        <div class="left" @click="show = false">
+        <button
+          type="button"
+          class="left app-drawer-close"
+          :aria-label="I18nT('base.cancel')"
+          @click="show = false"
+        >
           <yb-icon :svg="import('@/svg/delete.svg?raw')" class="top-back-icon" />
           <span class="ml-3 title truncate"
             >php.ini - {{ version.version }} - {{ version.path }}</span
           >
-        </div>
+        </button>
       </div>
 
       <Conf

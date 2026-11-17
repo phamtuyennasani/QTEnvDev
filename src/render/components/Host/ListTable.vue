@@ -8,7 +8,7 @@
         default-expand-all
         :row-class-name="tableRowClassName"
       >
-        <el-table-column :label="I18nT('common.label.site')">
+        <el-table-column :label="I18nT('common.label.site')" min-width="300">
           <template #header>
             <div class="w-full name-cell">
               <span style="display: inline-flex; align-items: center; padding: 2px 0">{{
@@ -17,6 +17,7 @@
               <el-input
                 v-model.trim="search"
                 :placeholder="I18nT('common.action.search')"
+                :aria-label="I18nT('common.action.search')"
                 clearable
               ></el-input>
             </div>
@@ -36,7 +37,12 @@
             </template>
             <template v-else>
               <QrcodePopper :url="siteName(scope.row)">
-                <div class="link" @click.stop="openSite(scope.row)">
+                <button
+                  type="button"
+                  class="link app-inline-button"
+                  :title="siteName(scope.row)"
+                  @click.stop="openSite(scope.row)"
+                >
                   <yb-icon
                     :class="{ active: linkEnable }"
                     :svg="import('@/svg/link.svg?raw')"
@@ -46,7 +52,7 @@
                   <span>
                     {{ siteName(scope.row) }}
                   </span>
-                </div>
+                </button>
               </QrcodePopper>
             </template>
           </template>
@@ -88,7 +94,7 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column :label="I18nT('common.label.comment')">
+        <el-table-column :label="I18nT('common.label.comment')" min-width="220">
           <template #default="scope">
             <template v-if="!scope?.row?.deling && quickEdit?.id && scope.row.id === quickEdit?.id">
               <el-input v-model="quickEdit.mark" @change="docClick(undefined)"></el-input>
@@ -119,79 +125,112 @@
             <template v-if="scope?.row?.deling || scope.row.id !== quickEdit?.id">
               <template v-if="!scope?.row?.deling">
                 <el-popover
+                  trigger="click"
                   effect="dark"
                   popper-class="host-list-poper"
                   placement="left-start"
                   width="auto"
                   :show-arrow="false"
                 >
-                  <ul v-poper-fix class="host-list-menu">
-                    <li @click.stop="action(scope.row, scope.$index, 'open')">
-                      <yb-icon :svg="import('@/svg/folder.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('base.open') }}</span>
-                    </li>
-                    <li @click.stop="action(scope.row, scope.$index, 'edit')">
-                      <yb-icon :svg="import('@/svg/edit.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('common.action.edit') }}</span>
-                    </li>
-                    <li @click.stop="action(scope.row, scope.$index, 'park')">
-                      <yb-icon :svg="import('@/svg/shengcheng.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('host.park') }}</span>
-                    </li>
-                    <li @click.stop="action(scope.row, scope.$index, 'link')">
-                      <yb-icon :svg="import('@/svg/link.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('base.links') }}</span>
-                    </li>
+                  <ul v-poper-fix class="host-list-menu app-host-actions">
                     <li
-                      v-if="nginxEnable"
-                      @click.stop="showConfig({ flag: 'nginx', item: scope.row })"
+                      ><button type="button" @click.stop="action(scope.row, scope.$index, 'open')">
+                        <yb-icon :svg="import('@/svg/folder.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('base.open') }}</span>
+                      </button></li
                     >
-                      <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('base.configFile') }} - Nginx</span>
-                    </li>
                     <li
-                      v-if="caddyEnable"
-                      @click.stop="showConfig({ flag: 'caddy', item: scope.row })"
+                      ><button type="button" @click.stop="action(scope.row, scope.$index, 'edit')">
+                        <yb-icon :svg="import('@/svg/edit.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('common.action.edit') }}</span>
+                      </button></li
                     >
-                      <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('base.configFile') }} - Caddy</span>
-                    </li>
                     <li
-                      v-if="apacheEnable"
-                      @click.stop="showConfig({ flag: 'apache', item: scope.row })"
+                      ><button type="button" @click.stop="action(scope.row, scope.$index, 'park')">
+                        <yb-icon :svg="import('@/svg/shengcheng.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('host.park') }}</span>
+                      </button></li
                     >
-                      <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('base.configFile') }} - Apache</span>
-                    </li>
                     <li
-                      v-if="frankenphpEnable"
-                      @click.stop="showConfig({ flag: 'frankenphp', item: scope.row })"
+                      ><button type="button" @click.stop="action(scope.row, scope.$index, 'link')">
+                        <yb-icon :svg="import('@/svg/link.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('base.links') }}</span>
+                      </button></li
                     >
-                      <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('base.configFile') }} - FrankenPHP</span>
-                    </li>
-                    <li @click.stop="action(scope.row, scope.$index, 'log')">
-                      <yb-icon :svg="import('@/svg/log.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('base.log') }}</span>
-                    </li>
-                    <li @click.stop="showSort($event, scope.row.id)">
-                      <yb-icon :svg="import('@/svg/sort.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('host.sort') }}</span>
-                    </li>
-                    <li @click.stop="action(scope.row, scope.$index, 'cron')">
-                      <yb-icon :svg="import('@/svg/log.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('cron.title') }}</span>
-                    </li>
-                    <li @click.stop="action(scope.row, scope.$index, 'del')">
-                      <yb-icon :svg="import('@/svg/trash.svg?raw')" width="13" height="13" />
-                      <span class="ml-3">{{ I18nT('common.action.delete') }}</span>
-                    </li>
+                    <li
+                      ><button
+                        v-if="nginxEnable"
+                        type="button"
+                        @click.stop="showConfig({ flag: 'nginx', item: scope.row })"
+                      >
+                        <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('base.configFile') }} - Nginx</span>
+                      </button></li
+                    >
+                    <li
+                      ><button
+                        v-if="caddyEnable"
+                        type="button"
+                        @click.stop="showConfig({ flag: 'caddy', item: scope.row })"
+                      >
+                        <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('base.configFile') }} - Caddy</span>
+                      </button></li
+                    >
+                    <li
+                      ><button
+                        v-if="apacheEnable"
+                        type="button"
+                        @click.stop="showConfig({ flag: 'apache', item: scope.row })"
+                      >
+                        <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('base.configFile') }} - Apache</span>
+                      </button></li
+                    >
+                    <li
+                      ><button
+                        v-if="frankenphpEnable"
+                        type="button"
+                        @click.stop="showConfig({ flag: 'frankenphp', item: scope.row })"
+                      >
+                        <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('base.configFile') }} - FrankenPHP</span>
+                      </button></li
+                    >
+                    <li
+                      ><button type="button" @click.stop="action(scope.row, scope.$index, 'log')">
+                        <yb-icon :svg="import('@/svg/log.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('base.log') }}</span>
+                      </button></li
+                    >
+                    <li
+                      ><button type="button" @click.stop="showSort($event, scope.row.id)">
+                        <yb-icon :svg="import('@/svg/sort.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('host.sort') }}</span>
+                      </button></li
+                    >
+                    <li
+                      ><button type="button" @click.stop="action(scope.row, scope.$index, 'cron')">
+                        <yb-icon :svg="import('@/svg/log.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('cron.title') }}</span>
+                      </button></li
+                    >
+                    <li
+                      ><button type="button" @click.stop="action(scope.row, scope.$index, 'del')">
+                        <yb-icon :svg="import('@/svg/trash.svg?raw')" width="13" height="13" />
+                        <span class="ml-3">{{ I18nT('common.action.delete') }}</span>
+                      </button></li
+                    >
                   </ul>
 
                   <template #reference>
-                    <div class="right">
+                    <button
+                      type="button"
+                      class="right app-inline-button"
+                      :aria-label="I18nT('common.label.action') + ': ' + scope.row.name"
+                    >
                       <yb-icon :svg="import('@/svg/more1.svg?raw')" width="22" height="22" />
-                    </div>
+                    </button>
                   </template>
                 </el-popover>
               </template>

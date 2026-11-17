@@ -57,6 +57,7 @@ export const EditorConfigMake = async (
 }
 
 const Editors: WeakMap<HTMLElement, editor.IStandaloneCodeEditor> = new WeakMap()
+const DisposedEditors = new WeakSet<editor.IStandaloneCodeEditor>()
 
 export const EditorCreate = (input: HTMLElement, config: any) => {
   if (Editors.has(input)) {
@@ -68,13 +69,17 @@ export const EditorCreate = (input: HTMLElement, config: any) => {
   console.log('EditorCreate config: ', config)
   const instance = editor.create(input, config)
   Editors.set(input, instance)
+  instance.onDidDispose(() => {
+    DisposedEditors.add(instance)
+    if (Editors.get(input) === instance) {
+      Editors.delete(input)
+    }
+  })
   return instance
 }
 
 export const EditorDestroy = (instance?: editor.IStandaloneCodeEditor) => {
-  instance?.dispose()
-  instance?.getModel()?.dispose()
-  editor.getModels().forEach((model) => {
-    model.dispose()
-  })
+  if (!instance || DisposedEditors.has(instance)) return
+  // Monaco disposes its own value-backed model; caller-supplied models stay with their owner.
+  instance.dispose()
 }

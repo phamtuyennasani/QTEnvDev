@@ -1,5 +1,5 @@
 <template>
-  <el-card class="startup-group-card" shadow="hover">
+  <el-card class="startup-group-card" shadow="never">
     <template #header>
       <div class="flex items-center justify-between gap-3">
         <div class="flex min-w-0 items-center gap-2">
@@ -16,7 +16,7 @@
               ></span>
               <strong class="truncate text-base">{{ group.name }}</strong>
             </div>
-            <div v-if="group.description" class="mt-1 truncate text-xs text-zinc-500">
+            <div v-if="group.description" class="mt-1 truncate text-xs text-muted">
               {{ group.description }}
             </div>
           </div>
@@ -26,22 +26,19 @@
           :model-value="groupRunning"
           :disabled="groupDisabled"
           :before-change="groupBeforeChange"
+          :aria-label="group.name"
         />
       </div>
     </template>
 
-    <el-scrollbar v-if="group.items.length" height="248px">
-      <div class="flex flex-col gap-2 pr-2">
-        <div
-          v-for="item in group.items"
-          :key="item.id"
-          class="flex h-14 items-center justify-between gap-3 rounded border border-zinc-200 px-3 py-2 dark:border-zinc-700"
-        >
+    <el-scrollbar v-if="group.items.length" max-height="360px">
+      <div class="startup-group-members">
+        <div v-for="item in group.items" :key="item.id" class="startup-group-member">
           <div class="min-w-0 flex-1">
             <div class="truncate text-sm font-medium">
               {{ memberDisplayTitle(item) }}
             </div>
-            <div class="mt-1 truncate text-xs text-zinc-500">
+            <div class="startup-group-member__path truncate" :title="memberPath(item)">
               {{ memberPath(item) }}
             </div>
           </div>
@@ -50,11 +47,12 @@
             :model-value="memberRunning(item)"
             :disabled="StartupGroupManager.isMemberDisabled(group, item)"
             :before-change="() => memberBeforeChange(item)"
+            :aria-label="memberDisplayTitle(item)"
           />
         </div>
       </div>
     </el-scrollbar>
-    <div v-else class="flex h-[248px] items-center text-sm text-zinc-400">
+    <div v-else class="startup-group-member-empty">
       {{ I18nT('common.startupGroup.emptyMembers') }}
     </div>
 
@@ -64,27 +62,36 @@
           :content="I18nT('common.startupGroup.defaultTooltip')"
           placement="top"
           :show-after="600"
+          :trigger-keys="[]"
         >
           <el-checkbox :model-value="isDefault" :disabled="defaultDisabled" @change="defaultChange">
             {{ I18nT('common.startupGroup.default') }}
           </el-checkbox>
         </el-tooltip>
         <div class="flex items-center gap-2">
-          <el-tooltip :content="I18nT('common.action.edit')" placement="top">
+          <el-tooltip
+            :content="I18nT('common.action.edit')"
+            placement="top"
+            :show-after="600"
+            :trigger-keys="[]"
+          >
             <el-button
               :icon="Edit"
               :aria-label="I18nT('common.action.edit')"
               size="small"
-              circle
               @click="emit('edit', group)"
             />
           </el-tooltip>
-          <el-tooltip :content="I18nT('common.action.delete')" placement="top">
+          <el-tooltip
+            :content="I18nT('common.action.delete')"
+            placement="top"
+            :show-after="600"
+            :trigger-keys="[]"
+          >
             <el-button
               :icon="Delete"
               :aria-label="I18nT('common.action.delete')"
               size="small"
-              circle
               type="danger"
               plain
               @click="emit('delete', group)"
@@ -145,11 +152,28 @@
 </script>
 
 <style scoped lang="scss">
-  .startup-group-card {
-    height: 100%;
-
-    :deep(.el-card__body) {
-      min-height: 190px;
+  .startup-group-member {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    min-height: 64px;
+    padding: var(--space-xs) var(--space-md);
+    border-bottom: 1px solid var(--color-rule);
+    &:last-child {
+      border-bottom: 0;
     }
+  }
+  .startup-group-member__path {
+    margin-top: var(--space-3xs);
+    color: var(--color-ink-muted);
+    font: var(--text-xs) / 1.5 var(--app-code-font, var(--font-mono));
+  }
+  .startup-group-member-empty {
+    padding: var(--space-md);
+    color: var(--color-ink-muted);
+  }
+  .startup-group-card :deep(.el-card__body) {
+    padding: 0;
   }
 </style>

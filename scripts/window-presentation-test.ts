@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
 import { build } from 'esbuild'
 import { runInNewContext } from 'node:vm'
+import { createScaledPageOptions } from '../src/main/ui/PageOptions'
 
 const bundle = await build({
   entryPoints: ['src/main/ui/WindowManager.ts'],
@@ -423,14 +424,42 @@ await test('negative-origin vertically arranged displays are supported', async (
   await f.manager.showWindow('index')
   assert.deepEqual(plain(f.win.bounds), { x: -1140, y: -750, width: 1000, height: 700 })
 })
-await test('small displays fit bounds and minimum size; larger displays restore minimum', async () => {
+await test('screen scaling preserves the configured minimum width', async () => {
+  const page = {
+    attrs: { width: 1200, height: 800, minWidth: 800, minHeight: 600 },
+    bindCloseToHide: true,
+    url: 'fixture://index'
+  }
+  for (const width of [600, 800, 1024, 1280, 1920]) {
+    const scaled = createScaledPageOptions(page, { width, height: 768 })
+    assert.equal(scaled.attrs.minWidth, 800)
+    assert.equal(scaled.attrs.width, width < 1280 ? 1050 : 1200)
+    assert.equal(scaled.attrs.height, 700)
+    assert.equal(scaled.attrs.minHeight, 525)
+  }
+  assert.deepEqual(page.attrs, { width: 1200, height: 800, minWidth: 800, minHeight: 600 })
+  assert.equal(createScaledPageOptions(undefined, { width: 800, height: 600 }), undefined)
+})
+await test('small displays preserve minimum width while fitting height and keeping titlebar reachable', async () => {
   const f = fixture()
   f.env.displays[1].workArea = { x: 1920, y: 24, width: 600, height: 400 }
   await f.manager.showWindow('index')
-  assert.deepEqual(plain(f.win.bounds), { x: 1920, y: 24, width: 600, height: 400 })
-  assert.deepEqual(f.win.minimum, [600, 400])
+  assert.deepEqual(plain(f.win.bounds), { x: 1920, y: 24, width: 800, height: 400 })
+  assert.deepEqual(f.win.minimum, [800, 400])
+  await f.manager.showWindow('index')
+  assert.equal(f.win.bounds.x, 1920, 'repeated show must keep the left edge reachable')
+  assert.equal(f.win.bounds.width, 800)
+  assert.equal(f.win.minimum[0], 800)
   f.env.cursor = { x: 100, y: 100 }
   await f.manager.showWindow('index')
+  assert.deepEqual(f.win.minimum, [800, 600])
+})
+await test('undersized saved bounds expand to the minimum width on presentation', async () => {
+  const f = fixture()
+  f.env.cursor = { x: 500, y: 500 }
+  f.win.bounds = { x: 100, y: 100, width: 700, height: 650 }
+  await f.manager.showWindow('index')
+  assert.deepEqual(plain(f.win.bounds), { x: 100, y: 100, width: 800, height: 650 })
   assert.deepEqual(f.win.minimum, [800, 600])
 })
 await test('same-display offscreen bounds are clamped to the workArea', async () => {

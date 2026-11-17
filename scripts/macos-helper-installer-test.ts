@@ -22,38 +22,72 @@ const require = createRequire(import.meta.url)
 const version = Number(
   readFileSync('src/shared/AppHelperCheck.ts', 'utf8').match(/HelperVersion = (\d+)/)![1]
 )
-const bundle = await build({
-  entryPoints: ['src/main/core/AppHelper.ts'],
-  bundle: true,
-  platform: 'node',
-  format: 'cjs',
-  write: false,
-  plugins: [
-    {
-      name: 'isolate-installation',
-      setup(builder) {
-        builder.onResolve({ filter: /./ }, (args) =>
-          args.kind === 'entry-point' ? undefined : { path: args.path, external: true }
-        )
+async function loadAppHelper(internal?: boolean, production = true) {
+  const bundle = await build({
+    entryPoints: ['src/main/core/AppHelper.ts'],
+    bundle: true,
+    platform: 'node',
+    format: 'cjs',
+    write: false,
+    define: internal === undefined ? {} : { __QTENVDEV_MAC_INTERNAL_BUILD__: String(internal) },
+    plugins: [
+      {
+        name: 'isolate-installation',
+        setup(builder) {
+          builder.onResolve({ filter: /./ }, (args) =>
+            args.kind === 'entry-point' ? undefined : { path: args.path, external: true }
+          )
+        }
       }
-    }
-  ]
-})
-const module = { exports: {} as any }
-runInNewContext(bundle.outputFiles[0].text, {
-  module,
-  exports: module.exports,
-  require(name: string) {
-    if (name.startsWith('node:')) return require(name)
-    if (name === '@shared/AppHelperCheck') return { HelperVersion: version }
-    if (name === '@shared/utils') return { isMacOS: () => true, appDebugLog: async () => {} }
-    return {}
-  },
-  global: {},
-  setTimeout,
-  clearTimeout
-})
-const { macOSHelperBootstrap, buildMacOSHelperInstallCommand } = module.exports
+    ]
+  })
+  assert.ok(bundle.outputFiles)
+  const module = { exports: {} as any }
+  runInNewContext(bundle.outputFiles[0].text, {
+    module,
+    exports: module.exports,
+    require(name: string) {
+      if (name.startsWith('node:')) return require(name)
+      if (name === 'electron-is') return { production: () => production }
+      if (name === '@shared/AppHelperCheck') return { HelperVersion: version }
+      if (name === '@shared/utils') {
+        return {
+          isMacOS: () => true,
+          isWindows: () => false,
+          isLinux: () => false,
+          appDebugLog: async () => {}
+        }
+      }
+      return {}
+    },
+    global: {
+      Server: {
+        Static: '/Applications/QTEnvDev.app/Contents/Resources/app.asar/dist/electron/static',
+        AppDir: join(tmpdir(), 'app'),
+        isArmArch: true
+      }
+    },
+    // A production app must not accept an environment-based policy downgrade.
+    process: { env: { QTENVDEV_MAC_INTERNAL_BUILD: 'true' } },
+    setTimeout,
+    clearTimeout
+  })
+  return module.exports
+}
+const { macOSHelperBootstrap, buildMacOSHelperInstallCommand } = await loadAppHelper()
+for (const [internal, production, expectedMode] of [
+  [false, true, 'production'],
+  [true, true, 'internal'],
+  [undefined, true, 'production'],
+  [true, false, 'development']
+] as const) {
+  const { AppHelper } = await loadAppHelper(internal, production)
+  const { command } = await new AppHelper().command()
+  assert.ok(command.includes(`qtenvdev-helper-bootstrap '${expectedMode}'`), command)
+}
+console.log(
+  'PASS compiled build profile selects the helper policy; runtime env cannot downgrade it'
+)
 const quote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`
 const root = mkdtempSync(join(tmpdir(), 'qtenvdev-helper-installer-'))
 let passed = 0
@@ -106,10 +140,18 @@ done
   const codesign = join(root, 'codesign')
   executable(
     codesign,
-    `/usr/bin/printf '%s\\n' "$*" >> ${quote(verify)}\nexit "\${VERIFY_EXIT:-0}"`
+    `/usr/bin/printf '%s\\n' "$*" >> ${quote(verify)}
+case "$*" in *'/qtenvdev-helper') exit "\${VERIFY_HELPER_EXIT:-0}" ;; esac
+exit "\${VERIFY_EXIT:-0}"`
   )
   const plistBuddy = join(root, 'PlistBuddy')
-  executable(plistBuddy, `/usr/bin/printf '%s\\n' '${version}'`)
+  executable(
+    plistBuddy,
+    `case "$2" in
+  'Print :QTEnvDevInternalBuild') /usr/bin/printf '%s\\n' "\${INTERNAL_MARKER:-true}" ;;
+  *) /usr/bin/printf '%s\\n' "\${PROTOCOL_VERSION:-${version}}" ;;
+esac`
+  )
   const bootstrap = macOSHelperBootstrap
     .replaceAll('/private/var/root', stageParent)
     .replaceAll('/usr/bin/codesign', codesign)
@@ -128,6 +170,9 @@ done
   const command = buildMacOSHelperInstallCommand(options)
     .replace(quote(macOSHelperBootstrap), quote(bootstrap))
     .replace('/usr/bin/sudo ', '')
+  const internalCommand = buildMacOSHelperInstallCommand({ ...options, mode: 'internal' })
+    .replace(quote(macOSHelperBootstrap), quote(bootstrap))
+    .replace('/usr/bin/sudo ', '')
   test('only necessary files are copied; quarantine is cleared before execution; arguments survive', () => {
     const result = spawnSync('/bin/bash', ['-c', command], { encoding: 'utf8', timeout: 10_000 })
     assert.equal(result.status, 0, result.stderr)
@@ -136,7 +181,48 @@ done
     assert.ok(!lines.some((line) => line.includes('unrelated-resource')))
     assert.deepEqual(lines.slice(-2), ['501:20', dataRoot])
     assert.deepEqual(readdirSync(stageParent), [], 'Private staging must be cleaned')
+    assert.equal(
+      readFileSync(verify, 'utf8')
+        .split('\n')
+        .filter((line) => line.includes('956BZQ2F2P')).length,
+      2,
+      'Production must verify both the app and helper against the upstream Developer ID'
+    )
   })
+  test('internal installation verifies app and helper integrity without the upstream team', () => {
+    rmSync(verify, { force: true })
+    const result = spawnSync('/bin/bash', ['-c', internalCommand], {
+      encoding: 'utf8',
+      timeout: 10_000
+    })
+    assert.equal(result.status, 0, result.stderr)
+    const checks = readFileSync(verify, 'utf8').trim().split('\n')
+    assert.equal(checks.length, 2)
+    assert.ok(checks[0].includes('--deep --strict --all-architectures'))
+    assert.ok(checks[0].includes('identifier "phpstudy.xpfme.com"'))
+    assert.ok(checks[1].includes('identifier "qtenvdev-helper"'))
+    assert.ok(!checks.some((line) => line.includes('956BZQ2F2P')))
+    assert.deepEqual(readdirSync(stageParent), [])
+  })
+  for (const [name, environment, reason] of [
+    ['invalid app signature', 'VERIFY_EXIT=1', 'helper_signature_invalid'],
+    ['invalid staged helper signature', 'VERIFY_HELPER_EXIT=1', 'helper_signature_invalid'],
+    ['missing internal marker', 'INTERNAL_MARKER=false', 'helper_signature_invalid'],
+    ['wrong helper protocol', 'PROTOCOL_VERSION=0', 'helper_version_mismatch']
+  ]) {
+    test(`internal ${name} blocks installation and cleans staging`, () => {
+      rmSync(record, { force: true })
+      const result = spawnSync(
+        '/bin/bash',
+        ['-c', internalCommand.replace('/usr/bin/env -i ', `/usr/bin/env -i ${environment} `)],
+        { encoding: 'utf8', timeout: 10_000 }
+      )
+      assert.notEqual(result.status, 0)
+      assert.ok(result.stderr.includes(`QTENVDEV_HELPER_INSTALL_ERROR:${reason}:`))
+      assert.ok(!existsSync(record))
+      assert.deepEqual(readdirSync(stageParent), [])
+    })
+  }
   test('source signature failures never execute the installer', () => {
     rmSync(record, { force: true })
     const result = spawnSync(

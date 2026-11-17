@@ -1,8 +1,6 @@
 <template>
   <div class="soft-index-panel main-right-panel app-workbench-page">
-    <el-radio-group v-model="tab" class="mt-3">
-      <el-radio-button label="Podman" value="podman"></el-radio-button>
-    </el-radio-group>
+    <AppPageHeader title="Podman" />
     <div class="main-block relative">
       <template v-if="PodmanManager.loading">
         <div v-loading="true" class="w-full h-full overflow-hidden"></div>
@@ -20,6 +18,7 @@
 
               <el-button
                 class="button"
+                :aria-label="I18nT('common.action.refresh')"
                 :disabled="PodmanManager.installing"
                 link
                 @click="PodmanManager.reinit()"
@@ -73,6 +72,7 @@
 
 <script lang="ts" setup>
   import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+  import AppPageHeader from '@/components/AppShell/AppPageHeader.vue'
   import { PodmanManager } from './class/Podman'
   import { I18nT } from '@lang/index'
   import { AppStore } from '@/store/app'
@@ -81,8 +81,6 @@
   import XTerm from '@/util/XTerm'
   import LeftVM from './left.vue'
   import RightVM from './right.vue'
-
-  const tab = ref('podman')
 
   PodmanManager.init()
 

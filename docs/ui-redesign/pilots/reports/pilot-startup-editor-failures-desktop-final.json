@@ -1,0 +1,3345 @@
+{
+  "scope": "StartupGroup production Add/Edit, three-step draft, native keyboard and fixture-only save",
+  "limitations": "IPC stubbed; no service/helper/installer test; API focuses controls before activation",
+  "discardChecks": false,
+  "failureChecks": true,
+  "cases": [
+    {
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "locale": "en",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-en-dark-1200x800-basic.png",
+        "startup-editor-en-dark-1200x800-candidates.png",
+        "startup-editor-en-dark-1200x800-order.png"
+      ],
+      "candidateFailure": {
+        "pending": {
+          "nextDisabled": true,
+          "loadingVisible": true,
+          "emptyVisible": false
+        },
+        "error": {
+          "text": "Could not load services and projects. Your draft is kept. Retry to continue.Fixture candidate source unavailable <fixture-error>Retry",
+          "unsafeHTML": false,
+          "name": "Candidate failure draft",
+          "description": "Keep this description after retry",
+          "nextDisabled": true,
+          "retryEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-dark-1200x800-candidate-error.png",
+        "retryPreservedDraft": true,
+        "staleRejectionIgnored": true,
+        "liveUnchanged": true,
+        "persistedUnchanged": true
+      },
+      "basic": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Enter a startup group name."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "addFailure": {
+        "pending": {
+          "open": true,
+          "calls": 1,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Could not save the startup group. Your draft is kept; you can retry Save.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "PHP-FPM 1.0.0",
+            "Apache 2.0.0",
+            "PHP-FPM 2.0.0",
+            "Fixture application with a long service name for layout verification"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-dark-1200x800-add-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Fixture workbench group",
+          "description": "Fixture draft description retained after failure",
+          "continueOnFailure": true
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 2
+      },
+      "saved": {
+        "groups": [
+          {
+            "id": "zEK9WXJjkNJJhDGiCIJddEiGHD4Jfkxl",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "yVaTBy4vECer5m7LUS4ZIBULhW2NP8LG",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "0PGvsxQ97PGtdlFVXClSCLpYI6YgFyJx",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "ZUi0nBAEFSe1oSgCIxcUz1poslxHU54H",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "5VVqBk1Ut2ON8fOoixLmqEwMpHQQjWBv",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903763773,
+            "updatedAt": 1794903763773
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "zEK9WXJjkNJJhDGiCIJddEiGHD4Jfkxl",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "yVaTBy4vECer5m7LUS4ZIBULhW2NP8LG",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "0PGvsxQ97PGtdlFVXClSCLpYI6YgFyJx",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "ZUi0nBAEFSe1oSgCIxcUz1poslxHU54H",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "5VVqBk1Ut2ON8fOoixLmqEwMpHQQjWBv",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903763773,
+            "updatedAt": 1794903763773
+          }
+        ],
+        "defaultStartupGroupId": "zEK9WXJjkNJJhDGiCIJddEiGHD4Jfkxl"
+      },
+      "updateFailure": {
+        "pending": {
+          "open": true,
+          "calls": 4,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Could not save the startup group. Your draft is kept; you can retry Save.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "Apache 2.0.0",
+            "PHP-FPM 1.0.0",
+            "PHP-FPM 2.0.0"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-dark-1200x800-update-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Updated after storage failure",
+          "description": "Keep the edited description",
+          "continueOnFailure": false
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 5
+      },
+      "afterUpdate": {
+        "groups": [
+          {
+            "id": "zEK9WXJjkNJJhDGiCIJddEiGHD4Jfkxl",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "0PGvsxQ97PGtdlFVXClSCLpYI6YgFyJx",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "yVaTBy4vECer5m7LUS4ZIBULhW2NP8LG",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "ZUi0nBAEFSe1oSgCIxcUz1poslxHU54H",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903763773,
+            "updatedAt": 1794903767305
+          }
+        ],
+        "defaultStartupGroupId": "zEK9WXJjkNJJhDGiCIJddEiGHD4Jfkxl"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "zEK9WXJjkNJJhDGiCIJddEiGHD4Jfkxl",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "0PGvsxQ97PGtdlFVXClSCLpYI6YgFyJx",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "yVaTBy4vECer5m7LUS4ZIBULhW2NP8LG",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "ZUi0nBAEFSe1oSgCIxcUz1poslxHU54H",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903763773,
+            "updatedAt": 1794903767305
+          }
+        ],
+        "defaultStartupGroupId": "zEK9WXJjkNJJhDGiCIJddEiGHD4Jfkxl"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "locale": "vi",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-vi-dark-1200x800-basic.png",
+        "startup-editor-vi-dark-1200x800-candidates.png",
+        "startup-editor-vi-dark-1200x800-order.png"
+      ],
+      "candidateFailure": {
+        "pending": {
+          "nextDisabled": true,
+          "loadingVisible": true,
+          "emptyVisible": false
+        },
+        "error": {
+          "text": "Không tải được dịch vụ và dự án. Bản nháp vẫn được giữ. Hãy thử lại để tiếp tục.Fixture candidate source unavailable <fixture-error>Thử lại",
+          "unsafeHTML": false,
+          "name": "Candidate failure draft",
+          "description": "Keep this description after retry",
+          "nextDisabled": true,
+          "retryEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-dark-1200x800-candidate-error.png",
+        "retryPreservedDraft": true,
+        "staleRejectionIgnored": true,
+        "liveUnchanged": true,
+        "persistedUnchanged": true
+      },
+      "basic": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Nhập tên nhóm khởi động."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "addFailure": {
+        "pending": {
+          "open": true,
+          "calls": 1,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Không lưu được nhóm khởi động. Bản nháp vẫn được giữ; bạn có thể bấm Lưu để thử lại.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "PHP-FPM 1.0.0",
+            "Apache 2.0.0",
+            "PHP-FPM 2.0.0",
+            "Fixture application with a long service name for layout verification"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-dark-1200x800-add-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Fixture workbench group",
+          "description": "Fixture draft description retained after failure",
+          "continueOnFailure": true
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 2
+      },
+      "saved": {
+        "groups": [
+          {
+            "id": "0BrF1bo5tcFJpdrRFgBwxeQb5TTt2xIy",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "r0Gcx6qjfz4xf2d7V1WTj33rf9tVbY2B",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "POaTYzqHuavZ2dYCQreNl7rRRnRPTRpf",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "Yqg2KAcreZA3dk39Za4JiBKbWUOrBPu1",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "IsqvpzvLRU8ESYinSfgYLW3xMFopy11c",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903779839,
+            "updatedAt": 1794903779839
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "0BrF1bo5tcFJpdrRFgBwxeQb5TTt2xIy",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "r0Gcx6qjfz4xf2d7V1WTj33rf9tVbY2B",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "POaTYzqHuavZ2dYCQreNl7rRRnRPTRpf",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "Yqg2KAcreZA3dk39Za4JiBKbWUOrBPu1",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "IsqvpzvLRU8ESYinSfgYLW3xMFopy11c",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903779839,
+            "updatedAt": 1794903779839
+          }
+        ],
+        "defaultStartupGroupId": "0BrF1bo5tcFJpdrRFgBwxeQb5TTt2xIy"
+      },
+      "updateFailure": {
+        "pending": {
+          "open": true,
+          "calls": 4,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Không lưu được nhóm khởi động. Bản nháp vẫn được giữ; bạn có thể bấm Lưu để thử lại.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "Apache 2.0.0",
+            "PHP-FPM 1.0.0",
+            "PHP-FPM 2.0.0"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-dark-1200x800-update-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Updated after storage failure",
+          "description": "Keep the edited description",
+          "continueOnFailure": false
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 5
+      },
+      "afterUpdate": {
+        "groups": [
+          {
+            "id": "0BrF1bo5tcFJpdrRFgBwxeQb5TTt2xIy",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "POaTYzqHuavZ2dYCQreNl7rRRnRPTRpf",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "r0Gcx6qjfz4xf2d7V1WTj33rf9tVbY2B",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "Yqg2KAcreZA3dk39Za4JiBKbWUOrBPu1",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903779839,
+            "updatedAt": 1794903783329
+          }
+        ],
+        "defaultStartupGroupId": "0BrF1bo5tcFJpdrRFgBwxeQb5TTt2xIy"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "0BrF1bo5tcFJpdrRFgBwxeQb5TTt2xIy",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "POaTYzqHuavZ2dYCQreNl7rRRnRPTRpf",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "r0Gcx6qjfz4xf2d7V1WTj33rf9tVbY2B",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "Yqg2KAcreZA3dk39Za4JiBKbWUOrBPu1",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903779839,
+            "updatedAt": 1794903783329
+          }
+        ],
+        "defaultStartupGroupId": "0BrF1bo5tcFJpdrRFgBwxeQb5TTt2xIy"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "locale": "en",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-en-light-1200x800-basic.png",
+        "startup-editor-en-light-1200x800-candidates.png",
+        "startup-editor-en-light-1200x800-order.png"
+      ],
+      "candidateFailure": {
+        "pending": {
+          "nextDisabled": true,
+          "loadingVisible": true,
+          "emptyVisible": false
+        },
+        "error": {
+          "text": "Could not load services and projects. Your draft is kept. Retry to continue.Fixture candidate source unavailable <fixture-error>Retry",
+          "unsafeHTML": false,
+          "name": "Candidate failure draft",
+          "description": "Keep this description after retry",
+          "nextDisabled": true,
+          "retryEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-light-1200x800-candidate-error.png",
+        "retryPreservedDraft": true,
+        "staleRejectionIgnored": true,
+        "liveUnchanged": true,
+        "persistedUnchanged": true
+      },
+      "basic": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Enter a startup group name."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "addFailure": {
+        "pending": {
+          "open": true,
+          "calls": 1,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Could not save the startup group. Your draft is kept; you can retry Save.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "PHP-FPM 1.0.0",
+            "Apache 2.0.0",
+            "PHP-FPM 2.0.0",
+            "Fixture application with a long service name for layout verification"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-light-1200x800-add-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Fixture workbench group",
+          "description": "Fixture draft description retained after failure",
+          "continueOnFailure": true
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 2
+      },
+      "saved": {
+        "groups": [
+          {
+            "id": "FvZRMVmvd4mZS2E2pCC6vN82nMGteFH2",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "GYJiZvfgBPkTWF0CIqTo6SfiHfsSMZlO",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "k3nXJvryReOn0K6q1A5Wt2MeQDSxQdO8",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "gvCzqhnGi1gJS89qCQLzFRRy4uoOuc0k",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "2WjkTfhre90FoQbpe28mFIfPG2D7RE39",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903795375,
+            "updatedAt": 1794903795375
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "FvZRMVmvd4mZS2E2pCC6vN82nMGteFH2",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "GYJiZvfgBPkTWF0CIqTo6SfiHfsSMZlO",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "k3nXJvryReOn0K6q1A5Wt2MeQDSxQdO8",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "gvCzqhnGi1gJS89qCQLzFRRy4uoOuc0k",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "2WjkTfhre90FoQbpe28mFIfPG2D7RE39",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903795375,
+            "updatedAt": 1794903795375
+          }
+        ],
+        "defaultStartupGroupId": "FvZRMVmvd4mZS2E2pCC6vN82nMGteFH2"
+      },
+      "updateFailure": {
+        "pending": {
+          "open": true,
+          "calls": 4,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Could not save the startup group. Your draft is kept; you can retry Save.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "Apache 2.0.0",
+            "PHP-FPM 1.0.0",
+            "PHP-FPM 2.0.0"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-light-1200x800-update-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Updated after storage failure",
+          "description": "Keep the edited description",
+          "continueOnFailure": false
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 5
+      },
+      "afterUpdate": {
+        "groups": [
+          {
+            "id": "FvZRMVmvd4mZS2E2pCC6vN82nMGteFH2",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "k3nXJvryReOn0K6q1A5Wt2MeQDSxQdO8",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "GYJiZvfgBPkTWF0CIqTo6SfiHfsSMZlO",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "gvCzqhnGi1gJS89qCQLzFRRy4uoOuc0k",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903795375,
+            "updatedAt": 1794903798937
+          }
+        ],
+        "defaultStartupGroupId": "FvZRMVmvd4mZS2E2pCC6vN82nMGteFH2"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "FvZRMVmvd4mZS2E2pCC6vN82nMGteFH2",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "k3nXJvryReOn0K6q1A5Wt2MeQDSxQdO8",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "GYJiZvfgBPkTWF0CIqTo6SfiHfsSMZlO",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "gvCzqhnGi1gJS89qCQLzFRRy4uoOuc0k",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903795375,
+            "updatedAt": 1794903798937
+          }
+        ],
+        "defaultStartupGroupId": "FvZRMVmvd4mZS2E2pCC6vN82nMGteFH2"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "locale": "vi",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-vi-light-1200x800-basic.png",
+        "startup-editor-vi-light-1200x800-candidates.png",
+        "startup-editor-vi-light-1200x800-order.png"
+      ],
+      "candidateFailure": {
+        "pending": {
+          "nextDisabled": true,
+          "loadingVisible": true,
+          "emptyVisible": false
+        },
+        "error": {
+          "text": "Không tải được dịch vụ và dự án. Bản nháp vẫn được giữ. Hãy thử lại để tiếp tục.Fixture candidate source unavailable <fixture-error>Thử lại",
+          "unsafeHTML": false,
+          "name": "Candidate failure draft",
+          "description": "Keep this description after retry",
+          "nextDisabled": true,
+          "retryEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-light-1200x800-candidate-error.png",
+        "retryPreservedDraft": true,
+        "staleRejectionIgnored": true,
+        "liveUnchanged": true,
+        "persistedUnchanged": true
+      },
+      "basic": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Nhập tên nhóm khởi động."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "addFailure": {
+        "pending": {
+          "open": true,
+          "calls": 1,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Không lưu được nhóm khởi động. Bản nháp vẫn được giữ; bạn có thể bấm Lưu để thử lại.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "PHP-FPM 1.0.0",
+            "Apache 2.0.0",
+            "PHP-FPM 2.0.0",
+            "Fixture application with a long service name for layout verification"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-light-1200x800-add-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Fixture workbench group",
+          "description": "Fixture draft description retained after failure",
+          "continueOnFailure": true
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 2
+      },
+      "saved": {
+        "groups": [
+          {
+            "id": "qKvQAJyCdk3nm3m4HdLWmHzXJ97BeVj6",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "DheoJkcBsK350koAf9j87hLlQ0Ybej2Y",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "N6zAbsomTwMl3u5xTYKuTrEKNMiYsrzd",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "GcYQ52Dr8DUOzX6okkbvvxWNZxPUquuY",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "XAHnFrVFlLnbWHfQz3aiLfsUuFkvNZZ9",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903812041,
+            "updatedAt": 1794903812041
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "qKvQAJyCdk3nm3m4HdLWmHzXJ97BeVj6",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "DheoJkcBsK350koAf9j87hLlQ0Ybej2Y",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "N6zAbsomTwMl3u5xTYKuTrEKNMiYsrzd",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "GcYQ52Dr8DUOzX6okkbvvxWNZxPUquuY",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "XAHnFrVFlLnbWHfQz3aiLfsUuFkvNZZ9",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903812041,
+            "updatedAt": 1794903812041
+          }
+        ],
+        "defaultStartupGroupId": "qKvQAJyCdk3nm3m4HdLWmHzXJ97BeVj6"
+      },
+      "updateFailure": {
+        "pending": {
+          "open": true,
+          "calls": 4,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Không lưu được nhóm khởi động. Bản nháp vẫn được giữ; bạn có thể bấm Lưu để thử lại.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "Apache 2.0.0",
+            "PHP-FPM 1.0.0",
+            "PHP-FPM 2.0.0"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 220,
+            "y": 60,
+            "width": 760,
+            "height": 680,
+            "right": 980,
+            "bottom": 740
+          },
+          "footer": {
+            "x": 236,
+            "y": 664,
+            "width": 728,
+            "height": 60,
+            "right": 964,
+            "bottom": 724
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-light-1200x800-update-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Updated after storage failure",
+          "description": "Keep the edited description",
+          "continueOnFailure": false
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 5
+      },
+      "afterUpdate": {
+        "groups": [
+          {
+            "id": "qKvQAJyCdk3nm3m4HdLWmHzXJ97BeVj6",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "N6zAbsomTwMl3u5xTYKuTrEKNMiYsrzd",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "DheoJkcBsK350koAf9j87hLlQ0Ybej2Y",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "GcYQ52Dr8DUOzX6okkbvvxWNZxPUquuY",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903812041,
+            "updatedAt": 1794903815634
+          }
+        ],
+        "defaultStartupGroupId": "qKvQAJyCdk3nm3m4HdLWmHzXJ97BeVj6"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "qKvQAJyCdk3nm3m4HdLWmHzXJ97BeVj6",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "N6zAbsomTwMl3u5xTYKuTrEKNMiYsrzd",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "DheoJkcBsK350koAf9j87hLlQ0Ybej2Y",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "GcYQ52Dr8DUOzX6okkbvvxWNZxPUquuY",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903812041,
+            "updatedAt": 1794903815634
+          }
+        ],
+        "defaultStartupGroupId": "qKvQAJyCdk3nm3m4HdLWmHzXJ97BeVj6"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "locale": "en",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-en-dark-800x600-basic.png",
+        "startup-editor-en-dark-800x600-candidates.png",
+        "startup-editor-en-dark-800x600-order.png"
+      ],
+      "candidateFailure": {
+        "pending": {
+          "nextDisabled": true,
+          "loadingVisible": true,
+          "emptyVisible": false
+        },
+        "error": {
+          "text": "Could not load services and projects. Your draft is kept. Retry to continue.Fixture candidate source unavailable <fixture-error>Retry",
+          "unsafeHTML": false,
+          "name": "Candidate failure draft",
+          "description": "Keep this description after retry",
+          "nextDisabled": true,
+          "retryEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-dark-800x600-candidate-error.png",
+        "retryPreservedDraft": true,
+        "staleRejectionIgnored": true,
+        "liveUnchanged": true,
+        "persistedUnchanged": true
+      },
+      "basic": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Enter a startup group name."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "addFailure": {
+        "pending": {
+          "open": true,
+          "calls": 1,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Could not save the startup group. Your draft is kept; you can retry Save.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "PHP-FPM 1.0.0",
+            "Apache 2.0.0",
+            "PHP-FPM 2.0.0",
+            "Fixture application with a long service name for layout verification"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-dark-800x600-add-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Fixture workbench group",
+          "description": "Fixture draft description retained after failure",
+          "continueOnFailure": true
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 2
+      },
+      "saved": {
+        "groups": [
+          {
+            "id": "tGwzjQ0gBKbK11mfLyWmBhdJlKMmoEXi",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "xvmHyaC2MFg7OfSCjDvbYqahIc3Zq1vi",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "6BRJVdSTLzjsFghA3ahatxfnycAYeaTX",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "T7GTkI8dULI1aI7z3CxFrYZJfwsFYztr",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "W2N6fjpS613QMlKcFBOz6AJNbHw7vpK0",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903828408,
+            "updatedAt": 1794903828408
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "tGwzjQ0gBKbK11mfLyWmBhdJlKMmoEXi",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "xvmHyaC2MFg7OfSCjDvbYqahIc3Zq1vi",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "6BRJVdSTLzjsFghA3ahatxfnycAYeaTX",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "T7GTkI8dULI1aI7z3CxFrYZJfwsFYztr",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "W2N6fjpS613QMlKcFBOz6AJNbHw7vpK0",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903828408,
+            "updatedAt": 1794903828408
+          }
+        ],
+        "defaultStartupGroupId": "tGwzjQ0gBKbK11mfLyWmBhdJlKMmoEXi"
+      },
+      "updateFailure": {
+        "pending": {
+          "open": true,
+          "calls": 4,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Could not save the startup group. Your draft is kept; you can retry Save.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "Apache 2.0.0",
+            "PHP-FPM 1.0.0",
+            "PHP-FPM 2.0.0"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-dark-800x600-update-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Updated after storage failure",
+          "description": "Keep the edited description",
+          "continueOnFailure": false
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 5
+      },
+      "afterUpdate": {
+        "groups": [
+          {
+            "id": "tGwzjQ0gBKbK11mfLyWmBhdJlKMmoEXi",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "6BRJVdSTLzjsFghA3ahatxfnycAYeaTX",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "xvmHyaC2MFg7OfSCjDvbYqahIc3Zq1vi",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "T7GTkI8dULI1aI7z3CxFrYZJfwsFYztr",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903828408,
+            "updatedAt": 1794903831882
+          }
+        ],
+        "defaultStartupGroupId": "tGwzjQ0gBKbK11mfLyWmBhdJlKMmoEXi"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "tGwzjQ0gBKbK11mfLyWmBhdJlKMmoEXi",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "6BRJVdSTLzjsFghA3ahatxfnycAYeaTX",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "xvmHyaC2MFg7OfSCjDvbYqahIc3Zq1vi",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "T7GTkI8dULI1aI7z3CxFrYZJfwsFYztr",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903828408,
+            "updatedAt": 1794903831882
+          }
+        ],
+        "defaultStartupGroupId": "tGwzjQ0gBKbK11mfLyWmBhdJlKMmoEXi"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "locale": "vi",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-vi-dark-800x600-basic.png",
+        "startup-editor-vi-dark-800x600-candidates.png",
+        "startup-editor-vi-dark-800x600-order.png"
+      ],
+      "candidateFailure": {
+        "pending": {
+          "nextDisabled": true,
+          "loadingVisible": true,
+          "emptyVisible": false
+        },
+        "error": {
+          "text": "Không tải được dịch vụ và dự án. Bản nháp vẫn được giữ. Hãy thử lại để tiếp tục.Fixture candidate source unavailable <fixture-error>Thử lại",
+          "unsafeHTML": false,
+          "name": "Candidate failure draft",
+          "description": "Keep this description after retry",
+          "nextDisabled": true,
+          "retryEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-dark-800x600-candidate-error.png",
+        "retryPreservedDraft": true,
+        "staleRejectionIgnored": true,
+        "liveUnchanged": true,
+        "persistedUnchanged": true
+      },
+      "basic": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Nhập tên nhóm khởi động."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "addFailure": {
+        "pending": {
+          "open": true,
+          "calls": 1,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Không lưu được nhóm khởi động. Bản nháp vẫn được giữ; bạn có thể bấm Lưu để thử lại.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "PHP-FPM 1.0.0",
+            "Apache 2.0.0",
+            "PHP-FPM 2.0.0",
+            "Fixture application with a long service name for layout verification"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-dark-800x600-add-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Fixture workbench group",
+          "description": "Fixture draft description retained after failure",
+          "continueOnFailure": true
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 2
+      },
+      "saved": {
+        "groups": [
+          {
+            "id": "qe8xHAtYh6ls5XwXvv5M08DMKOjvptZ9",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "Rpjn5OgDJik17DeCHMTTIwGNcR7GwRac",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "wN3FAPUwPrPRgY1BzzYMPhthDMlphyyb",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "Rb7W6jofaQhY4gqqAPx0HX5YlajwMFAk",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "c6NpW0h0URa2Mtz5Fzf7XmJ9vfJqtT23",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903844398,
+            "updatedAt": 1794903844398
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "qe8xHAtYh6ls5XwXvv5M08DMKOjvptZ9",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "Rpjn5OgDJik17DeCHMTTIwGNcR7GwRac",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "wN3FAPUwPrPRgY1BzzYMPhthDMlphyyb",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "Rb7W6jofaQhY4gqqAPx0HX5YlajwMFAk",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "c6NpW0h0URa2Mtz5Fzf7XmJ9vfJqtT23",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903844398,
+            "updatedAt": 1794903844398
+          }
+        ],
+        "defaultStartupGroupId": "qe8xHAtYh6ls5XwXvv5M08DMKOjvptZ9"
+      },
+      "updateFailure": {
+        "pending": {
+          "open": true,
+          "calls": 4,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Không lưu được nhóm khởi động. Bản nháp vẫn được giữ; bạn có thể bấm Lưu để thử lại.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "Apache 2.0.0",
+            "PHP-FPM 1.0.0",
+            "PHP-FPM 2.0.0"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-dark-800x600-update-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Updated after storage failure",
+          "description": "Keep the edited description",
+          "continueOnFailure": false
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 5
+      },
+      "afterUpdate": {
+        "groups": [
+          {
+            "id": "qe8xHAtYh6ls5XwXvv5M08DMKOjvptZ9",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "wN3FAPUwPrPRgY1BzzYMPhthDMlphyyb",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "Rpjn5OgDJik17DeCHMTTIwGNcR7GwRac",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "Rb7W6jofaQhY4gqqAPx0HX5YlajwMFAk",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903844398,
+            "updatedAt": 1794903847869
+          }
+        ],
+        "defaultStartupGroupId": "qe8xHAtYh6ls5XwXvv5M08DMKOjvptZ9"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "qe8xHAtYh6ls5XwXvv5M08DMKOjvptZ9",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "wN3FAPUwPrPRgY1BzzYMPhthDMlphyyb",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "Rpjn5OgDJik17DeCHMTTIwGNcR7GwRac",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "Rb7W6jofaQhY4gqqAPx0HX5YlajwMFAk",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903844398,
+            "updatedAt": 1794903847869
+          }
+        ],
+        "defaultStartupGroupId": "qe8xHAtYh6ls5XwXvv5M08DMKOjvptZ9"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "locale": "en",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-en-light-800x600-basic.png",
+        "startup-editor-en-light-800x600-candidates.png",
+        "startup-editor-en-light-800x600-order.png"
+      ],
+      "candidateFailure": {
+        "pending": {
+          "nextDisabled": true,
+          "loadingVisible": true,
+          "emptyVisible": false
+        },
+        "error": {
+          "text": "Could not load services and projects. Your draft is kept. Retry to continue.Fixture candidate source unavailable <fixture-error>Retry",
+          "unsafeHTML": false,
+          "name": "Candidate failure draft",
+          "description": "Keep this description after retry",
+          "nextDisabled": true,
+          "retryEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-light-800x600-candidate-error.png",
+        "retryPreservedDraft": true,
+        "staleRejectionIgnored": true,
+        "liveUnchanged": true,
+        "persistedUnchanged": true
+      },
+      "basic": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Enter a startup group name."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "addFailure": {
+        "pending": {
+          "open": true,
+          "calls": 1,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Could not save the startup group. Your draft is kept; you can retry Save.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "PHP-FPM 1.0.0",
+            "Apache 2.0.0",
+            "PHP-FPM 2.0.0",
+            "Fixture application with a long service name for layout verification"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-light-800x600-add-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Fixture workbench group",
+          "description": "Fixture draft description retained after failure",
+          "continueOnFailure": true
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 2
+      },
+      "saved": {
+        "groups": [
+          {
+            "id": "aDFkRnWGkMmnWIUSvvnP7N0gqUvqkBWg",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "C0JcBLnwQMPBMofZtyDkBGshofFMeukg",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "ub65tWupnDGosl7RMtcWR0npKm1c4vn7",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "VJfKbY62gT9fbVHJKv9D9CIs1jhbbAVe",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "sOAfJUMC2TE65nd52IdDsG7GlfYjsdNS",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903859453,
+            "updatedAt": 1794903859453
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "aDFkRnWGkMmnWIUSvvnP7N0gqUvqkBWg",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "C0JcBLnwQMPBMofZtyDkBGshofFMeukg",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "ub65tWupnDGosl7RMtcWR0npKm1c4vn7",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "VJfKbY62gT9fbVHJKv9D9CIs1jhbbAVe",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "sOAfJUMC2TE65nd52IdDsG7GlfYjsdNS",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903859453,
+            "updatedAt": 1794903859453
+          }
+        ],
+        "defaultStartupGroupId": "aDFkRnWGkMmnWIUSvvnP7N0gqUvqkBWg"
+      },
+      "updateFailure": {
+        "pending": {
+          "open": true,
+          "calls": 4,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Could not save the startup group. Your draft is kept; you can retry Save.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "Apache 2.0.0",
+            "PHP-FPM 1.0.0",
+            "PHP-FPM 2.0.0"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-en-light-800x600-update-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Updated after storage failure",
+          "description": "Keep the edited description",
+          "continueOnFailure": false
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 5
+      },
+      "afterUpdate": {
+        "groups": [
+          {
+            "id": "aDFkRnWGkMmnWIUSvvnP7N0gqUvqkBWg",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "ub65tWupnDGosl7RMtcWR0npKm1c4vn7",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "C0JcBLnwQMPBMofZtyDkBGshofFMeukg",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "VJfKbY62gT9fbVHJKv9D9CIs1jhbbAVe",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903859453,
+            "updatedAt": 1794903862932
+          }
+        ],
+        "defaultStartupGroupId": "aDFkRnWGkMmnWIUSvvnP7N0gqUvqkBWg"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "aDFkRnWGkMmnWIUSvvnP7N0gqUvqkBWg",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "ub65tWupnDGosl7RMtcWR0npKm1c4vn7",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "C0JcBLnwQMPBMofZtyDkBGshofFMeukg",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "VJfKbY62gT9fbVHJKv9D9CIs1jhbbAVe",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903859453,
+            "updatedAt": 1794903862932
+          }
+        ],
+        "defaultStartupGroupId": "aDFkRnWGkMmnWIUSvvnP7N0gqUvqkBWg"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "locale": "vi",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-vi-light-800x600-basic.png",
+        "startup-editor-vi-light-800x600-candidates.png",
+        "startup-editor-vi-light-800x600-order.png"
+      ],
+      "candidateFailure": {
+        "pending": {
+          "nextDisabled": true,
+          "loadingVisible": true,
+          "emptyVisible": false
+        },
+        "error": {
+          "text": "Không tải được dịch vụ và dự án. Bản nháp vẫn được giữ. Hãy thử lại để tiếp tục.Fixture candidate source unavailable <fixture-error>Thử lại",
+          "unsafeHTML": false,
+          "name": "Candidate failure draft",
+          "description": "Keep this description after retry",
+          "nextDisabled": true,
+          "retryEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-light-800x600-candidate-error.png",
+        "retryPreservedDraft": true,
+        "staleRejectionIgnored": true,
+        "liveUnchanged": true,
+        "persistedUnchanged": true
+      },
+      "basic": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Nhập tên nhóm khởi động."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "addFailure": {
+        "pending": {
+          "open": true,
+          "calls": 1,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Không lưu được nhóm khởi động. Bản nháp vẫn được giữ; bạn có thể bấm Lưu để thử lại.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "PHP-FPM 1.0.0",
+            "Apache 2.0.0",
+            "PHP-FPM 2.0.0",
+            "Fixture application with a long service name for layout verification"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-light-800x600-add-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Fixture workbench group",
+          "description": "Fixture draft description retained after failure",
+          "continueOnFailure": true
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 2
+      },
+      "saved": {
+        "groups": [
+          {
+            "id": "oIKnN9QmqbrxylMxWcwXW4XtBjLfnjvZ",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "RqcFl14uVGIQZyVpb0k0rtWDfwNuou5u",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "MkqrHW8KenrEEJkX3QiZ7TiNeD52MSHk",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "yBDS0dF9yKvKqg1S2beh1OoIEnRk1poq",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "fc7H7LIhDeBiv3BsZHameAslT9FWfk9T",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903874635,
+            "updatedAt": 1794903874635
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "oIKnN9QmqbrxylMxWcwXW4XtBjLfnjvZ",
+            "name": "Fixture workbench group",
+            "description": "Fixture draft description retained after failure",
+            "color": "#409eff",
+            "continueOnFailure": true,
+            "items": [
+              {
+                "id": "RqcFl14uVGIQZyVpb0k0rtWDfwNuou5u",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "MkqrHW8KenrEEJkX3QiZ7TiNeD52MSHk",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "yBDS0dF9yKvKqg1S2beh1OoIEnRk1poq",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "fc7H7LIhDeBiv3BsZHameAslT9FWfk9T",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794903874635,
+            "updatedAt": 1794903874635
+          }
+        ],
+        "defaultStartupGroupId": "oIKnN9QmqbrxylMxWcwXW4XtBjLfnjvZ"
+      },
+      "updateFailure": {
+        "pending": {
+          "open": true,
+          "calls": 4,
+          "footerDisabled": true,
+          "closeVisible": false,
+          "saving": true
+        },
+        "error": {
+          "text": "Không lưu được nhóm khởi động. Bản nháp vẫn được giữ; bạn có thể bấm Lưu để thử lại.Fixture storage write rejected <fixture-error>",
+          "unsafeHTML": false,
+          "order": [
+            "Apache 2.0.0",
+            "PHP-FPM 1.0.0",
+            "PHP-FPM 2.0.0"
+          ],
+          "focused": true,
+          "footerEnabled": true
+        },
+        "layout": {
+          "dialog": {
+            "x": 20,
+            "y": 16,
+            "width": 760,
+            "height": 568,
+            "right": 780,
+            "bottom": 584
+          },
+          "footer": {
+            "x": 36,
+            "y": 508,
+            "width": 728,
+            "height": 60,
+            "right": 764,
+            "bottom": 568
+          },
+          "overflow": [],
+          "rootOverflow": false,
+          "focusedInside": true,
+          "footerVisible": true,
+          "fitsViewport": true
+        },
+        "screenshot": "startup-editor-vi-light-800x600-update-save-error.png",
+        "liveUnchanged": true,
+        "persistedUnchanged": true,
+        "basic": {
+          "name": "Updated after storage failure",
+          "description": "Keep the edited description",
+          "continueOnFailure": false
+        },
+        "noAutomaticRetry": true,
+        "expectedNextCall": 5
+      },
+      "afterUpdate": {
+        "groups": [
+          {
+            "id": "oIKnN9QmqbrxylMxWcwXW4XtBjLfnjvZ",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "MkqrHW8KenrEEJkX3QiZ7TiNeD52MSHk",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "RqcFl14uVGIQZyVpb0k0rtWDfwNuou5u",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "yBDS0dF9yKvKqg1S2beh1OoIEnRk1poq",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903874635,
+            "updatedAt": 1794903878134
+          }
+        ],
+        "defaultStartupGroupId": "oIKnN9QmqbrxylMxWcwXW4XtBjLfnjvZ"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "oIKnN9QmqbrxylMxWcwXW4XtBjLfnjvZ",
+            "name": "Updated after storage failure",
+            "description": "Keep the edited description",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "MkqrHW8KenrEEJkX3QiZ7TiNeD52MSHk",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "RqcFl14uVGIQZyVpb0k0rtWDfwNuou5u",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "yBDS0dF9yKvKqg1S2beh1OoIEnRk1poq",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              }
+            ],
+            "createdAt": 1794903874635,
+            "updatedAt": 1794903878134
+          }
+        ],
+        "defaultStartupGroupId": "oIKnN9QmqbrxylMxWcwXW4XtBjLfnjvZ"
+      },
+      "errors": [],
+      "consoleErrors": []
+    }
+  ],
+  "errors": []
+}

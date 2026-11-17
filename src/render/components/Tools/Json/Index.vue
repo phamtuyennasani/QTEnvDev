@@ -1,5 +1,5 @@
 <template>
-  <div class="json-parse tools host-edit">
+  <div class="json-parse tools host-edit app-json-workspace">
     <div class="nav p-0">
       <div class="left">
         <span class="text-xl">{{ $t('tools.jsonParseTitle') }}</span>
@@ -16,18 +16,20 @@
       </el-tabs>
       <div ref="mainRef" class="main pb-0 pt-3">
         <div class="left" :style="leftStyle">
-          <div class="flex h-[36px] justify-between">
+          <div class="app-json-toolbar">
             <span>{{ currentType }}</span>
-            <el-button size="small" :icon="Document" @click.stop="openFile"></el-button>
+            <el-button :icon="Document" :aria-label="I18nT('base.open')" @click.stop="openFile">{{
+              I18nT('base.open')
+            }}</el-button>
           </div>
           <div ref="fromRef" class="editor el-input__wrapper"></div>
         </div>
         <div ref="moveRef" class="handle" @mousedown.stop="HandleMoveMouseDown"></div>
         <div class="right">
-          <div class="flex h-[36px]">
+          <div class="app-json-toolbar">
             <el-select
               v-model="to"
-              size="small"
+              :aria-label="I18nT('common.label.code')"
               class="max-w-[140px]"
               filterable
               @change="onToChange"
@@ -50,16 +52,32 @@
               <el-option label="JSDoc" value="JSDoc"></el-option>
             </el-select>
             <el-button-group size="small">
-              <el-button size="small" @click.stop="currentTab.transformTo('asc')">
+              <el-button
+                size="small"
+                aria-label="A → Z"
+                @click.stop="currentTab.transformTo('asc')"
+              >
                 <yb-icon :svg="import('@/svg/asc1.svg?raw')" width="14" height="14" />
               </el-button>
-              <el-button size="small" @click.stop="currentTab.transformTo('desc')">
+              <el-button
+                size="small"
+                aria-label="Z → A"
+                @click.stop="currentTab.transformTo('desc')"
+              >
                 <yb-icon :svg="import('@/svg/desc1.svg?raw')" width="14" height="14" />
               </el-button>
-              <el-button size="small" @click.stop="currentTab.transformTo(undefined)">
+              <el-button
+                size="small"
+                :aria-label="I18nT('tools.jsonParseTitle')"
+                @click.stop="currentTab.transformTo(undefined)"
+              >
                 <yb-icon :svg="import('@/svg/nosort.svg?raw')" width="14" height="14" />
               </el-button>
-              <el-button size="small" @click.stop="saveToLocal">
+              <el-button
+                size="small"
+                :aria-label="I18nT('common.action.save')"
+                @click.stop="saveToLocal"
+              >
                 <yb-icon :svg="import('@/svg/save.svg?raw')" width="14" height="14" />
               </el-button>
             </el-button-group>

@@ -180,20 +180,20 @@ export default class WindowPresentation {
       state.minimumSize = [width, height]
     }
     const minimum: [number, number] = [
-      Math.min(state.minimumSize[0], area.width),
+      state.minimumSize[0],
       Math.min(state.minimumSize[1], area.height)
     ]
     const currentMinimum = window.getMinimumSize()
     if (minimum[0] !== currentMinimum[0] || minimum[1] !== currentMinimum[1]) {
       window.setMinimumSize(...minimum)
     }
-    const width = Math.min(Math.max(bounds.width, minimum[0]), area.width)
+    const width = Math.max(minimum[0], Math.min(bounds.width, area.width))
     const height = Math.min(Math.max(bounds.height, minimum[1]), area.height)
     const next: Rectangle = {
       x: Math.round(
         source.id !== target.id
-          ? area.x + (area.width - width) / 2
-          : Math.min(Math.max(bounds.x, area.x), area.x + area.width - width)
+          ? area.x + Math.max(0, (area.width - width) / 2)
+          : Math.max(area.x, Math.min(bounds.x, area.x + area.width - width))
       ),
       y: Math.round(
         source.id !== target.id

@@ -8,26 +8,36 @@
     </template>
   </div>
   <div class="tool gap-3">
-    <el-radio-group v-if="showCommond" v-model="type" size="small">
+    <el-button-group v-if="showCommond">
       <el-tooltip :show-after="600" :content="I18nT('conf.rawFile')" placement="top">
-        <el-radio-button value="default">
+        <el-button
+          :type="type === 'default' ? 'primary' : 'default'"
+          :aria-pressed="type === 'default'"
+          :aria-label="I18nT('conf.rawFile')"
+          @click="type = 'default'"
+        >
           <Document class="w-5 h-5 p-0.5" />
-        </el-radio-button>
+        </el-button>
       </el-tooltip>
       <el-tooltip :show-after="600" :content="I18nT('conf.CommonSetting')" placement="top">
-        <el-radio-button value="common">
+        <el-button
+          :type="type === 'common' ? 'primary' : 'default'"
+          :aria-pressed="type === 'common'"
+          :aria-label="I18nT('conf.CommonSetting')"
+          @click="type = 'common'"
+        >
           <Operation class="w-5 h-5 p-0.5" />
-        </el-radio-button>
+        </el-button>
       </el-tooltip>
-    </el-radio-group>
+    </el-button-group>
     <el-button-group>
       <el-tooltip :show-after="600" :content="I18nT('conf.open')" placement="top">
-        <el-button :disabled="disabled" @click="openConfig">
+        <el-button :disabled="disabled" :aria-label="I18nT('conf.open')" @click="openConfig">
           <FolderOpened class="w-5 h-5 p-0.5" />
         </el-button>
       </el-tooltip>
       <el-tooltip :show-after="600" :content="I18nT('conf.save')" placement="top">
-        <el-button :disabled="disabled" @click="saveConfig">
+        <el-button :disabled="disabled" :aria-label="I18nT('conf.save')" @click="saveConfig">
           <el-badge is-dot :offset="[8, 1]" :hidden="!changed">
             <yb-icon :svg="import('@/svg/save.svg?raw')" class="w-5 h-5 p-0.5" />
           </el-badge>
@@ -39,26 +49,30 @@
         :content="I18nT('conf.loadDefault')"
         placement="top"
       >
-        <el-button :disabled="disabled || defaultDisabled" @click="getDefault">
+        <el-button
+          :disabled="disabled || defaultDisabled"
+          :aria-label="I18nT('conf.loadDefault')"
+          @click="getDefault"
+        >
           <yb-icon :svg="import('@/svg/load-default.svg?raw')" class="w-5 h-5" />
         </el-button>
       </el-tooltip>
     </el-button-group>
     <el-button-group>
       <el-tooltip :show-after="600" :content="I18nT('conf.loadCustom')" placement="top">
-        <el-button :disabled="disabled" @click="loadCustom">
+        <el-button :disabled="disabled" :aria-label="I18nT('conf.loadCustom')" @click="loadCustom">
           <yb-icon :svg="import('@/svg/custom.svg?raw')" class="w-5 h-5 p-0.5" />
         </el-button>
       </el-tooltip>
       <el-tooltip :show-after="600" :content="I18nT('conf.saveCustom')" placement="top">
-        <el-button :disabled="disabled" @click="saveCustom">
+        <el-button :disabled="disabled" :aria-label="I18nT('conf.saveCustom')" @click="saveCustom">
           <yb-icon :svg="import('@/svg/saveas.svg?raw')" class="w-5 h-5 p-0.5" />
         </el-button>
       </el-tooltip>
     </el-button-group>
     <template v-if="!!url">
       <el-tooltip :content="url" :show-after="600" placement="top">
-        <el-button @click="openURL(url)">
+        <el-button :aria-label="I18nT('base.open')" @click="openURL(url)">
           <yb-icon :svg="import('@/svg/http.svg?raw')" class="w-5 h-5" />
         </el-button>
       </el-tooltip>

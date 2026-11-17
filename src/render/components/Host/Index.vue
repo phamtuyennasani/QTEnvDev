@@ -1,5 +1,6 @@
 <template>
   <div class="soft-index-panel main-right-panel app-workbench-page">
+    <AppPageHeader :title="I18nT('common.label.site')" />
     <ul class="top-tab mt-3 flex items-center gap-2.5">
       <el-dropdown @command="setTab">
         <el-button class="outline-0 focus:outline-0">
@@ -30,9 +31,7 @@
           </el-tooltip>
         </template>
         <template v-else>
-          <el-button style="padding-left: 30px; padding-right: 30px" @click="toAdd">{{
-            I18nT('common.action.add')
-          }}</el-button>
+          <el-button type="primary" @click="toAdd">{{ I18nT('common.action.add') }}</el-button>
         </template>
         <el-dropdown trigger="click" @command="handleCommand">
           <template #default>
@@ -43,6 +42,7 @@
                 border-left-color: transparent !important;
               "
               :icon="More"
+              :aria-label="I18nT('common.label.action')"
             ></el-button>
           </template>
           <template #dropdown>
@@ -112,6 +112,7 @@
 
 <script lang="ts" setup>
   import { reactive, computed, onMounted } from 'vue'
+  import AppPageHeader from '@/components/AppShell/AppPageHeader.vue'
   import List from './ListTable.vue'
   import hostsSettings from './HostsSettingsController'
   import { AppStore } from '@/store/app'

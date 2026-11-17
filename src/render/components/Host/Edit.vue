@@ -5,59 +5,91 @@
     size="500px"
     :close-on-click-modal="false"
     :destroy-on-close="true"
-    class="host-edit-drawer"
+    class="host-edit-drawer app-workbench-drawer"
     :with-header="false"
     @closed="closedFn"
   >
     <div class="host-edit">
       <div class="nav pl-3 pr-5">
-        <div class="left" @click="show = false">
+        <button
+          type="button"
+          class="left app-drawer-close"
+          :aria-label="I18nT('base.cancel')"
+          @click="show = false"
+        >
           <yb-icon :svg="import('@/svg/delete.svg?raw')" class="top-back-icon" />
           <span class="ml-3">{{
             isEdit ? I18nT('common.action.edit') : I18nT('common.action.add')
           }}</span>
-        </div>
-        <el-button :loading="running" :disabled="running" class="shrink0" @click="doSave">{{
-          I18nT('common.action.save')
-        }}</el-button>
+        </button>
+        <el-button
+          type="primary"
+          :loading="running"
+          :disabled="running"
+          class="shrink0"
+          @click="doSave"
+          >{{ I18nT('common.action.save') }}</el-button
+        >
       </div>
 
       <el-scrollbar class="flex-1">
         <div class="main-wapper p-3">
           <div class="main p-5">
+            <label class="app-field-label" for="host-edit-name">{{
+              I18nT('common.label.name')
+            }}</label>
             <input
+              id="host-edit-name"
               v-model.trim="item.name"
+              :aria-invalid="!!errs['name']"
               type="text"
               :class="'input' + (errs['name'] ? ' error' : '')"
               :placeholder="I18nT('host.placeholderName')"
             />
+            <label class="app-field-label" for="host-edit-alias">{{
+              I18nT('host.placeholderAlias')
+            }}</label>
             <textarea
+              id="host-edit-alias"
               v-model.trim="item.alias"
               type="text"
               class="input-textarea"
               :placeholder="I18nT('host.placeholderAlias')"
             ></textarea>
+            <label class="app-field-label" for="host-edit-mark">{{
+              I18nT('common.label.comment')
+            }}</label>
             <input
+              id="host-edit-mark"
               v-model.trim="item.mark"
-              style="margin: 15px 0 10px"
               class="input"
               :placeholder="I18nT('common.label.comment')"
             />
+            <label class="app-field-label" for="host-edit-root">{{
+              I18nT('host.placeholderRootPath')
+            }}</label>
             <div class="path-choose my-5">
               <input
+                id="host-edit-root"
                 v-model.trim="item.root"
+                :aria-invalid="!!errs['root']"
                 type="text"
                 :class="'input' + (errs['root'] ? ' error' : '')"
                 :placeholder="I18nT('host.placeholderRootPath')"
               />
-              <div class="icon-block" @click="chooseRoot('root')">
+              <button
+                type="button"
+                class="icon-block"
+                :aria-label="I18nT('base.open')"
+                @click="chooseRoot('root')"
+              >
                 <yb-icon
                   :svg="import('@/svg/folder.svg?raw')"
                   class="choose"
                   width="18"
                   height="18"
                 />
-              </div>
+              </button>
             </div>
             <div class="park">
               <div class="title">
@@ -78,7 +110,11 @@
                   </template>
                 </el-popover>
               </div>
-              <el-switch v-model="park" :before-change="onParkChange"></el-switch>
+              <el-switch
+                v-model="park"
+                :aria-label="I18nT('base.parkTitle')"
+                :before-change="onParkChange"
+              ></el-switch>
             </div>
           </div>
 
@@ -87,6 +123,7 @@
             <div class="port-set">
               <el-select
                 v-model="item.phpVersion"
+                :aria-label="I18nT('base.phpVersion')"
                 class="w-full"
                 :placeholder="I18nT('base.selectPhpVersion')"
               >
@@ -116,8 +153,11 @@
           <div class="main p-5">
             <template v-if="!portAdvanced">
               <div class="port-set mb-5">
-                <div class="port-type"> {{ I18nT('common.label.port') }} </div>
+                <label class="port-type" for="host-edit-primaryPort">
+                  {{ I18nT('common.label.port') }}
+                </label>
                 <input
+                  id="host-edit-primaryPort"
                   v-model.number="primaryPort"
                   type="number"
                   :class="
@@ -135,8 +175,9 @@
             </template>
             <template v-else>
               <div class="port-set mb-5">
-                <div class="port-type"> Nginx </div>
+                <label class="port-type" for="host-edit-item-port-nginx"> Nginx </label>
                 <input
+                  id="host-edit-item-port-nginx"
                   v-model.number="item.port.nginx"
                   type="number"
                   :class="'input' + (errs['port_nginx'] ? ' error' : '')"
@@ -146,8 +187,9 @@
               </div>
 
               <div class="port-set mb-5">
-                <div class="port-type"> Caddy </div>
+                <label class="port-type" for="host-edit-item-port-caddy"> Caddy </label>
                 <input
+                  id="host-edit-item-port-caddy"
                   v-model.number="item.port.caddy"
                   type="number"
                   :class="'input' + (errs['port_caddy'] ? ' error' : '')"
@@ -157,8 +199,9 @@
               </div>
 
               <div class="port-set mb-5">
-                <div class="port-type"> Apache </div>
+                <label class="port-type" for="host-edit-item-port-apache"> Apache </label>
                 <input
+                  id="host-edit-item-port-apache"
                   v-model.number="item.port.apache"
                   type="number"
                   :class="'input' + (errs['port_apache'] ? ' error' : '')"
@@ -168,8 +211,9 @@
               </div>
 
               <div class="port-set mb-5">
-                <div class="port-type"> FrankenPHP </div>
+                <label class="port-type" for="host-edit-item-port-frankenphp"> FrankenPHP </label>
                 <input
+                  id="host-edit-item-port-frankenphp"
                   v-model.number="item.port.frankenphp"
                   type="number"
                   :class="'input' + (errs['port_frankenphp'] ? ' error' : '')"
@@ -183,7 +227,7 @@
           <div class="main p-5">
             <div class="ssl-switch">
               <span>SSL</span>
-              <el-switch v-model="item.useSSL"></el-switch>
+              <el-switch v-model="item.useSSL" aria-label="SSL"></el-switch>
             </div>
 
             <div v-if="item.useSSL" class="ssl-switch" style="margin-top: 12px">
@@ -191,7 +235,7 @@
                 <span>{{ I18nT('host.autoSSL') }}</span>
                 <SSLTips />
               </div>
-              <el-switch v-model="item.autoSSL"></el-switch>
+              <el-switch v-model="item.autoSSL" :aria-label="I18nT('host.autoSSL')"></el-switch>
             </div>
 
             <template v-if="item.useSSL && !item.autoSSL">
@@ -202,14 +246,19 @@
                   :class="'input' + (errs['cert'] ? ' error' : '')"
                   placeholder="cert"
                 />
-                <div class="icon-block" @click="chooseRoot('cert', true)">
+                <button
+                  type="button"
+                  class="icon-block"
+                  :aria-label="I18nT('base.open')"
+                  @click="chooseRoot('cert', true)"
+                >
                   <yb-icon
                     :svg="import('@/svg/folder.svg?raw')"
                     class="choose"
                     width="18"
                     height="18"
                   />
-                </div>
+                </button>
               </div>
 
               <div class="path-choose my-5">
@@ -219,14 +268,19 @@
                   :class="'input' + (errs['certkey'] ? ' error' : '')"
                   placeholder="cert key"
                 />
-                <div class="icon-block" @click="chooseRoot('certkey', true)">
+                <button
+                  type="button"
+                  class="icon-block"
+                  :aria-label="I18nT('base.open')"
+                  @click="chooseRoot('certkey', true)"
+                >
                   <yb-icon
                     :svg="import('@/svg/folder.svg?raw')"
                     class="choose"
                     width="18"
                     height="18"
                   />
-                </div>
+                </button>
               </div>
             </template>
 
@@ -236,8 +290,9 @@
               </div>
               <template v-if="!portAdvanced">
                 <div class="port-set port-ssl mb-5">
-                  <div class="port-type"> Port </div>
+                  <label class="port-type" for="host-edit-primaryPortSSL"> SSL Port </label>
                   <input
+                    id="host-edit-primaryPortSSL"
                     v-model.number="primaryPortSSL"
                     type="number"
                     :class="
@@ -255,8 +310,9 @@
               </template>
               <template v-else>
                 <div class="port-set port-ssl mb-5">
-                  <div class="port-type"> Nginx </div>
+                  <label class="port-type" for="host-edit-item-port-nginx_ssl"> Nginx SSL </label>
                   <input
+                    id="host-edit-item-port-nginx_ssl"
                     v-model.number="item.port.nginx_ssl"
                     type="number"
                     :class="'input' + (errs['port_nginx_ssl'] ? ' error' : '')"
@@ -265,8 +321,9 @@
                   />
                 </div>
                 <div class="port-set port-ssl mb-5">
-                  <div class="port-type"> Caddy </div>
+                  <label class="port-type" for="host-edit-item-port-caddy_ssl"> Caddy SSL </label>
                   <input
+                    id="host-edit-item-port-caddy_ssl"
                     v-model.number="item.port.caddy_ssl"
                     type="number"
                     :class="'input' + (errs['port_caddy_ssl'] ? ' error' : '')"
@@ -275,8 +332,9 @@
                   />
                 </div>
                 <div class="port-set port-ssl mb-5">
-                  <div class="port-type"> Apache </div>
+                  <label class="port-type" for="host-edit-item-port-apache_ssl"> Apache SSL </label>
                   <input
+                    id="host-edit-item-port-apache_ssl"
                     v-model.number="item.port.apache_ssl"
                     type="number"
                     :class="'input' + (errs['port_apache_ssl'] ? ' error' : '')"
@@ -285,8 +343,11 @@
                   />
                 </div>
                 <div class="port-set port-ssl mb-5">
-                  <div class="port-type"> FrankenPHP </div>
+                  <label class="port-type" for="host-edit-item-port-frankenphp_ssl">
+                    FrankenPHP SSL
+                  </label>
                   <input
+                    id="host-edit-item-port-frankenphp_ssl"
                     v-model.number="item.port.frankenphp_ssl"
                     type="number"
                     :class="'input' + (errs['port_frankenphp_ssl'] ? ' error' : '')"

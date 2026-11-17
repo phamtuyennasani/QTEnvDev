@@ -1,12 +1,15 @@
 <template>
   <div class="w-full h-full overflow-hidden flex flex-col gap-2 items-start">
     <div class="flex items-center">
-      <el-button size="small" class="flex-shrink-0" @click="addContainer()">
+      <el-button
+        type="primary"
+        :loading="!!machine?.containerCreating"
+        size="small"
+        class="flex-shrink-0"
+        @click="addContainer()"
+      >
         <template #default>
           <span>{{ I18nT('common.action.add') }}</span>
-          <template v-if="machine?.containerCreating">
-            <el-button link loading></el-button>
-          </template>
         </template>
       </el-button>
     </div>
@@ -55,22 +58,26 @@
             <el-button loading link></el-button>
           </template>
           <template v-else-if="scope.row.run">
-            <div class="service status running" :class="{ disabled: scope.row.running }">
-              <yb-icon
-                class="w-[21px] h-[21px]"
-                :svg="import('@/svg/stop2.svg?raw')"
-                @click.stop="scope.row.stop()"
-              />
-            </div>
+            <button
+              type="button"
+              class="service status running app-inline-button"
+              :disabled="scope.row.running"
+              :aria-label="I18nT('common.action.stop')"
+              @click.stop="scope.row.stop()"
+            >
+              <yb-icon class="w-[21px] h-[21px]" :svg="import('@/svg/stop2.svg?raw')" />
+            </button>
           </template>
           <template v-else>
-            <div class="service status" :class="{ disabled: scope.row.running }">
-              <yb-icon
-                class="w-[21px] h-[21px]"
-                :svg="import('@/svg/play.svg?raw')"
-                @click.stop="scope.row.start()"
-              />
-            </div>
+            <button
+              type="button"
+              class="service status app-inline-button"
+              :disabled="scope.row.running"
+              :aria-label="I18nT('common.action.start')"
+              @click.stop="scope.row.start()"
+            >
+              <yb-icon class="w-[21px] h-[21px]" :svg="import('@/svg/play.svg?raw')" />
+            </button>
           </template>
         </template>
       </el-table-column>
@@ -82,9 +89,9 @@
             }}</el-button>
           </template>
           <template v-else>
-            <el-dropdown>
+            <el-dropdown trigger="click">
               <template #default>
-                <el-button link class="status">
+                <el-button link class="status" :aria-label="I18nT('common.label.action')">
                   <yb-icon :svg="import('@/svg/more1.svg?raw')" width="22" height="22" />
                 </el-button>
               </template>

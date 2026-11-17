@@ -5,7 +5,11 @@
     :class="{ fold: !appStore.asideExpanded, expanded: appStore.asideExpanded }"
   >
     <div class="aside-inner">
-      <ul class="top-tool mt-3 pt-2" :style="topToolStyle as any">
+      <div class="app-brand" aria-label="QTEnvDev">
+        <img :src="brandIcon" alt="" width="28" height="28" />
+        <span>QTEnvDev</span>
+      </div>
+      <div class="top-tool">
         <el-popover
           width="auto"
           :show-after="800"
@@ -16,14 +20,14 @@
             <span>{{ I18nT('aside.appExit') }}</span>
           </template>
           <template #reference>
-            <li class="cursor-pointer" @click.stop="appExit()">
+            <button type="button" :aria-label="I18nT('aside.appExit')" @click.stop="appExit()">
               <yb-icon
                 class="fa-flip-h"
                 :svg="import('@/svg/exit.svg?raw')"
                 width="16"
                 height="16"
               />
-            </li>
+            </button>
           </template>
         </el-popover>
         <el-popover
@@ -36,9 +40,9 @@
             <span>{{ I18nT('aside.appLog') }}</span>
           </template>
           <template #reference>
-            <li class="cursor-pointer" @click.stop="showLog()">
+            <button type="button" :aria-label="I18nT('aside.appLog')" @click.stop="showLog()">
               <yb-icon :svg="import('@/svg/log.svg?raw')" width="16" height="16" />
-            </li>
+            </button>
           </template>
         </el-popover>
         <el-popover
@@ -51,12 +55,18 @@
             <span>{{ groupTooltip }}</span>
           </template>
           <template #reference>
-            <li class="cursor-pointer" :class="groupClass" @click="groupDo">
+            <button type="button" :aria-label="groupTooltip" :class="groupClass" @click="groupDo">
               <yb-icon :svg="import('@/svg/switch.svg?raw')" width="24" height="24" />
-            </li>
+            </button>
           </template>
         </el-popover>
-        <li
+        <button
+          type="button"
+          :aria-label="
+            I18nT(appStore.asideExpanded ? 'aside.collapseNavigation' : 'aside.expandNavigation')
+          "
+          :aria-expanded="appStore.asideExpanded"
+          :disabled="!expandEnable"
           :class="{
             'opacity-40 cursor-not-allowed': !expandEnable,
             'cursor-pointer hover:text-yellow-500': expandEnable
@@ -69,8 +79,8 @@
           <template v-else>
             <yb-icon class="p-[4px]" :svg="import('@/svg/expand.svg?raw')" width="24" height="24" />
           </template>
-        </li>
-      </ul>
+        </button>
+      </div>
       <el-scrollbar>
         <ul class="menu top-menu">
           <template v-for="(item, _index) in allModule" :key="_index">
@@ -101,7 +111,12 @@
       </el-scrollbar>
       <ul class="menu setup-menu">
         <li
+          role="link"
+          tabindex="0"
           :class="'non-draggable' + (currentPage === '/setup' ? ' active' : '')"
+          :aria-current="currentPage === '/setup' ? 'page' : undefined"
+          @keydown.enter.prevent="nav('/setup')"
+          @keydown.space.prevent="nav('/setup')"
           @click="nav('/setup')"
         >
           <div class="left">
@@ -117,6 +132,7 @@
 </template>
 
 <script lang="ts" setup>
+  import brandIcon from '../../../../static/qtenvdev-icon.svg?url'
   import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
   import IPC from '@/util/IPC'
   import { AppStore } from '@/store/app'
@@ -180,15 +196,6 @@
 
   const currentPage = computed(() => {
     return appStore.currentPage
-  })
-
-  const topToolStyle = computed(() => {
-    if (window.Server.isMacOS) {
-      return null
-    }
-    return {
-      paddingTop: '11px'
-    }
   })
 
   const platformAppModules = computed(() => {

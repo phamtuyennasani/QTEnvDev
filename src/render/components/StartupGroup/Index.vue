@@ -29,7 +29,7 @@
           v-model="orderedGroups"
           item-key="id"
           handle=".startup-group-card-drag-handle"
-          class="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3"
+          class="startup-group-list"
           ghost-class="startup-group-card-ghost"
           :disabled="reordering || groups.length < 2"
           @end="persistGroupOrder"
@@ -185,6 +185,12 @@
 </script>
 
 <style scoped lang="scss">
+  .startup-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
   .startup-group-main {
     overflow: auto !important;
   }

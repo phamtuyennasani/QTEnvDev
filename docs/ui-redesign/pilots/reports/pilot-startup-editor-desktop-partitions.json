@@ -1,0 +1,1871 @@
+{
+  "scope": "StartupGroup production Add/Edit, three-step draft, native keyboard and fixture-only save",
+  "limitations": "IPC stubbed; no service/helper/installer test; API focuses controls before activation",
+  "cases": [
+    {
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "locale": "en",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-en-dark-1200x800-basic.png",
+        "startup-editor-en-dark-1200x800-candidates.png",
+        "startup-editor-en-dark-1200x800-order.png"
+      ],
+      "basic": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Enter a startup group name."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "saved": {
+        "groups": [
+          {
+            "id": "WU6kCcuhb70BR82fZatUKhZ5LDDwFpF9",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "EFYG3RF6f7WfD5yxoVGtXBl1GDCajB7U",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "PkSZi9oVlQHl3JfQ9vcx3Z1NdU2A06e3",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "RZ7qaz31buRiiEmtAb2jKKkM3n4COOo9",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "oroVmzakFIRjptHLSIthjEUUDmgAPoRP",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900944045,
+            "updatedAt": 1794900944045
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "WU6kCcuhb70BR82fZatUKhZ5LDDwFpF9",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "EFYG3RF6f7WfD5yxoVGtXBl1GDCajB7U",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "PkSZi9oVlQHl3JfQ9vcx3Z1NdU2A06e3",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "RZ7qaz31buRiiEmtAb2jKKkM3n4COOo9",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "oroVmzakFIRjptHLSIthjEUUDmgAPoRP",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900944045,
+            "updatedAt": 1794900944045
+          }
+        ],
+        "defaultStartupGroupId": "WU6kCcuhb70BR82fZatUKhZ5LDDwFpF9"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "WU6kCcuhb70BR82fZatUKhZ5LDDwFpF9",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "EFYG3RF6f7WfD5yxoVGtXBl1GDCajB7U",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "PkSZi9oVlQHl3JfQ9vcx3Z1NdU2A06e3",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "RZ7qaz31buRiiEmtAb2jKKkM3n4COOo9",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "oroVmzakFIRjptHLSIthjEUUDmgAPoRP",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900944045,
+            "updatedAt": 1794900944045
+          }
+        ],
+        "defaultStartupGroupId": "WU6kCcuhb70BR82fZatUKhZ5LDDwFpF9"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 1200,
+      "height": 800,
+      "theme": "dark",
+      "locale": "vi",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-vi-dark-1200x800-basic.png",
+        "startup-editor-vi-dark-1200x800-candidates.png",
+        "startup-editor-vi-dark-1200x800-order.png"
+      ],
+      "basic": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Nhập tên nhóm khởi động."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "saved": {
+        "groups": [
+          {
+            "id": "r229bNec0sGipzPDDT3h6IwuOOiYpcav",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "J35SGcIBmRgz8if84397eQ8zV8nC2wTA",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "Sx4rWfHydaOkjVgrKPaYlD7iJDN98KLN",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "rr0P5k9phIgWGXapzEeWmVBiyaQ0RKQV",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "vl7FLCpAYY1XvMCWmPsKz1k9FiLHI3PG",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900952329,
+            "updatedAt": 1794900952329
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "r229bNec0sGipzPDDT3h6IwuOOiYpcav",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "J35SGcIBmRgz8if84397eQ8zV8nC2wTA",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "Sx4rWfHydaOkjVgrKPaYlD7iJDN98KLN",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "rr0P5k9phIgWGXapzEeWmVBiyaQ0RKQV",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "vl7FLCpAYY1XvMCWmPsKz1k9FiLHI3PG",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900952329,
+            "updatedAt": 1794900952329
+          }
+        ],
+        "defaultStartupGroupId": "r229bNec0sGipzPDDT3h6IwuOOiYpcav"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "r229bNec0sGipzPDDT3h6IwuOOiYpcav",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "J35SGcIBmRgz8if84397eQ8zV8nC2wTA",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "Sx4rWfHydaOkjVgrKPaYlD7iJDN98KLN",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "rr0P5k9phIgWGXapzEeWmVBiyaQ0RKQV",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "vl7FLCpAYY1XvMCWmPsKz1k9FiLHI3PG",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900952329,
+            "updatedAt": 1794900952329
+          }
+        ],
+        "defaultStartupGroupId": "r229bNec0sGipzPDDT3h6IwuOOiYpcav"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "locale": "en",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-en-light-1200x800-basic.png",
+        "startup-editor-en-light-1200x800-candidates.png",
+        "startup-editor-en-light-1200x800-order.png"
+      ],
+      "basic": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Enter a startup group name."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "saved": {
+        "groups": [
+          {
+            "id": "IhyZpeArv30Sdrlo3XtgE24oGvRAU4a4",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "uCPPIAF1c5HjSUC5e07HRJKenPlHQlLR",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "zFnAK8tMYZAIbGLvdAzuwYC0m9Oo5k7Q",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "ELrh8GybvpBTK0nCMTlMcvwlsNztoSTS",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "cpoiFzgRPeVO3Z3twGNc1fkb29GcBrWP",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900960521,
+            "updatedAt": 1794900960521
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "IhyZpeArv30Sdrlo3XtgE24oGvRAU4a4",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "uCPPIAF1c5HjSUC5e07HRJKenPlHQlLR",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "zFnAK8tMYZAIbGLvdAzuwYC0m9Oo5k7Q",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "ELrh8GybvpBTK0nCMTlMcvwlsNztoSTS",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "cpoiFzgRPeVO3Z3twGNc1fkb29GcBrWP",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900960521,
+            "updatedAt": 1794900960521
+          }
+        ],
+        "defaultStartupGroupId": "IhyZpeArv30Sdrlo3XtgE24oGvRAU4a4"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "IhyZpeArv30Sdrlo3XtgE24oGvRAU4a4",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "uCPPIAF1c5HjSUC5e07HRJKenPlHQlLR",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "zFnAK8tMYZAIbGLvdAzuwYC0m9Oo5k7Q",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "ELrh8GybvpBTK0nCMTlMcvwlsNztoSTS",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "cpoiFzgRPeVO3Z3twGNc1fkb29GcBrWP",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900960521,
+            "updatedAt": 1794900960521
+          }
+        ],
+        "defaultStartupGroupId": "IhyZpeArv30Sdrlo3XtgE24oGvRAU4a4"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 1200,
+      "height": 800,
+      "theme": "light",
+      "locale": "vi",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-vi-light-1200x800-basic.png",
+        "startup-editor-vi-light-1200x800-candidates.png",
+        "startup-editor-vi-light-1200x800-order.png"
+      ],
+      "basic": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Nhập tên nhóm khởi động."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 220,
+          "y": 60,
+          "width": 760,
+          "height": 680,
+          "right": 980,
+          "bottom": 740
+        },
+        "footer": {
+          "x": 236,
+          "y": 664,
+          "width": 728,
+          "height": 60,
+          "right": 964,
+          "bottom": 724
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "saved": {
+        "groups": [
+          {
+            "id": "HcbokYh55TWoYxz9sAFpRaVAYDIJO276",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "LMHX4F5iOh56fTEhivJnVpGfZBNNchJm",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "RjLgc0oODHth11EaVUcXHswCnHXs99GG",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "eefrDyLhnpEiIzEWxIzzv5kdmvdNWaaL",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "ZuK4COp5gUDrEG33Oej2qNkyuMPhFDx4",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900968979,
+            "updatedAt": 1794900968979
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "HcbokYh55TWoYxz9sAFpRaVAYDIJO276",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "LMHX4F5iOh56fTEhivJnVpGfZBNNchJm",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "RjLgc0oODHth11EaVUcXHswCnHXs99GG",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "eefrDyLhnpEiIzEWxIzzv5kdmvdNWaaL",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "ZuK4COp5gUDrEG33Oej2qNkyuMPhFDx4",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900968979,
+            "updatedAt": 1794900968979
+          }
+        ],
+        "defaultStartupGroupId": "HcbokYh55TWoYxz9sAFpRaVAYDIJO276"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "HcbokYh55TWoYxz9sAFpRaVAYDIJO276",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "LMHX4F5iOh56fTEhivJnVpGfZBNNchJm",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "RjLgc0oODHth11EaVUcXHswCnHXs99GG",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "eefrDyLhnpEiIzEWxIzzv5kdmvdNWaaL",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "ZuK4COp5gUDrEG33Oej2qNkyuMPhFDx4",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900968979,
+            "updatedAt": 1794900968979
+          }
+        ],
+        "defaultStartupGroupId": "HcbokYh55TWoYxz9sAFpRaVAYDIJO276"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "locale": "en",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-en-dark-800x600-basic.png",
+        "startup-editor-en-dark-800x600-candidates.png",
+        "startup-editor-en-dark-800x600-order.png"
+      ],
+      "basic": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Enter a startup group name."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "saved": {
+        "groups": [
+          {
+            "id": "EfSoXvODhC9jkdyNmDRvuzuX1J54uwYe",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "GkqFieJYr6j9vCgMTWqLnbxYBzuFLaFX",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "5HiqIfvYSD4Mt9pvcM10f0XXFlxLC1qV",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "LrQhObysRsa2BRtmB9WQ3utKxbiwyiCz",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "m13mwn6sws1xMuNAVE1YbaKNCqTlYvtW",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900977158,
+            "updatedAt": 1794900977158
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "EfSoXvODhC9jkdyNmDRvuzuX1J54uwYe",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "GkqFieJYr6j9vCgMTWqLnbxYBzuFLaFX",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "5HiqIfvYSD4Mt9pvcM10f0XXFlxLC1qV",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "LrQhObysRsa2BRtmB9WQ3utKxbiwyiCz",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "m13mwn6sws1xMuNAVE1YbaKNCqTlYvtW",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900977158,
+            "updatedAt": 1794900977158
+          }
+        ],
+        "defaultStartupGroupId": "EfSoXvODhC9jkdyNmDRvuzuX1J54uwYe"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "EfSoXvODhC9jkdyNmDRvuzuX1J54uwYe",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "GkqFieJYr6j9vCgMTWqLnbxYBzuFLaFX",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "5HiqIfvYSD4Mt9pvcM10f0XXFlxLC1qV",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "LrQhObysRsa2BRtmB9WQ3utKxbiwyiCz",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "m13mwn6sws1xMuNAVE1YbaKNCqTlYvtW",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900977158,
+            "updatedAt": 1794900977158
+          }
+        ],
+        "defaultStartupGroupId": "EfSoXvODhC9jkdyNmDRvuzuX1J54uwYe"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "theme": "dark",
+      "locale": "vi",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-vi-dark-800x600-basic.png",
+        "startup-editor-vi-dark-800x600-candidates.png",
+        "startup-editor-vi-dark-800x600-order.png"
+      ],
+      "basic": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Nhập tên nhóm khởi động."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "saved": {
+        "groups": [
+          {
+            "id": "NMGv8jeTy5QcdB83yT1DSyDZ6Aq0oXqH",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "DRdkgNW8STss6iyIuL2V6z419UIEdKBa",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "IuJKjviFQEQDtI70wKpR6SU28DJCB0TV",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "maOCrywY9nPQn5HRaxg2aqibWu1Ks4fi",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "TE36khLOdAeDjkbRH7M7lZJqcw4MVlL8",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900985140,
+            "updatedAt": 1794900985140
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "NMGv8jeTy5QcdB83yT1DSyDZ6Aq0oXqH",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "DRdkgNW8STss6iyIuL2V6z419UIEdKBa",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "IuJKjviFQEQDtI70wKpR6SU28DJCB0TV",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "maOCrywY9nPQn5HRaxg2aqibWu1Ks4fi",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "TE36khLOdAeDjkbRH7M7lZJqcw4MVlL8",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900985140,
+            "updatedAt": 1794900985140
+          }
+        ],
+        "defaultStartupGroupId": "NMGv8jeTy5QcdB83yT1DSyDZ6Aq0oXqH"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "NMGv8jeTy5QcdB83yT1DSyDZ6Aq0oXqH",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "DRdkgNW8STss6iyIuL2V6z419UIEdKBa",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "IuJKjviFQEQDtI70wKpR6SU28DJCB0TV",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "maOCrywY9nPQn5HRaxg2aqibWu1Ks4fi",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "TE36khLOdAeDjkbRH7M7lZJqcw4MVlL8",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900985140,
+            "updatedAt": 1794900985140
+          }
+        ],
+        "defaultStartupGroupId": "NMGv8jeTy5QcdB83yT1DSyDZ6Aq0oXqH"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "locale": "en",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-en-light-800x600-basic.png",
+        "startup-editor-en-light-800x600-candidates.png",
+        "startup-editor-en-light-800x600-order.png"
+      ],
+      "basic": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Enter a startup group name."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "saved": {
+        "groups": [
+          {
+            "id": "VZDwVVXBcFju0WU6folzpkXwgLZoczue",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "4pI3OmhFZi596px8JF54Zz0ODOkr3SFR",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "HFv6L8rd69xLBEdtz5vM46ikqPqo3l0f",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "AlAXiSEaM41Y4bkvnpOZLeogbH2jAJ3A",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "oYLP2JcUtF3NM16Ki8APK82z4cAoTzBp",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900993251,
+            "updatedAt": 1794900993251
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "VZDwVVXBcFju0WU6folzpkXwgLZoczue",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "4pI3OmhFZi596px8JF54Zz0ODOkr3SFR",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "HFv6L8rd69xLBEdtz5vM46ikqPqo3l0f",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "AlAXiSEaM41Y4bkvnpOZLeogbH2jAJ3A",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "oYLP2JcUtF3NM16Ki8APK82z4cAoTzBp",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900993251,
+            "updatedAt": 1794900993251
+          }
+        ],
+        "defaultStartupGroupId": "VZDwVVXBcFju0WU6folzpkXwgLZoczue"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "VZDwVVXBcFju0WU6folzpkXwgLZoczue",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "4pI3OmhFZi596px8JF54Zz0ODOkr3SFR",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "HFv6L8rd69xLBEdtz5vM46ikqPqo3l0f",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "AlAXiSEaM41Y4bkvnpOZLeogbH2jAJ3A",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "oYLP2JcUtF3NM16Ki8APK82z4cAoTzBp",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794900993251,
+            "updatedAt": 1794900993251
+          }
+        ],
+        "defaultStartupGroupId": "VZDwVVXBcFju0WU6folzpkXwgLZoczue"
+      },
+      "errors": [],
+      "consoleErrors": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "theme": "light",
+      "locale": "vi",
+      "pass": true,
+      "screenshots": [
+        "startup-editor-vi-light-800x600-basic.png",
+        "startup-editor-vi-light-800x600-candidates.png",
+        "startup-editor-vi-light-800x600-order.png"
+      ],
+      "basic": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "validation": {
+        "invalid": "true",
+        "focused": true,
+        "message": "Nhập tên nhóm khởi động."
+      },
+      "singleSelection": [
+        "2.0.0/visual-fixture/apache/1"
+      ],
+      "selected": 4,
+      "warnings": 4,
+      "candidates": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "orderBefore": [
+        "Apache 2.0.0",
+        "PHP-FPM 1.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "orderAfter": [
+        "PHP-FPM 1.0.0",
+        "Apache 2.0.0",
+        "PHP-FPM 2.0.0",
+        "Fixture application with a long service name for layout verification"
+      ],
+      "order": {
+        "dialog": {
+          "x": 20,
+          "y": 16,
+          "width": 760,
+          "height": 568,
+          "right": 780,
+          "bottom": 584
+        },
+        "footer": {
+          "x": 36,
+          "y": 508,
+          "width": 728,
+          "height": 60,
+          "right": 764,
+          "bottom": 568
+        },
+        "overflow": [],
+        "rootOverflow": false,
+        "focusedInside": true,
+        "footerVisible": true,
+        "fitsViewport": true
+      },
+      "focusTrap": true,
+      "saved": {
+        "groups": [
+          {
+            "id": "7VeozPpC6mxvazMkusXOZNk37RAx8HKD",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "tkoatOFzL3uyHW5RPOHiKoAoNc33zm1p",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "CFPoDunxxGUXpb78G9EUqdZF7hahSTyM",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "96pdkdveM3CgLd9ObGi2iHTn7kBWqdWn",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "SV2UtX1t6p41cG1sqh3rRqZCCgXXC4cD",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794901001484,
+            "updatedAt": 1794901001484
+          }
+        ]
+      },
+      "editName": "Fixture workbench group",
+      "focusRestored": true,
+      "defaultAfterSpace": {
+        "groups": [
+          {
+            "id": "7VeozPpC6mxvazMkusXOZNk37RAx8HKD",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "tkoatOFzL3uyHW5RPOHiKoAoNc33zm1p",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "CFPoDunxxGUXpb78G9EUqdZF7hahSTyM",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "96pdkdveM3CgLd9ObGi2iHTn7kBWqdWn",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "SV2UtX1t6p41cG1sqh3rRqZCCgXXC4cD",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794901001484,
+            "updatedAt": 1794901001484
+          }
+        ],
+        "defaultStartupGroupId": "7VeozPpC6mxvazMkusXOZNk37RAx8HKD"
+      },
+      "afterDeleteCancel": {
+        "groups": [
+          {
+            "id": "7VeozPpC6mxvazMkusXOZNk37RAx8HKD",
+            "name": "Fixture workbench group",
+            "color": "#409eff",
+            "items": [
+              {
+                "id": "tkoatOFzL3uyHW5RPOHiKoAoNc33zm1p",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/0/bin",
+                "versionPath": "/visual-fixture/php/0"
+              },
+              {
+                "id": "CFPoDunxxGUXpb78G9EUqdZF7hahSTyM",
+                "type": "service-version",
+                "module": "apache",
+                "versionBin": "/visual-fixture/apache/1/bin",
+                "versionPath": "/visual-fixture/apache/1"
+              },
+              {
+                "id": "96pdkdveM3CgLd9ObGi2iHTn7kBWqdWn",
+                "type": "service-version",
+                "module": "php-fpm",
+                "versionBin": "/visual-fixture/php/1/bin",
+                "versionPath": "/visual-fixture/php/1"
+              },
+              {
+                "id": "SV2UtX1t6p41cG1sqh3rRqZCCgXXC4cD",
+                "type": "language-project",
+                "module": "node",
+                "projectId": "fixture-editor-project",
+                "projectPath": "/visual-fixture/teams/development/projects/application-with-a-long-folder-name/server"
+              }
+            ],
+            "createdAt": 1794901001484,
+            "updatedAt": 1794901001484
+          }
+        ],
+        "defaultStartupGroupId": "7VeozPpC6mxvazMkusXOZNk37RAx8HKD"
+      },
+      "errors": [],
+      "consoleErrors": []
+    }
+  ],
+  "errors": []
+}

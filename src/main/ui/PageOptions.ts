@@ -30,9 +30,9 @@ export function createScaledPageOptions(
   const widthScale = workAreaSize.width >= 1280 ? 1 : 0.875
   const heightScale = workAreaSize.height >= 800 ? 1 : 0.875
   const attrs = { ...pageOptions.attrs }
+  // Scale the initial size, but preserve the layout's minimum width in DIP.
   const scaledDimensions = [
     ['width', widthScale],
-    ['minWidth', widthScale],
     ['height', heightScale],
     ['minHeight', heightScale]
   ] as const

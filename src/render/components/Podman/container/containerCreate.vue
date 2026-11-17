@@ -6,7 +6,7 @@
         ? I18nT('common.action.edit') + I18nT('podman.Container')
         : I18nT('podman.Container') + I18nT('common.action.add')
     "
-    class="el-dialog-content-flex-1 h-[75%] dark:bg-[#1d2033]"
+    class="el-dialog-content-flex-1 app-workbench-dialog h-[75%]"
     width="600px"
     @closed="closedFn"
   >
@@ -20,7 +20,11 @@
         >
           <el-input v-model="form.dir">
             <template #append>
-              <el-button :icon="FolderOpened" @click.stop="chooseDir"></el-button>
+              <el-button
+                :icon="FolderOpened"
+                :aria-label="I18nT('base.open')"
+                @click.stop="chooseDir"
+              ></el-button>
             </template>
           </el-input>
         </el-form-item>
@@ -62,7 +66,13 @@
           <template #label>
             <div class="inline-flex items-center gap-3">
               <span>{{ I18nT('podman.PortBind') }}</span>
-              <el-button link type="primary" :icon="Plus" @click.stop="addPort"></el-button>
+              <el-button
+                link
+                type="primary"
+                :icon="Plus"
+                :aria-label="I18nT('common.action.add') + ' · ' + I18nT('podman.PortBind')"
+                @click.stop="addPort"
+              ></el-button>
             </div>
           </template>
           <div class="w-full flex flex-col gap-3">
@@ -87,6 +97,7 @@
                   class="flex-shrink-0 ml-4"
                   link
                   :icon="Delete"
+                  :aria-label="I18nT('common.action.delete') + ' · ' + I18nT('podman.PortBind')"
                   @click.stop="removePort(_p)"
                 ></el-button>
               </div>
@@ -98,7 +109,13 @@
           <template #label>
             <div class="inline-flex items-center gap-3">
               <span>{{ I18nT('podman.Volumes') }}</span>
-              <el-button link type="primary" :icon="Plus" @click.stop="addVolumes"></el-button>
+              <el-button
+                link
+                type="primary"
+                :icon="Plus"
+                :aria-label="I18nT('common.action.add') + ' · ' + I18nT('podman.Volumes')"
+                @click.stop="addVolumes"
+              ></el-button>
             </div>
           </template>
           <div class="w-full flex flex-col gap-3">
@@ -115,13 +132,18 @@
                     <span>{{ I18nT('podman.LocalDir') }}</span>
                   </template>
                   <template #append>
-                    <el-button :icon="FolderOpened" @click.stop="chooseVolume(_p)"></el-button>
+                    <el-button
+                      :icon="FolderOpened"
+                      :aria-label="I18nT('base.open')"
+                      @click.stop="chooseVolume(_p)"
+                    ></el-button>
                   </template>
                 </el-input>
                 <el-button
                   class="flex-shrink-0 ml-4"
                   link
                   :icon="Delete"
+                  :aria-label="I18nT('common.action.delete') + ' · ' + I18nT('podman.Volumes')"
                   @click.stop="removeVolume(_p)"
                 ></el-button>
               </div>
@@ -133,20 +155,28 @@
           <template #label>
             <div class="inline-flex items-center gap-3">
               <span>{{ I18nT('common.label.containerEnvVars') }}</span>
-              <el-button link type="primary" :icon="Plus" @click.stop="addEnv"></el-button>
+              <el-button
+                link
+                type="primary"
+                :icon="Plus"
+                :aria-label="
+                  I18nT('common.action.add') + ' · ' + I18nT('common.label.containerEnvVars')
+                "
+                @click.stop="addEnv"
+              ></el-button>
             </div>
           </template>
           <div class="w-full flex flex-col gap-3">
-            <template v-for="(item, _index) in form.env" :key="_index">
+            <template v-for="(envEntry, _index) in form.env" :key="_index">
               <div class="w-full flex items-center justify-between gap-3">
                 <el-input
-                  v-model="item.name"
+                  v-model="envEntry.name"
                   :placeholder="I18nT('host.envVar')"
                   class="w-[140px] flex-shrink-0"
                 >
                 </el-input>
                 <el-input
-                  v-model="item.value"
+                  v-model="envEntry.value"
                   :placeholder="I18nT('tools.envValue')"
                   class="flex-1"
                 >
@@ -155,6 +185,9 @@
                   class="flex-shrink-0 ml-4"
                   link
                   :icon="Delete"
+                  :aria-label="
+                    I18nT('common.action.delete') + ' · ' + I18nT('common.label.containerEnvVars')
+                  "
                   @click.stop="removeEnv(_index)"
                 ></el-button>
               </div>

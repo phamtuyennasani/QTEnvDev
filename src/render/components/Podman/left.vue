@@ -7,7 +7,12 @@
     <template #header>
       <div class="flex items-center justify-between">
         <span class="text-[12px]">{{ I18nT('podman.Machine') }}</span>
-        <el-button link :icon="Plus" @click.stop="addMachine(undefined)"></el-button>
+        <el-button
+          link
+          :icon="Plus"
+          :aria-label="I18nT('common.action.add')"
+          @click.stop="addMachine(undefined)"
+        ></el-button>
       </div>
     </template>
     <template #default>
@@ -20,18 +25,17 @@
               </template>
               <template v-else>
                 <template v-for="(item, _index) in mechine" :key="_index">
-                  <div
-                    :class="{
-                      'bg-gray-300 dark:bg-gray-700': item.name === tab,
-                      'hover:bg-gray-200 dark:hover:bg-gray-800': item.name !== tab
-                    }"
-                    class="h-[32px] group cursor-pointer w-full flex gap-3 items-center justify-between relative px-2 py-1 rounded-md"
-                    @click.stop="PodmanManager.tabChange(item)"
-                  >
-                    <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                  <div :class="{ 'is-current': item.name === tab }" class="app-machine-row">
+                    <button
+                      type="button"
+                      class="app-machine-select"
+                      :aria-pressed="item.name === tab"
+                      :title="item.name"
+                      @click.stop="PodmanManager.tabChange(item)"
+                    >
                       <span
                         :class="{
-                          'text-green-500': item.run
+                          'text-success': item.run
                         }"
                         class="text-[13px] truncate"
                         >{{ item.name }}</span
@@ -41,7 +45,7 @@
                           class="w-[20px] h-[20px] flex-shrink-0 flex items-center justify-center"
                         >
                           <yb-icon
-                            class="text-green-500 w-[15px] h-[15px]"
+                            class="text-success w-[15px] h-[15px]"
                             :svg="import('@/svg/play.svg?raw')"
                           />
                         </div>
@@ -50,27 +54,27 @@
                         <div
                           class="w-[20px] h-[20px] flex-shrink-0 flex items-center justify-center"
                         >
-                          <el-button link loading></el-button>
+                          <el-icon class="is-loading"><Loading /></el-icon>
                         </div>
                       </template>
-                    </div>
+                    </button>
                     <template v-if="!isLinux">
                       <el-dropdown trigger="click">
                         <template #default>
-                          <div
-                            class="h-full flex items-center justify-center flex-shrink-0"
+                          <button
+                            type="button"
+                            class="app-machine-menu"
+                            :aria-label="`${I18nT('common.label.action')} · ${item.name}`"
                             @click.stop="emptyClick"
                           >
-                            <div
-                              class="hidden group-hover:flex items-center justify-center py-[2px] px-[2px] rounded-sm hover:bg-slate-100 dark:hover:bg-slate-600"
-                            >
+                            <div class="flex items-center justify-center">
                               <yb-icon
                                 :svg="import('@/svg/more1.svg?raw')"
                                 width="16"
                                 height="16"
                               />
                             </div>
-                          </div>
+                          </button>
                         </template>
                         <template #dropdown>
                           <el-dropdown-menu>
@@ -92,7 +96,7 @@
                               {{ I18nT('common.action.edit') }}
                             </el-dropdown-item>
                             <el-dropdown-item divided @click.stop="item.remove()">
-                              <span class="text-red-500">{{ I18nT('common.action.delete') }}</span>
+                              <span class="text-danger">{{ I18nT('common.action.delete') }}</span>
                             </el-dropdown-item>
                           </el-dropdown-menu>
                         </template>
@@ -110,7 +114,7 @@
 </template>
 <script lang="ts" setup>
   import { computed } from 'vue'
-  import { Plus } from '@element-plus/icons-vue'
+  import { Loading, Plus } from '@element-plus/icons-vue'
   import { I18nT } from '@lang/index'
   import { PodmanManager } from '@/components/Podman/class/Podman'
   import { emptyClick } from '@/util/Index'

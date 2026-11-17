@@ -25,14 +25,26 @@ const checkLinuxBrew = (sendGlobalUpdate: () => void) => {
 }
 
 /**
+ * Known Homebrew binary locations checked before PATH-dependent commands.
+ * Apple Silicon default, Intel default, and legacy Intel path cover all supported macOS layouts.
+ */
+const KNOWN_BREW_PATHS = [
+  '/opt/homebrew/bin/brew',
+  '/usr/local/bin/brew',
+  '/usr/local/Homebrew/bin/brew'
+]
+
+/**
  * 运行 Brew 检查
  */
 const runBrewChecks = (brewBins: string[], sendGlobalUpdate: () => void) => {
   const handleBrewCheck = (error?: Error) => {
-    for (const s of brewBins) {
-      if (existsSync(s)) {
-        global.Server.BrewBin = s
-        break
+    if (!global.Server.BrewBin) {
+      for (const s of brewBins) {
+        if (existsSync(s)) {
+          global.Server.BrewBin = s
+          break
+        }
       }
     }
     if (error) {
@@ -48,9 +60,28 @@ const runBrewChecks = (brewBins: string[], sendGlobalUpdate: () => void) => {
  * 执行 Brew 检查命令
  */
 const executeBrewChecks = (handleBrewCheck: (error?: Error) => void) => {
-  spawnPromiseWithEnv('which', ['brew'])
+  // Resolve Brew binary from known absolute paths first; this avoids failures on fresh
+  // machines where shell-env has not yet added /opt/homebrew/bin to PATH.
+  for (const bin of KNOWN_BREW_PATHS) {
+    if (existsSync(bin)) {
+      global.Server.BrewBin = bin
+      break
+    }
+  }
+
+  const resolvePromise = global.Server.BrewBin
+    ? Promise.resolve({ stdout: global.Server.BrewBin })
+    : spawnPromiseWithEnv('which', ['brew'])
+
+  resolvePromise
     .then((res) => {
       console.log('which brew: ', res)
+      if (!global.Server.BrewBin) {
+        const whichBin = res.stdout.trim()
+        if (whichBin && existsSync(whichBin)) {
+          global.Server.BrewBin = whichBin
+        }
+      }
       checkBrewRepo(handleBrewCheck)
       checkBrewCellar(handleBrewCheck)
     })

@@ -26,6 +26,7 @@ const dev: BuildOptions = {
 
 const dist: BuildOptions = {
   ...mainOutput,
+  define: { __QTENVDEV_MAC_INTERNAL_BUILD__: 'false' },
   platform: 'node',
   entryPoints: { main: 'src/main/index.ts' },
   minify: true,

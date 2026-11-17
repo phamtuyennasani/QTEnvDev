@@ -1,6 +1,6 @@
 #!/bin/sh
-# Invoked only from AppHelper's root-private resource copies. Unsigned sources
-# require the separate explicit administrator development bootstrap.
+# Invoked only from AppHelper's root-private resource copies, after the selected
+# production, internal or explicit development bootstrap has verified its inputs.
 set -eu
 umask 077
 BIN="$1"

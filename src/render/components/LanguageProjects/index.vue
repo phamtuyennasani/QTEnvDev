@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full overflow-hidden">
+  <div class="h-full overflow-hidden app-project-workspace">
     <!-- 项目目录列表 -->
     <el-card class="version-manager">
       <template #header>
@@ -9,8 +9,8 @@
             <el-input
               v-model="project.search"
               clearable
-              class="ml-4"
-              size="small"
+              class="app-project-search"
+              :aria-label="I18nT('common.action.search')"
               :placeholder="I18nT('common.action.search')"
             ></el-input>
           </div>
@@ -24,8 +24,8 @@
             </template>
             <template v-else>
               <slot name="header-actions" />
-              <el-button link @click.stop="project.addProject()">
-                <FolderAdd class="w-[24px] h-[24px] p-[2px]"></FolderAdd>
+              <el-button type="primary" :icon="FolderAdd" @click.stop="project.addProject()">
+                {{ I18nT('common.action.add') }}
               </el-button>
             </template>
           </div>
@@ -39,23 +39,22 @@
         :data="tableData"
         :row-class-name="tableRowClassName"
       >
-        <el-table-column prop="path">
+        <el-table-column prop="path" min-width="240">
           <template #header>
-            <span class="truncate" style="padding: 2px 12px 2px 24px; display: block">{{
-              I18nT('common.label.path')
-            }}</span>
+            <span class="app-project-path-heading">{{ I18nT('common.label.path') }}</span>
           </template>
           <template #default="scope">
-            <span
-              style="padding: 2px 12px 2px 24px"
-              class="truncate cursor-pointer hover:text-yellow-500 project-list-cell-id"
+            <button
+              type="button"
+              class="app-project-path project-list-cell-id"
+              :title="scope.row.path"
               :data-project-id="scope.row.id"
               @click.stop="shell.openPath(scope.row.path)"
-              >{{ scope.row.path }}</span
+              >{{ scope.row.path }}</button
             >
           </template>
         </el-table-column>
-        <el-table-column :label="I18nT('base.links')" width="300px">
+        <el-table-column :label="I18nT('base.links')" min-width="200">
           <template #default="scope">
             <template v-if="scope.row.isService">
               <template
@@ -69,8 +68,8 @@
                     v-if="projectPorts.get(scope.row.id)?.primaryUrl"
                     class="flex items-center gap-2 cursor-pointer"
                     :class="{
-                      'hover:text-yellow-500': !scope.row?.state?.isRun,
-                      'text-green-500': scope.row?.state?.isRun
+                      'text-accent': !scope.row?.state?.isRun,
+                      'text-success': scope.row?.state?.isRun
                     }"
                     @click.stop="openSite(scope.row)"
                   >
@@ -131,7 +130,7 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column :label="I18nT('common.label.port')" width="100px">
+        <el-table-column :label="I18nT('common.label.port')" width="88">
           <template #default="scope">
             <template v-if="scope.row.isService">
               <template v-if="scope.row.id === quickEdit?.id">
@@ -151,7 +150,7 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column :label="I18nT('base.version')" :prop="null" width="160px">
+        <el-table-column :label="I18nT('base.version')" :prop="null" width="104">
           <template #default="scope">
             <template v-if="quickEdit?.id === scope.row.id">
               <el-select v-model="quickEdit!.binBin">
@@ -162,13 +161,13 @@
               </el-select>
             </template>
             <template v-else>
-              <span class="cursor-pointer hover:text-yellow-500">
+              <span class="font-mono">
                 {{ scope.row.binVersion }}
               </span>
             </template>
           </template>
         </el-table-column>
-        <el-table-column :label="I18nT('common.label.comment')" prop="comment">
+        <el-table-column :label="I18nT('common.label.comment')" prop="comment" min-width="160">
           <template #header>
             <span class="truncate">{{ I18nT('common.label.comment') }}</span>
           </template>
@@ -178,7 +177,7 @@
             </template>
             <template v-else>
               <template v-if="!scope.row.comment && !scope.row?.state?.running">
-                <span class="truncate row-hover-show text-yellow-500">
+                <span class="truncate row-hover-show text-muted">
                   {{ I18nT('host.dbclickRowToEdit') }}
                 </span>
               </template>
@@ -197,7 +196,7 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column :label="I18nT('base.service')" :prop="null" width="110px">
+        <el-table-column :label="I18nT('base.service')" :prop="null" width="110px" fixed="right">
           <template #default="scope">
             <template
               v-if="scope.row.isService && !scope?.row?.deling && quickEdit?.id !== scope.row.id"
@@ -210,6 +209,8 @@
                   <el-button
                     link
                     class="status running"
+                    :aria-label="I18nT('common.action.stop')"
+                    :disabled="scope.row.state.running"
                     :class="{ disabled: scope.row.state.running }"
                     @click.stop="scope.row.stop()"
                   >
@@ -218,6 +219,8 @@
                   <el-button
                     link
                     class="status refresh"
+                    :aria-label="I18nT('common.action.restart')"
+                    :disabled="scope.row.state.running"
                     :class="{ disabled: scope.row.state.running }"
                     @click.stop="scope.row.restart()"
                   >
@@ -228,6 +231,8 @@
                   <el-button
                     link
                     class="status start"
+                    :aria-label="I18nT('common.action.start')"
+                    :disabled="scope.row.state.running"
                     :class="{
                       disabled: scope.row.state.running
                     }"
@@ -240,12 +245,19 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column :label="I18nT('base.operation')" :prop="null" width="110px" align="center">
+        <el-table-column
+          :label="I18nT('base.operation')"
+          :prop="null"
+          width="90"
+          align="center"
+          fixed="right"
+        >
           <template #header>
             <span class="truncate">{{ I18nT('base.operation') }}</span>
           </template>
           <template #default="scope">
             <el-popover
+              trigger="click"
               effect="dark"
               popper-class="host-list-poper"
               placement="left-start"
@@ -359,7 +371,12 @@
               </ul>
 
               <template #reference>
-                <el-button :key="scope.row.id" link class="status">
+                <el-button
+                  :key="scope.row.id"
+                  link
+                  class="status"
+                  :aria-label="I18nT('common.label.action')"
+                >
                   <yb-icon :svg="import('@/svg/more1.svg?raw')" width="22" height="22" />
                 </el-button>
               </template>
