@@ -2,6 +2,7 @@ import { build as viteBuild } from 'vite'
 import { build as esbuild } from 'esbuild'
 import { Arch, build as electronBuild, Platform } from 'electron-builder'
 import { existsSync } from 'node:fs'
+import { copyFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -19,6 +20,12 @@ if (windowsBuildStage && !['app', 'installers'].includes(windowsBuildStage)) {
 
 async function packMain() {
   await DoFix()
+  await import('./generate-pqt-forge-icons')
+  await mkdir(path.resolve(__dirname, '../dist/electron/static'), { recursive: true })
+  await copyFile(
+    path.resolve(__dirname, '../build/pqt-forge.svg'),
+    path.resolve(__dirname, '../dist/electron/static/pqt-forge.svg')
+  )
   await buildLanguageAssets({
     sourceRoot: path.resolve(__dirname, '../src/lang'),
     outputRoot: path.resolve(__dirname, '../dist/electron/static/lang')
@@ -38,6 +45,7 @@ async function packMain() {
 
 async function packRenderer() {
   await viteBuild(viteConfig.buildConfig)
+  await viteBuild(viteConfig.nextBuildConfig)
 }
 
 async function packElectron() {

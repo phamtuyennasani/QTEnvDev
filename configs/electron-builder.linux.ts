@@ -22,8 +22,8 @@ const ptyPrebuildExcludes = [
   .map((d) => `!**/node_modules/node-pty/prebuilds/${d}/**`)
 
 const desktop: any = {
-  Name: 'QTEnvDev',
-  Comment: 'All-In-One Full-Stack Environment Management Tool',
+  Name: 'PQT Forge',
+  Comment: 'PQT Forge developer environment manager',
   // Exec: 'QTEnvDev', // 确保这里与 executableName 一致
   // Icon: 'com.xpf0000.qtenvdev', // 通常是 executableName 的小写，或者你的应用ID
   Terminal: false,
@@ -65,7 +65,7 @@ const conf: Configuration = {
   },
   artifactName: `\${productName}-\${version}-${archName}.\${ext}`, // 自定义打包文件名格式
   linux: {
-    icon: 'build/icons',
+    icon: 'build/pqt-forge-icons',
     asarUnpack: ['**/*.node', '**/node_modules/sharp/**/*', '**/node_modules/@img/**/*'],
     category: 'Development',
     desktop: {

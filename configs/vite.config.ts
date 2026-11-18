@@ -100,7 +100,10 @@ const serverConfig: UserConfig = {
     port: ViteDevPort,
     hmr: true
   },
-  ...config
+  ...config,
+  // Dev serves both independent renderers from the shared src root.
+  // Production builds remain separately configured below.
+  root: path.resolve(__dirname, '../src')
 }
 
 const serveConfig: UserConfig = {
@@ -125,6 +128,7 @@ const buildConfig: UserConfig = {
       external: [],
       input: {
         main: path.resolve(__dirname, '../src/render/index.html'),
+        next: path.resolve(__dirname, '../src/render-next/next.html'),
         tray: path.resolve(__dirname, '../src/render/tray.html'),
         capturer: path.resolve(__dirname, '../src/render/capturer/capturer.html')
       },
@@ -160,8 +164,36 @@ const buildConfig: UserConfig = {
   }
 }
 
+const renderNextPath = path.resolve(__dirname, '../src/render-next/')
+const nextBuildConfig: UserConfig = {
+  ...config,
+  root: renderNextPath,
+  build: {
+    outDir: '../../dist/render',
+    emptyOutDir: false,
+    assetsDir: 'static',
+    rollupOptions: {
+      input: path.resolve(renderNextPath, 'next.html'),
+      output: {
+        entryFileNames: 'static/js/next.[hash].js',
+        chunkFileNames: 'static/js/next-[name].[hash].js',
+        assetFileNames: 'static/[ext]/next-[name].[hash].[ext]'
+      }
+    },
+    minify: 'esbuild'
+  },
+  resolve: {
+    alias: {
+      '@': renderPath,
+      '@shared': sharePath,
+      '@lang': langPath
+    }
+  }
+}
+
 export default {
   serveConfig,
   serverConfig,
-  buildConfig
+  buildConfig,
+  nextBuildConfig
 }

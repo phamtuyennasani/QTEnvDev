@@ -1,0 +1,14 @@
+﻿<template>
+<section class="screen startup-groups-screen">
+<header class="page-header"><div><p class="eyebrow">WORKSPACE / STARTUP GROUPS</p><h1>Startup groups</h1><p class="subtitle">Run saved service and language project sequences in a safe order.</p></div><button class="primary-button" @click="editorGroup=undefined; editorOpen=true">+ New group</button></header>
+<p v-if="error" class="forge-alert forge-alert--error">{{ error }}</p>
+<div v-if="loading&&!groups.length" class="panel empty-copy">Loading saved startup groups...</div>
+<div v-else-if="!groups.length" class="panel empty-copy">No startup groups configured.</div>
+<div v-else class="startup-group-grid"><article v-for="group in groups" :key="group.id" class="panel startup-group-card"><div class="detail-top"><div><p class="eyebrow">{{ defaultGroup?.id===group.id?'DEFAULT GROUP':'STARTUP GROUP' }}</p><h2>{{ group.name }}</h2><p class="detail-kind">{{ group.items.length }} members</p></div><span class="state-label">{{ controller.isExecuting(group)?'Working...':controller.isRunning(group)?'Running':'Stopped' }}</span></div><div class="startup-member-list"><div v-for="item in group.items" :key="item.id" class="startup-member"><span class="status-dot"></span><span>{{ item.module }}<small>{{ item.type==='service-version'?item.versionBin:item.projectPath }}</small></span></div></div><div class="detail-actions"><button class="action-button action-button--primary" :disabled="busy||controller.isExecuting(group)||controller.isRunning(group)" @click="controller.run(group,true)">Start group</button><button class="action-button" :disabled="busy||controller.isExecuting(group)||!controller.isRunning(group)" @click="controller.run(group,false)">Stop</button><button class="action-button" @click="editorGroup=group;editorOpen=true">Edit</button><button class="action-button" @click="controller.setDefault(defaultGroup?.id===group.id?undefined:group.id)">{{ defaultGroup?.id===group.id?'Default':'Set default' }}</button><button class="action-button action-button--danger" @click="removeGroup(group.id)">Delete</button></div></article></div>
+<StartupGroupEditorDialog v-model:open="editorOpen" :group="editorGroup" @saved="showNotice('Startup group saved')" />
+</section>
+</template>
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'; import { startupGroupController } from '../state/startupGroupController'; import { showNotice } from '../state/app'; import StartupGroupEditorDialog from '../components/StartupGroupEditorDialog.vue';
+const controller=startupGroupController, groups=controller.groups, defaultGroup=controller.defaultGroup, loading=controller.loading, busy=controller.busy, error=controller.error; const editorOpen=ref(false), editorGroup=ref<any>(); const removeGroup=async(id:string)=>{if(confirm('Delete this startup group?')) await controller.remove(id)}; onMounted(()=>void controller.init());
+</script>

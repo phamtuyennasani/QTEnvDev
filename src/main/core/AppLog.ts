@@ -22,7 +22,7 @@ class AppLog {
   }
 
   info(msg: string) {
-    this.log('debug', msg)
+    this.log('info', msg)
   }
 
   error(msg: string) {

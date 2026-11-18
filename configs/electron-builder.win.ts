@@ -35,7 +35,7 @@ const conf: Configuration = {
     ],
     // Windows release signing is performed from GitHub workflow artifacts via the
     // SignPath trusted-build connector. Electron Builder does not submit signing requests.
-    icon: 'build/icon.ico',
+    icon: 'build/pqt-forge-icons/pqt-forge.ico',
     target: [
       {
         target: 'nsis',

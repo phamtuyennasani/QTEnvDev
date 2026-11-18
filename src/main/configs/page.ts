@@ -5,6 +5,10 @@ import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOption
 
 const index = getRendererResourcePath('index.html')
 const tray = getRendererResourcePath('tray.html')
+const next = getRendererResourcePath('next.html')
+// PQT Forge is the primary renderer. Set PQT_FORGE_NEXT_RENDERER=0 only for a
+// temporary legacy fallback while comparing or diagnosing the old shell.
+const useNextRenderer = process.env.PQT_FORGE_NEXT_RENDERER !== '0'
 
 interface PageOptions {
   [key: string]: {
@@ -17,19 +21,28 @@ interface PageOptions {
 const options: PageOptions = {
   index: {
     attrs: {
-      title: 'QTEnvDev',
-      width: 1200,
-      height: 800,
-      minWidth: 800,
-      minHeight: 600
+      title: useNextRenderer ? 'PQT Forge' : 'QTEnvDev',
+      // PQT Forge owns its titlebar and window controls. Keep the legacy
+      // renderer on Electron's native frame when explicitly selected.
+      frame: useNextRenderer ? false : undefined,
+      width: useNextRenderer ? 1000 : 1200,
+      height: useNextRenderer ? 700 : 800,
+      minWidth: useNextRenderer ? 1000 : 800,
+      minHeight: useNextRenderer ? 700 : 600,
+      maxWidth: useNextRenderer ? 1000 : undefined,
+      maxHeight: useNextRenderer ? 700 : undefined
     },
     bindCloseToHide: true,
-    url: is.dev() ? `http://localhost:${ViteDevPort}` : index
+    url: is.dev()
+      ? `http://localhost:${ViteDevPort}${useNextRenderer ? '/render-next/next.html' : '/render/index.html'}`
+      : useNextRenderer
+        ? next
+        : index
   },
   tray: {
     attrs: {},
     bindCloseToHide: true,
-    url: is.dev() ? `http://localhost:${ViteDevPort}/tray.html` : tray
+    url: is.dev() ? `http://localhost:${ViteDevPort}/render/tray.html` : tray
   }
 }
 

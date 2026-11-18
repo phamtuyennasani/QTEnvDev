@@ -6,7 +6,6 @@ import CloudflareTunnelStore from '@/core/CloudflareTunnel/CloudflareTunnelStore
 import { forkTerminalRequest, isPositiveHostPid } from '@/util/ForkTerminalRequest'
 import { beginServiceStatusPending, noteServiceStatusRevision } from '@/util/mcpServiceStatus'
 
-// 请求属于跨页面存活的实例；WeakMap 避免 Promise 被 JSON 序列化并发送到 fork/持久化。
 const operations = new WeakMap<object, { command: string; promise: Promise<boolean> }>()
 
 export class CloudflareTunnel {

@@ -132,6 +132,11 @@ function runElectronApp() {
   // for Node-based scripts. It makes the Electron executable run as plain
   // Node, where Chromium flags such as --user-data-dir are rejected.
   const electronEnv = { ...process.env }
+  console.log(
+    process.env.PQT_FORGE_NEXT_RENDERER === '0'
+      ? 'Legacy renderer fallback enabled'
+      : 'PQT Forge renderer enabled by default (1000x700)'
+  )
   delete electronEnv.ELECTRON_RUN_AS_NODE
   electronProcess = spawn('electron', args, {
     stdio: 'pipe',

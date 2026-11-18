@@ -8,7 +8,7 @@
 - **Electron Version**: 39.8.7
 - **License**: MIT
 - **Author**: Pengfei Xu
-- **Repository**: <https://github.com/xpf0000/QTEnvDev>
+- **Repository**: <https://github.com/phamtuyennasani/QTEnvDev>
 
 ## Technology Stack
 

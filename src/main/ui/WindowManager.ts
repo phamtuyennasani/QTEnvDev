@@ -104,7 +104,13 @@ export default class WindowManager extends EventEmitter {
     this.bindDiagnostics(page, window)
     window.setMenu(null)
     if (is.dev()) {
-      window.loadURL(pageOptions.url).catch()
+      console.log(`[PQT Forge] loading ${page} renderer: ${pageOptions.url}`)
+      window.webContents.once('did-finish-load', () => {
+        console.log(`[PQT Forge] loaded ${page}: ${window.webContents.getURL()}`)
+      })
+      window.loadURL(pageOptions.url).catch((error) => {
+        console.error(`[PQT Forge] failed loading ${page}:`, error)
+      })
     } else {
       window.loadFile(pageOptions.url).catch()
     }
@@ -135,7 +141,11 @@ export default class WindowManager extends EventEmitter {
     window = new BrowserWindow({
       ...defaultBrowserOptions,
       ...pageOptions.attrs,
-      icon: nativeImage.createFromPath(join(global.__static, '512x512.png'))
+      icon: nativeImage.createFromPath(
+        process.env.PQT_FORGE_NEXT_RENDERER !== '0'
+          ? join(global.__static, 'pqt-forge-512.png')
+          : join(global.__static, '512x512.png')
+      )
     })
     window.webContents.on('before-input-event', (event, input) => {
       if ((input.control || input.meta) && input.key.toLowerCase() === 'r') {
@@ -151,7 +161,13 @@ export default class WindowManager extends EventEmitter {
     }
 
     if (is.dev()) {
-      window.loadURL(pageOptions.url).catch()
+      console.log(`[PQT Forge] loading ${page} renderer: ${pageOptions.url}`)
+      window.webContents.once('did-finish-load', () => {
+        console.log(`[PQT Forge] loaded ${page}: ${window.webContents.getURL()}`)
+      })
+      window.loadURL(pageOptions.url).catch((error) => {
+        console.error(`[PQT Forge] failed loading ${page}:`, error)
+      })
       window.webContents.openDevTools()
     } else {
       window.loadFile(pageOptions.url).catch((e) => {

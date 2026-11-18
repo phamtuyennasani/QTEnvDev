@@ -44,8 +44,14 @@ export default class TrayManager extends EventEmitter {
   constructor() {
     super()
     this.active = false
-    this.normalIcon = nativeImage.createFromPath(join(global.__static, '32x32.png'))
-    this.activeIcon = nativeImage.createFromPath(join(global.__static, '32x32_active.png'))
+    const forgeEnabled = process.env.PQT_FORGE_NEXT_RENDERER !== '0'
+    const forgeIcon = forgeEnabled
+      ? join(global.__static, 'pqt-forge-tray.png')
+      : join(global.__static, '32x32.png')
+    this.normalIcon = nativeImage.createFromPath(forgeIcon)
+    this.activeIcon = forgeEnabled
+      ? nativeImage.createFromPath(forgeIcon)
+      : nativeImage.createFromPath(join(global.__static, '32x32_active.png'))
     const size = isWindows() ? 9 : 10
     this.stopIcon = nativeImage
       .createFromPath(join(__static, 'stop.png'))
@@ -54,7 +60,7 @@ export default class TrayManager extends EventEmitter {
       .createFromPath(join(__static, 'run.png'))
       .resize({ width: size, height: size })
     this.tray = new Tray(this.normalIcon)
-    this.tray.setToolTip('QTEnvDev')
+    this.tray.setToolTip(forgeEnabled ? 'PQT Forge' : 'QTEnvDev')
     this.onBlur = this.onBlur.bind(this)
   }
 

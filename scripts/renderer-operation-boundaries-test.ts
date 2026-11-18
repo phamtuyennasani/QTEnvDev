@@ -9,6 +9,14 @@ import {
 import { redisCommanderRequest } from '../src/render/components/Redis/RedisCommanderRequest'
 
 const root = join(import.meta.dirname, '..')
+const nextSource = (file: string) => readFileSync(join(root, 'src/render-next', file), 'utf8')
+assert.match(nextSource('state/projectController.ts'), /reactiveBind\(new WebsiteController/)
+assert.match(nextSource('websites/WebsiteController.ts'), /private mutation\?: Promise<boolean>/)
+assert.match(nextSource('websites/WebsiteController.ts'), /WebsiteOutcomeUnknown/)
+for (const file of ['screens/WebsitesScreen.vue', 'websites/WebsiteEditor.vue', 'screens/DatabasesScreen.vue']) {
+  assert.doesNotMatch(nextSource(file), /IPC\.send|from ['"]@\/util\/IPC/)
+}
+assert.match(nextSource('screens/DatabasesScreen.vue'), /serviceController\.run/)
 const componentsDir = join(root, 'src', 'render', 'components')
 const agentsSource = readFileSync(join(root, 'AGENTS.md'), 'utf-8')
 const packageJson = JSON.parse(readFileSync(join(root, 'package.json'), 'utf-8'))
