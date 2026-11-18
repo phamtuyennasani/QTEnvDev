@@ -5,7 +5,7 @@ import { shell } from '@/util/NodeFn'
 import { showNotice } from './app'
 
 type PhpState = { loading: boolean; iniPath: string; extensions: string[]; error: string }
-const state = reactive<PhpState>({ loading: false, iniPath: '', extensions: [], error: '' })
+const state = reactive<PhpState & { query: string }>({ loading: false, iniPath: '', extensions: [], error: '', query: '' })
 const current = () => BrewStore().module('php').installed.find((item) => item.run) ?? BrewStore().currentVersion('php') ?? BrewStore().module('php').installed[0]
 const request = <T>(method: string, ...args: unknown[]) => new Promise<T>((resolve, reject) => {
   IPC.send('app-fork:php', method, ...args).then((key: string, response: any) => {
@@ -26,4 +26,4 @@ const load = async () => {
   finally { state.loading = false }
 }
 const openFolder = () => { const version = current(); if (version) shell.openPath(version.path).catch(() => {}) }
-export const phpController = { state, current, load, openFolder, installed: computed(() => Boolean(current())) }
+export const phpController = { state, current, load, openFolder, installed: computed(() => Boolean(current())), filteredExtensions: computed(() => state.extensions.filter((name) => name.toLowerCase().includes(state.query.toLowerCase()))) }

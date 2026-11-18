@@ -15,6 +15,7 @@
       </article>
     </div>
     <WebsiteEditor v-if="editorOpen" :original="editing" @close="editorOpen = false" />
+    <TomcatWebsiteEditor v-if="tomcatEditorOpen" :original="editing" @close="tomcatEditorOpen = false" @saved="projectController.refresh()" />
     <ForgeDialog v-if="pendingDelete" title="Remove website?" description="Remove the host record, generated server configuration and managed certificate. Your project directory and source files are kept." @close="pendingDelete = undefined">
       <div class="website-form"><label>Type {{ pendingDelete.domain }} to confirm<input v-model="confirmation" autofocus autocomplete="off" @keyup.enter="remove" /></label><p v-if="projectController.error" class="forge-alert forge-alert--error" role="alert">{{ projectController.error }}</p></div>
       <template #footer><button class="action-button" @click="pendingDelete = undefined">Cancel</button><button class="action-button action-button--danger" :disabled="busy || confirmation !== pendingDelete.domain" @click="remove">Remove configuration</button></template>
@@ -28,6 +29,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { projectController, type ProjectItem } from '../state/projectController'
 import WebsiteEditor from '../websites/WebsiteEditor.vue'
+import TomcatWebsiteEditor from '../websites/TomcatWebsiteEditor.vue'
 import ForgeDialog from '../components/ForgeDialog.vue'
 import { editableWebsite } from '../websites/model'
 import type { WebsiteHost } from '../websites/types'
@@ -35,11 +37,11 @@ const query = ref('')
 const selectedProject = computed(() => projectController.selected.project)
 const filteredProjects = computed(() => projectController.projects.filter((item) => (item.name + ' ' + item.domain).toLowerCase().includes(query.value.toLowerCase())))
 const busy = computed(() => projectController.saving)
-const editorOpen = ref(false); const editing = ref<WebsiteHost>()
+const editorOpen = ref(false); const tomcatEditorOpen = ref(false); const editing = ref<WebsiteHost>()
 const pendingDelete = ref<ProjectItem>(); const confirmation = ref(''); const logsProject = ref<ProjectItem>()
 const server = ref<'nginx' | 'apache' | 'caddy' | 'frankenphp' | 'tomcat'>('nginx')
 const servers = [{ flag: 'nginx', label: 'Nginx' }, { flag: 'apache', label: 'Apache' }, { flag: 'caddy', label: 'Caddy' }, { flag: 'frankenphp', label: 'FrankenPHP' }, { flag: 'tomcat', label: 'Tomcat' }] as const
-const openEditor = (host?: WebsiteHost) => { projectController.error = ''; editing.value = host; editorOpen.value = true }
+const openEditor = (host?: WebsiteHost) => { projectController.error = ''; editing.value = host; if (host?.type === 'tomcat') { tomcatEditorOpen.value = true; return } editorOpen.value = true }
 const openProject = () => { if (selectedProject.value) void projectController.open(selectedProject.value, server.value) }
 const remove = async () => { if (pendingDelete.value && await projectController.remove(pendingDelete.value, confirmation.value)) pendingDelete.value = undefined }
 onMounted(() => { void projectController.refresh() })

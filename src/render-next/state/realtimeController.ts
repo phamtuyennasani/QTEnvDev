@@ -1,0 +1,9 @@
+import { reactive } from 'vue'
+export type RealtimeMode='websocket'|'sse'
+const state=reactive({mode:'websocket' as RealtimeMode,url:'',message:'',events:[] as string[],connected:false,error:'',busy:false})
+let socket:WebSocket|EventSource|undefined
+const connect=()=>{if(state.busy||state.connected)return false;let url='';try{url=new URL(state.url.trim()).toString()}catch{state.error='Enter a valid ws://, wss://, http:// or https:// URL';return false}state.busy=true;state.error='';try{if(state.mode==='websocket'){if(!/^wss?:/i.test(url))throw new Error('WebSocket mode requires ws:// or wss://');const ws=new WebSocket(url);socket=ws;ws.onopen=()=>{state.connected=true;state.busy=false;state.events.unshift('Connected')};ws.onmessage=(event)=>state.events.unshift(String(event.data));ws.onerror=()=>{state.error='WebSocket connection failed'};ws.onclose=()=>{state.connected=false;state.busy=false;state.events.unshift('Disconnected')}}else{if(!/^https?:/i.test(url))throw new Error('SSE mode requires http:// or https://');const es=new EventSource(url);socket=es;es.onopen=()=>{state.connected=true;state.busy=false;state.events.unshift('Connected')};es.onmessage=(event)=>state.events.unshift(String(event.data));es.onerror=()=>{state.error='SSE connection failed';state.connected=false;state.busy=false}}return true}catch(e){state.error=e instanceof Error?e.message:String(e);state.busy=false;return false}}
+const send=()=>{if(state.connected&&state.mode==='websocket'&&socket instanceof WebSocket){socket.send(state.message);state.events.unshift(`> ${state.message}`);state.message=''}}
+const disconnect=()=>{socket?.close();socket=undefined;state.connected=false;state.busy=false}
+const clear=()=>state.events.splice(0)
+export const realtimeController={state,connect,send,disconnect,clear}
