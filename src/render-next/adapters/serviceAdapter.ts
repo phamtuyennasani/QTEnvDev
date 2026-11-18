@@ -36,16 +36,16 @@ export async function runServiceLifecycle(name: string, action: Lifecycle): Prom
   }
 }
 
-export async function readServiceSnapshot(name: string): Promise<{ connected: boolean; running: boolean; version?: string; port?: number }> {
+export async function readServiceSnapshot(name: string): Promise<{ connected: boolean; installed: boolean; running: boolean; version?: string; port?: number; reason?: 'unavailable' | 'unknown' }> {
   const flag = serviceModuleFlags[name]
-  if (!flag) return { connected: false, running: false }
+  if (!flag) return { connected: false, installed: false, running: false, reason: 'unavailable' }
   try {
-    if (!window.Server?.DataDirectoryReady) return { connected: false, running: false }
+    if (!window.Server?.DataDirectoryReady) return { connected: false, installed: false, running: false, reason: 'unknown' }
     const module = BrewStore().module(flag === 'php-fpm' ? 'php' : flag)
     if (!await module.fetchInstalled(false, { fresh: false })) throw new Error('Installed versions could not be refreshed.')
     const item = module.installed.find((version) => version.run) ?? BrewStore().currentVersion(module.typeFlag) ?? module.installed[0]
-    return { connected: true, running: module.installed.some((version) => version.run), version: item?.version ?? undefined, port: undefined }
+    return { connected: true, installed: Boolean(item), running: module.installed.some((version) => version.run), version: item?.version ?? undefined, port: undefined }
   } catch {
-    return { connected: false, running: false }
+    return { connected: false, installed: false, running: false, reason: 'unknown' }
   }
 }

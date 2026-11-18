@@ -128,7 +128,6 @@ const buildConfig: UserConfig = {
       external: [],
       input: {
         main: path.resolve(__dirname, '../src/render/index.html'),
-        next: path.resolve(__dirname, '../src/render-next/next.html'),
         tray: path.resolve(__dirname, '../src/render/tray.html'),
         capturer: path.resolve(__dirname, '../src/render/capturer/capturer.html')
       },
@@ -173,7 +172,7 @@ const nextBuildConfig: UserConfig = {
     emptyOutDir: false,
     assetsDir: 'static',
     rollupOptions: {
-      input: path.resolve(renderNextPath, 'next.html'),
+      input: { next: path.resolve(renderNextPath, 'next.html') },
       output: {
         entryFileNames: 'static/js/next.[hash].js',
         chunkFileNames: 'static/js/next-[name].[hash].js',

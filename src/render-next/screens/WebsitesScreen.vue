@@ -41,7 +41,7 @@ const editorOpen = ref(false); const tomcatEditorOpen = ref(false); const editin
 const pendingDelete = ref<ProjectItem>(); const confirmation = ref(''); const logsProject = ref<ProjectItem>()
 const server = ref<'nginx' | 'apache' | 'caddy' | 'frankenphp' | 'tomcat'>('nginx')
 const servers = [{ flag: 'nginx', label: 'Nginx' }, { flag: 'apache', label: 'Apache' }, { flag: 'caddy', label: 'Caddy' }, { flag: 'frankenphp', label: 'FrankenPHP' }, { flag: 'tomcat', label: 'Tomcat' }] as const
-const openEditor = (host?: WebsiteHost) => { projectController.error = ''; editing.value = host; if (host?.type === 'tomcat') { tomcatEditorOpen.value = true; return } editorOpen.value = true }
+const openEditor = (host?: WebsiteHost) => { projectController.error = ''; editing.value = host; if (host && !editableWebsite(host)) return; if (host?.type === 'tomcat' || host?.subType === 'other') { tomcatEditorOpen.value = true; return } editorOpen.value = true }
 const openProject = () => { if (selectedProject.value) void projectController.open(selectedProject.value, server.value) }
 const remove = async () => { if (pendingDelete.value && await projectController.remove(pendingDelete.value, confirmation.value)) pendingDelete.value = undefined }
 onMounted(() => { void projectController.refresh() })

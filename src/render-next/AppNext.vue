@@ -3,12 +3,12 @@
     <header class="titlebar">
       <div class="brand"><span class="brand-mark"><PqtMark :size="18" color="var(--pqt-accent)" /></span><span>PQT Forge</span></div>
       <span class="titlebar-context">Developer Environment</span>
-      <div class="window-controls"><button aria-label="Minimize" @click="windowCommand('Application:APP-Minimize')">âˆ’</button><button class="close" aria-label="Close" @click="windowCommand('Application:APP-Close')">Ã—</button></div>
+      <div class="window-controls"><button aria-label="Minimize" @click="windowCommand('Application:APP-Minimize')">−</button><button class="close" aria-label="Close" @click="windowCommand('Application:APP-Close')">×</button></div>
     </header>
     <div class="app-body">
       <aside class="sidebar">
         <div class="sidebar-section"><p class="sidebar-label">WORKSPACE</p><button v-for="item in navigation" :key="item.id" class="nav-item" :class="{ active: nextAppState.workspace === item.id }" @click="navigateNext(item.id)"><span class="nav-icon">{{ item.icon }}</span><span>{{ item.label }}</span><kbd v-if="item.shortcut">{{ item.shortcut }}</kbd></button></div>
-        <div class="sidebar-bottom"><button class="nav-item" :class="{ active: nextAppState.workspace === 'settings' }" @click="navigateNext('settings')"><span class="nav-icon">âš™</span><span>Settings</span></button><div class="profile-chip"><span class="profile-avatar">PQT</span><span><b>PQT Forge</b><small>Local workspace</small></span></div></div>
+        <div class="sidebar-bottom"><button class="nav-item" :class="{ active: nextAppState.workspace === 'settings' }" @click="navigateNext('settings')"><span class="nav-icon">⚙</span><span>Settings</span></button><div class="profile-chip"><span class="profile-avatar">PQT</span><span><b>PQT Forge</b><small>Local workspace</small></span></div></div>
       </aside>
       <main class="main"><OverviewScreen v-if="nextAppState.workspace === 'overview'" /><WebsitesScreen v-else-if="nextAppState.workspace === 'websites'" /><ServicesScreen v-else-if="nextAppState.workspace === 'services'" /><RuntimesScreen v-else-if="nextAppState.workspace === 'runtimes'" /><DatabasesScreen v-else-if="nextAppState.workspace === 'databases'" /><StartupGroupsScreen v-else-if="nextAppState.workspace === 'startup-groups'" /><ToolsScreen v-else-if="nextAppState.workspace === 'tools'" /><LogsScreen v-else-if="nextAppState.workspace === 'logs'" /><CronScreen v-else-if="nextAppState.workspace === 'cron'" /><SettingsScreen v-else-if="nextAppState.workspace === 'settings'" /></main>
     </div>
@@ -54,7 +54,7 @@ const onShortcut = (event: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onShortcut))
 onMounted(() => startLogListener())
 onUnmounted(() => window.removeEventListener('keydown', onShortcut))
-const navigation: { id: Workspace; label: string; icon: string; shortcut?: string }[] = [{ id: 'overview', label: 'Overview', icon: 'âŒ‚', shortcut: '1' }, { id: 'websites', label: 'Websites', icon: 'âŒ' }, { id: 'services', label: 'Services', icon: 'â—‰' }, { id: 'runtimes', label: 'Runtimes', icon: 'âŒ˜' }, { id: 'databases', label: 'Databases', icon: 'â—ˆ' }, { id: 'startup-groups', label: 'Startup groups', icon: 'â–¶' }, { id: 'tools', label: 'Tools', icon: 'âœ¦' }, { id: 'logs', label: 'Logs', icon: 'â‰‹' }, { id: 'cron', label: 'Scheduled tasks', icon: '◷' }]
+const navigation: { id: Workspace; label: string; icon: string; shortcut?: string }[] = [{ id: 'overview', label: 'Overview', icon: '⌂', shortcut: '1' }, { id: 'websites', label: 'Websites', icon: '⌁' }, { id: 'services', label: 'Services', icon: '◉' }, { id: 'runtimes', label: 'Runtimes', icon: '⌘' }, { id: 'databases', label: 'Databases', icon: '◈' }, { id: 'startup-groups', label: 'Startup groups', icon: '▶' }, { id: 'tools', label: 'Tools', icon: '✦' }, { id: 'logs', label: 'Logs', icon: '≋' }, { id: 'cron', label: 'Scheduled tasks', icon: '◷' }]
 </script>
 <style src="./styles/app.css"></style>
 <style src="./styles/services.css"></style>

@@ -14,8 +14,8 @@ import { startupGroupController } from '../state/startupGroupController'
 const services = serviceController.services
 const runningCount = computed(() => serviceController.runningCount.value)
 const visibleServices = computed(() => services.filter((service) => service.state === 'running' || service.state === 'warning'))
-const healthPercent = computed(() => services.length ? Math.round((runningCount.value / services.length) * 100) : 0)
-const healthLabel = computed(() => healthPercent.value === 100 ? 'All services healthy' : 'Review service status')
+const healthPercent = computed(() => { const known = services.filter((service) => !['unknown', 'unavailable', 'busy'].includes(service.state)); return known.length ? Math.round((known.filter((service) => service.state === 'running').length / known.length) * 100) : '—' })
+const healthLabel = computed(() => services.some((service) => service.state === 'unknown' || service.state === 'unavailable') ? 'Some service state is unknown' : healthPercent.value === 100 ? 'All services healthy' : 'Review service status')
 const websiteCount = computed(() => projectController.projects.length)
 const websiteMeta = computed(() => projectController.loading ? 'Loading saved hosts…' : projectController.error ? 'Unable to read saved hosts' : websiteCount.value === 0 ? 'No saved hosts' : `${websiteCount.value} saved host${websiteCount.value === 1 ? '' : 's'}`)
 const startGroup = () => { void startupGroupController.runDefault() }

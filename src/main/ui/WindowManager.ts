@@ -168,7 +168,7 @@ export default class WindowManager extends EventEmitter {
       window.loadURL(pageOptions.url).catch((error) => {
         console.error(`[PQT Forge] failed loading ${page}:`, error)
       })
-      window.webContents.openDevTools()
+      if (process.env.PQT_OPEN_DEVTOOLS === '1') window.webContents.openDevTools()
     } else {
       window.loadFile(pageOptions.url).catch((e) => {
         AppStartErrorCallback(e).catch()

@@ -135,7 +135,7 @@ function runElectronApp() {
   console.log(
     process.env.PQT_FORGE_NEXT_RENDERER === '0'
       ? 'Legacy renderer fallback enabled'
-      : 'PQT Forge renderer enabled by default (1000x700)'
+    : 'PQT Forge renderer enabled by default (1200x800)'
   )
   delete electronEnv.ELECTRON_RUN_AS_NODE
   electronProcess = spawn('electron', args, {

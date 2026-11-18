@@ -22,7 +22,10 @@ export class PackageController {
   constructor(private deps: PackageDependencies) {}
 
   catalog(flag: string): PackageCatalog {
-    return this.catalogs[flag] ??= { loading: false, loaded: false, error: '', warning: '', versions: [], installed: [] }
+    this.catalogs[flag] ??= { loading: false, loaded: false, error: '', warning: '', versions: [], installed: [] }
+    // The assignment expression returns the raw initializer on first access.
+    // Read back through the controller proxy so asynchronous updates render.
+    return this.catalogs[flag]
   }
 
   load(flag: string, fresh = false): Promise<PackageCatalog> {
@@ -33,16 +36,22 @@ export class PackageController {
     catalog.loading = true; catalog.error = ''; catalog.warning = ''
     const flight = Promise.resolve().then(async () => {
       if (!this.deps.ready()) throw new Error('The desktop connection is not ready. Retry after startup completes.')
-      // An online catalog failure must not hide installed versions, or vice versa.
-      const outcomes = await Promise.allSettled([this.deps.list(flag), this.deps.installed(flag, fresh)])
-      const [online, local] = outcomes
-      if (online.status === 'fulfilled') {
-        catalog.versions = online.value.versions
-        catalog.warning = online.value.warning ?? ''
-      } else catalog.error = packageError(online.reason)
-      if (local.status === 'fulfilled') catalog.installed = local.value
-      else catalog.warning = [catalog.warning, `Installed versions could not be refreshed: ${packageError(local.reason)}`].filter(Boolean).join(' ')
-      catalog.loaded = online.status === 'fulfilled' && local.status === 'fulfilled'
+      // Publish each source as soon as it resolves. A slow online catalog must
+      // not hide installed versions, and a slow installed scan must not leave
+      // the Available tab looking empty.
+      let onlineOk = false
+      let localOk = false
+      const online = this.deps.list(flag).then((result) => {
+        catalog.versions = result.versions
+        catalog.warning = result.warning ?? ''
+        onlineOk = true
+      }).catch((error) => { catalog.error = packageError(error) })
+      const local = this.deps.installed(flag, fresh).then((installed) => {
+        catalog.installed = installed
+        localOk = true
+      }).catch((error) => { catalog.warning = [catalog.warning, 'Installed versions could not be refreshed: ' + packageError(error)].filter(Boolean).join(' ') })
+      await Promise.all([online, local])
+      catalog.loaded = onlineOk && localOk
       // A concurrent refresh may finish before an active mutation. Keep its terminal fact.
       const operation = this.operation
       if (operation?.typeFlag === flag && operation.status === 'success') {

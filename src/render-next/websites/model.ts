@@ -38,7 +38,7 @@ export function normalizeWebsite(input: Readonly<WebsiteHost>): WebsiteHost {
   }
   return host
 }
-export const editableWebsite = (host: WebsiteHost) => !host.type || host.type === 'php'
+export const editableWebsite = (host: WebsiteHost) => !host.type || host.type === 'php' || isTomcatSite(host) || isDirectProjectSite(host)
 export const projectFromHost = (host: WebsiteHost): ProjectItem => ({
   id: host.id, name: host.projectName?.trim() || host.name, domain: host.name, path: host.root, ssl: host.useSSL,
   runtime: host.phpVersionFull ? 'PHP ' + host.phpVersionFull : host.phpVersion ? 'PHP ' + host.phpVersion : host.type && host.type !== 'php' ? host.type : 'Static',

@@ -21,6 +21,7 @@ export class ServiceFilesController {
   files: ServiceFile[] = []
   selected?: ServiceFile
   content = ''
+  private loadedContent = ''
   loading = false
   saving = false
   error = ''
@@ -29,7 +30,7 @@ export class ServiceFilesController {
     const flag = serviceModuleFlags[name]
     if (!flag) { this.error = 'This service does not expose a migrated file provider.'; return false }
     const generation = ++this.generation
-    this.loading = true; this.error = ''; this.content = ''; this.selected = undefined
+    this.loading = true; this.error = ''; this.content = ''; this.loadedContent = ''; this.selected = undefined
     try {
       const method = kind === 'config' ? 'listConfigFiles' : 'listLogFiles'
       const target = typeof version === 'string' || version === undefined ? currentServiceVersion(name) : version
@@ -47,17 +48,21 @@ export class ServiceFilesController {
   async readSelected(generation = this.generation) {
     const file = this.selected
     if (!file || generation !== this.generation) return
-    try { this.content = await fs.readFileStrict(file.path) } catch (error) { if (generation === this.generation) this.error = packageError(error) }
+    try { this.content = await fs.readFileStrict(file.path); this.loadedContent = this.content } catch (error) { if (generation === this.generation) this.error = packageError(error) }
   }
   async save() {
     const file = this.selected
     if (!file || file.kind !== 'config' || this.saving) return false
     this.saving = true; this.error = ''
-    try { await fs.writeFile(file.path, this.content); return true }
+    try {
+      const current = await fs.readFileStrict(file.path)
+      if (current !== this.loadedContent) { this.error = 'The file changed outside this editor. Reload it before saving.'; return false }
+      await fs.writeFile(file.path, this.content); this.loadedContent = this.content; return true
+    }
     catch (error) { this.error = packageError(error); return false }
     finally { this.saving = false }
   }
   async reveal(file = this.selected) { if (!file) return; try { await shell.showItemInFolder(file.path) } catch (error) { this.error = packageError(error) } }
-  clear() { this.generation++; this.files = []; this.selected = undefined; this.content = ''; this.error = ''; this.loading = false }
+  clear() { this.generation++; this.files = []; this.selected = undefined; this.content = ''; this.loadedContent = ''; this.error = ''; this.loading = false }
 }
 export const serviceFilesController = reactive(new ServiceFilesController())

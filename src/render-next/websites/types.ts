@@ -1,6 +1,9 @@
 import type { AppHost } from '@/store/app'
 
-export type WebsiteHost = AppHost & { reverseProxy?: Array<{ path: string; url: string }> }
+export type WebsiteHost = AppHost & {
+  reverseProxy?: Array<{ path: string; url: string }>
+  startCommand?: string
+}
 export type ProjectItem = { id: number; name: string; domain: string; path: string; runtime: string; ssl: boolean; host: WebsiteHost }
 export type WebsiteAction = 'add' | 'edit' | 'del'
 export type WebsiteOperation = { id: number; action: WebsiteAction; status: 'running' | 'success' | 'failed' | 'unknown'; message: string; warnings: string[] }

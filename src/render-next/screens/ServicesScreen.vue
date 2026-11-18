@@ -16,7 +16,7 @@ import { startupGroupController } from '../state/startupGroupController'
 const query = ref(''); const filter = ref('All'); const tabs = ['All', 'Running', 'Stopped']
 const selectedService = computed(() => serviceController.selected.service!)
 const filteredServices = computed(() => serviceController.services.filter((service) => { const textMatch = `${service.name} ${service.kind}`.toLowerCase().includes(query.value.toLowerCase()); const stateMatch = filter.value === 'All' || (filter.value === 'Running' ? service.state === 'running' : service.state === 'stopped'); return textMatch && stateMatch }))
-const formatState = (state: ServiceState) => state === 'busy' ? 'Working…' : state[0].toUpperCase() + state.slice(1)
+const formatState = (state: ServiceState) => state === 'busy' ? 'Working…' : state === 'unknown' ? 'Unknown' : state === 'unavailable' ? 'Unavailable' : state === 'not-installed' ? 'Not installed' : state[0].toUpperCase() + state.slice(1)
 const notify = (message: string) => showNotice(message)
 const startGroup = async () => { if (startupGroupController.defaultGroup.value) { await startupGroupController.runDefault(); return } const result = await serviceController.runGroup(); notify(result.completed + ' services started; ' + result.failed + ' failed') }
 const selectedFlag = computed(() => selectedService.value ? packageFlagForName(selectedService.value.name) : undefined)

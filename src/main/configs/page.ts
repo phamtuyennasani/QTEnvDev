@@ -25,12 +25,12 @@ const options: PageOptions = {
       // PQT Forge owns its titlebar and window controls. Keep the legacy
       // renderer on Electron's native frame when explicitly selected.
       frame: useNextRenderer ? false : undefined,
-      width: useNextRenderer ? 1000 : 1200,
-      height: useNextRenderer ? 700 : 800,
-      minWidth: useNextRenderer ? 1000 : 800,
-      minHeight: useNextRenderer ? 700 : 600,
-      maxWidth: useNextRenderer ? 1000 : undefined,
-      maxHeight: useNextRenderer ? 700 : undefined
+      width: useNextRenderer ? 1200 : 1200,
+      height: useNextRenderer ? 800 : 800,
+      minWidth: useNextRenderer ? 1000 : 1000,
+      minHeight: useNextRenderer ? 700 : 700,
+      maxWidth: useNextRenderer ? 1200 : undefined,
+      maxHeight: useNextRenderer ? 800 : undefined
     },
     bindCloseToHide: true,
     url: is.dev()

@@ -1,0 +1,424 @@
+yarn run v1.22.22
+$ yarn run clean:dev && yarn run build-dev-runner && cross-env NODE_ENV=development node electron/dev-runner.mjs
+$ npx rimraf dist
+npm warn Unknown env config "argv". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "version-commit-hooks". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "version-git-message". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "version-git-tag". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "version-tag-prefix". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm notice run QTEnvDev@4.21.0 npx
+npm notice run rimraf dist
+$ npx esbuild --platform=node --bundle --packages=external --inject:scripts/shim-dynamic-require.mjs --format=esm scripts/dev-runner.ts --outfile=electron/dev-runner.mjs
+npm warn Unknown env config "argv". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "version-commit-hooks". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "version-git-message". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "version-git-tag". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "version-tag-prefix". This will error in a future major version of npm. See `npm help npmrc` for supported config options.
+npm notice run QTEnvDev@4.21.0 npx
+npm notice run esbuild --platform=node --bundle --packages=external --inject:scripts/shim-dynamic-require.mjs --format=esm scripts/dev-runner.ts --outfile=electron/dev-runner.mjs
+
+  electron\dev-runner.mjs  292.8kb
+
+Port 4000 is in use, trying another one...
+Port 4001 is in use, trying another one...
+isWindows !!!
+sh:  W:\FlyEnvLocal\scripts\electron-kill.ps1 W:\FlyEnvLocal\scripts
+build end !!!!!!
+all:  []
+_stopServer arr:  []
+PQT Forge renderer enabled by default (1200x800)
+(node:988) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+  Debugger listening on ws://127.0.0.1:5858/bf8eda99-c0ef-4767-bc64-80dc3aa3fafe
+  For help, see: https://nodejs.org/en/docs/inspector
+  
+
+
+  01:10:28.413 > Logger init
+  
+
+
+  01:10:28.418 > [QTEnvDev] Logger init
+  
+
+
+  app on ready !!!!!!
+  
+
+
+  01:10:28.566 > Using unvalidated locale code: en-US
+  
+
+
+  Application inited !!!
+  
+
+
+  [BinVersionCache]:  { type: 'load-success', entryCount: 9 }
+  
+
+
+  [PQT Forge] loading index renderer: http://localhost:4000/render-next/next.html
+  
+
+
+  showPage checkBrewOrPort !!!
+  
+
+
+  setStyle:  modern 
+  
+
+
+  style-changed !!! modern
+  
+
+
+  [PQT Forge] loading tray renderer: http://localhost:4000/render/tray.html
+  
+
+
+  DOM 已准备好
+  
+
+
+  01:10:29.519 > [tray] popup up x=2223 y=964 arrow=129 icon=2346,1409,24,31
+  
+
+
+  [PQT Forge] loaded tray: http://localhost:4000/render/tray.html#/
+  
+
+
+  window.once ready-to-show !!!
+  
+
+
+  [PQT Forge] loaded index: http://localhost:4000/render-next/next.html#/
+  
+
+
+  App-Node-FN:  app_getConfig
+  
+
+
+  this?.mainWindow?.webContents:  AppNodeFn {
+    mainWindow: BrowserWindow {
+      setBounds: [Function (anonymous)],
+      _events: [Object: null prototype] {
+        blur: [Function (anonymous)],
+        focus: [Function (anonymous)],
+        close: [Array],
+        show: [Function: visibilityChanged],
+        hide: [Function: visibilityChanged],
+        minimize: [Function: visibilityChanged],
+        maximize: [Function: visibilityChanged],
+        restore: [Function: visibilityChanged],
+        closed: [Array],
+        unresponsive: [Function (anonymous)],
+        resize: [Function (anonymous)],
+        move: [Function (anonymous)]
+      },
+      _eventsCount: 12,
+      _browserViews: [],
+      devToolsWebContents: [Getter]
+    },
+    trayWindow: BrowserWindow {
+      setBounds: [Function (anonymous)],
+      _events: [Object: null prototype] {
+        blur: [Function (anonymous)],
+        focus: [Function (anonymous)],
+        close: [Array],
+        show: [Function: visibilityChanged],
+        hide: [Function: visibilityChanged],
+        minimize: [Function: visibilityChanged],
+        maximize: [Function: visibilityChanged],
+        restore: [Function: visibilityChanged],
+        closed: [Array],
+        unresponsive: [Function (anonymous)]
+      },
+      _eventsCount: 10,
+      _browserViews: [],
+      devToolsWebContents: [Getter]
+    },
+    configManager: ConfigManager {
+      config: ElectronStore {
+        path: 'C:\\Users\\Admin\\AppData\\Roaming\\Electron\\user.json',
+        events: EventTarget,
+        _deserialize: [Function: _deserialize],
+        _serialize: [Function: _serialize]
+      }
+    },
+    fileWatchers: Map(0) {},
+    dirWatchers: Map(0) {},
+    sseConnections: Map(0) {}
+  }
+  
+
+
+  forksCount:  0 6
+  
+
+
+  onSpawn:  11240
+  
+
+
+  forksCount:  1 6
+  
+
+
+  forksCount:  2 6
+  
+
+
+  forksCount:  3 6
+  
+
+
+  forksCount:  4 6
+  
+
+
+  forksCount:  5 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  Unknown command: application:renderer-initialized
+  
+
+
+  forksCount:  6 6
+  
+
+
+  App-Node-FN:  nativeTheme_shouldUseDarkColors
+  nativeTheme_shouldUseDarkColors:  App-Node-FN IPC-Key-wSYK06GP5zuQ5Zk9s2EZYMJuP0fUUXVl false
+  
+
+
+  onSpawn:  13692
+  onSpawn:  3676
+  onSpawn:  23372
+  
+
+
+  onSpawn:  23224
+  
+
+
+  onSpawn:  232
+  
+
+
+  [BinVersionCache]:  { type: 'hit' }
+  
+
+
+  fork find:  5 true
+  
+
+
+  fork find:  0 false
+  
+
+
+  fork find:  1 false
+  
+
+
+  fork find:  2 false
+  
+
+
+  fork find:  3 false
+  
+
+
+  fork find:  4 false
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  forksCount:  6 6
+  
+
+
+  onSpawn:  22244
+  
+
+
+  onSpawn:  13896
+  
+
+
+  onSpawn:  14120
+  
+
+
+  onSpawn:  22296
+  
+
+
+  onSpawn:  17088
+  
+
+
+  [BinVersionCache]:  { type: 'hit' }
+  
+
+
+  fork find:  3 true
+  
+
+
+  [BinVersionCache]:  { type: 'hit' }
+  
+
+
+  [BinVersionCache]:  { type: 'hit' }
+  
+
+
+  [BinVersionCache]:  { type: 'hit' }
+  
+
+
+  [BinVersionCache]:  { type: 'hit' }
+  
+
+
+  [BinVersionCache]:  { type: 'hit' }
+  
+
+
+  [BinVersionCache]:  { type: 'hit' }
+  
+
+electronProcess close !!!
+error Command failed with exit code 4294967295.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

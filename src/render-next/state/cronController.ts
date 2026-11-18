@@ -9,5 +9,5 @@ const mutate=async(fn:()=>Promise<any>)=>{if(state.busy)return false;state.busy=
 const toggle=(job:CronJob)=>mutate(()=>request('toggleCronJob',job.hostId??0,job.id,!job.enabled))
 const run=(job:CronJob)=>mutate(()=>request('runJobNow',job.hostId??0,job.id,job.workDir??''))
 const remove=(job:CronJob)=>mutate(()=>request('deleteCronJob',job.hostId??0,job.id))
-const save=(draft:Partial<CronJob>, existing?:CronJob)=>mutate(()=>existing?request('updateCronJob',existing.hostId??0,existing.id,draft):request('addCronJob',draft.hostId??0,draft))
+const save=(draft:Partial<CronJob>, existing?:CronJob)=>{const schedule=String(draft.schedule??'').trim();if(schedule.split(/\s+/).length!==5){state.error='Schedule must contain five cron fields.';showNotice(state.error);return Promise.resolve(false)}if(!draft.name?.trim()||!draft.command?.trim()){state.error='Name and command are required.';showNotice(state.error);return Promise.resolve(false)}if(draft.scope==='host'&&!draft.hostId){state.error='Choose a website before saving a website task.';showNotice(state.error);return Promise.resolve(false)}return mutate(()=>existing?request('updateCronJob',existing.hostId??0,existing.id,{...draft,schedule}):request('addCronJob',draft.hostId??0,{...draft,schedule}))}
 export const cronController={state,load,toggle,run,remove,save}
