@@ -22,7 +22,7 @@ const dependencies: WebsiteDependencies = {
   },
   reconcile() {},
   async afterCommit() { throw new Error('Restart failed') },
-  async open() {}, async choosePath() { return undefined }, async reveal() {}, logFiles() { return [] }, notice() {}
+  async open() {}, async choosePath() { return undefined }, async reveal() {}, logFiles() { return [] }, vhostFiles() { return [] }, notice() {}
 }
 const controller = reactive(new WebsiteController(dependencies))
 const refresh = controller.refresh()

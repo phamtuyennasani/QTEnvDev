@@ -18,6 +18,7 @@ export type WebsiteDependencies = {
   choosePath(file: boolean, current: string): Promise<string | undefined>
   reveal(path: string): Promise<void>
   logFiles(id: number): Array<{ label: string; path: string }>
+  vhostFiles(id: number): Array<{ label: string; path: string }>
   notice(message: string): void
 }
 export class WebsiteOutcomeUnknown extends Error {}

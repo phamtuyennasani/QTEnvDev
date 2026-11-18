@@ -49,6 +49,7 @@ export class WebsiteController {
     catch (error) { this.notify(websiteError(error)); return undefined }
   }
   logs(project: ProjectItem) { return this.deps.logFiles(project.id) }
+  vhosts(project: ProjectItem) { return this.deps.vhostFiles(project.id) }
   async reveal(path: string) {
     try { this.assertReady(); await this.deps.reveal(path) }
     catch (error) { this.notify(websiteError(error)) }

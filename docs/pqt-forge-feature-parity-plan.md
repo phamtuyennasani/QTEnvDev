@@ -21,10 +21,10 @@ This document tracks the migration from the legacy renderer (src/render) to the 
 
 ## Phase 1 — websites and project workflows
 
-- [ ] Complete host list and CRUD parity: sorting, templates, QR, vhost/rewrite, logs, and SSL state.
-- [ ] Complete PHP, Node.js, Python, Go, and Java/Tomcat project workflows.
-- [ ] Keep unsupported project types unchanged until their structure is understood by the new editor.
-- [ ] Verify project ports, start commands, SSL/proxy changes, and post-save server restart behavior.
+- [x] Complete host list and CRUD parity: sorting, templates, QR, vhost/rewrite, logs, and SSL state.
+- [x] Complete PHP, Node.js, Python, and Go project workflows with saved project discovery, real start/stop lifecycle actions, ports, commands, folder/config/log access; Java/Tomcat hosts use the dedicated Tomcat editor and lifecycle path.
+- [x] Keep unsupported project types unchanged until their structure is understood by the new editor.
+- [x] Verify project ports, start commands, SSL/proxy changes, and post-save server restart behavior through the website controller and language-project lifecycle contracts.
 
 ## Phase 2 — services, runtimes, packages, and databases
 

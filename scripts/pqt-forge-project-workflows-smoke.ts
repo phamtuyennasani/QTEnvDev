@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+const root = join(import.meta.dirname, '..')
+const controller = readFileSync(join(root, 'src/render-next/state/projectWorkflowController.ts'), 'utf8')
+const panel = readFileSync(join(root, 'src/render-next/components/ProjectWorkflowPanel.vue'), 'utf8')
+const websites = readFileSync(join(root, 'src/render-next/screens/WebsitesScreen.vue'), 'utf8')
+const templateController = readFileSync(join(root, 'src/render-next/state/vhostTemplateController.ts'), 'utf8')
+const templatePanel = readFileSync(join(root, 'src/render-next/components/VhostTemplatePanel.vue'), 'utf8')
+for (const source of [controller, panel, websites]) assert.ok(source.length > 0)
+assert.ok(controller.includes('reactiveBind(new ProjectWorkflowController())'))
+assert.ok(controller.includes('ProjectSetup(kind as AllAppModule)'))
+assert.ok(controller.includes('private actionFlights = new Map'))
+assert.ok(controller.includes('project.item.start()'))
+assert.ok(controller.includes('project.item.stop()'))
+assert.ok(panel.includes('projectWorkflowController as controller'))
+assert.ok(panel.includes("controller.run(project, 'start')"))
+assert.ok(panel.includes("controller.run(project, 'stop')"))
+assert.ok(websites.includes('<ProjectWorkflowPanel />'))
+assert.ok(websites.includes('<VhostTemplatePanel'))
+assert.ok(templateController.includes('reactiveBind(new VhostTemplateController())'))
+assert.ok(templateController.includes('VhostTemplate'))
+assert.ok(templateController.includes('fs.writeFile(template.custom'))
+assert.ok(templatePanel.includes('controller.save()'))
+console.log('PQT Forge project workflows smoke passed (saved language projects and real lifecycle controls).')

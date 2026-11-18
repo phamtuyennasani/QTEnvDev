@@ -51,6 +51,7 @@
     "test:pqt-forge-tools": "tsx scripts/pqt-forge-tools-smoke.ts",
     "test:pqt-forge-navigation": "tsx scripts/pqt-forge-navigation-smoke.ts",
     "test:pqt-forge-websites": "tsx scripts/pqt-forge-websites-smoke.ts",
+    "test:pqt-forge-project-workflows": "tsx scripts/pqt-forge-project-workflows-smoke.ts",
     "build:pqt-forge-next": "tsx scripts/build-pqt-forge-next.ts",
     "test:custom-module-lifecycle": "tsx scripts/custom-module-lifecycle-test.ts",
     "test:pqt-forge-package-controller": "tsx scripts/pqt-forge-package-controller-test.ts",

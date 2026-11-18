@@ -67,5 +67,6 @@ export const websiteDependencies: WebsiteDependencies = {
   },
   async reveal(path) { if (!await fs.existsSync(path)) throw new Error('This file has not been created yet.'); await shell.showItemInFolder(path) },
   logFiles(id) { return [['Nginx access', String(id) + '.log'], ['Nginx errors', String(id) + '.error.log'], ['Apache access', String(id) + '-access_log'], ['Apache errors', String(id) + '-error_log'], ['Caddy', String(id) + '.caddy.log'], ['FrankenPHP', String(id) + '.frankenphp.log']].map(([label, file]) => ({ label, path: String(window.Server.BaseDir) + '/vhost/logs/' + file })) },
+  vhostFiles(id) { const base = String(window.Server.BaseDir); return [['Nginx', 'nginx/' + id + '.conf'], ['Apache', 'apache/' + id + '.conf'], ['Caddy', 'caddy/' + id + '.conf'], ['FrankenPHP', 'frankenphp/' + id + '.conf'], ['Rewrite', 'rewrite/' + id + '.conf']].map(([label, file]) => ({ label, path: base + '/vhost/' + file })) },
   notice: showNotice
 }
