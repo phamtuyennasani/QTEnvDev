@@ -3,6 +3,7 @@ import { ForkPromise } from '@shared/ForkPromise'
 import { join, basename } from 'path'
 import { spawn } from 'child_process'
 import { isMacOS } from '@shared/utils'
+import { isExternalEditor, openUnixEditor, type ExternalEditor } from './openEditor'
 
 export function runInTerminal(command: string) {
   return new ForkPromise(async (resolve, reject) => {
@@ -53,8 +54,20 @@ export function runInTerminal(command: string) {
   })
 }
 
-export function openPathByApp(dir: string, app: 'Terminal') {
+export function openPathByApp(dir: string, app: 'Terminal' | ExternalEditor) {
   return new ForkPromise(async (resolve, reject) => {
+    if (isExternalEditor(app)) {
+      try {
+        resolve(await openUnixEditor(dir, app, isMacOS()))
+      } catch (error) {
+        reject(error)
+      }
+      return
+    }
+    if (app !== 'Terminal') {
+      reject(new Error('This application is not supported on this platform.'))
+      return
+    }
     if (isMacOS()) {
       let appleScript = ''
       if (app === 'Terminal') {

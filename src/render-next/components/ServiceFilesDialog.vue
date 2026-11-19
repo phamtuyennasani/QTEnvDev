@@ -5,7 +5,7 @@
       <div class="service-file-editor">
         <p v-if="controller.loading" class="empty-copy">Loading file list…</p>
         <template v-else-if="controller.selected">
-          <div class="service-file-toolbar"><code>{{ controller.selected.path }}</code><button class="action-button" @click="controller.reveal()">Reveal</button><button class="action-button" @click="controller.readSelected()">Refresh</button></div>
+          <div class="service-file-toolbar"><code>{{ controller.selected.path }}</code><button class="action-button" @click="controller.reveal()">Reveal</button><button class="action-button" @click="controller.readSelected()">Refresh</button><slot name="file-actions" :file="controller.selected" /></div>
           <small v-if="kind === 'log'" class="website-help">Showing up to the latest 200 KB.</small>
           <small v-else-if="controller.selected.readOnly" class="website-help">Use the website editor to change this generated file.</small>
           <slot v-if="kind === 'config'" name="configuration" :content="controller.content" :readOnly="!controller.canEdit" :update="updateContent">

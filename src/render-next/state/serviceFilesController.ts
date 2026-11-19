@@ -1,10 +1,12 @@
 import { reactive } from 'vue'
 import IPC from '@/util/IPC'
 import { fs, shell } from '@/util/NodeFn'
+import { Project } from '@/util/Project'
 import { packageError } from '../packages/types'
 import { serviceModuleFlags, currentServiceVersion, serviceFileContext } from '../adapters/serviceAdapter'
 
 export type ServiceFile = { name: string; path: string; exists?: boolean; kind: 'config' | 'log'; readOnly?: boolean }
+export type ServiceFileEditor = 'VSCode' | 'PhpStorm' | 'WebStorm' | 'Sublime'
 type Reply = { code?: number; data?: unknown; msg?: unknown }
 const request = (flag: string, method: string, version: unknown, ...context: unknown[]) => new Promise<unknown>((resolve, reject) => {
   const sent = IPC.send('app-fork:' + flag, method, version, ...context)
@@ -24,6 +26,7 @@ export class ServiceFilesController {
   private loadedContent?: string
   loading = false
   saving = false
+  openingExternal = false
   error = ''
   warning = ''
   private generation = 0
@@ -137,6 +140,30 @@ export class ServiceFilesController {
     finally { this.saving = false }
   }
   async reveal(file = this.selected) { if (!file) return; try { await shell.showItemInFolder(file.path) } catch (error) { this.error = packageError(error) } }
+
+  async openExternal(file: ServiceFile, editor: ServiceFileEditor) {
+    if (this.openingExternal || this.saving || file.kind !== 'config' || this.selected !== file) return false
+    const { path } = file
+    const generation = this.generation
+    const current = () => generation === this.generation && this.selected === file
+    this.openingExternal = true
+    this.error = ''
+    try {
+      if (file.exists === false || (await fs.existsSync(path)) !== true) {
+        throw new Error('The configuration file was not found.')
+      }
+      if (!current()) return false
+      const result = await Project.openPath(path, editor, false)
+      if (result !== true) throw new Error(result)
+      return true
+    } catch (error) {
+      if (current()) this.error = packageError(error)
+      return false
+    } finally {
+      this.openingExternal = false
+    }
+  }
+
   clear() { this.generation++; this.files = []; this.selected = undefined; this.content = ''; this.loadedContent = undefined; this.error = ''; this.warning = ''; this.loading = false }
 }
 export const serviceFilesController = reactive(new ServiceFilesController())

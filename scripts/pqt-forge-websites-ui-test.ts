@@ -46,9 +46,11 @@ const bootstrap = String.raw`
   window.addEventListener('error', (event) => websiteErrors.push(String(event.error || event.message)))
   window.addEventListener('unhandledrejection', (event) => websiteErrors.push(String(event.reason)))
   const vhost = 'C:/fixture/vhost/nginx/1.conf'
+  const rewrite = 'C:/fixture/vhost/rewrite/1.conf'
   const tomcatConf = 'C:/fixture/catalina/conf/'
   window.websiteFiles = {
     [vhost]: 'server { listen 8080; }\n',
+    [rewrite]: 'try_files $uri /index.php;\n',
     'C:/fixture/app.hosts.txt': '127.0.0.1     alpha.fixture.test\n127.0.0.1     alias.fixture.test',
     [tomcatConf + 'server.xml']: '<Server port="8005" />',
     [tomcatConf + 'Catalina/java.fixture.test/rewrite.config']: 'RewriteRule ^/old /new [L]',
@@ -94,8 +96,32 @@ const bootstrap = String.raw`
         if (first !== 'C:/fixture/laravel' || second !== 'laravel') return failure('Wrong generated project directory')
         return success(true)
       }
+      if (channel === 'app-fork:tools' && method === 'openPathByApp') {
+        if (first !== rewrite) return failure('The launcher received the wrong configuration path.')
+        if (second === 'PhpStorm') return failure('Fixture PhpStorm was not found.')
+        if (second === 'VSCode') {
+          window.finishEditorOpen = () => success(true)
+          return reply({ code: 200 })
+        }
+        return success(true)
+      }
       if (channel === 'app-fork:host') {
         if (method === 'hostList') return success(snapshot())
+        if (method === 'listNginxRewriteTemplates') {
+          if (first === 'bundled') return success(['wordpress.conf'])
+          window.finishUserTemplateCatalog = () => success(['custom.conf', 'slow.conf'])
+          return
+        }
+        if (method === 'readNginxRewriteTemplate') {
+          if (first === 'bundled' && second === 'wordpress.conf') return success('# bundled fixture\n')
+          if (first === 'user' && second === 'custom.conf') return success('# custom fixture\n')
+          if (first === 'user' && second === 'slow.conf') {
+            window.finishSlowRewriteTemplate = () => success('# stale fixture\n')
+            return
+          }
+          return failure('Unexpected rewrite template selection.')
+        }
+        if (method === 'prepareNginxRewriteTemplateDirectory') return success('C:/fixture/NginxRewriteTemplate')
         if (method === 'handleHost') {
           if (second !== 'park' || first.name !== 'alpha.fixture.test' || third.id !== first.id) return failure('Unexpected park request')
           websiteHosts.push({ ...first, id: 5, name: 'blog.alpha.fixture.test', root: first.root + '/blog' })
@@ -145,6 +171,7 @@ const bootstrap = String.raw`
         return success(snapshot())
       }
       if (channel === 'App-Node-FN') {
+        if (method === 'shell' && first === 'openPath') return reply('')
         if (method === 'dialog' && first === 'showSaveDialog') {
           return reply({ canceled: false, filePath: 'C:/fixture-export/website-backup.json' })
         }
@@ -265,6 +292,33 @@ const checks = String.raw`(async () => {
   await select('alpha.fixture.test')
   await click('Vhost / rewrite files ↗')
   await wait(() => modal()?.querySelector('textarea')?.value.includes('listen 8080'), 'generated Nginx configuration')
+  const rewrite = 'C:/fixture/vhost/rewrite/1.conf'
+  modal().querySelector('.service-file-item:last-child').click()
+  await wait(() => modal()?.querySelector('textarea')?.value.includes('try_files'), 'select Nginx rewrite configuration')
+  await click('Reveal')
+  await wait(() => requests('App-Node-FN', 'shell').some((entry) => entry[2] === 'showItemInFolder' && entry[3] === rewrite), 'reveal the selected generated rewrite')
+  const editorChoice = modal().querySelector('select[aria-label="External editor"]')
+  const selectEditor = (value) => {
+    editorChoice.value = value
+    editorChoice.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+  await click('Open in editor')
+  await wait(() => window.finishEditorOpen && button('Open in editor').disabled, 'wait for external editor terminal result')
+  button('Open in editor').click()
+  assert(requests('app-fork:tools', 'openPathByApp').length === 1, 'duplicate clicks must not launch an editor twice')
+  finishEditorOpen()
+  await wait(() => !button('Open in editor').disabled, 'external editor launch done')
+  selectEditor('PhpStorm')
+  await click('Open in editor')
+  await wait(() => modal()?.querySelector('[role=alert]')?.textContent.includes('Fixture PhpStorm was not found.'), 'missing external editor message')
+  for (const name of ['WebStorm', 'Sublime']) {
+    selectEditor(name)
+    await click('Open in editor')
+    await wait(() => requests('app-fork:tools', 'openPathByApp').some((entry) => entry[2] === rewrite && entry[3] === name) && !button('Open in editor').disabled, 'open rewrite in ' + name)
+  }
+  assert(!requests('App-Node-FN', 'fs').some((entry) => entry[2] === 'writeFile'), 'External editor actions must not save configuration')
+  modal().querySelector('.service-file-item').click()
+  await wait(() => modal()?.querySelector('textarea')?.value.includes('listen 8080'), 'return to generated Nginx configuration')
   const editor = modal().querySelector('textarea')
   const updated = 'server { listen 8081; }\n'
   assert(button('Save configuration').disabled, 'Unchanged configuration should not enable save')
@@ -403,6 +457,27 @@ const checks = String.raw`(async () => {
   await click('Routing')
   await wait(() => field('Nginx rewrite'), 'scaffold routing tab')
   assert(field('Nginx rewrite').value.includes('try_files $uri $uri/ /index.php$is_args$query_string;'), 'Laravel must prefill the generated Nginx rewrite')
+  const rewritePicker = () => modal()?.querySelector('label select')
+  const pickRewrite = (value) => {
+    const picker = rewritePicker()
+    picker.value = value
+    picker.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+  await wait(() => rewritePicker()?.querySelector('option[value="bundled:wordpress.conf"]') && window.finishUserTemplateCatalog, 'bundled templates remain available while user discovery is pending')
+  pickRewrite('bundled:wordpress.conf')
+  await wait(() => field('Nginx rewrite').value.trim() === '# bundled fixture', 'apply bundled rewrite')
+  window.finishUserTemplateCatalog()
+  await wait(() => rewritePicker()?.querySelector('option[value="user:custom.conf"]'), 'user rewrite templates')
+  pickRewrite('user:slow.conf')
+  await wait(() => window.finishSlowRewriteTemplate, 'slow rewrite template started')
+  input(field('Nginx rewrite'), '# manual rewrite')
+  window.finishSlowRewriteTemplate()
+  await new Promise((resolve) => setTimeout(resolve, 30))
+  assert(field('Nginx rewrite').value === '# manual rewrite', 'A stale template must preserve the edited draft')
+  pickRewrite('user:custom.conf')
+  await wait(() => field('Nginx rewrite').value.trim() === '# custom fixture', 'apply user rewrite')
+  await click('Open template folder')
+  await wait(() => requests('App-Node-FN', 'shell').some((entry) => entry[2] === 'openPath' && entry[3] === 'C:/fixture/NginxRewriteTemplate'), 'open user rewrite folder')
   assert(requests('app-fork:host', 'handleHost').length === 0, 'Opening a scaffold draft must not write a host')
   await click('Close dialog')
   await click('＋ New website')

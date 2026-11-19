@@ -1,5 +1,7 @@
 import { execPromiseWithEnv, existsSync } from '../../Fn'
 import { ForkPromise } from '@shared/ForkPromise'
+import { win32 } from 'node:path'
+import { launchEditor, launchFirstEditor, windowsEditorCandidates } from '../Tool/openEditor'
 
 const findIdePath = async (ideName: string) => {
   try {
@@ -102,7 +104,7 @@ const openWithIde = async (ideName: string, folderPath: string) => {
       return false
     }
 
-    await execPromiseWithEnv(`"${idePath}" "${folderPath}"`)
+    await launchEditor(idePath, folderPath)
     console.log(`Opened ${folderPath} with ${ideName}`)
     return true
   } catch (error) {
@@ -147,6 +149,8 @@ export function openPathByApp(
   app:
     | 'PowerShell'
     | 'PowerShell7'
+    | 'VSCode'
+    | 'Sublime'
     | 'PhpStorm'
     | 'WebStorm'
     | 'IntelliJ'
@@ -157,6 +161,21 @@ export function openPathByApp(
     | 'RustRover'
 ) {
   return new ForkPromise(async (resolve, reject) => {
+    if (app === 'VSCode' || app === 'Sublime') {
+      try {
+        if (!win32.isAbsolute(dir)) throw new Error('An absolute file path is required.')
+        if (await launchFirstEditor(windowsEditorCandidates(app), dir)) {
+          resolve(true)
+        } else {
+          reject(
+            new Error(`${app === 'VSCode' ? 'Visual Studio Code' : 'Sublime Text'} was not found.`)
+          )
+        }
+      } catch (error) {
+        reject(error)
+      }
+      return
+    }
     let command = ''
     const JetBrains = [
       'PhpStorm',
@@ -189,6 +208,9 @@ export function openPathByApp(
       command = `cd "${dir}"`
       command = JSON.stringify(command).slice(1, -1)
       command = `start pwsh.exe -NoExit -Command "${command}"`
+    } else {
+      reject(new Error('This application is not supported on this platform.'))
+      return
     }
     try {
       await execPromiseWithEnv(command)
