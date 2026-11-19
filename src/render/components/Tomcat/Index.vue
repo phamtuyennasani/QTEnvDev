@@ -17,7 +17,7 @@
             >
             <el-button
               class="flex-shrink-0"
-              :disabled="!CATALINA_BASE"
+              :disabled="!currentVersion?.bin || !TomcatSetup.state.loaded"
               link
               :icon="Edit"
               @click.stop="chooseDir"
@@ -52,6 +52,7 @@
   import { BrewStore } from '@/store/brew'
   import { TomcatSetup, tomcatCatalinaBase } from '@/components/Tomcat/setup'
   import { chooseFolder } from '@/util/File'
+  import { MessageError } from '@/util/Element'
   import { shell } from '@/util/NodeFn'
 
   const { tab, checkVersion } = AppModuleSetup('tomcat')
@@ -63,7 +64,7 @@
     I18nT('base.log')
   ]
   checkVersion()
-  TomcatSetup.init().catch()
+  void TomcatSetup.load().catch(MessageError)
 
   const brewStore = BrewStore()
 
@@ -71,27 +72,16 @@
     return brewStore.currentVersion('tomcat')
   })
 
-  const CATALINA_BASE = computed({
-    get() {
-      if (currentVersion?.value?.bin) {
-        return tomcatCatalinaBase(currentVersion.value)
-      }
-      return I18nT('base.needSelectVersion')
-    },
-    set(v: string) {
-      if (!currentVersion?.value?.bin) {
-        return
-      }
-      TomcatSetup.CATALINA_BASE[currentVersion.value.bin] = v
-      TomcatSetup.save()
-    }
-  })
+  const CATALINA_BASE = computed(() =>
+    currentVersion.value ? tomcatCatalinaBase(currentVersion.value) : I18nT('base.needSelectVersion')
+  )
 
-  const chooseDir = () => {
-    chooseFolder()
-      .then((path: string) => {
-        CATALINA_BASE.value = path
-      })
-      .catch()
+  const chooseDir = async () => {
+    const version = currentVersion.value
+    if (!version?.bin) return
+    const path = await chooseFolder().catch(() => undefined)
+    if (!path || path === tomcatCatalinaBase(version)) return
+    await TomcatSetup.setDirectory(version.bin, path, () => currentVersion.value?.bin === version.bin)
+      .catch(MessageError)
   }
 </script>

@@ -25,7 +25,7 @@
             >
             <el-button
               class="flex-shrink-0"
-              :disabled="!DATA_DIR"
+              :disabled="!DATA_DIR || isRunning"
               link
               :icon="Edit"
               @click.stop="chooseDir"
@@ -58,6 +58,7 @@
   import { BrewStore } from '@/store/brew'
   import { MeiliSearchSetup } from './setup'
   import { chooseFolder } from '@/util/File'
+  import { MessageError } from '@/util/Element'
   import { Edit } from '@element-plus/icons-vue'
   import { join } from '@/util/path-browserify'
   import { shell, fs } from '@/util/NodeFn'
@@ -80,32 +81,23 @@
     return brewStore.currentVersion('meilisearch')
   })
 
-  const DATA_DIR = computed({
-    get() {
-      if (currentVersion?.value?.bin) {
-        if (MeiliSearchSetup.dir[currentVersion.value.bin]) {
-          return MeiliSearchSetup.dir[currentVersion.value.bin]
-        }
-        const v = currentVersion?.value?.version?.split('.')?.slice(0, 2)?.join('.') ?? ''
-        return join(window.Server.BaseDir!, `meilisearch`, v)
-      }
-      return I18nT('base.needSelectVersion')
-    },
-    set(v: string) {
-      if (!currentVersion?.value?.bin) {
-        return
-      }
-      MeiliSearchSetup.dir[currentVersion.value.bin] = v
-      MeiliSearchSetup.save()
-    }
+  void MeiliSearchSetup.load().catch(MessageError)
+  const DATA_DIR = computed(() => {
+    const version = currentVersion.value
+    return version ? MeiliSearchSetup.path(version) : ''
   })
 
-  const chooseDir = () => {
-    chooseFolder()
-      .then((path: string) => {
-        DATA_DIR.value = path
-      })
-      .catch()
+  const chooseDir = async () => {
+    const version = currentVersion.value
+    const module = brewStore.module('meilisearch')
+    const editable = () =>
+      currentVersion.value?.bin === version?.bin &&
+      !module.starting &&
+      !module.installed.some((item) => item.run || item.running)
+    if (!version || !editable()) return
+    const path = await chooseFolder().catch(() => undefined)
+    if (!path) return
+    await MeiliSearchSetup.setDirectory(version.bin, path, editable).catch(MessageError)
   }
 
   const openURL = async () => {

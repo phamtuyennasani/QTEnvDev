@@ -26,12 +26,17 @@ try {
     let receive, discovery = 0, running = false
     const path = 'C:/fixture/shared'
     window.tunnelStops = 0
-    window.Server = { isLinux: true, UserHome: '/tmp/qtenvdev-fixture', DataDirectoryReady: true }
+    window.Server = { isLinux: true, UserHome: '/tmp/qtenvdev-fixture', BaseDir: '/fixture', DataDirectoryReady: true }
     window.versionStarts = []
     window.versionStops = []
     window.visibilityWrites = []
     window.composerScans = []
     window.openedLinks = []
+    window.openedDirectories = []
+    window.consulStarts = []
+    window.consulBrowserLaunches = []
+    window.tomcatRequests = []
+    window.tomcatDirectoryWrites = 0
     window.failVersionStop = false
     const apacheVersions = ['2.4.60', '2.4.62'].map((version, num) => ({
       version, num, path: '/fixture/apache-' + version, bin: '/fixture/apache-' + version + '/httpd',
@@ -39,6 +44,11 @@ try {
     }))
     const composerVersions = [{ version: '2.8.6', num: 28, path: '/fixture/composer', bin: '/fixture/composer/composer', enable: true }]
     const redisVersion = { version: '7.4.1', num: 74, path: '/fixture/redis', bin: '/fixture/redis/redis-server', enable: true }
+    const consulVersion = { version: '1.21.3', num: 121, path: '/fixture/consul-app', bin: '/fixture/consul-app/consul', enable: true }
+    const tomcatVersions = ['9.0.106', '10.1.46'].map((version, num) => ({
+      version, num, path: '/fixture/tomcat-' + version,
+      bin: '/fixture/tomcat-' + version + '/bin/startup.sh', enable: true
+    }))
     const mongoVersion = { version: '8.2.1', num: 82, path: '/fixture/mongodb', bin: '/fixture/mongodb/mongod', enable: true }
     const nodeVersion = { version: '24.13.0', num: 24, path: '/fixture/node', bin: '/fixture/node/node', enable: true }
     window.dbGateRuntimeInstalled = false
@@ -62,6 +72,8 @@ try {
             flag, flag === 'apache' ? apacheVersions
               : flag === 'composer' ? composerVersions
               : flag === 'redis' ? [redisVersion]
+              : flag === 'consul' ? [consulVersion]
+              : flag === 'tomcat' ? tomcatVersions
               : flag === 'mongodb' ? [mongoVersion]
               : flag === 'node' && window.dbGateRuntimeInstalled ? [nodeVersion] : []
           ])))
@@ -70,6 +82,16 @@ try {
           return respond(0, { 'APP-Service-Start-PID': '4351' })
         }
         if (channel === 'app-fork:mongodb' && action === 'stopService') return respond(0)
+        if (channel === 'app-fork:consul' && action === 'startService') {
+          window.consulStarts.push(args.slice(1))
+          return respond(0, { 'APP-Service-Start-PID': '4851' })
+        }
+        if (channel === 'app-fork:consul' && action === 'stopService') return respond(0)
+        if (channel === 'app-fork:tomcat') {
+          window.tomcatRequests.push(args)
+          if (action === 'startService') return respond(0, { 'APP-Service-Start-PID': '4852' })
+          if (action === 'listConfigFiles' || action === 'listLogFiles') return respond(0, [])
+        }
         if (channel === 'app-fork:mongodb' && action === 'openDbGate') {
           window.dbGateRequests.push(args[1])
           respond(200)
@@ -103,7 +125,27 @@ try {
           window.openedLinks.push(args[2])
           return queueMicrotask(() => receive({}, channel, key, undefined))
         }
+        if (channel === 'App-Node-FN' && action === 'fs' && args[1] === 'readFile' && args[2] === '/fixture/consul/consul-1.json') {
+          return queueMicrotask(() => receive({}, channel, key, '{"ports":{"http":48500}}'))
+        }
+        if (channel === 'App-Node-FN' && action === 'shell' && args[1] === 'openExternalChecked') {
+          window.consulBrowserLaunches.push(args[2])
+          window.finishConsulBrowser = () => respond(0)
+          return
+        }
+        if (channel === 'App-Node-FN' && action === 'shell' && args[1] === 'openPath') {
+          window.openedDirectories.push(args[2])
+          return queueMicrotask(() => receive({}, channel, key, ''))
+        }
         if (channel === 'App-Node-FN' && action === 'dialog' && args[1] === 'showOpenDialog') {
+          if (args[2]?.title === 'Choose service directory') {
+            if (args[2].defaultPath.includes('tomcat')) {
+              window.finishTomcatPicker = (path) => queueMicrotask(() => receive({}, channel, key, { canceled: !path, filePaths: path ? [path] : [] }))
+              return
+            }
+            if (args[2].defaultPath !== '/legacy/consul') errors.push('Directory picker did not use the legacy path')
+            return queueMicrotask(() => receive({}, channel, key, { canceled: false, filePaths: ['/new/consul'] }))
+          }
           return queueMicrotask(() => receive({}, channel, key, { canceled: false, filePaths: ['/other/composer'] }))
         }
         if (channel === 'app-fork:apache' && action === 'startService') {
@@ -155,6 +197,7 @@ try {
   </script><script type="module">
     import { createApp } from 'vue'
     import { createPinia } from 'pinia'
+    import localForage from 'localforage'
     import { applyLanguagePayload } from '../lang/runtime.ts'
     import { AppStore } from '../render/store/app.ts'
     import { StorageSetAsync } from '../render/util/Storage.ts'
@@ -166,6 +209,27 @@ try {
     applyLanguagePayload({ locale: 'en', fallbackLocale: 'en', messages, fallbackMessages: messages })
     const app = createApp(AppNext).use(createPinia())
     AppStore().config.setup.common.showItem.mysql = false
+    await localForage.setItem('qtenvdev-consul-storage-dir', {
+      '/fixture/consul-app/consul': '/legacy/consul',
+      '/fixture/another/consul': '/legacy/other-version'
+    })
+    const tomcatVersion = (version) => ({
+      version, path: '/fixture/tomcat-' + version, bin: '/fixture/tomcat-' + version + '/bin/startup.sh'
+    })
+    const tomcatKey = 'qtenvdev-tomcat-server-root'
+    await localForage.setItem(tomcatKey, {
+      [tomcatVersion('9.0.106').bin]: '/legacy/tomcat-a',
+      [tomcatVersion('10.1.46').bin]: '/legacy/tomcat-b'
+    })
+    window.selectTomcat = version => AppStore().UPDATE_SERVER_CURRENT({ flag: 'tomcat', data: tomcatVersion(version) })
+    const setItem = localForage.setItem.bind(localForage)
+    localForage.setItem = (key, data, ...args) => {
+      if (key === tomcatKey) {
+        window.tomcatDirectoryWrites++
+        if (window.failTomcatWrite) return Promise.reject(new Error('Tomcat directory write failed'))
+      }
+      return setItem(key, data, ...args)
+    }
     await StorageSetAsync('qtenvdev-cloudflare-tunnel-store', [{
       id: 'fixture-tunnel', tunnelName: 'fixture-tunnel',
       cloudflaredBin: '/fixture/cloudflared', dns: [{
@@ -212,6 +276,63 @@ try {
     document.querySelector('.forge-close').click()
     await wait(() => document.querySelector('.service-detail-panel .detail-kind code')?.textContent === '2.4.62', 'running version in Services detail')
     const navigation = label => [...document.querySelectorAll('.nav-item')].find(button => button.textContent.includes(label))
+    const serviceRow = label => [...document.querySelectorAll('.service-item')]
+      .find(row => row.querySelector('b')?.textContent === label)
+    for (const service of ['RustFS', 'ETCD', 'Temporal', 'Temporal CLI', 'ZincSearch', 'RNacos', 'Numa', 'CLIProxyAPI']) {
+      await wait(() => serviceRow(service), service + ' appears in Services')
+    }
+    await wait(() => serviceRow('Consul')?.querySelector('.state-label')?.textContent === 'Stopped', 'installed Consul')
+    serviceRow('Consul').click()
+    await wait(() => has('/legacy/consul') && exact('Change directory'), 'saved Consul directory')
+    if (exact('Open Consul UI')) throw new Error('A stopped service exposed its dashboard')
+    await click('Open folder')
+    await wait(() => window.openedDirectories.includes('/legacy/consul'), 'open the legacy service directory')
+    await click('Change directory')
+    await wait(() => has('/new/consul'), 'saved Consul directory change')
+    await click('Start')
+    await wait(() => exact('Open Consul UI') && window.consulStarts.length === 1, 'Consul starts from Services')
+    if (window.consulStarts[0][0].bin !== '/fixture/consul-app/consul' || window.consulStarts[0][1] !== '/new/consul') throw new Error('Start did not use the stored Consul directory')
+    if (!exact('Change directory').disabled) throw new Error('A running service can change its startup directory')
+    await click('Open Consul UI')
+    await wait(() => exact('Open Consul UI')?.disabled && window.finishConsulBrowser, 'Consul dashboard launch in flight')
+    if (window.consulBrowserLaunches.join() !== 'http://127.0.0.1:48500/ui/') throw new Error('Console ignored the configured port')
+    window.finishConsulBrowser()
+    await wait(() => !exact('Open Consul UI')?.disabled, 'Consul dashboard terminal result')
+    await click('Stop')
+    await wait(() => !exact('Open Consul UI') && !exact('Change directory')?.disabled, 'Consul stopped')
+    serviceRow('Tomcat').click()
+    await wait(() => has('CATALINA_BASE') && has('/legacy/tomcat-a'), 'existing Tomcat base per binary')
+    const chooseTomcat = async (path, beforeFinish) => {
+      window.finishTomcatPicker = undefined
+      await click('Change directory')
+      await wait(() => window.finishTomcatPicker && exact('Change directory')?.disabled, 'Tomcat picker in progress')
+      beforeFinish?.()
+      window.finishTomcatPicker(path)
+      await wait(() => !exact('Change directory')?.disabled, 'Tomcat picker terminal result')
+    }
+    await chooseTomcat('/new/tomcat-stale', () => window.selectTomcat('10.1.46'))
+    if (!has('/legacy/tomcat-b') || window.tomcatDirectoryWrites) throw new Error('Stale Tomcat picker changed a directory')
+    window.selectTomcat('9.0.106')
+    window.failTomcatWrite = true
+    await chooseTomcat('/new/tomcat-failed')
+    await wait(() => document.body.textContent.includes('Tomcat directory write failed') &&
+      has('/legacy/tomcat-a'), 'Tomcat write failure retains original directory')
+    window.failTomcatWrite = false
+    await chooseTomcat('/new/tomcat')
+    await wait(() => has('/new/tomcat'), 'Tomcat directory retry')
+    for (const [label, action] of [['Configuration', 'listConfigFiles'], ['Logs', 'listLogFiles']]) {
+      await click(label)
+      await wait(() => window.tomcatRequests.some(([cmd, version, base]) =>
+        cmd === action && version.version === '9.0.106' && base === '/new/tomcat'
+      ), 'Tomcat ' + label + ' uses saved base')
+      await click('Close', '[role=dialog] button')
+    }
+    await click('Start')
+    await wait(() => window.tomcatRequests.some(([cmd, version, base]) =>
+      cmd === 'startService' && version.version === '9.0.106' && base === '/new/tomcat'
+    ), 'Tomcat Start uses saved base')
+    await wait(() => exact('Stop') && !exact('Stop').disabled, 'Tomcat running')
+    await click('Stop')
     const modulesButton = () => [...document.querySelectorAll('.settings-nav button')]
       .find(button => button.lastChild.textContent.trim() === 'Modules')
     const openModules = async () => {

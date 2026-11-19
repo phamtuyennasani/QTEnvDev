@@ -26,7 +26,7 @@
             >
             <el-button
               class="flex-shrink-0"
-              :disabled="!DATA_DIR"
+              :disabled="!DATA_DIR || isRunning"
               link
               :icon="Edit"
               @click.stop="chooseDir"
@@ -59,6 +59,7 @@
   import { I18nT } from '@lang/index'
   import { BrewStore } from '@/store/brew'
   import { chooseFolder } from '@/util/File'
+  import { MessageError } from '@/util/Element'
   import { RustfsSetup } from './setup'
   import { Edit } from '@element-plus/icons-vue'
   import Config from './Config.vue'
@@ -86,31 +87,23 @@
     return brewStore.currentVersion('rustfs')
   })
 
-  const DATA_DIR = computed({
-    get() {
-      if (currentVersion?.value?.bin) {
-        if (RustfsSetup.dir[currentVersion.value.bin]) {
-          return RustfsSetup.dir[currentVersion.value.bin]
-        }
-        return join(window.Server.BaseDir!, `rustfs/data`)
-      }
-      return I18nT('base.needSelectVersion')
-    },
-    set(v: string) {
-      if (!currentVersion?.value?.bin) {
-        return
-      }
-      RustfsSetup.dir[currentVersion.value.bin] = v
-      RustfsSetup.save()
-    }
+  void RustfsSetup.load().catch(MessageError)
+  const DATA_DIR = computed(() => {
+    const version = currentVersion.value
+    return version ? RustfsSetup.path(version) : ''
   })
 
-  const chooseDir = () => {
-    chooseFolder()
-      .then((path: string) => {
-        DATA_DIR.value = path
-      })
-      .catch()
+  const chooseDir = async () => {
+    const version = currentVersion.value
+    const module = brewStore.module('rustfs')
+    const editable = () =>
+      currentVersion.value?.bin === version?.bin &&
+      !module.starting &&
+      !module.installed.some((item) => item.run || item.running)
+    if (!version || !editable()) return
+    const path = await chooseFolder().catch(() => undefined)
+    if (!path) return
+    await RustfsSetup.setDirectory(version.bin, path, editable).catch(MessageError)
   }
 
   const openURL = async () => {

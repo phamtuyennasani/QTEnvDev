@@ -219,7 +219,11 @@ export const dialog = {
 export const shell = {
   showItemInFolder: createIPCCall<[string], void>('shell', 'showItemInFolder'),
   openPath: createIPCCall<[string], string>('shell', 'openPath'),
-  openExternal: createIPCCall<[string], void>('shell', 'openExternal')
+  openExternal: createIPCCall<[string], void>('shell', 'openExternal'),
+  openExternalChecked: createIPCCall<[string], { code: 0 } | { code: 1; msg?: string }>(
+    'shell',
+    'openExternalChecked'
+  )
 }
 
 export const mime = {

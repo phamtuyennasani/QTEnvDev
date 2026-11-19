@@ -36,7 +36,19 @@
         <div class="detail-actions">
           <button class="action-button action-button--primary" :disabled="selectedService.state === 'busy'" @click="serviceController.run(selectedService, selectedService.state === 'running' ? 'Restart' : 'Start')">{{ selectedService.state === 'running' ? 'Restart' : 'Start' }}</button>
           <button class="action-button" :disabled="selectedService.state !== 'running'" @click="serviceController.run(selectedService, 'Stop')">Stop</button>
+          <button
+            v-if="dashboard && selectedService.state === 'running'"
+            class="action-button"
+            :disabled="serviceDashboardController.isOpening(dashboard.flag)"
+            @click="serviceDashboardController.open(dashboard.flag)"
+          >{{ dashboard.label }}</button>
         </div>
+        <ServiceDirectory
+          v-if="directoryFlag"
+          :key="directoryFlag"
+          :flag="directoryFlag"
+          :has-version="selectedService.version !== '—'"
+        />
         <div class="detail-actions"><button class="action-button" @click="openFiles('config')">Configuration</button><button class="action-button" @click="openFiles('log')">Logs</button></div>
         <button v-if="installedFlag" class="action-button" @click="versionsOpen = true">Installed versions</button>
         <PackageBrowser v-if="selectedFlag" :key="selectedFlag" :flag="selectedFlag" :title="selectedService.name" />
@@ -64,6 +76,10 @@ import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
 import { packageFlagForName } from '../packages/catalog'
 import { startupGroupController } from '../state/startupGroupController'
 import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
+import { serviceModuleFlags } from '../adapters/serviceAdapter'
+import ServiceDirectory from '../serviceDirectories/ServiceDirectory.vue'
+import { isServiceDirectoryFlag } from '../serviceDirectories/controller'
+import { serviceDashboardController, serviceDashboardLabel } from '../serviceDashboards/controller'
 const query = ref(''); const filter = ref('All'); const tabs = ['All', 'Running', 'Stopped']
 const selectedService = computed(() => {
   const services = serviceController.visibleServices.value
@@ -74,6 +90,17 @@ const formatState = (state: ServiceState) => state === 'busy' ? 'Working…' : s
 const notify = (message: string) => showNotice(message)
 const startGroup = async () => { if (startupGroupController.defaultGroup.value) { await startupGroupController.runDefault(); return } const result = await serviceController.runGroup(); notify(result.completed + ' services started; ' + result.failed + ' failed') }
 const selectedFlag = computed(() => selectedService.value ? packageFlagForName(selectedService.value.name) : undefined)
+const moduleFlag = computed(() => selectedService.value && serviceModuleFlags[selectedService.value.name])
+const directoryFlag = computed(() => {
+  const flag = moduleFlag.value
+  return flag && isServiceDirectoryFlag(flag) ? flag : undefined
+})
+const dashboard = computed(() => {
+  const flag = moduleFlag.value
+  if (!flag) return undefined
+  const label = serviceDashboardLabel(flag)
+  return label ? { flag, label } : undefined
+})
 const InstalledVersionsDialog = defineAsyncComponent(() => import('../serviceVersions/InstalledVersionsDialog.vue'))
 const TunnelDialog = defineAsyncComponent(() => import('../cloudflareTunnel/TunnelDialog.vue'))
 const tunnelsOpen = ref(false)

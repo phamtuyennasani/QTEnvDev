@@ -28,10 +28,7 @@
 
 <script lang="ts" setup>
   import { AsideSetup, AppServiceModule } from '@/core/ASide'
-  import { BrewStore } from '@/store/brew'
-  import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
-  import { join } from '@/util/path-browserify'
-  import { ConsulSetup } from '@/components/Consul/setup'
+  import { registerConsulLifecycle } from './lifecycle'
 
   const {
     showItem,
@@ -45,21 +42,7 @@
     stopNav
   } = AsideSetup('consul')
 
-  ConsulSetup.init()
-
-  const brewStore = BrewStore()
-
-  const module = brewStore.module('consul')
-  if (!module?.startExtParam) {
-    module.startExtParam = (version: ModuleInstalledItem) => {
-      return new Promise<any[]>((resolve) => {
-        const versionTop = version?.version?.split('.')?.shift() ?? ''
-        const dir = join(window.Server.BaseDir!, `consul/consul-${versionTop}-data`)
-        const p = ConsulSetup.dir?.[version.bin] ?? dir
-        resolve([p])
-      })
-    }
-  }
+  registerConsulLifecycle()
 
   AppServiceModule.consul = {
     groupDo,

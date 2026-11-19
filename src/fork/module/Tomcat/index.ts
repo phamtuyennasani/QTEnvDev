@@ -1,5 +1,6 @@
 import { dirname, join } from 'path'
 import { existsSync } from 'fs'
+import { format } from 'date-fns'
 import { Base } from '../Base'
 import { ForkPromise } from '@shared/ForkPromise'
 import type { AppHost, OnlineVersionItem, SoftInstalled } from '@shared/app'
@@ -447,7 +448,8 @@ class Tomcat extends Base {
   ): Array<{ name: string; path: string }> {
     const v = _version?.version?.split('.')?.shift() ?? ''
     const logsDir = join(catalinaBase ?? join(global.Server.BaseDir!, `tomcat/tomcat${v}`), 'logs')
-    return [{ name: 'catalina.out', path: join(logsDir, 'catalina.out') }]
+    const name = isWindows() ? `catalina.${format(new Date(), 'yyyy-MM-dd')}.log` : 'catalina.out'
+    return [{ name, path: join(logsDir, name) }]
   }
 }
 export default new Tomcat()

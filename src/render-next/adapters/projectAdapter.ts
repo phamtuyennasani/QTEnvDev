@@ -15,7 +15,7 @@ import { registerLifecycle } from './lifecycleAdapter'
 import { isTomcatSite } from '@shared/siteRuntime'
 import tomcatSiteController from '@/components/Host/Tomcat/TomcatSiteController'
 import { cloneTomcatSiteHost, rendererTomcatNameError } from '@/components/Host/Tomcat/site'
-import { tomcatCatalinaBase, TomcatSetup } from '@/components/Tomcat/setup'
+import { TomcatSetup } from '@/components/Tomcat/setup'
 import { dirname, basename, join } from '@/util/path-browserify'
 
 function request(
@@ -255,8 +255,7 @@ export const websiteDependencies: WebsiteDependencies = {
       const version =
         store.module('tomcat').installed.find((item) => item.run) ?? store.currentVersion('tomcat')
       if (!version) return []
-      await TomcatSetup.init()
-      const conf = join(tomcatCatalinaBase(version), 'conf')
+      const conf = join(await TomcatSetup.resolve(version), 'conf')
       const files = [{ label: 'server.xml', path: join(conf, 'server.xml'), readOnly: true }]
       if (host.tomcat?.rewrite?.enabled && !rendererTomcatNameError(host.name)) {
         files.push({

@@ -33,7 +33,7 @@ const run = async (service: ServiceItem, action: 'Start' | 'Stop' | 'Restart') =
   }
 }
 const runGroup = async () => {
-  const pending = visibleServices.value.filter((service) => service.state !== 'running' && service.state !== 'busy')
+  const pending = visibleServices.value.filter((service) => service.state === 'stopped')
   const results = []; for (const service of pending) results.push(await run(service, 'Start')); return { completed: results.filter(Boolean).length, failed: results.filter((item) => !item).length }
 }
 const refresh = async (targets = visibleServices.value) => {

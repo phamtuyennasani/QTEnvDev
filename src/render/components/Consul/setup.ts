@@ -1,26 +1,7 @@
-import { reactive } from 'vue'
-import localForage from 'localforage'
+import { join } from '@/util/path-browserify'
+import { createVersionDirectory } from '../ServiceManager/versionDirectory'
 
-export const ConsulSetup: {
-  dir: Record<string, string>
-  init: () => void
-  save: () => void
-} = reactive({
-  dir: {},
-  init() {
-    localForage
-      .getItem('qtenvdev-consul-storage-dir')
-      .then((res: Record<string, string>) => {
-        if (res) {
-          ConsulSetup.dir = reactive(res)
-        }
-      })
-      .catch()
-  },
-  save() {
-    localForage
-      .setItem('qtenvdev-consul-storage-dir', JSON.parse(JSON.stringify(ConsulSetup.dir)))
-      .then()
-      .catch()
-  }
-})
+export const ConsulSetup = createVersionDirectory(
+  'qtenvdev-consul-storage-dir',
+  (base, version) => join(base, 'consul', `consul-${version.version.split('.')[0]}-data`)
+)

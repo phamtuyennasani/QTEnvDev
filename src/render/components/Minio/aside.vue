@@ -23,10 +23,7 @@
 
 <script lang="ts" setup>
   import { AsideSetup, AppServiceModule } from '@/core/ASide'
-  import { MinioSetup } from './setup'
-  import { BrewStore } from '@/store/brew'
-  import { join } from '@/util/path-browserify'
-  import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
+  import { registerMinioLifecycle } from './lifecycle'
 
   const {
     showItem,
@@ -40,19 +37,7 @@
     stopNav
   } = AsideSetup('minio')
 
-  MinioSetup.init()
-
-  const brewStore = BrewStore()
-  const module = brewStore.module('minio')
-  if (!module?.startExtParam) {
-    module.startExtParam = (version: ModuleInstalledItem) => {
-      return new Promise<any[]>((resolve) => {
-        const dir = join(window.Server.BaseDir!, `minio/data`)
-        const p = MinioSetup.dir?.[version.bin] ?? dir
-        resolve([p])
-      })
-    }
-  }
+  registerMinioLifecycle()
 
   AppServiceModule.minio = {
     groupDo,

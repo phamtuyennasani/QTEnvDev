@@ -1,41 +1,9 @@
-import { reactive } from 'vue'
-import localForage from 'localforage'
-import type { SoftInstalled } from '@shared/app'
 import { join } from '@/util/path-browserify'
+import { createVersionDirectory } from '../ServiceManager/versionDirectory'
 
-let initPromise: Promise<void> | undefined
+export const TomcatSetup = createVersionDirectory(
+  'qtenvdev-tomcat-server-root',
+  (base, version) => join(base, 'tomcat', `tomcat${version.version.split('.')[0]}`)
+)
 
-export const TomcatSetup: {
-  CATALINA_BASE: Record<string, string>
-  init: () => Promise<void>
-  save: () => void
-} = reactive({
-  CATALINA_BASE: {},
-  init() {
-    if (!initPromise) {
-      initPromise = localForage
-        .getItem<Record<string, string>>('qtenvdev-tomcat-server-root')
-        .then((value) => {
-          if (value) {
-            TomcatSetup.CATALINA_BASE = reactive(value)
-          }
-        })
-        .catch(() => {})
-    }
-    return initPromise
-  },
-  save() {
-    localForage
-      .setItem('qtenvdev-tomcat-server-root', JSON.parse(JSON.stringify(TomcatSetup.CATALINA_BASE)))
-      .then()
-      .catch()
-  }
-})
-
-export const tomcatDefaultCatalinaBase = (version: SoftInstalled) => {
-  const major = version.version?.split('.').shift() ?? ''
-  return join(window.Server.BaseDir!, `tomcat/tomcat${major}`)
-}
-
-export const tomcatCatalinaBase = (version: SoftInstalled) =>
-  TomcatSetup.CATALINA_BASE[version.bin] ?? tomcatDefaultCatalinaBase(version)
+export const tomcatCatalinaBase = TomcatSetup.path

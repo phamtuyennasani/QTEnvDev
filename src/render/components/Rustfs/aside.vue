@@ -23,10 +23,7 @@
 
 <script lang="ts" setup>
   import { AsideSetup, AppServiceModule } from '@/core/ASide'
-  import { RustfsSetup } from './setup'
-  import { BrewStore } from '@/store/brew'
-  import { join } from '@/util/path-browserify'
-  import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
+  import { registerRustfsLifecycle } from './lifecycle'
 
   const {
     showItem,
@@ -40,19 +37,7 @@
     stopNav
   } = AsideSetup('rustfs')
 
-  RustfsSetup.init()
-
-  const brewStore = BrewStore()
-  const module = brewStore.module('rustfs')
-  if (!module?.startExtParam) {
-    module.startExtParam = (version: ModuleInstalledItem) => {
-      return new Promise<any[]>((resolve) => {
-        const dir = join(window.Server.BaseDir!, `rustfs/data`)
-        const p = RustfsSetup.dir?.[version.bin] ?? dir
-        resolve([p])
-      })
-    }
-  }
+  registerRustfsLifecycle()
 
   AppServiceModule.rustfs = {
     groupDo,

@@ -1,26 +1,7 @@
-import { reactive } from 'vue'
-import localForage from 'localforage'
+import { join } from '@/util/path-browserify'
+import { createVersionDirectory } from '../ServiceManager/versionDirectory'
 
-export const RustfsSetup: {
-  dir: Record<string, string>
-  init: () => void
-  save: () => void
-} = reactive({
-  dir: {},
-  init() {
-    localForage
-      .getItem('qtenvdev-rustfs-storage-dir')
-      .then((res: Record<string, string>) => {
-        if (res) {
-          RustfsSetup.dir = reactive(res)
-        }
-      })
-      .catch()
-  },
-  save() {
-    localForage
-      .setItem('qtenvdev-rustfs-storage-dir', JSON.parse(JSON.stringify(RustfsSetup.dir)))
-      .then()
-      .catch()
-  }
-})
+export const RustfsSetup = createVersionDirectory(
+  'qtenvdev-rustfs-storage-dir',
+  (base) => join(base, 'rustfs', 'data')
+)

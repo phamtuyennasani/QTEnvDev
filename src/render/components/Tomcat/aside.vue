@@ -28,9 +28,7 @@
 
 <script lang="ts" setup>
   import { AsideSetup, AppServiceModule } from '@/core/ASide'
-  import { TomcatSetup, tomcatCatalinaBase } from '@/components/Tomcat/setup'
-  import { BrewStore } from '@/store/brew'
-  import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
+  import { registerTomcatLifecycle } from './lifecycle'
 
   const {
     showItem,
@@ -44,18 +42,7 @@
     stopNav
   } = AsideSetup('tomcat')
 
-  TomcatSetup.init().catch()
-
-  const brewStore = BrewStore()
-  const module = brewStore.module('tomcat')
-  if (!module?.startExtParam) {
-    module.startExtParam = (version: ModuleInstalledItem) => {
-      return new Promise<any[]>(async (resolve) => {
-        await TomcatSetup.init()
-        resolve([tomcatCatalinaBase(version)])
-      })
-    }
-  }
+  registerTomcatLifecycle()
 
   AppServiceModule.tomcat = {
     groupDo,

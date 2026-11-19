@@ -14,7 +14,6 @@
   import { computed, ref } from 'vue'
   import Conf from '@/components/Conf/index.vue'
   import { AppStore } from '@/store/app'
-  import type { SoftInstalled } from '@shared/app'
   import { join } from '@/util/path-browserify'
   import { tomcatCatalinaBase } from './setup'
 
@@ -29,8 +28,9 @@
   })
 
   const currentBaseDir = computed(() => {
-    if (!currentVersion.value) return ''
-    return tomcatCatalinaBase(currentVersion.value as SoftInstalled)
+    const version = currentVersion.value
+    if (!version?.version || !version.bin) return ''
+    return tomcatCatalinaBase({ bin: version.bin, version: version.version })
   })
 
   const conf = ref()

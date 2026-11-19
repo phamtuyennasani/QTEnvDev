@@ -24,7 +24,7 @@
             >
             <el-button
               class="flex-shrink-0"
-              :disabled="!DATA_DIR"
+              :disabled="!DATA_DIR || isRunning"
               link
               :icon="Edit"
               @click.stop="chooseDir"
@@ -58,6 +58,7 @@
   import { computed } from 'vue'
   import { join } from '@/util/path-browserify'
   import { chooseFolder } from '@/util/File'
+  import { MessageError } from '@/util/Element'
   import { ConsulSetup } from '@/components/Consul/setup'
 
   const { tab, checkVersion } = AppModuleSetup('consul')
@@ -79,33 +80,23 @@
     return brewStore.currentVersion('consul')
   })
 
-  const DATA_DIR = computed({
-    get() {
-      if (currentVersion?.value?.bin) {
-        if (ConsulSetup.dir[currentVersion.value.bin]) {
-          return ConsulSetup.dir[currentVersion.value.bin]
-        }
-        const versionTop = currentVersion?.value?.version?.split('.')?.shift() ?? ''
-        const dir = join(window.Server.BaseDir!, `consul/consul-${versionTop}-data`)
-        return dir
-      }
-      return I18nT('base.needSelectVersion')
-    },
-    set(v: string) {
-      if (!currentVersion?.value?.bin) {
-        return
-      }
-      ConsulSetup.dir[currentVersion.value.bin] = v
-      ConsulSetup.save()
-    }
+  void ConsulSetup.load().catch(MessageError)
+  const DATA_DIR = computed(() => {
+    const version = currentVersion.value
+    return version ? ConsulSetup.path(version) : ''
   })
 
-  const chooseDir = () => {
-    chooseFolder()
-      .then((path: string) => {
-        DATA_DIR.value = path
-      })
-      .catch()
+  const chooseDir = async () => {
+    const version = currentVersion.value
+    const module = brewStore.module('consul')
+    const editable = () =>
+      currentVersion.value?.bin === version?.bin &&
+      !module.starting &&
+      !module.installed.some((item) => item.run || item.running)
+    if (!version || !editable()) return
+    const path = await chooseFolder().catch(() => undefined)
+    if (!path) return
+    await ConsulSetup.setDirectory(version.bin, path, editable).catch(MessageError)
   }
 
   const openConsulUI = async () => {

@@ -3,7 +3,7 @@ import { I18nT } from '@lang/index'
 import { AppStore, type AppHost } from '@/store/app'
 import { BrewStore } from '@/store/brew'
 import { HostStore } from '@/components/Host/store'
-import { TomcatSetup, tomcatCatalinaBase } from '@/components/Tomcat/setup'
+import { TomcatSetup } from '@/components/Tomcat/setup'
 import { registerTomcatLifecycle } from '@/components/Tomcat/lifecycle'
 import { MessageError, MessageSuccess, MessageWarning } from '@/util/Element'
 import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
@@ -79,13 +79,13 @@ export class TomcatSiteController {
         return false
       }
       registerTomcatLifecycle()
-      await TomcatSetup.init()
+      const catalinaBase = await TomcatSetup.resolve(version)
       const wasRunning = !!version.run
       const request: TomcatSaveRequest = {
         ...snapshot,
         flag,
         version: JSON.parse(JSON.stringify(version)),
-        catalinaBase: tomcatCatalinaBase(version),
+        catalinaBase,
         wasRunning
       }
       const result = await this.operation.save(request)

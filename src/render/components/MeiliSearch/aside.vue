@@ -28,10 +28,7 @@
 
 <script lang="ts" setup>
   import { AsideSetup, AppServiceModule } from '@/core/ASide'
-  import { MeiliSearchSetup } from './setup'
-  import { BrewStore } from '@/store/brew'
-  import { join } from '@/util/path-browserify'
-  import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
+  import { registerMeiliSearchLifecycle } from './lifecycle'
 
   const {
     showItem,
@@ -45,21 +42,7 @@
     stopNav
   } = AsideSetup('meilisearch')
 
-  MeiliSearchSetup.init()
-
-  const brewStore = BrewStore()
-
-  const module = brewStore.module('meilisearch')
-  if (!module?.startExtParam) {
-    module.startExtParam = (version: ModuleInstalledItem) => {
-      return new Promise<any[]>((resolve) => {
-        const v = version?.version?.split('.')?.slice(0, 2)?.join('.') ?? ''
-        const dir = join(window.Server.BaseDir!, `meilisearch`, v)
-        const p = MeiliSearchSetup.dir?.[version.bin] ?? dir
-        resolve([p])
-      })
-    }
-  }
+  registerMeiliSearchLifecycle()
 
   AppServiceModule.meilisearch = {
     groupDo,

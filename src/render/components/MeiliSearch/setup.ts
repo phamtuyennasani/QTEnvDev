@@ -1,26 +1,7 @@
-import { reactive } from 'vue'
-import localForage from 'localforage'
+import { join } from '@/util/path-browserify'
+import { createVersionDirectory } from '../ServiceManager/versionDirectory'
 
-export const MeiliSearchSetup: {
-  dir: Record<string, string>
-  init: () => void
-  save: () => void
-} = reactive({
-  dir: {},
-  init() {
-    localForage
-      .getItem('qtenvdev-meilisearch-storage-dir')
-      .then((res: Record<string, string>) => {
-        if (res) {
-          MeiliSearchSetup.dir = reactive(res)
-        }
-      })
-      .catch()
-  },
-  save() {
-    localForage
-      .setItem('qtenvdev-meilisearch-storage-dir', JSON.parse(JSON.stringify(MeiliSearchSetup.dir)))
-      .then()
-      .catch()
-  }
-})
+export const MeiliSearchSetup = createVersionDirectory(
+  'qtenvdev-meilisearch-storage-dir',
+  (base, version) => join(base, 'meilisearch', version.version.split('.').slice(0, 2).join('.'))
+)
