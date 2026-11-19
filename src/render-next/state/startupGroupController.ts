@@ -5,21 +5,33 @@ import { showNotice } from './app'
 
 /** Renderer-lifetime bridge to the established startup-group domain. */
 const state = reactive({ ready: false, loading: false, error: '' })
-const init = async () => {
-  if (state.loading) return
-  state.loading = true; state.error = ''
-  try { await StartupGroupManager.store.init(); await StartupGroupManager.ensureSources(StartupGroupManager.store.groups); state.ready = true }
-  catch (error) { state.error = error instanceof Error ? error.message : String(error) }
-  finally { state.loading = false }
+let initFlight: Promise<void> | undefined
+const init = () => {
+  if (initFlight) return initFlight
+  state.loading = true
+  state.error = ''
+  initFlight = (async () => {
+    try {
+      await StartupGroupManager.store.init()
+      state.ready = true
+      await StartupGroupManager.ensureSources(StartupGroupManager.store.groups)
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : String(error)
+    } finally {
+      state.loading = false
+      initFlight = undefined
+    }
+  })()
+  return initFlight
 }
 const groups = computed(() => StartupGroupManager.store.groups)
 const defaultGroup = computed(() => StartupGroupManager.store.defaultGroup)
 const isRunning = (group: StartupGroup) => StartupGroupManager.isGroupRunning(group)
 const isExecuting = (group: StartupGroup) => StartupGroupManager.isGroupExecuting(group)
-const run = async (group: StartupGroup, enabled: boolean) => {
+const run = async (group: StartupGroup, enabled: boolean, interactive = true) => {
   if (StartupGroupManager.busy) return false
   try {
-    const result = await StartupGroupManager.setGroupEnabled(group, enabled)
+    const result = await StartupGroupManager.setGroupEnabled(group, enabled, interactive)
     if (result) {
       const failed = result.members.filter((member) => ['failed', 'invalid'].includes(member.outcome)).length
       showNotice(`${group.name}: ${failed ? `${failed} member(s) failed` : enabled ? 'started' : 'stopped'}`)

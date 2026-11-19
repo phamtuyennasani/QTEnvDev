@@ -2,9 +2,10 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { navigateNext, type Workspace } from '../state/app'
+import { isWorkspaceVisible } from '../moduleVisibility/workspaces'
 const open = ref(false); const query = ref(''); const input = ref<HTMLInputElement>()
 const commands = [{ id: 'overview', label: 'Open overview', hint: 'Environment status', glyph: '⌂', key: '1', workspace: 'overview' }, { id: 'services', label: 'Open services', hint: 'Processes and ports', glyph: '◉', key: '2', workspace: 'services' }, { id: 'websites', label: 'Open websites', hint: 'Projects and hosts', glyph: '⌁', key: '3', workspace: 'websites' }, { id: 'runtimes', label: 'Open runtimes', hint: 'Versions and defaults', glyph: '⌘', key: '4', workspace: 'runtimes' }, { id: 'databases', label: 'Open databases', hint: 'Data services', glyph: '◈', key: '5', workspace: 'databases' }, { id: 'startup-groups', label: 'Open startup groups', hint: 'Saved service sequences', glyph: '▶', key: '6', workspace: 'startup-groups' }, { id: 'tools', label: 'Open toolbox', hint: 'Developer utilities', glyph: '✦', key: '7', workspace: 'tools' }, { id: 'logs', label: 'Open logs', hint: 'Live application events', glyph: '≋', key: '8', workspace: 'logs' }, { id: 'settings', label: 'Open settings', hint: 'Preferences', glyph: '⚙', key: '9', workspace: 'settings' }] as const
-const filtered = computed(() => commands.filter((item) => `${item.label} ${item.hint}`.toLowerCase().includes(query.value.toLowerCase())))
+const filtered = computed(() => commands.filter((item) => isWorkspaceVisible(item.workspace) && `${item.label} ${item.hint}`.toLowerCase().includes(query.value.toLowerCase())))
 const show = async () => { open.value = true; query.value = ''; await nextTick(); input.value?.focus() }
 const close = () => { open.value = false }
 const run = (item: (typeof commands)[number]) => { navigateNext(item.workspace as Workspace); close() }

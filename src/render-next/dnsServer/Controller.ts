@@ -29,6 +29,15 @@ export class DnsServerController {
 
   constructor(private readonly dependencies: Dependencies) {}
 
+  refreshStatus() {
+    return this.run('refresh', async () => {
+      this.status = undefined
+      this.status = await this.readStatus()
+      this.updateSubscriptions()
+      return true
+    })
+  }
+
   refresh() {
     return this.run('refresh', async () => {
       const [status, config, interfaces] = await Promise.allSettled([

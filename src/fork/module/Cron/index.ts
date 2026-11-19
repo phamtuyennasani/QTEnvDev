@@ -9,6 +9,7 @@ import { CronStorage } from './Storage'
 import { CronSystemScheduler } from './SystemScheduler'
 import {
   CRON_OUTCOME_UNKNOWN,
+  CRON_SYSTEM_TASK_REMOVED,
   GLOBAL_HOST_ID,
   RUN_HISTORY_LIMIT,
   type CronCommandResult,
@@ -115,12 +116,12 @@ export class Cron extends Base {
   }
 
   private systemTaskJobId(systemTaskId: string): string | undefined {
-    const unix = systemTaskId.match(/^qtenvdev:(.+)$/)
+    const unix = systemTaskId.match(/^qtenvdev:([a-z\d_-]+)$/i)
     if (unix) {
       return unix[1]
     }
 
-    const task = systemTaskId.match(/(?:^|[\\/])QTEnvDev-Cron-([^\\/]+)$/)
+    const task = systemTaskId.match(/^\\?QTEnvDev-Cron-([a-z\d_-]+)$/i)
     return task?.[1]
   }
 
@@ -136,10 +137,9 @@ export class Cron extends Base {
       return
     }
 
-    await this.systemScheduler.remove(jobId).catch(() => {})
     found.jobs.splice(found.index, 1)
     data[found.key] = found.jobs
-    await this.storage.save(data)
+    await this.saveScheduledChanges(data)
   }
 
   private resolveJobHostId(hostId: number | undefined | null, job: Partial<CronJob>): number {
@@ -293,7 +293,12 @@ export class Cron extends Base {
   listRunRecords(jobId: string, limit = RUN_HISTORY_LIMIT): ForkPromise<CronRunRecord[]> {
     return new ForkPromise(async (resolve, reject) => {
       try {
-        resolve(await this.runRecords.read(jobId, limit))
+        if (typeof jobId !== 'string' || !/^[a-z\d_-]{1,128}$/i.test(jobId))
+          throw new Error('Invalid scheduled task ID.')
+        const count = Number.isSafeInteger(limit) && limit > 0
+          ? Math.min(limit, RUN_HISTORY_LIMIT)
+          : RUN_HISTORY_LIMIT
+        resolve(await this.runRecords.read(jobId, count))
       } catch (error) {
         reject(error)
       }
@@ -334,10 +339,18 @@ export class Cron extends Base {
     return new ForkPromise(async (resolve, reject) => {
       try {
         await this.systemScheduler.deleteSystemTask(id)
+      } catch (error) {
+        reject(error)
+        return
+      }
+      try {
         await this.removeLocalJobBySystemTaskId(id)
         resolve(true)
       } catch (error) {
-        reject(error)
+        reject(Object.assign(
+          new Error('The system task was removed, but its app record could not be updated: ' + error),
+          { code: CRON_SYSTEM_TASK_REMOVED }
+        ))
       }
     })
   }

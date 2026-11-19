@@ -31,6 +31,16 @@ async function stopInstalledService(flag: AllAppModule) {
   // PHP and PHP-FPM share the PHP inventory. Hiding the CLI leaves a visible FPM running.
   if (flag === 'php' && isBuiltinModuleVisible('php-fpm')) return
   const module = BrewStore().module(flag === 'php-fpm' ? 'php' : flag)
+  if (flag === 'mysql') {
+    const { stopMysqlCompanions } = await import('@/components/Mysql/serviceLifecycle')
+    const results = await Promise.allSettled([module.stop(), stopMysqlCompanions()])
+    const errors = results.flatMap((result) =>
+      result.status === 'rejected' ? [String(result.reason)]
+        : result.value === true ? [] : [String(result.value)]
+    )
+    if (errors.length) throw new Error(errors.join('\n'))
+    return
+  }
   if (!module.installed.some(({ run, running }) => run || running) && !module.starting) return
   const result = await module.stop()
   if (result !== true)

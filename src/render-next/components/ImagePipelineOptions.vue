@@ -1,5 +1,5 @@
 <template>
-  <div class="pipeline-options pqt-established-tool dark">
+  <div class="pipeline-options pqt-established-tool">
     <nav class="option-tabs" aria-label="Image options">
       <button v-for="tab in tabs" :key="tab.id" class="action-button" :class="{ active: active === tab.id }" @click="active = tab.id">{{ tab.label }}</button>
     </nav>

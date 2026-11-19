@@ -1,5 +1,5 @@
 <template>
-  <div class="pqt-established-tool pqt-php-extension-surface dark">
+  <div class="pqt-established-tool pqt-php-extension-surface">
     <EstablishedExtensions ref="drawer" :version="snapshot" />
   </div>
 </template>

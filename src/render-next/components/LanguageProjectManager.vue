@@ -13,7 +13,7 @@
       </div>
     </div>
     <p v-if="runtimeWarning" class="forge-alert" role="status">{{ runtimeWarning }}</p>
-    <div class="pqt-established-tool pqt-language-project-surface dark">
+    <div class="pqt-established-tool pqt-language-project-surface">
       <component :is="surface" :key="language + ':' + tab" v-bind="viewProps" />
     </div>
   </ForgeDialog>

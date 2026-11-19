@@ -1,6 +1,6 @@
 ﻿import { reactive } from 'vue'
 
-export type Workspace = 'overview' | 'websites' | 'services' | 'runtimes' | 'databases' | 'startup-groups' | 'tools' | 'logs' | 'cron' | 'settings'
+export type Workspace = 'overview' | 'websites' | 'services' | 'runtimes' | 'databases' | 'startup-groups' | 'custom-modules' | 'tools' | 'logs' | 'cron' | 'http-serve' | 'dns-server' | 'ftp-accounts' | 'podman' | 'settings'
 
 export const nextAppState = reactive({
   workspace: 'overview' as Workspace,

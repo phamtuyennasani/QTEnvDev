@@ -108,10 +108,12 @@ exit "$EXIT_CODE"
 
   private async readCrontab(): Promise<string> {
     try {
-      const res = await execPromise('crontab -l')
+      const res = await execPromise('crontab -l', { env: { ...process.env, LC_ALL: 'C' } })
       return res.stdout?.toString() || ''
-    } catch {
-      return ''
+    } catch (error) {
+      const { code, stderr } = error as { code?: number; stderr?: string }
+      if (code === 1 && /(?:^|\n)(?:crontab:\s*)?no crontab for\b/i.test(stderr ?? '')) return ''
+      throw error
     }
   }
 
@@ -343,7 +345,7 @@ exit "$EXIT_CODE"
     if (!id?.trim()) {
       throw new Error('System task id is required')
     }
-    const qtEnvDev = id.match(/^qtenvdev:(.+)$/)
+    const qtEnvDev = id.match(/^qtenvdev:([a-z\d_-]+)$/i)
     if (qtEnvDev) {
       await this.remove(qtEnvDev[1])
       return

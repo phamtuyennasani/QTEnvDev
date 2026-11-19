@@ -23,3 +23,4 @@ export type CronTaskScriptExt = 'sh' | 'ps1' | 'cmd'
 export const GLOBAL_HOST_ID = 0
 export const RUN_HISTORY_LIMIT = 50
 export const CRON_OUTCOME_UNKNOWN = 'CRON_OUTCOME_UNKNOWN'
+export const CRON_SYSTEM_TASK_REMOVED = 'CRON_SYSTEM_TASK_REMOVED'

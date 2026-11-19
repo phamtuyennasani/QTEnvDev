@@ -1,7 +1,7 @@
 <template>
   <ForgeDialog title="Process control" description="Search ports or process commands, inspect the process tree, then confirm a stop." eyebrow="WORKSPACE / SYSTEM" wide @close="emit('close')">
     <div class="process-tabs"><button class="action-button" :class="{ active: kind === 'port' }" @click="kind = 'port'">Port</button><button class="action-button" :class="{ active: kind === 'process' }" @click="kind = 'process'">Process name</button></div>
-    <div class="legacy-process-view pqt-established-tool dark"><PortKill v-if="kind === 'port'" /><ProcessKill v-else /></div>
+    <div class="legacy-process-view pqt-established-tool"><PortKill v-if="kind === 'port'" /><ProcessKill v-else /></div>
   </ForgeDialog>
 </template>
 <script setup lang="ts">

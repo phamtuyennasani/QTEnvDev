@@ -24,13 +24,14 @@ async function ftpRequest(
   method: string,
   args: unknown[] = [],
   sensitive = false,
-  mutation = false
+  mutation = false,
+  interactive = true
 ) {
   if (!(await ensureDataDirectoryReady())) throw new Error('Application data is unavailable.')
   let reply
   try {
     reply = await forkTerminalRequest(
-      'app-fork:' + mode,
+      `${interactive ? 'app-fork' : 'app-fork-background'}:${mode}`,
       [method, ...args],
       'FTP did not return a result.',
       mutation ? 360_000 : 60_000,
@@ -85,17 +86,17 @@ export const ftpAccounts = Object.fromEntries(
                 typeof item?.pass === 'string'
             )
           },
-          async change(action) {
+          async change(action, interactive) {
             if (builtin) {
               if (action !== 'start')
-                await ftpRequest(mode, 'stopService', [builtinVersion], false, true)
+                await ftpRequest(mode, 'stopService', [builtinVersion], false, true, interactive)
               if (action !== 'stop')
-                await ftpRequest(mode, 'startService', [builtinVersion], false, true)
+                await ftpRequest(mode, 'startService', [builtinVersion], false, true, interactive)
               return
             }
             const version = pureVersion()
             if (!version) throw new Error('Install a Pure-FTPd version first.')
-            const result = await version[action]()
+            const result = await version[action](interactive)
             if (result !== true)
               throw new Error(
                 typeof result === 'string' ? result : 'Pure-FTPd did not confirm the change.'

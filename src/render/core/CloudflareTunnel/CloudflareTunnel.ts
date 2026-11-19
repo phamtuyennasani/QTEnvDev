@@ -80,7 +80,7 @@ export class CloudflareTunnel {
   }
 
   /** 进度不移除监听；超时表示未知结果，保留原 PID 并允许以后重新查询/停止。 */
-  private request(command: string): Promise<any> {
+  private request(command: string, interactive: boolean): Promise<any> {
     const finishPending = beginServiceStatusPending('cloudflare-tunnel')
     let snapshot: string
     try {
@@ -90,7 +90,7 @@ export class CloudflareTunnel {
       return Promise.reject(error)
     }
     return forkTerminalRequest(
-      'app-fork:cloudflare-tunnel',
+      interactive ? 'app-fork:cloudflare-tunnel' : 'app-fork-background:cloudflare-tunnel',
       [command, JSON.parse(snapshot)],
       I18nT('setup.windowsPrivilege.timeout'),
       undefined,
@@ -105,9 +105,9 @@ export class CloudflareTunnel {
       .finally(finishPending)
   }
 
-  private async startInternal() {
+  private async startInternal(interactive: boolean) {
     if (this.run && this.pid) return
-    const data = await this.request('start')
+    const data = await this.request('start', interactive)
     const pid = data?.['APP-Service-Start-PID']
     if (!isPositiveHostPid(pid)) throw new Error(I18nT('base.fail'))
     this.pid = `${pid}`
@@ -118,27 +118,27 @@ export class CloudflareTunnel {
     this.run = true
   }
 
-  private async stopInternal() {
+  private async stopInternal(interactive: boolean) {
     // 与应用退出使用同一 stopService；main 恢复运行登记中的 PID/程序路径快照。
-    await this.request('stopService')
+    await this.request('stopService', interactive)
     // fork 的失败/取消已经 reject，只有实际成功才能清除运行状态。
     this.pid = ''
     this.run = false
   }
 
-  start(): Promise<boolean> {
-    return this.operate('start', () => this.startInternal())
+  start(interactive = true): Promise<boolean> {
+    return this.operate('start', () => this.startInternal(interactive))
   }
 
-  stop(): Promise<boolean> {
-    return this.operate('stop', () => this.stopInternal())
+  stop(interactive = true): Promise<boolean> {
+    return this.operate('stop', () => this.stopInternal(interactive))
   }
 
   restart(): Promise<boolean> {
     // 整次重启共享一次互斥；内部步骤不用公共入口，避免自己与自己冲突。
     return this.operate('restart', async () => {
-      await this.stopInternal()
-      await this.startInternal()
+      await this.stopInternal(true)
+      await this.startInternal(true)
     })
   }
 }

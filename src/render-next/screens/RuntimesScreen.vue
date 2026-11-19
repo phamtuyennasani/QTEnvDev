@@ -1,14 +1,185 @@
 <template>
-<section class="screen"><header class="page-header"><div><p class="eyebrow">WORKSPACE / RUNTIMES</p><h1>Runtimes</h1><p class="subtitle">Versions available to your local projects.</p></div><button class="primary-button" @click="packageBrowser?.show()">+ Add runtime</button></header><div class="runtime-layout"><article class="panel runtime-list-panel"><div class="list-heading runtime-heading"><span>Runtime</span><span>Version</span><span>Projects</span><span>Status</span></div><button v-for="runtime in runtimeController.runtimes" :key="runtime.name" class="runtime-item" :class="{ selected: selectedRuntime?.name === runtime.name }" @click="runtimeController.select(runtime)"><span class="runtime-primary"><span class="runtime-mark">{{ runtime.name.slice(0,1) }}</span><span><b>{{ runtime.name }}</b><small>{{ runtime.family }}</small></span></span><code>{{ runtime.version }}</code><span class="runtime-projects">{{ runtime.projects }}</span><span class="state-label">{{ runtime.state === 'active' ? 'Installed' : 'Available' }}</span></button></article><article v-if="selectedRuntime" class="panel runtime-detail-panel"><div class="detail-top"><div><p class="eyebrow">RUNTIME DETAIL</p><h2>{{ selectedRuntime.name }}</h2><p class="detail-kind">{{ selectedRuntime.family }} · <code>{{ selectedRuntime.version }}</code></p></div><span class="runtime-mark runtime-mark--large">{{ selectedRuntime.name.slice(0,1) }}</span></div><div class="runtime-facts"><div><span>Install path</span><code>{{ selectedRuntime.path }}</code></div><div><span>Assigned projects</span><b>{{ selectedRuntime.projects }}</b></div></div><div v-if="selectedRuntime.name==='PHP'" class="runtime-tools"><div class="php-projects"><div class="detail-actions"><b>PHP projects</b><button class="action-button" @click="projects.load()">Refresh</button></div><input v-model="projects.state.query" placeholder="Filter projects"/><div v-for="project in projects.filtered()" :key="project.id" class="php-project-row"><span><b>{{ project.comment || "Unnamed project" }}</b><small>{{ project.path }}</small></span><button class="action-button" @click="projects.run(project as any,!project.state.isRun)">{{ project.state.isRun ? "Stop" : "Start" }}</button></div></div><div class="detail-actions"><button class="action-button" :disabled="php.state.loading" @click="php.load()">{{ php.state.loading ? 'Reading PHP…' : 'Refresh PHP details' }}</button><button class="action-button" @click="php.openFolder()">Open PHP folder</button><button class="action-button" @click="phpConfigOpen=true">Edit php.ini</button><button class="action-button" :disabled="!phpVersion" @click="extensionsOpen=true">Manage extensions</button></div><p v-if="php.state.error" class="forge-alert forge-alert--error">{{ php.state.error }}</p><div class="runtime-facts"><div><span>php.ini</span><code>{{ php.state.iniPath || 'Not loaded' }}</code></div><div><span>Loaded extensions</span><b>{{ php.state.extensions.length }}</b></div></div><div class="extension-browser"><input v-model="php.state.query" placeholder="Filter loaded extensions"/><div class="extension-pills"><span v-for="name in php.state.extensions.filter((name) => name.toLowerCase().includes(php.state.query.toLowerCase()))" :key="name">{{ name }}</span><small v-if="!php.state.extensions.filter((name) => name.toLowerCase().includes(php.state.query.toLowerCase())).length">No loaded extensions found.</small></div></div></div><ServiceFilesDialog v-if="phpConfigOpen" v-model="phpConfigOpen" name="PHP" :version="selectedRuntime.version" kind="config" /><PhpExtensionsPanel v-if="extensionsOpen && phpVersion" :version="phpVersion" @close="extensionsOpen=false" /><PackageBrowser v-if="selectedFlag" ref="packageBrowser" :key="selectedFlag" :flag="selectedFlag" :title="selectedRuntime.name" /></article></div></section>
+  <section class="screen"
+    ><header class="page-header"
+      ><div
+        ><p class="eyebrow">WORKSPACE / RUNTIMES</p><h1>Runtimes</h1
+        ><p class="subtitle">Versions available to your local projects.</p></div
+      ><div class="detail-actions"
+        ><button v-if="gitVisible" class="action-button" @click="gitOpen = true"
+          >Git environment</button
+        ><button class="primary-button" @click="packageBrowser?.show()">+ Add runtime</button></div
+      ></header
+    ><div class="runtime-layout"
+      ><article class="panel runtime-list-panel"
+        ><div class="list-heading runtime-heading"
+          ><span>Runtime</span><span>Version</span><span>Projects</span><span>Status</span></div
+        ><button
+          v-for="runtime in visibleRuntimes"
+          :key="runtime.name"
+          class="runtime-item"
+          :class="{ selected: selectedRuntime?.name === runtime.name }"
+          @click="runtimeController.select(runtime)"
+          ><span class="runtime-primary"
+            ><span class="runtime-mark">{{ runtime.name.slice(0, 1) }}</span
+            ><span
+              ><b>{{ runtime.name }}</b
+              ><small>{{ runtime.family }}</small></span
+            ></span
+          ><code>{{ runtime.version }}</code
+          ><span class="runtime-projects">{{ runtime.projects }}</span
+          ><span class="state-label">{{
+            runtime.state === 'active' ? 'Installed' : 'Available'
+          }}</span></button
+        ></article
+      ><article v-if="selectedRuntime" class="panel runtime-detail-panel"
+        ><div class="detail-top"
+          ><div
+            ><p class="eyebrow">RUNTIME DETAIL</p><h2>{{ selectedRuntime.name }}</h2
+            ><p class="detail-kind"
+              >{{ selectedRuntime.family }} Â· <code>{{ selectedRuntime.version }}</code></p
+            ></div
+          ><span class="runtime-mark runtime-mark--large">{{
+            selectedRuntime.name.slice(0, 1)
+          }}</span></div
+        ><div class="runtime-facts"
+          ><div
+            ><span>Install path</span><code>{{ selectedRuntime.path }}</code></div
+          ><div
+            ><span>Assigned projects</span><b>{{ selectedRuntime.projects }}</b></div
+          ></div
+        ><div v-if="selectedRuntime.name === 'PHP'" class="runtime-tools"
+          ><div class="php-projects"
+            ><div class="detail-actions"
+              ><b>PHP projects</b
+              ><button class="action-button" @click="projects.load()">Refresh</button></div
+            ><input v-model="projects.state.query" placeholder="Filter projects" /><div
+              v-for="project in projects.filtered()"
+              :key="project.id"
+              class="php-project-row"
+              ><span
+                ><b>{{ project.comment || 'Unnamed project' }}</b
+                ><small>{{ project.path }}</small></span
+              ><button
+                class="action-button"
+                @click="projects.run(project as any, !project.state.isRun)"
+                >{{ project.state.isRun ? 'Stop' : 'Start' }}</button
+              ></div
+            ></div
+          ><div class="detail-actions"
+            ><button class="action-button" :disabled="php.state.loading" @click="php.load()">{{
+              php.state.loading ? 'Reading PHPâ€¦' : 'Refresh PHP details'
+            }}</button
+            ><button class="action-button" @click="php.openFolder()">Open PHP folder</button
+            ><button class="action-button" @click="phpConfigOpen = true">Edit php.ini</button
+            ><button class="action-button" :disabled="!phpVersion" @click="extensionsOpen = true"
+              >Manage extensions</button
+            ></div
+          ><p v-if="php.state.error" class="forge-alert forge-alert--error">{{ php.state.error }}</p
+          ><div class="runtime-facts"
+            ><div
+              ><span>php.ini</span><code>{{ php.state.iniPath || 'Not loaded' }}</code></div
+            ><div
+              ><span>Loaded extensions</span><b>{{ php.state.extensions.length }}</b></div
+            ></div
+          ><div class="extension-browser"
+            ><input v-model="php.state.query" placeholder="Filter loaded extensions" /><div
+              class="extension-pills"
+              ><span
+                v-for="name in php.state.extensions.filter((name) =>
+                  name.toLowerCase().includes(php.state.query.toLowerCase())
+                )"
+                :key="name"
+                >{{ name }}</span
+              ><small
+                v-if="
+                  !php.state.extensions.filter((name) =>
+                    name.toLowerCase().includes(php.state.query.toLowerCase())
+                  ).length
+                "
+                >No loaded extensions found.</small
+              ></div
+            ></div
+          ></div
+        ><ServiceFilesDialog
+          v-if="phpConfigOpen"
+          v-model="phpConfigOpen"
+          name="PHP"
+          :version="selectedRuntime.version"
+          kind="config" /><PhpExtensionsPanel
+          v-if="extensionsOpen && phpVersion"
+          :version="phpVersion"
+          @close="extensionsOpen = false" /><div
+          v-if="selectedRuntime.name === 'Node.js'"
+          class="detail-actions"
+          ><button class="action-button" @click="workflow = 'node'">Node.js version managers</button
+          ><button class="action-button" @click="workflow = 'npm'">npm configuration</button></div
+        ><button
+          v-if="selectedRuntime.name === 'Go' && supportsGvm"
+          class="action-button"
+          @click="workflow = 'gvm'"
+          >Go Version Manager</button
+        ><PackageBrowser
+          v-if="selectedFlag"
+          ref="packageBrowser"
+          :key="selectedFlag"
+          :flag="selectedFlag"
+          :title="selectedRuntime.name" /></article></div
+    ><RuntimeWorkflowDialog v-if="workflow" :workflow="workflow" @close="workflow = undefined" />
+    <GitEnvironmentDialog v-if="gitOpen && gitVisible" @close="gitOpen = false" />
+  </section>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'; import { runtimeController } from '../state/runtimeController'; import PackageBrowser from '../components/PackageBrowser.vue'; import ServiceFilesDialog from "../components/ServiceFilesDialog.vue"; import PhpExtensionsPanel from '../components/PhpExtensionsPanel.vue'; import { phpProjectsController } from "../state/phpProjectsController"; import { phpController } from '../state/phpController';
-const packageBrowser=ref<InstanceType<typeof PackageBrowser>>(); const projects=phpProjectsController; const phpConfigOpen=ref(false); const extensionsOpen=ref(false); const selectedRuntime=computed(()=>runtimeController.selected.runtime); const flags:Record<string,string>={PHP:'php', 'Node.js':'node',Python:'python',Go:'golang',Java:'java',Ruby:'ruby',Rust:'rust',Bun:'bun',Deno:'deno','.NET':'dotnet',Erlang:'erlang',Perl:'perl',Zig:'zig',Flutter:'flutter',Gradle:'gradle'}; const selectedFlag=computed(()=>selectedRuntime.value?flags[selectedRuntime.value.name]:undefined); const php=phpController; const phpVersion=computed(()=>php.current()); onMounted(()=>{runtimeController.refresh().catch();phpProjectsController.load().catch()});
+  import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
+  import { runtimeController } from '../state/runtimeController'
+  import PackageBrowser from '../components/PackageBrowser.vue'
+  import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
+  import PhpExtensionsPanel from '../components/PhpExtensionsPanel.vue'
+  import { phpProjectsController } from '../state/phpProjectsController'
+  import { phpController } from '../state/phpController'
+  import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
+  const RuntimeWorkflowDialog = defineAsyncComponent(
+    () => import('../components/RuntimeWorkflowDialog.vue')
+  )
+  const GitEnvironmentDialog = defineAsyncComponent(
+    () => import('../components/GitEnvironmentDialog.vue')
+  )
+  const gitVisible = computed(() => isBuiltinModuleVisible('git'))
+  const gitOpen = ref(false)
+  const workflow = ref<'node' | 'npm' | 'gvm'>()
+  const supportsGvm = computed(() => Boolean(window.Server.isMacOS || window.Server.isLinux))
+  const packageBrowser = ref<InstanceType<typeof PackageBrowser>>()
+  const projects = phpProjectsController
+  const phpConfigOpen = ref(false)
+  const extensionsOpen = ref(false)
+  const visibleRuntimes = runtimeController.visibleRuntimes
+  const selectedRuntime = computed(() => {
+    const runtimes = visibleRuntimes.value
+    return runtimes.find((runtime) => runtime === runtimeController.selected.runtime) ?? runtimes[0]
+  })
+  const flags: Record<string, string> = {
+    PHP: 'php',
+    'Node.js': 'node',
+    Python: 'python',
+    Go: 'golang',
+    Java: 'java',
+    Ruby: 'ruby',
+    Rust: 'rust',
+    Bun: 'bun',
+    Deno: 'deno',
+    '.NET': 'dotnet',
+    Erlang: 'erlang',
+    Perl: 'perl',
+    Zig: 'zig',
+    Flutter: 'flutter',
+    Gradle: 'gradle'
+  }
+  const selectedFlag = computed(() =>
+    selectedRuntime.value ? flags[selectedRuntime.value.name] : undefined
+  )
+  const php = phpController
+  const phpVersion = computed(() => php.current())
+  onMounted(() => {
+    runtimeController.refresh().catch()
+    phpProjectsController.load().catch()
+  })
 </script>
-
-
-
-
-
-
-

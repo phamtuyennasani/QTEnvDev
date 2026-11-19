@@ -1,5 +1,114 @@
-﻿<template><section class="screen settings-screen"><header class="page-header"><div><p class="eyebrow">WORKSPACE / SETTINGS</p><h1>Settings</h1><p class="subtitle">Tune PQT Forge to the way you work.</p></div><span class="settings-version">PQT FORGE / {{ settingsController.version }}</span></header><div class="settings-layout"><nav class="settings-nav"><button v-for="section in sections" :key="section.id" :class="{active:activeSection===section.id}" @click="activeSection=section.id">{{section.glyph}} {{section.label}}</button></nav><article class="panel settings-panel"><template v-if="activeSection==='general'"><p class="eyebrow">GENERAL</p><h2>Application behavior</h2><div class="settings-row"><span><b>Launch services on startup</b><small>Start your default group when PQT Forge opens.</small></span><button class="toggle" :class="{on:settingsController.autoStart}" @click="settingsController.autoStart=!settingsController.autoStart"><i/></button></div><div class="settings-row"><span><b>Keep in system tray</b><small>Keep the app available from the tray when the window closes.</small></span><button class="toggle" :class="{on:settingsController.trayOnClose}" @click="settingsController.trayOnClose=!settingsController.trayOnClose"><i/></button></div><div class="settings-row"><span><b>Compact sidebar</b><small>Use a denser workspace navigation.</small></span><button class="toggle" :class="{on:settingsController.compactSidebar}" @click="settingsController.compactSidebar=!settingsController.compactSidebar"><i/></button></div></template><template v-else-if="activeSection==='environment'"><p class="eyebrow">ENVIRONMENT</p><h2>System PATH</h2><div class="path-toolbar"><button class="action-button" @click="path.load()">Refresh</button><input v-model="newPath" placeholder="Add absolute folder path" @keyup.enter="addPath"/><button class="action-button" @click="addPath">Add</button></div><div class="path-list"><div v-for="(entry,index) in path.state.list" :key="entry.path+index" class="path-row"><code>{{entry.path}}</code><button class="icon-button" @click="path.remove(index)">×</button></div></div><button class="settings-save" @click="path.save()">Save PATH</button></template><template v-else-if="activeSection==='hosts'"><p class="eyebrow">HOSTS</p><h2>System hosts file</h2><p class="muted">Digest guarded editing for local hostname resolution.</p><div class="path-toolbar"><button class="action-button" @click="hosts.load()">Refresh</button></div><textarea v-model="hosts.state.content" class="hosts-editor" spellcheck="false"></textarea><button class="settings-save" @click="hosts.save()">Save hosts</button></template><template v-else-if="activeSection==='appearance'"><p class="eyebrow">APPEARANCE</p><h2>Visual system</h2><label class="setting-select"><span>Theme</span><select v-model="settingsController.theme"><option>Dark graphite</option><option>Dark high contrast</option></select></label></template><template v-else><p class="eyebrow">ABOUT</p><h2>PQT Forge</h2><p class="about-copy">Developer Environment Manager</p></template><button v-if="!['environment','hosts'].includes(activeSection)" class="settings-save" @click="persist">Save changes</button></article></div></section></template>
+<template>
+  <section class="screen settings-screen">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">WORKSPACE / SETTINGS</p>
+        <h1>Settings</h1>
+      </div>
+    </header>
+    <div class="settings-layout">
+      <nav class="settings-nav" aria-label="Settings sections">
+        <button
+          v-for="section in sections"
+          :key="section.id"
+          type="button"
+          :class="{ active: activeSection === section.id }"
+          :aria-current="activeSection === section.id ? 'page' : undefined"
+          @click="activeSection = section.id"
+        >
+          <span aria-hidden="true">{{ section.glyph }}</span> {{ section.label }}
+        </button>
+      </nav>
+      <article class="panel settings-panel">
+        <h2>{{ activeLabel }}</h2>
+        <template v-if="activeSection === 'environment'">
+          <label for="settings-path">System PATH</label>
+          <div class="path-toolbar">
+            <button class="action-button" :disabled="!desktop || pathBusy" @click="path.load()">Refresh</button>
+            <input id="settings-path" v-model="newPath" placeholder="Add absolute folder path" :disabled="!desktop || pathBusy" @keyup.enter="addPath" />
+            <button class="action-button" :disabled="!desktop || pathBusy || !newPath.trim()" @click="addPath">Add</button>
+          </div>
+          <div class="path-list">
+            <div v-for="(entry, index) in path.state.list" :key="entry.path + index" class="path-row">
+              <code>{{ entry.path }}</code>
+              <button class="icon-button" :aria-label="'Remove ' + entry.path" :disabled="pathBusy" @click="path.remove(index)">×</button>
+            </div>
+          </div>
+          <p v-if="path.state.error" class="muted" role="status">{{ path.state.error }}</p>
+          <button class="action-button settings-submit" :disabled="!desktop || pathBusy" @click="path.save()">Save PATH</button>
+        </template>
+        <template v-else-if="activeSection === 'hosts'">
+          <label for="settings-hosts">System hosts file</label>
+          <div class="path-toolbar">
+            <button class="action-button" :disabled="!desktop || hostsBusy" @click="hosts.load()">Refresh</button>
+          </div>
+          <textarea id="settings-hosts" v-model="hosts.state.content" class="hosts-editor" spellcheck="false" :disabled="!hosts.state.digest || hostsBusy" />
+          <p v-if="hosts.state.error" class="muted" role="status">{{ hosts.state.error }}</p>
+          <button class="action-button settings-submit" :disabled="!desktop || !hosts.state.digest || hostsBusy" @click="hosts.save()">Save hosts</button>
+        </template>
+        <CustomModulesSettings v-else-if="activeSection === 'custom-modules'" />
+        <MacOSMirrorSettings v-else-if="activeSection === 'package-mirrors' && showPackageMirrors" />
+        <p v-else-if="activeSection === 'package-mirrors'" class="muted">Package mirrors are available on macOS.</p>
+        <BuiltinModulesSettings v-else-if="activeSection === 'modules' && desktop" />
+        <p v-else-if="activeSection === 'modules'" class="muted">Open the desktop app to manage modules.</p>
+        <EstablishedSettingsPanel v-else-if="desktop" :section="activeSection" />
+        <p v-else class="muted">Open the desktop app to manage these settings.</p>
+      </article>
+    </div>
+  </section>
+</template>
+
 <script setup lang="ts">
-import {ref} from 'vue';import {loadSettings,saveSettings,settingsController} from '../state/settingsController';import {showNotice} from '../state/app';import {pathController} from '../state/pathController';import {hostsController} from '../state/hostsController';const activeSection=ref('general'),newPath=ref('');const path=pathController,hosts=hostsController;const addPath=()=>{path.add(newPath.value);newPath.value=''};const persist=async()=>{await saveSettings();showNotice('Settings saved locally')};loadSettings().catch(()=>undefined);path.load().catch(()=>undefined);hosts.load().catch(()=>undefined);const sections=[{id:'general',label:'General',glyph:'⚙'},{id:'environment',label:'Environment',glyph:'⌁'},{id:'hosts',label:'Hosts',glyph:'↔'},{id:'appearance',label:'Appearance',glyph:'◐'},{id:'about',label:'About PQT Forge',glyph:'i'}];
+  import { computed, defineAsyncComponent, ref, watch } from 'vue'
+  import CustomModulesSettings from '../custom-modules/CustomModulesSettings.vue'
+  import { pathController } from '../state/pathController'
+  import { hostsController } from '../state/hostsController'
+
+  const EstablishedSettingsPanel = defineAsyncComponent(
+    () => import('../components/EstablishedSettingsPanel.vue')
+  )
+  const BuiltinModulesSettings = defineAsyncComponent(
+    () => import('../moduleVisibility/BuiltinModulesSettings.vue')
+  )
+  const MacOSMirrorSettings = defineAsyncComponent(() => import('../components/MacOSMirrorSettings.vue'))
+  const allSections = [
+    { id: 'general', label: 'General', glyph: '⚙' },
+    { id: 'environment', label: 'Environment', glyph: '⌁' },
+    { id: 'hosts', label: 'Hosts', glyph: '↔' },
+    { id: 'modules', label: 'Modules', glyph: '◉' },
+    { id: 'package-mirrors', label: 'Package mirrors', glyph: '⇄' },
+    { id: 'custom-modules', label: 'Custom modules', glyph: '⊞' },
+    { id: 'editors', label: 'Editors', glyph: '◐' },
+    { id: 'licenses', label: 'Licenses', glyph: '◇' },
+    { id: 'about', label: 'About PQT Forge', glyph: 'i' }
+  ] as const
+
+  const desktop = Boolean(window.QTEnvDevNodeAPI)
+  const showPackageMirrors = computed(() => desktop && window.Server?.isMacOS === true)
+  const sections = computed(() => allSections.filter((section) => section.id !== 'package-mirrors' || showPackageMirrors.value))
+  const activeSection = ref<(typeof allSections)[number]['id']>('general')
+  const activeLabel = computed(() => allSections.find((section) => section.id === activeSection.value)?.label)
+  const newPath = ref('')
+  const path = pathController
+  const hosts = hostsController
+  const pathBusy = computed(() => path.state.loading || path.state.saving)
+  const hostsBusy = computed(() => hosts.state.loading || hosts.state.saving)
+
+  const addPath = () => {
+    if (!desktop || pathBusy.value) return
+    path.add(newPath.value)
+    newPath.value = ''
+  }
+
+  watch(activeSection, (section) => {
+    if (!desktop) return
+    if (section === 'environment' && !pathBusy.value && !path.state.rawPath) void path.load()
+    if (section === 'hosts' && !hostsBusy.value && !hosts.state.digest) void hosts.load()
+  })
 </script>
 
+<style scoped>
+  .settings-layout { grid-template-columns: 155px minmax(0, 1fr); }
+  .settings-nav { align-self: start; }
+  .settings-submit { margin-top: 12px; }
+</style>

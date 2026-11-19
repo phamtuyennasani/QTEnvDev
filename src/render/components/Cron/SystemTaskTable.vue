@@ -102,6 +102,7 @@
   import Base from '@/core/Base'
   import { MessageError, MessageSuccess } from '@/util/Element'
   import type { SystemScheduledTask } from '@shared/app'
+  import { CRON_SYSTEM_TASK_REMOVED } from '../../../fork/module/Cron/types'
   import { useCronStore } from './store'
 
   interface LoadDataOptions {
@@ -175,8 +176,9 @@
         IPC.send('app-fork:cron', 'deleteSystemTask', row.id).then((key: string, res: any) => {
           IPC.off(key)
           loading.value = false
-          if (res?.code === 0) {
-            MessageSuccess(I18nT('base.success'))
+          if (res?.code === 0 || res?.errorCode === CRON_SYSTEM_TASK_REMOVED) {
+            if (res.code === 0) MessageSuccess(I18nT('base.success'))
+            else MessageError(res.msg)
             cronStore.clearAllCronJobs()
             loadData({ force: true })
           } else {

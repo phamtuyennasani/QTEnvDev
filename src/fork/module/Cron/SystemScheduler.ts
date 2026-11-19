@@ -41,7 +41,9 @@ export class CronSystemScheduler {
   }
 
   async deleteSystemTask(id: string) {
-    await this.platformScheduler()?.deleteSystemTask(id)
+    const scheduler = this.platformScheduler()
+    if (!scheduler) throw new Error('Cron system scheduler is not supported on this platform')
+    await scheduler.deleteSystemTask(id)
   }
 
   async apply(job: CronJob): Promise<CronJob> {

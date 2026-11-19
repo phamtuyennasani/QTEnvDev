@@ -1,6 +1,7 @@
 import { ProjectSetup } from '@/components/LanguageProjects/setup'
 import { AppModules } from '@/core/App'
 import { AppCustomerModule } from '@/core/Module'
+import { registerLifecycle } from '@/core/RegisterServiceLifecycle'
 import type { AllAppModule } from '@/core/type'
 import { BrewStore } from '@/store/brew'
 import { reactiveBind, uuid } from '@/util/Index'
@@ -189,6 +190,7 @@ const runtime = reactiveBind(
         await AppCustomerModule.init()
         return customStartupTargets(module)
       }
+      await registerLifecycle(module)
       const manager = BrewStore().module(module)
       await manager.fetchInstalled()
       return manager.installed

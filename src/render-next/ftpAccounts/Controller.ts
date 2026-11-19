@@ -9,7 +9,7 @@ export class FtpMutationUnknown extends Error {}
 type Dependencies = {
   status: () => Promise<Status>
   accounts: () => Promise<Account[]>
-  change: (action: Lifecycle) => Promise<void>
+  change: (action: Lifecycle, interactive: boolean) => Promise<void>
   write: (action: 'add' | 'del', account: Account) => Promise<string | undefined>
   folder: (path?: string) => Promise<string | undefined>
   open: (path: string) => Promise<void>
@@ -29,6 +29,13 @@ export class FtpAccountsController {
 
   constructor(private readonly deps: Dependencies) {}
 
+  refreshStatus() {
+    return this.run(async () => {
+      await this.readStatus()
+      return true
+    })
+  }
+
   refresh() {
     return this.run(async () => {
       const results = await Promise.allSettled([
@@ -46,12 +53,12 @@ export class FtpAccountsController {
     })
   }
 
-  change(action: Lifecycle) {
+  change(action: Lifecycle, interactive = true) {
     if (!this.status?.installed) return Promise.resolve(false)
     return this.run(async () => {
       this.status = undefined
       try {
-        await this.deps.change(action)
+        await this.deps.change(action, interactive)
       } catch (error) {
         await this.readStatus().catch(() => undefined)
         throw error

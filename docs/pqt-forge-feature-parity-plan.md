@@ -28,13 +28,13 @@ See [the current parity audit](pqt-forge-parity-audit.md) for verified changes, 
 - [x] Keep unsupported project types unchanged until their structure is understood by the new editor.
 - [x] Verify ports, commands, TLS, proxy changes and post-save lifecycle behavior through the website and project controllers. Run native server fixtures with generated configurations.
 
-The Windows Electron fixture exercises Websites with isolated IPC, including scoped Cron navigation, a Laravel scaffold draft, legacy-compatible backup, alias links, hosts shortcuts and subdirectory websites. Separate Windows runtime fixtures served requests with Nginx, Apache with PHP-CGI, and Tomcat 9. They use temporary configuration, explicit loopback ports and an isolated test certificate. These runs verify generated server files and their behavior after a restart. Platform acceptance for OS hosts changes, system trust, Caddy and FrankenPHP runtime, and macOS and Linux service execution remains open.
+The Windows Electron fixture exercises Websites with isolated IPC, including scoped Cron navigation, a Laravel scaffold draft, legacy-compatible backup, alias links, hosts shortcuts and subdirectory websites. Windows runtime fixtures passed with Nginx 1.28.0, Apache 2.4.66 with PHP-CGI 8.3.30, Tomcat 9.0.106, Caddy 2.11.9, and FrankenPHP 1.13.5 with PHP 8.5.12. They use temporary configuration, loopback requests and test certificate trust scoped to the fixture. The Caddy and FrankenPHP fixture also caught and verifies the fix for HTTPS retaining an old reverse proxy after an edit. Platform acceptance for system hosts changes, OS trust and native service execution on macOS and Linux remains open.
 
 ## Phase 2 — services, runtimes, packages, and databases
 
-- [ ] Finish comparison and migration for online packages, installed and current versions, install/update/remove, timeout and failure reporting. Package Library exposes Homebrew formulae, install/uninstall, macOS bootstrap and the existing macOS PHP upgrade flow. Generic MacPorts, SDKMAN and dedicated version managers still differ. Live macOS Homebrew execution remains to be verified.
-- [ ] Add module-specific configuration, bounded log tail/clear, and companion-service behavior for the migrated service-file and lifecycle paths.
-- [ ] Migrate database admin tools, credentials, ports, and data-directory workflows for the supported database panels; unsupported module-specific fields remain explicit.
+- [ ] Finish comparison and migration for online packages, installed and current versions, and provider-specific actions. Package Library exposes Homebrew, MacPorts and SDKMAN. Runtimes exposes the established Node.js and Go managers. Live provider execution on macOS and Linux remains to be verified.
+- [ ] Add module-specific configuration, bounded log tail/clear, and companion-service behavior for the migrated service-file and lifecycle paths. Services now includes dedicated entry points for HTTP Serve, DNS Server, FTP Accounts and Podman.
+- [ ] Migrate database admin tools, credentials, ports, and data-directory workflows for the supported database panels. Databases exposes MySQL/MariaDB Create and Backup, MySQL instance groups and bounded slow logs for both engines.
 - [x] Preserve completed side effects when a refresh fails; package mutations retain terminal success and report refresh warnings, while unknown outcomes block replay.
 
 ## Phase 3 — toolbox parity
@@ -71,10 +71,25 @@ Relevant checks:
 - yarn test:pqt-forge-native-tools
 - yarn test:pqt-forge-native-apache
 - yarn test:pqt-forge-native-nginx
+- yarn test:pqt-forge-native-caddy
 - yarn test:pqt-forge-native-tomcat
 
 The build smoke test verifies dist/render/next.html; it does not prove interactive UI parity.
 
-The opt-in Windows server checks take paths to existing binaries. Run yarn test:pqt-forge-native-apache with paths to httpd.exe, php-cgi.exe and openssl.exe. Run yarn test:pqt-forge-native-nginx with paths to nginx.exe and openssl.exe. Run yarn test:pqt-forge-native-tomcat with paths to java.exe, the Tomcat distribution directory and openssl.exe. Quote any argument that contains spaces.
+### HTTP Serve operation contract
+
+The HTTP Serve screen owns folder selection, drag feedback, removal confirmation and the selected QR code. A module-local renderer singleton owns its request snapshots, pending actions, notices, terminal results and IPC cleanup across navigation. There are no progress messages. A timeout leaves the outcome unknown until a fresh snapshot reports the saved folders and active servers. Duplicate mutations are blocked while the current request is pending. The existing main runtime owns the server, port, links and per-folder start/stop ordering. HTTP Serve has no installed binary or companion service.
+
+Adding a valid folder saves it before trying to start it. If startup fails, the saved folder remains available for retry. Removing a folder requires a confirmed stop and then a successful preference write. A failed stop preserves the saved entry. Dropped folders are independent. Reuse the existing HTTP Serve preference key for compatibility and update only that key. No new store or shared configuration field is needed. Verify folder validation, native HTTP serving, duplicate start, authoritative status, listener shutdown and the legacy saved-folder entry point.
+
+### Podman operation contract
+
+Services opens a dedicated workspace using the established Podman machine, image, container and Compose views. The existing Podman singleton owns discovery across navigation and the established model classes own machine and container lifecycle, IPC and saved Compose definitions. The fork runs Podman and supplies authoritative state. Installation uses the existing Homebrew coordinator and its terminal outcomes and logs, with one request at a time. Rediscovery after installation is supplementary and preserves the package result. No new store, configuration key or service lifecycle is needed. Verify entry, failed discovery and retry, and opening a detected machine and its Compose tab.
+
+### Dedicated runtime manager entry points
+
+Runtimes opens the established Node.js manager, npm configuration editor and Go GVM panel. The renderer dialog selects and mounts a view. The existing fnm, nvm and GVM module state owns commands and terminal handles. Reopening the dialog uses the same module state. Source support follows the existing platform options for each manager. Verify the desktop entry points and Unix provider controls through renderer fixtures. Actual installs and version selection in the user shell require native platform acceptance.
+
+The opt-in Windows server checks accept paths to existing binaries. Pass httpd.exe, php-cgi.exe and openssl.exe to `yarn test:pqt-forge-native-apache`. Pass nginx.exe and openssl.exe to `yarn test:pqt-forge-native-nginx`. Pass caddy.exe, frankenphp.exe and openssl.exe to `yarn test:pqt-forge-native-caddy`. Pass java.exe, the Tomcat distribution directory and openssl.exe to `yarn test:pqt-forge-native-tomcat`. Quote paths that contain spaces.
 
 

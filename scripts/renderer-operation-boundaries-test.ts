@@ -15,13 +15,19 @@ assert.match(nextSource('websites/WebsiteController.ts'), /private mutation\?: P
 assert.match(nextSource('websites/WebsiteController.ts'), /WebsiteOutcomeUnknown/)
 for (const file of [
   'screens/WebsitesScreen.vue', 'websites/WebsiteEditor.vue', 'websites/TomcatWebsiteEditor.vue',
-  'screens/DatabasesScreen.vue', 'screens/CronScreen.vue', 'components/HomebrewPackagePanel.vue'
+  'screens/DatabasesScreen.vue', 'screens/CronScreen.vue', 'components/HomebrewPackagePanel.vue',
+  'screens/HttpServeScreen.vue', 'components/SdkmanPackagePanel.vue', 'components/MacPortsPackagePanel.vue',
+  'custom-modules/CustomModulesSettings.vue'
 ]) {
   assert.doesNotMatch(nextSource(file), /IPC\.send|from ['"]@\/util\/IPC/)
 }
 assert.match(nextSource('components/HomebrewPackagePanel.vue'), /homebrewPackages as controller/)
 assert.match(nextSource('components/HomebrewPackagePanel.vue'), /homebrewBootstrap as bootstrap/)
 assert.match(nextSource('state/homebrewBootstrapController.ts'), /reactiveBind\(new HomebrewBootstrapController\(\)\)/)
+assert.match(nextSource('components/MacPortsPackagePanel.vue'), /macportsPackages as controller/)
+assert.match(nextSource('state/macportsPackagesController.ts'), /reactiveBind\(new MacPortsPackagesController\(\)\)/)
+assert.match(nextSource('state/sdkmanPackagesController.ts'), /reactiveBind\(new SdkmanPackagesController\(\)\)/)
+assert.match(nextSource('custom-modules/customModulesController.ts'), /reactiveBind\(new CustomModulesController\(\)\)/)
 assert.match(nextSource('screens/CronScreen.vue'), /cronController as controller/)
 assert.match(nextSource('state/cronController.ts'), /forkTerminalRequest\(/)
 assert.match(nextSource('websites/TomcatWebsiteEditor.vue'), /projectController\.save\(/)
@@ -461,6 +467,9 @@ for (const name of ['CapturerPanel', 'SiteSuckerPanel', 'ImageCompressPanel']) {
 await import('./pqt-forge-capturer-test')
 await import('./pqt-forge-site-sucker-test')
 await import('./pqt-forge-image-pipeline-test')
+await import('./pqt-forge-custom-modules-test')
+await import('./pqt-forge-homebrew-mirrors-test')
+await import('./pqt-forge-cron-controller-test')
 const fileInfoPage = readFileSync(join(componentsDir, 'Tools/FileInfo/Index.vue'), 'utf8')
 assert.match(fileInfoPage, /from ['"]\.\/Controller['"]/)
 assert.doesNotMatch(fileInfoPage, /fs\.(?:stat|md5|sha1|sha256|sha512|sha384)\(/)
@@ -493,3 +502,13 @@ const extensionBrewPage = readFileSync(
 assert.doesNotMatch(extensionBrewSetup + extensionBrewPage, /brew-cmd\.sh|new XTerm|xterm\?\.stop/)
 assert.match(extensionBrewSetup, /homebrewUpgrade\s*\.package/)
 assert.match(extensionBrewPage, /homebrewUpgrade\.busy/)
+
+const dnsPage = readFileSync(join(root, 'src/render-next/screens/DnsServerScreen.vue'), 'utf8')
+assert.match(dnsPage, /from ['"]\.\.\/dnsServer\/state['"]/)
+assert.doesNotMatch(dnsPage, /IPC\.|forkTerminalRequest|fs\.writeFile/)
+await import('./pqt-forge-dns-test')
+
+const ftpPage = readFileSync(join(root, 'src/render-next/screens/FtpAccountsScreen.vue'), 'utf8')
+assert.match(ftpPage, /from ['"]\.\.\/ftpAccounts\/state['"]/)
+assert.doesNotMatch(ftpPage, /IPC\.|forkTerminalRequest|fs\.writeFile/)
+await import('./pqt-forge-ftp-accounts-test')

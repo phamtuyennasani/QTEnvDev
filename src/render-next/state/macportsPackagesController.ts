@@ -135,7 +135,7 @@ class MacPortsPackagesController {
     if (!current || current.installed !== row.installed) return
     const commands = buildCommands(flag, current, portPath(), window.Server.isArmArch === true)
     this.terminal?.destroy()
-    const terminal = markRaw(new XTerm(false))
+    const terminal = markRaw(new XTerm())
     this.terminal = terminal
     this.stopFlight = undefined
     this.terminalError = ''

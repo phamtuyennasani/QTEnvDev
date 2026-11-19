@@ -75,12 +75,13 @@ class NodePTY {
         cwd: process.cwd(),
         encoding: 'utf8'
       })
-      const onEnd = () => {
+      const onEnd = (exitCode?: number, legacyMarker = false) => {
         const item = this.pty[key]
         if (item) {
+          if (legacyMarker && item.task.some((task) => task.reportExitCode)) return
           const task = item?.task ?? []
           for (const t of task) {
-            this.completeTask(t)
+            this.completeTask(t, exitCode)
           }
           this.exitPtyByKey(key)
         }
@@ -94,12 +95,12 @@ class NodePTY {
         if (item) {
           item.data += data
           if (item?.data?.includes(`Task-${key}-End`)) {
-            onEnd()
+            onEnd(undefined, true)
           }
         }
       })
-      pty.onExit(async () => {
-        onEnd()
+      pty.onExit(({ exitCode }) => {
+        onEnd(exitCode)
       })
       this.pty[key] = {
         task: [],
@@ -208,6 +209,13 @@ class NodePTY {
   }
 
   private writeDirect(pty: IPty, param: string[]) {
+    if (isWindows()) {
+      const script = param.join('; ')
+      pty.write(
+        `${script}; if ($?) { exit 0 }; if ($LASTEXITCODE) { exit $LASTEXITCODE }; exit 1\r`
+      )
+      return
+    }
     const literal = param.join('\n').replace(/'/g, "'\\''")
     pty.write(`/bin/sh -c '${literal}'; exit $?\r`)
   }
@@ -222,7 +230,6 @@ class NodePTY {
   ) {
     if (!this.pty?.[ptyKey]?.pty) throw new Error('Terminal process is unavailable')
     if (execUseOneFile === 'direct') {
-      if (!isMacOS() && !isLinux()) throw new Error('Direct terminal execution requires Unix')
       const item = this.pty[ptyKey]!
       const task = { command, key, reportExitCode }
       item.task.push(task)

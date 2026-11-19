@@ -1,8 +1,8 @@
 import { reactive } from 'vue'
-import type { CronJob } from '@shared/app'
+import type { CronJob, CronRunRecord, SystemScheduledTask } from '@shared/app'
 import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
 import { validatePortableCronExpression } from '@shared/CronExpression'
-import { CRON_OUTCOME_UNKNOWN, type CronCommandResult } from '../../fork/module/Cron/types'
+import { CRON_OUTCOME_UNKNOWN, CRON_SYSTEM_TASK_REMOVED, type CronCommandResult } from '../../fork/module/Cron/types'
 import { showNotice } from './app'
 type Outcome = {
   status: 'running' | 'succeeded' | 'partial' | 'failed' | 'unknown'
@@ -18,6 +18,14 @@ const state = reactive({
   unknown: false,
   error: ''
 })
+const system = reactive({
+  tasks: [] as SystemScheduledTask[],
+  loading: false,
+  verified: false,
+  error: '',
+  result: ''
+})
+const histories = reactive<Record<string, { records: CronRunRecord[]; loading: boolean; error: string }>>({})
 let loadFlight: Promise<boolean> | undefined
 const request = (method: string, args: unknown[] = []) =>
   forkTerminalRequest('app-fork:cron', [method, ...args], 'The scheduler did not return a result.', 120_000)
@@ -51,8 +59,9 @@ const load = (fromMutation = false) => {
   return loadFlight
 }
 const mutate = async (key: string, method: string, args: unknown[]) => {
-  if (state.busy || state.loading || state.unknown) return false
+  if (state.busy || state.loading || state.unknown || system.loading) return false
   state.busy = true
+  if (method !== 'runJobNow') system.verified = false
   state.error = ''
   state.outcomes[key] = { status: 'running', message: 'Waiting for scheduler…' }
   const finishUnknown = (message: string) => {
@@ -114,6 +123,88 @@ const mutate = async (key: string, method: string, args: unknown[]) => {
 const toggle = (job: CronJob) => mutate(taskKey(job), 'toggleCronJob', [job.hostId ?? 0, job.id, !job.enabled])
 const run = (job: CronJob) => mutate(taskKey(job), 'runJobNow', [job.hostId ?? 0, job.id, job.workDir ?? ''])
 const remove = (job: CronJob) => mutate(taskKey(job), 'deleteCronJob', [job.hostId ?? 0, job.id])
+const historyFor = (job: CronJob) => histories[taskKey(job)]
+const loadHistory = async (job: CronJob) => {
+  const key = taskKey(job)
+  const id = job.id
+  if (histories[key]?.loading) return
+  histories[key] ??= { records: [], loading: false, error: '' }
+  const history = histories[key]
+  history.loading = true
+  history.error = ''
+  try {
+    const result = await request('listRunRecords', [id, 20])
+    if (result.code !== 0 || !Array.isArray(result.data)) throw new Error(result.msg || 'Could not load run history.')
+    history.records = (result.data as CronRunRecord[]).filter((record) => record?.jobId === id).reverse()
+  } catch (error) {
+    history.error = errorText(error)
+  } finally {
+    history.loading = false
+  }
+}
+const loadSystem = async (fromMutation = false) => {
+  if (system.loading || (state.busy && !fromMutation)) return false
+  system.loading = true
+  system.verified = false
+  system.error = ''
+  try {
+    const result = await request('listSystemTasks')
+    if (result.code !== 0 || !Array.isArray(result.data)) throw new Error(result.msg || 'Could not load the system scheduler.')
+    system.tasks = result.data
+    system.verified = true
+    return true
+  } catch (error) {
+    system.error = errorText(error)
+    return false
+  } finally {
+    system.loading = false
+  }
+}
+const isCurrentSystemTask = (task: SystemScheduledTask) => system.verified && system.tasks.includes(task)
+const removeSystem = async (task: SystemScheduledTask) => {
+  if (state.busy || state.loading || state.unknown || !isCurrentSystemTask(task)) return false
+  const { id, isQTEnvDev } = task
+  state.busy = true
+  system.result = ''
+  system.error = ''
+  try {
+    let result
+    try {
+      result = await request('deleteSystemTask', [id])
+    } catch (error) {
+      state.unknown = true
+      system.verified = false
+      system.error = errorText(error)
+      return false
+    }
+    const metadataFailed = result.errorCode === CRON_SYSTEM_TASK_REMOVED
+    if (!metadataFailed && result.code !== 0) {
+      system.error = result.msg || 'Could not remove the system task.'
+      if (result.errorCode === CRON_OUTCOME_UNKNOWN) {
+        state.unknown = true
+        system.verified = false
+      }
+      return false
+    }
+    if (!metadataFailed && result.data !== true) {
+      state.unknown = true
+      system.verified = false
+      system.error = 'The scheduler did not confirm the removal.'
+      return false
+    }
+    system.tasks = system.tasks.filter((item) => item.id !== id)
+    const [systemRefreshed, jobsRefreshed] = await Promise.all([
+      loadSystem(true),
+      isQTEnvDev ? load(true) : Promise.resolve(true)
+    ])
+    system.result = metadataFailed ? result.msg || 'System task removed. Its app record could not be updated.' : 'System task removed.'
+    if (!systemRefreshed || !jobsRefreshed) system.result += ' A task list could not be refreshed.'
+    showNotice(system.result)
+    return true
+  } finally {
+    state.busy = false
+  }
+}
 const save = (draft: Partial<CronJob>, existing?: CronJob) => {
   const schedule = String(draft.schedule ?? '').trim()
   const validation = validatePortableCronExpression(schedule)
@@ -140,6 +231,7 @@ const save = (draft: Partial<CronJob>, existing?: CronJob) => {
 }
 export const cronController = {
   state, load, toggle, run, remove, save, taskKey,
+  system, loadSystem, isCurrentSystemTask, removeSystem, historyFor, loadHistory,
   clearError: () => { state.error = '' },
   outcome: (job: CronJob) => state.outcomes[taskKey(job)]
 }

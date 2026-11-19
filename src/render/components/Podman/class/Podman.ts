@@ -9,6 +9,7 @@ import { XTermExec, XTermExecCache } from '@/util/XTermExec'
 import { AsyncComponentShow } from '@/util/AsyncComponent'
 import { I18nT } from '@lang/index'
 import { ElMessageBox } from 'element-plus'
+import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
 
 class Podman {
   machine: Machine[] = []
@@ -16,6 +17,7 @@ class Podman {
   version: string = ''
   inited: boolean = false
   loading: boolean = false
+  discoveryError = ''
   tab: string = ''
   imageVersion: Partial<Record<string, string[]>> = {}
 
@@ -47,9 +49,10 @@ class Podman {
         }
       })
     }
-    StorageGetAsync(storeKey)
-      .then((res: any) => {
-        this.imageVersion = reactive(res)
+    StorageGetAsync<Partial<Record<string, string[]>>>(storeKey)
+      .then((res) => {
+        if (res && typeof res === 'object' && !Array.isArray(res)) this.imageVersion = reactive(res)
+        else doFetch()
       })
       .catch(doFetch)
   }
@@ -58,11 +61,12 @@ class Podman {
     if (this.inited || this.loading) {
       return
     }
+    this.loading = true
+    this.discoveryError = ''
     this.initImageVersion()
     this.checkIsComposeExists()
     PodmanManager.loadComposeList().catch()
-    IPC.send('app-fork:podman', 'podmanInit').then((key: string, res: any) => {
-      IPC.off(key)
+    void forkTerminalRequest('app-fork:podman', ['podmanInit'], 'Podman discovery did not respond.', 60_000).then((res) => {
       if (res?.code === 0) {
         this.inited = true
         this.version = res?.data?.version ?? ''
@@ -82,15 +86,17 @@ class Podman {
           }
         }
       } else {
-        this.version = ''
-        this.machine.splice(0)
+        throw new Error(res?.msg || 'Podman discovery failed.')
       }
+    }).catch((error) => {
+      this.discoveryError = error instanceof Error ? error.message : String(error)
+    }).finally(() => {
       this.loading = false
     })
   }
 
   reinit() {
-    this.loading = false
+    if (this.loading) return
     this.inited = false
     this.init()
   }

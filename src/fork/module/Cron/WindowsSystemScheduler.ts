@@ -309,6 +309,10 @@ export class WindowsSystemScheduler {
 
   async remove(jobId: string) {
     await this.removeTask(jobId)
+    await this.removeScripts(jobId)
+  }
+
+  private async removeScripts(jobId: string) {
     await remove(this.taskScriptPath(jobId, 'ps1')).catch(() => {})
     await remove(this.taskScriptPath(jobId, 'cmd')).catch(() => {})
   }
@@ -316,7 +320,7 @@ export class WindowsSystemScheduler {
   async listSystemTasks(): Promise<SystemScheduledTask[]> {
     const script = `
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
-$tasks = @(Get-ScheduledTask | Sort-Object TaskPath, TaskName | ForEach-Object {
+$tasks = @(Get-ScheduledTask -ErrorAction Stop | Sort-Object TaskPath, TaskName | ForEach-Object {
   $actions = @($_.Actions | ForEach-Object {
     $parts = @()
     if ($_.Execute) { $parts += $_.Execute }
@@ -334,7 +338,7 @@ $tasks = @(Get-ScheduledTask | Sort-Object TaskPath, TaskName | ForEach-Object {
     }
   } catch {}
   $fullName = "$($_.TaskPath)$($_.TaskName)"
-  $isQTEnvDev = $_.TaskName -like 'QTEnvDev-Cron-*'
+  $isQTEnvDev = $_.TaskPath -eq [string][char]92 -and $_.TaskName -match '^QTEnvDev-Cron-[a-z0-9_-]+$'
   $jobId = if ($isQTEnvDev) { $_.TaskName.Substring('QTEnvDev-Cron-'.Length) } else { $null }
   [PSCustomObject]@{
     id = $fullName
@@ -374,8 +378,11 @@ if ($tasks.Count -eq 0) { '[]' } else { $tasks | ConvertTo-Json -Compress -Depth
       throw new Error('System task id is required')
     }
 
-    await spawnPromiseWithEnv(await this.schtasksPath(), ['/Delete', '/TN', id.trim(), '/F'], {
+    await spawnPromiseWithEnv(await this.schtasksPath(), ['/Delete', '/TN', id, '/F'], {
+      shell: false,
       windowsHide: true
     })
+    const jobId = id.match(/^\\?QTEnvDev-Cron-([a-z\d_-]+)$/i)?.[1]
+    if (jobId) await this.removeScripts(jobId)
   }
 }

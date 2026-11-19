@@ -1,6 +1,6 @@
 <template>
   <ForgeDialog :title="surface?.title || 'Tool'" eyebrow="WORKSPACE / TOOLS" wide @close="emit('close')">
-    <div class="pqt-established-tool dark" :data-tool="tool">
+    <div class="pqt-established-tool" :data-tool="tool">
       <p v-if="error" class="forge-alert forge-alert--error">{{ error }} <button class="action-button" @click="load">Retry</button></p>
       <component :is="content" v-else-if="content" />
       <p v-else class="empty-copy">Loading tool…</p>

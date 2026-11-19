@@ -19,7 +19,7 @@ export function provideLegacyToolContext(options?: { poperFix?: boolean; detache
   for (const [name, component] of Object.entries(ElementPlus)) if (/^El[A-Z]/.test(name) && component && (typeof component === 'object' || typeof component === 'function')) Object.assign(components, { [name]: component })
   const config = Object.create(parentContext.config) as App['config']
   Object.defineProperty(config, 'globalProperties', { value: { ...parentContext.config.globalProperties, $t: I18nT, markRaw, toRaw }, writable: true, enumerable: true })
-  const context = { ...parentContext, components, directives: { ...parentContext.directives, loading: ElementPlus.ElLoading.directive }, config, asyncComponentHostClass: 'pqt-established-tool pqt-established-detached-tool dark' + (options?.detachedClass ? ' ' + options.detachedClass : ''), acquireAsyncComponentHost: () => acquireLegacySvgSprite(document) }
+  const context = { ...parentContext, components, directives: { ...parentContext.directives, loading: ElementPlus.ElLoading.directive }, config, asyncComponentHostClass: 'pqt-established-tool pqt-established-detached-tool' + (options?.detachedClass ? ' ' + options.detachedClass : ''), acquireAsyncComponentHost: () => acquireLegacySvgSprite(document) }
   if (options?.poperFix) {
     const scopedApp = {
       directive(name: string, directive: import('vue').Directive) {

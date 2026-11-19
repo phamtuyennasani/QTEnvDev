@@ -3,10 +3,10 @@ import type { SoftInstalled } from '@shared/app'
 import { BrewStore } from '@/store/brew'
 import { registerLifecycle } from './lifecycleAdapter'
 
-export const serviceModuleFlags: Record<string, AllAppModule> = { Apache: 'apache', Nginx: 'nginx', Caddy: 'caddy', Tomcat: 'tomcat', PHP: 'php', 'PHP-FPM': 'php-fpm', MySQL: 'mysql', MariaDB: 'mariadb', PostgreSQL: 'postgresql', Redis: 'redis', MongoDB: 'mongodb', ClickHouse: 'clickhouse', Elasticsearch: 'elasticsearch', RabbitMQ: 'rabbitmq', Memcached: 'memcached', Mailpit: 'mailpit', Minio: 'minio', Qdrant: 'qdrant', Typesense: 'typesense', Meilisearch: 'meilisearch', Neo4j: 'neo4j', Consul: 'consul', Podman: 'podman', Cloudflared: 'cloudflared', 'Cloudflare Tunnel': 'cloudflare-tunnel', 'Pure-FTPd': 'pure-ftpd', 'FTP Server': 'ftp-srv', 'HTTP Serve': 'httpserver', RoadRunner: 'roadrunner', FrankenPHP: 'frankenphp', N8N: 'n8n' }
+export const serviceModuleFlags: Record<string, AllAppModule> = { Apache: 'apache', Nginx: 'nginx', Caddy: 'caddy', Tomcat: 'tomcat', PHP: 'php', 'PHP-FPM': 'php-fpm', MySQL: 'mysql', MariaDB: 'mariadb', PostgreSQL: 'postgresql', Redis: 'redis', MongoDB: 'mongodb', ClickHouse: 'clickhouse', Elasticsearch: 'elasticsearch', RabbitMQ: 'rabbitmq', Memcached: 'memcached', Mailpit: 'mailpit', Minio: 'minio', Qdrant: 'qdrant', Typesense: 'typesense', Meilisearch: 'meilisearch', Neo4j: 'neo4j', Consul: 'consul', Podman: 'podman', Cloudflared: 'cloudflared', 'Cloudflare Tunnel': 'cloudflare-tunnel', 'Pure-FTPd': 'pure-ftpd', 'FTP Server': 'ftp-srv', RoadRunner: 'roadrunner', FrankenPHP: 'frankenphp', N8N: 'n8n' }
 
 type Lifecycle = 'start' | 'stop' | 'restart'
-export type AdapterResult = { connected: boolean; result: string | boolean }
+export type AdapterResult = { connected: boolean; result: string | boolean; warning?: string }
 export function currentServiceVersion(name: string) {
   const flag = serviceModuleFlags[name]
   if (!flag) return undefined
@@ -39,11 +39,19 @@ export async function runServiceLifecycle(name: string, action: Lifecycle): Prom
   const flag = serviceModuleFlags[name]
   if (!flag || !window.Server?.DataDirectoryReady) return { connected: false, result: 'The service is unavailable or the desktop connection is not ready.' }
   try {
+    if (flag === 'cloudflare-tunnel') {
+      const { changeCloudflareTunnels } = await import('../cloudflareTunnel/lifecycle')
+      return { connected: true, result: await changeCloudflareTunnels(action) }
+    }
     const module = BrewStore().module(flag === 'php-fpm' ? 'php' : flag)
     if (!await module.fetchInstalled(false, { fresh: false })) throw new Error('Installed versions could not be refreshed.')
     await registerLifecycle(flag)
     const item = BrewStore().currentVersion(flag) ?? module.installed[0]
     if (!item) return { connected: true, result: 'No installed version. Open Manage packages to install one first.' }
+    if (flag === 'mysql') {
+      const { runMysqlServiceLifecycle } = await import('@/components/Mysql/serviceLifecycle')
+      return { connected: true, ...await runMysqlServiceLifecycle(item, action) }
+    }
     const result = action === 'start' ? await item.start() : action === 'stop' ? await item.stop() : await item.restart()
     return { connected: true, result }
   } catch (error) {
@@ -56,6 +64,11 @@ export async function readServiceSnapshot(name: string): Promise<{ connected: bo
   if (!flag) return { connected: false, installed: false, running: false, reason: 'unavailable' }
   try {
     if (!window.Server?.DataDirectoryReady) return { connected: false, installed: false, running: false, reason: 'unknown' }
+    if (flag === 'cloudflare-tunnel') {
+      const { default: tunnels } = await import('@/core/CloudflareTunnel/CloudflareTunnelStore')
+      await tunnels.init()
+      return { connected: true, installed: tunnels.items.length > 0, running: tunnels.items.some((item) => item.run) }
+    }
     const module = BrewStore().module(flag === 'php-fpm' ? 'php' : flag)
     if (!await module.fetchInstalled(false, { fresh: false })) throw new Error('Installed versions could not be refreshed.')
     const item = module.installed.find((version) => version.run) ?? BrewStore().currentVersion(module.typeFlag) ?? module.installed[0]

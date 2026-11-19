@@ -25,7 +25,7 @@ const run = async (service: ServiceItem, action: 'Start' | 'Stop' | 'Restart') =
       service.state = 'warning'; showNotice(service.name + ': ' + (typeof adapter.result === 'string' ? adapter.result : 'The service did not report success.')); return false
     }
     service.state = action === 'Stop' ? 'stopped' : 'running'
-    showNotice(service.name + ' ' + action.toLowerCase() + ' completed'); return true
+    showNotice(service.name + ' ' + action.toLowerCase() + ' completed' + (adapter.warning ? '. ' + adapter.warning : '')); return true
   } catch (error) {
     service.state = 'warning'; showNotice(service.name + ': ' + (error instanceof Error ? error.message : String(error))); return false
   } finally {
