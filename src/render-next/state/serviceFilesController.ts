@@ -44,11 +44,16 @@ export class ServiceFilesController {
     } catch (error) { if (generation === this.generation) this.error = packageError(error); return false }
     finally { if (generation === this.generation) this.loading = false }
   }
-  async select(file: ServiceFile) { this.selected = file; this.error = ''; this.content = ''; if (file.kind === 'config') await this.readSelected(this.generation) }
+  async select(file: ServiceFile) { this.selected = file; this.error = ''; this.content = ''; await this.readSelected(this.generation) }
   async readSelected(generation = this.generation) {
     const file = this.selected
     if (!file || generation !== this.generation) return
-    try { this.content = await fs.readFileStrict(file.path); this.loadedContent = this.content } catch (error) { if (generation === this.generation) this.error = packageError(error) }
+    try {
+      const raw = await fs.readFileStrict(file.path)
+      const maxTail = 200_000
+      this.content = file.kind === 'log' && raw.length > maxTail ? raw.slice(-maxTail) : raw
+      this.loadedContent = this.content
+    } catch (error) { if (generation === this.generation) this.error = packageError(error) }
   }
   async save() {
     const file = this.selected
@@ -59,6 +64,14 @@ export class ServiceFilesController {
       if (current !== this.loadedContent) { this.error = 'The file changed outside this editor. Reload it before saving.'; return false }
       await fs.writeFile(file.path, this.content); this.loadedContent = this.content; return true
     }
+    catch (error) { this.error = packageError(error); return false }
+    finally { this.saving = false }
+  }
+  async clearLog() {
+    const file = this.selected
+    if (!file || file.kind !== 'log' || this.saving) return false
+    this.saving = true; this.error = ''
+    try { await fs.writeFile(file.path, ''); this.content = ''; return true }
     catch (error) { this.error = packageError(error); return false }
     finally { this.saving = false }
   }

@@ -55,6 +55,8 @@
     "build:pqt-forge-next": "tsx scripts/build-pqt-forge-next.ts",
     "test:custom-module-lifecycle": "tsx scripts/custom-module-lifecycle-test.ts",
     "test:pqt-forge-package-controller": "tsx scripts/pqt-forge-package-controller-test.ts",
+    "test:pqt-forge-phase2": "tsx scripts/pqt-forge-phase2-smoke.ts",
+    "test:pqt-forge-package-capabilities": "tsx scripts/pqt-forge-package-capability-audit.ts",
     "test:pqt-forge-website-controller": "tsx scripts/pqt-forge-website-controller-test.ts",
     "test:pqt-forge-local-tools": "tsx scripts/pqt-forge-local-tools-test.ts",
     "test:pqt-forge-parity-audit": "tsx scripts/pqt-forge-parity-audit.ts"

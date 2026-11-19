@@ -9,6 +9,7 @@
         <div class="database-facts"><div><span>Default endpoint</span><code>localhost:{{ selectedDatabase.port }}</code></div><div><span>Connections / storage</span><b>Not measured</b></div></div>
         <div class="detail-actions"><button class="action-button action-button--primary" :disabled="busy || !service || selectedDatabase.version === '—'" @click="run(selectedDatabase.state === 'running' ? 'Restart' : 'Start')">{{ selectedDatabase.state === 'running' ? 'Restart' : 'Start' }}</button><button class="action-button" :disabled="busy || selectedDatabase.state !== 'running'" @click="run('Stop')">Stop</button></div>
         <div class="detail-actions"><button class="action-button" @click="openFiles('config')">Configuration</button><button class="action-button" @click="openFiles('log')">Logs</button><button v-for="tool in adminTools" :key="tool.id" class="action-button" :disabled="adminController.isOpening(tool.id)" @click="adminController.open(tool.id)">{{ adminController.isOpening(tool.id) ? 'Opening…' : tool.label }}</button></div>
+        <DatabaseToolsPanel :name="selectedDatabase.name" />
         <PackageBrowser v-if="selectedFlag" ref="packageBrowser" :key="selectedFlag" :flag="selectedFlag" :title="selectedDatabase.name" />
       </article>
     </div>
@@ -22,6 +23,7 @@ import { serviceController } from '../state/serviceController'
 import PackageBrowser from '../components/PackageBrowser.vue'
 import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
 import { databaseAdminController } from '../state/databaseAdminController'
+import DatabaseToolsPanel from '../components/DatabaseToolsPanel.vue'
 const packageBrowser = ref<InstanceType<typeof PackageBrowser>>()
 const selectedDatabase = computed(() => databaseController.selected.database)
 const flags: Record<string, string> = { MySQL: 'mysql', MariaDB: 'mariadb', PostgreSQL: 'postgresql', Redis: 'redis', MongoDB: 'mongodb', ClickHouse: 'clickhouse', Neo4j: 'neo4j', Elasticsearch: 'elasticsearch', Qdrant: 'qdrant' }

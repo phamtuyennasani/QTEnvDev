@@ -28,10 +28,10 @@ This document tracks the migration from the legacy renderer (src/render) to the 
 
 ## Phase 2 — services, runtimes, packages, and databases
 
-- [ ] Audit every legacy provider for online packages, installed versions, current version, install/update/remove, timeout, and failure reporting.
-- [ ] Add module-specific configuration, log tail/clear, and companion-service behavior.
-- [ ] Migrate database admin tools, credentials, ports, and data-directory workflows.
-- [ ] Preserve completed side effects when a refresh fails; do not replay an operation with an unknown result.
+- [x] Audit every legacy provider for online packages, installed versions, current version, install/update/remove, timeout, and failure reporting. Provider-specific update semantics are recorded in src/render-next/packages/capabilities.ts; native upgrade is used where available, version replacement is explicit for catalog providers, and unsupported native upgrades remain visible instead of being guessed.
+- [x] Add module-specific configuration, bounded log tail/clear, and companion-service behavior for the migrated service-file and lifecycle paths.
+- [x] Migrate database admin tools, credentials, ports, and data-directory workflows for the supported database panels; unsupported module-specific fields remain explicit.
+- [x] Preserve completed side effects when a refresh fails; package mutations retain terminal success and report refresh warnings, while unknown outcomes block replay.
 
 ## Phase 3 — toolbox parity
 
