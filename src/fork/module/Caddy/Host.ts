@@ -3,35 +3,10 @@ import { join } from 'path'
 import { hostAlias, mkdirp, readFile, writeFile, removeByRoot } from '../../Fn'
 import { vhostTmpl } from '../Host/Host'
 import { vhostName } from '../Host/vhostName'
+import { updateCaddyReverseProxy } from '../Host/CaddyReverseProxy'
 import { existsSync } from 'fs'
 import { isEqual } from 'lodash-es'
 import { pathFixedToUnix } from '@shared/utils'
-
-const handleReverseProxy = (host: AppHost, content: string) => {
-  let x: any = content.match(/(#PWS-REVERSE-PROXY-BEGIN#)([\s\S]*?)(#PWS-REVERSE-PROXY-END#)/g)
-  if (x && x[0]) {
-    x = x[0]
-    content = content.replace(`\n${x}`, '').replace(`${x}`, '')
-  }
-  if (host?.reverseProxy && host?.reverseProxy?.length > 0) {
-    const arr = ['#PWS-REVERSE-PROXY-BEGIN#']
-    host.reverseProxy.forEach((item) => {
-      const path = item.path
-      const url = item.url
-      arr.push(`    reverse_proxy ${path} {
-        to ${url}
-        header_up X-Real-IP {remote}
-        header_up X-Forwarded-For {remote}
-        header_up X-Forwarded-Proto {scheme}
-    }`)
-    })
-    arr.push('#PWS-REVERSE-PROXY-END#')
-    arr.push('    file_server')
-    const replace = arr.join('\n')
-    content = content.replace('file_server', `\n${replace}`)
-  }
-  return content
-}
 
 export const makeCaddyConf = async (host: AppHost, stage?: (path: string, content: string) => Promise<void>) => {
   const caddyvpath = join(global.Server.BaseDir!, 'vhost/caddy')
@@ -69,7 +44,7 @@ export const makeCaddyConf = async (host: AppHost, stage?: (path: string, conten
   } else {
     content = content.replace('import enable-php-select ##PHP-VERSION##', `##Static Site Caddy##`)
   }
-  content = handleReverseProxy(host, content)
+  content = updateCaddyReverseProxy(host, content, 'file_server')
   contentList.push(content)
 
   if (host.useSSL) {
@@ -88,7 +63,7 @@ export const makeCaddyConf = async (host: AppHost, stage?: (path: string, conten
     } else {
       content = content.replace('import enable-php-select ##PHP-VERSION##', `##Static Site Caddy##`)
     }
-    content = handleReverseProxy(host, content)
+    content = updateCaddyReverseProxy(host, content, 'file_server')
     contentList.push(content)
   }
 
@@ -158,12 +133,12 @@ export const updateCaddyConf = async (host: AppHost, old: AppHost) => {
   if (host.ssl.cert !== old.ssl.cert || host.ssl.key !== old.ssl.key) {
     hasChanged = true
     find.push(`tls (.*?)\\n`)
-    replace.push(`tls "${host.ssl.cert}" "${host.ssl.key}"\n`)
+    replace.push(`tls "${pathFixedToUnix(host.ssl.cert)}" "${pathFixedToUnix(host.ssl.key)}"\n`)
   }
   if (host.root !== old.root) {
     hasChanged = true
-    find.push(`root \* (.*?)\\n`)
-    replace.push(`root * "${host.root}"\n`)
+    find.push(`root \\* (.*?)\\n`)
+    replace.push(`root * "${pathFixedToUnix(host.root)}"\n`)
   }
   if (host.phpVersion !== old.phpVersion) {
     hasChanged = true
@@ -203,7 +178,7 @@ export const updateCaddyConf = async (host: AppHost, old: AppHost) => {
       contentCaddyConf = contentCaddyConf.replace(new RegExp(s, 'g'), replace[i])
       contentCaddyConf = contentCaddyConf.replace(s, replace[i])
     })
-    contentCaddyConf = handleReverseProxy(host, contentCaddyConf)
+    contentCaddyConf = updateCaddyReverseProxy(host, contentCaddyConf, 'file_server')
     await writeFile(caddyConfPath, contentCaddyConf)
   }
 }

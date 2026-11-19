@@ -6,38 +6,13 @@ import { isEqual } from 'lodash-es'
 import { pathFixedToUnix } from '@shared/utils'
 import { vhostTmpl } from '../Host/Host'
 import { vhostName } from '../Host/vhostName'
+import { updateCaddyReverseProxy } from '../Host/CaddyReverseProxy'
 import { fetchHostList } from '../Host/HostFile'
 
 // #700: FrankenPHP has its own listening ports. For sites created before this
 // field existed, fall back to the Caddy port to preserve behavior.
 const fpPort = (host: AppHost) => host?.port?.frankenphp ?? host?.port?.caddy
 const fpPortSSL = (host: AppHost) => host?.port?.frankenphp_ssl ?? host?.port?.caddy_ssl ?? 443
-
-const handleReverseProxy = (host: AppHost, content: string) => {
-  let x: any = content.match(/(#PWS-REVERSE-PROXY-BEGIN#)([\s\S]*?)(#PWS-REVERSE-PROXY-END#)/g)
-  if (x && x[0]) {
-    x = x[0]
-    content = content.replace(`\n${x}`, '').replace(`${x}`, '')
-  }
-  if (host?.reverseProxy && host?.reverseProxy?.length > 0) {
-    const arr = ['#PWS-REVERSE-PROXY-BEGIN#']
-    host.reverseProxy.forEach((item) => {
-      const path = item.path
-      const url = item.url
-      arr.push(`    reverse_proxy ${path} {
-        to ${url}
-        header_up X-Real-IP {remote}
-        header_up X-Forwarded-For {remote}
-        header_up X-Forwarded-Proto {scheme}
-    }`)
-    })
-    arr.push('#PWS-REVERSE-PROXY-END#')
-    arr.push('    php_server')
-    const replace = arr.join('\n')
-    content = content.replace('php_server', `\n${replace}`)
-  }
-  return content
-}
 
 export const makeFrankenPHPConf = async (host: AppHost, stage?: (path: string, content: string) => Promise<void>) => {
   const frankenphpvpath = join(global.Server.BaseDir!, 'vhost/frankenphp')
@@ -70,7 +45,7 @@ export const makeFrankenPHPConf = async (host: AppHost, stage?: (path: string, c
     .replace('##HOST-ALL##', httpHostNameAll)
     .replace('##LOG-PATH##', logPath)
     .replace('##ROOT##', pathFixedToUnix(root))
-  content = handleReverseProxy(host, content)
+  content = updateCaddyReverseProxy(host, content, 'php_server')
   contentList.push(content)
 
   if (host.useSSL) {
@@ -84,7 +59,7 @@ export const makeFrankenPHPConf = async (host: AppHost, stage?: (path: string, c
       .replace('##LOG-PATH##', logPath)
       .replace('##SSL##', tls)
       .replace('##ROOT##', pathFixedToUnix(root))
-    content = handleReverseProxy(host, content)
+    content = updateCaddyReverseProxy(host, content, 'php_server')
     contentList.push(content)
   }
 
@@ -158,7 +133,7 @@ export const updateFrankenPHPConf = async (host: AppHost, old: AppHost) => {
   }
   if (host.root !== old.root) {
     hasChanged = true
-    find.push(`root \* (.*?)\\n`)
+    find.push(`root \\* (.*?)\\n`)
     replace.push(`root * "${pathFixedToUnix(host.root)}"\n`)
   }
   if (!isEqual(host?.reverseProxy, old?.reverseProxy)) {
@@ -169,7 +144,7 @@ export const updateFrankenPHPConf = async (host: AppHost, old: AppHost) => {
       contentFrankenPHPConf = contentFrankenPHPConf.replace(new RegExp(s, 'g'), replace[i])
       contentFrankenPHPConf = contentFrankenPHPConf.replace(s, replace[i])
     })
-    contentFrankenPHPConf = handleReverseProxy(host, contentFrankenPHPConf)
+    contentFrankenPHPConf = updateCaddyReverseProxy(host, contentFrankenPHPConf, 'php_server')
     await writeFile(frankenphpConfPath, contentFrankenPHPConf)
   }
 }
@@ -233,7 +208,7 @@ export const fixVHost = async () => {
       .replace('##HOST-ALL##', httpHostNameAll)
       .replace('##LOG-PATH##', pathFixedToUnix(logFile))
       .replace('##ROOT##', pathFixedToUnix(root))
-    contentList.push(content)
+    contentList.push(updateCaddyReverseProxy(host, content, 'php_server'))
 
     if (host.useSSL) {
       let tls = 'internal'
@@ -246,7 +221,7 @@ export const fixVHost = async () => {
         .replace('##LOG-PATH##', pathFixedToUnix(logFile))
         .replace('##SSL##', tls)
         .replace('##ROOT##', pathFixedToUnix(root))
-      contentList.push(content)
+      contentList.push(updateCaddyReverseProxy(host, content, 'php_server'))
     }
     await writeFile(confFile, contentList.join('\n'))
   }
