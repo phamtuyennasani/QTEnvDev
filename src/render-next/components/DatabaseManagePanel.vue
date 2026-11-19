@@ -14,7 +14,7 @@
   const drawer = ref<{ onClosed(fn: () => void): void }>()
   provideLegacyToolContext({ poperFix: true, detachedClass: 'pqt-database-manage-surface' })
   onMounted(() => drawer.value?.onClosed(() => emit('close')))
-  const openAdmin = () => databaseAdminController.open('phpmyadmin')
+  const openAdmin = () => databaseAdminController.open('phpmyadmin', props.item.typeFlag === 'mysql' ? 'mysql' : 'mariadb', props.item)
 </script>
 
 <style>

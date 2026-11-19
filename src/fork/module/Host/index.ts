@@ -11,6 +11,7 @@ import { makeApacheConf, updateApacheConf } from '../Apache/Host'
 import { autoFillNginxRewrite, makeNginxConf, updateNginxConf } from '../Nginx/Host'
 import { setDirRole, updateAutoSSL, updateRootRule } from './Host'
 import { TaskAddPhpMyAdminSite, TaskAddRandomSite } from './Task'
+import type { PhpMyAdminTarget } from './PhpMyAdminProfile'
 import { fetchHostList, saveHostList } from './HostFile'
 import { exportWebsiteBackup, importWebsiteBackup, previewWebsiteBackup } from './WebsiteBackup'
 import { parkSubdirectories } from './ParkSubdirectories'
@@ -605,6 +606,11 @@ export class Host extends Base {
 
   addPhpMyAdminSite(phpVersion?: number, write = true, ipv6 = true) {
     return TaskAddPhpMyAdminSite.call(this, phpVersion, write, ipv6)
+  }
+
+  async configurePhpMyAdminProfile(target: PhpMyAdminTarget) {
+    const { configurePhpMyAdminProfile } = await import('./PhpMyAdminProfile')
+    return configurePhpMyAdminProfile(target)
   }
 
   getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {

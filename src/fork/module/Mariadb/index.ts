@@ -1088,6 +1088,13 @@ datadir=${dataDir}`
     })
   }
 
+  async databaseConnectionEndpoint(version: Pick<SoftInstalled, 'version'>) {
+    const series = version.version?.split('.').slice(0, 2).join('.') ?? ''
+    if (!/^\d+\.\d+$/.test(series)) throw new Error('Select an installed MariaDB version.')
+    const content = await readFile(join(global.Server.MariaDBDir!, `my-${series}.cnf`), 'utf8')
+    return { port: getMariaDBPort(iniParse(content)) }
+  }
+
   getDatabasesWithUsers(version: SoftInstalled) {
     return new ForkPromise(async (resolve, reject) => {
       const v = version?.version?.split('.')?.slice(0, 2)?.join('.') ?? ''

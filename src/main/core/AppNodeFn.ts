@@ -472,6 +472,19 @@ X-GNOME-Autostart-enabled=true`
     this?.mainWindow?.webContents.send('command', command, key, true)
   }
 
+  async shell_openExternalChecked(command: string, key: string, url: string) {
+    try {
+      const parsed = new URL(url)
+      if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) {
+        throw new Error('Invalid browser URL.')
+      }
+      await shell.openExternal(parsed.href)
+      this?.mainWindow?.webContents.send('command', command, key, { code: 0 })
+    } catch {
+      this?.mainWindow?.webContents.send('command', command, key, { code: 1, msg: 'Could not open the browser.' })
+    }
+  }
+
   exec_exec(command: string, key: string, cmd: string, opt: any) {
     EnvSync.clean()
     EnvSync.sync()

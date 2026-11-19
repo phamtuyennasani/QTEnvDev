@@ -7,7 +7,6 @@ import { I18nT } from '@lang/runtime'
 import compressing from 'compressing'
 import {
   downloadFile,
-  execPromise,
   waitTime,
   copyFile,
   mkdirp,
@@ -106,13 +105,13 @@ export function TaskAddPhpMyAdminSite(this: any, phpVersion?: number, write = tr
   return new ForkPromise(async (resolve, reject, on) => {
     const zipFile = join(global.Server.Cache!, 'phpMyAdmin.zip')
     const siteDir = join(global.Server.BaseDir!, 'www/phpMyAdmin')
-    let hostList: Array<AppHost> = []
-    try {
-      hostList = await fetchHostList()
-    } catch {}
-    hostList = hostList.filter((h) => !h.type || h.type === 'php')
-    const find = hostList.find((h) => h.name === 'phpmyadmin.test')
+    const hostList: Array<AppHost> = await fetchHostList()
+    const find = hostList.find((h) => h.name.toLowerCase() === 'phpmyadmin.test')
     if (find) {
+      if (!('isAppPHPMyAdmin' in find) || find.isAppPHPMyAdmin !== true) {
+        reject(new Error('A website already uses phpmyadmin.test.'))
+        return
+      }
       resolve(true)
       return
     }
@@ -133,11 +132,7 @@ export function TaskAddPhpMyAdminSite(this: any, phpVersion?: number, write = tr
           const subDirs = await readdir(tmplDir, { withFileTypes: true })
           const subDir = subDirs.filter((f) => f.isDirectory()).pop()
           if (subDir) {
-            if (isWindows()) {
-              await moveDirToDir(join(tmplDir, subDir.name), siteDir)
-            } else {
-              await execPromise(`cd ${join(tmplDir, subDir.name)} && mv ./* ${siteDir}/`)
-            }
+            await moveDirToDir(join(tmplDir, subDir.name), siteDir)
             await waitTime(300)
             await remove(tmplDir)
           }
@@ -204,19 +199,27 @@ export function TaskAddPhpMyAdminSite(this: any, phpVersion?: number, write = tr
       }
       try {
         await this.handleHost(hostItem, 'add')
-        await this.writeHosts(write, ipv6)
-        await setDirRole(siteDir)
-        console.log('TaskAddPhpMyAdminSite end !!!')
-        resolve(true)
-      } catch (e) {
-        console.log('TaskAddPhpMyAdminSite error: ', e)
-        reject(e)
+      } catch (error) {
+        reject(error)
+        return
       }
+      const warnings: string[] = []
+      try {
+        await this.writeHosts(write, ipv6)
+      } catch {
+        warnings.push('The phpMyAdmin site was created. Its hostname could not be added to the system hosts file.')
+      }
+      try {
+        await setDirRole(siteDir)
+      } catch {
+        warnings.push('The phpMyAdmin directory permissions could not be updated.')
+      }
+      resolve(warnings.length ? { warnings } : true)
     }
 
     if (existsSync(zipFile)) {
       on(100)
-      doMake().then()
+      doMake().catch(reject)
       return
     }
 
@@ -230,13 +233,9 @@ export function TaskAddPhpMyAdminSite(this: any, phpVersion?: number, write = tr
       .then(async () => {
         return copyFile(zipTmpFile, zipFile)
       })
-      .then(() => {
-        if (existsSync(zipFile)) {
-          doMake().then()
-          return
-        } else {
-          reject(new Error(I18nT('fork.downloadFileFail')))
-        }
+      .then(async () => {
+        if (!existsSync(zipFile)) throw new Error(I18nT('fork.downloadFileFail'))
+        await doMake()
       })
       .catch(reject)
   })
