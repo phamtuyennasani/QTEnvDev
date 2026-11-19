@@ -4,6 +4,10 @@ import {
   updateEnvServiceField
 } from '../src/render-next/serviceConfiguration/envServiceDraft'
 import { loadIsolated } from './helpers/load-isolated'
+import {
+  readMeilisearchFields,
+  updateMeilisearchField
+} from '../src/render-next/serviceConfiguration/meilisearchDraft'
 
 const language = { '@lang/index': { I18nT: (name: string) => name } }
 const { n8nCommonFields } = await loadIsolated(
@@ -61,10 +65,7 @@ const verbose = field(mailpitFields, 'MP_VERBOSE')
 const authFile = field(mailpitFields, 'MP_SMTP_AUTH_FILE')
 assert.equal(bind.value, '[::1]:8025')
 assert.equal(field(mailpitFields, 'MP_LABEL').value, '"a=b#c"')
-assert.deepEqual(
-  Array.from(verbose.options ?? [], (item) => item.value).sort(),
-  ['false', 'true']
-)
+assert.deepEqual(Array.from(verbose.options ?? [], (item) => item.value).sort(), ['false', 'true'])
 assert.equal(authFile.isFile, true)
 assert.equal(
   updateEnvServiceField(mailpitDraft, 'mailpit', authFile, true, 'C:\\Mail setup\\auth=file'),
@@ -75,6 +76,125 @@ assert.equal(
   mailpitDraft.replace('MP_VERBOSE=false', 'MP_VERBOSE=true')
 )
 
-console.log(
-  'n8n and Mailpit field edits preserve scoped draft text, paths, quoting and line endings.'
+const { minioCommonFields } = await loadIsolated(
+  'src/render/components/Minio/commonFields.ts',
+  language
 )
+const { rustfsCommonFields } = await loadIsolated(
+  'src/render/components/Rustfs/commonFields.ts',
+  language
+)
+const { meilisearchCommonFields } = await loadIsolated(
+  'src/render/components/MeiliSearch/commonFields.ts',
+  language
+)
+
+const minioDraft =
+  '# defaults\r\nMINIO_ROOT_PASSWORD = "x=y#z"\r\nMINIO_ADDRESS="127.0.0.1:9000"\r\n'
+const minio = readEnvServiceFields(minioDraft, 'minio', minioCommonFields())
+assert.equal(field(minio, 'MINIO_ROOT_PASSWORD').value, 'x=y#z')
+assert.equal(
+  updateEnvServiceField(
+    minioDraft,
+    'minio',
+    field(minio, 'MINIO_CERTS_DIR'),
+    true,
+    'C:\\cert files'
+  ),
+  minioDraft + 'MINIO_CERTS_DIR="C:\\cert files"\r\n'
+)
+const rustfsDraft = 'RUSTFS_ACCESS_KEY_FILE=C:\\keys\\access=key\r\nRUSTFS_SECRET_KEY=literal\r\n'
+const rustfs = readEnvServiceFields(rustfsDraft, 'rustfs', rustfsCommonFields())
+const accessFile = field(rustfs, 'RUSTFS_ACCESS_KEY_FILE')
+assert.equal(accessFile.value, 'C:\\keys\\access=key')
+assert.equal(
+  updateEnvServiceField(rustfsDraft, 'rustfs', accessFile, true, 'C:\\keys and certs\\access=key'),
+  rustfsDraft.replace('C:\\keys\\access=key', 'C:\\keys and certs\\access=key')
+)
+
+const tomlDraft =
+  '\ufeff# meilisearch\r\nnotes = """\r\nhttp_addr = "127.0.0.1:7700"\r\n"""\r\n' +
+  "db_path = 'C:\\dev#1\\meili' # use local data\r\n" +
+  'http_addr = "127.0.0.1:7700" # default listen address\r\n' +
+  'max_indexing_threads = 12\r\n[custom]\r\nhttp_addr = "local-only"\r\n'
+const meiliSchema = meilisearchCommonFields()
+const meili = readMeilisearchFields(tomlDraft, meiliSchema)
+const dbPath = field(meili, 'db_path')
+const http = field(meili, 'http_addr')
+const maxThreads = field(meili, 'max_indexing_threads')
+assert.equal(dbPath.value, 'C:\\dev#1\\meili')
+assert.equal(http.value, '127.0.0.1:7700')
+assert.equal(maxThreads.value, '12')
+assert.equal(
+  updateMeilisearchField(tomlDraft, dbPath, true, 'D:\\data # us'),
+  tomlDraft.replace("'C:\\dev#1\\meili'", '"D:\\\\data # us"')
+)
+assert.equal(
+  updateMeilisearchField(tomlDraft, http, true, 'localhost:8800'),
+  tomlDraft.replace('"127.0.0.1:7700" #', '"localhost:8800" #')
+)
+assert.equal(
+  updateMeilisearchField(tomlDraft, http, false, ''),
+  tomlDraft.replace('http_addr = "127.0.0.1:7700" #', '#')
+)
+assert.equal(updateMeilisearchField(tomlDraft, maxThreads, true, '[]'), tomlDraft)
+const scoped = '[custom]\r\nhttp_addr = "scoped"'
+assert.equal(field(readMeilisearchFields(scoped, meiliSchema), 'http_addr').enabled, false)
+assert.equal(
+  updateMeilisearchField(scoped, http, true, 'localhost:8800'),
+  'http_addr = "localhost:8800"\r\n' + scoped
+)
+const invalid = 'http_addr="a"\nhttp_addr="b"\n'
+assert.equal(field(readMeilisearchFields(invalid, meiliSchema), 'http_addr').ambiguous, true)
+assert.equal(updateMeilisearchField(invalid, http, true, 'localhost:8800'), invalid)
+
+type PickerResult = { canceled: boolean; filePaths: string[] }
+let pending: ((value: PickerResult) => void) | undefined
+let pickerCalls = 0
+const pickerWarnings: string[] = []
+const { configurationPathPicker } = await loadIsolated(
+  'src/render-next/serviceConfiguration/pathPickerController.ts',
+  {
+    '@/util/Index': { reactiveBind: (value: unknown) => value },
+    '@/util/NodeFn': {
+      dialog: {
+        showOpenDialog: () =>
+          new Promise<PickerResult>((resolve) => {
+            pickerCalls++
+            pending = resolve
+          })
+      }
+    },
+    '../state/app': { showNotice: (message: string) => pickerWarnings.push(message) }
+  }
+)
+const paths: string[] = []
+let current = true
+const choosePath = () =>
+  configurationPathPicker.choose(
+    'db_path',
+    true,
+    '',
+    () => current,
+    (path: string) => paths.push(path)
+  )
+const old = choosePath()
+await choosePath()
+assert.equal(pickerCalls, 1)
+current = false
+pending?.({ canceled: false, filePaths: ['C:\\discarded'] })
+await old
+assert.deepEqual(paths, [])
+assert.equal(configurationPathPicker.choosing, false)
+current = true
+const canceled = choosePath()
+pending?.({ canceled: true, filePaths: [] })
+await canceled
+assert.deepEqual(paths, [])
+const selected = choosePath()
+pending?.({ canceled: false, filePaths: ['C:\\current'] })
+await selected
+assert.deepEqual(paths, ['C:\\current'])
+assert.deepEqual(pickerWarnings, [])
+
+console.log('Service settings preserve path syntax, TOML scope, line endings and picker lifetime.')

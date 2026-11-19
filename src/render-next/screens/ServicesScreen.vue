@@ -59,7 +59,14 @@
         </template>
       </article>
     </div>
-    <ServiceFilesDialog v-if="selectedService" v-model="filesOpen" :name="selectedService.name" :version="selectedService.version" :kind="fileKind">
+    <ServiceFilesDialog
+      v-if="selectedService"
+      v-model="filesOpen"
+      :name="selectedService.name"
+      :version="selectedService.version"
+      :kind="fileKind"
+      :initialize="configurationInitializer"
+    >
       <template v-if="webServer || envService" #configuration="{ content, readOnly, update }">
         <WebServerConfiguration v-if="webServer" :engine="webServer" :content="content" :read-only="readOnly" @update="update" />
         <EnvServiceConfiguration v-else-if="envService" :engine="envService" :content="content" :read-only="readOnly" @update="update" />
@@ -85,6 +92,7 @@ import PackageBrowser from '../components/PackageBrowser.vue'
 import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
 import WebServerConfiguration from '../serviceConfiguration/WebServerConfiguration.vue'
 import EnvServiceConfiguration from '../serviceConfiguration/EnvServiceConfiguration.vue'
+import { serviceConfigurationInitializer } from '../serviceConfiguration/serviceInitialization'
 import type { WebServer } from '../serviceConfiguration/webServerDirectives'
 import { packageFlagForName } from '../packages/catalog'
 import { startupGroupController } from '../state/startupGroupController'
@@ -107,8 +115,10 @@ const moduleFlag = computed(() => selectedService.value && serviceModuleFlags[se
 const webServer = computed<WebServer | undefined>(() =>
   moduleFlag.value === 'apache' ? 'apache' : moduleFlag.value === 'nginx' ? 'nginx' : undefined
 )
-const envService = computed(() =>
-  moduleFlag.value === 'n8n' ? 'n8n' : moduleFlag.value === 'mailpit' ? 'mailpit' : undefined
+const envServices = ['n8n', 'mailpit', 'minio', 'rustfs', 'meilisearch'] as const
+const envService = computed(() => envServices.find((service) => service === moduleFlag.value))
+const configurationInitializer = computed(() =>
+  fileKind.value === 'config' ? serviceConfigurationInitializer(moduleFlag.value) : undefined
 )
 const directoryFlag = computed(() => {
   const flag = moduleFlag.value

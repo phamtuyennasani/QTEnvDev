@@ -13,10 +13,9 @@
     :readonly="readOnly"
     aria-label="Service environment configuration"
     spellcheck="false"
-    @input="emit('update', ($event.target as HTMLTextAreaElement).value)"
+    @input="editRaw(($event.target as HTMLTextAreaElement).value)"
   />
   <fieldset v-else class="env-fields" :disabled="readOnly">
-    <p v-if="error" class="forge-alert forge-alert--error" role="alert">{{ error }}</p>
     <details v-for="([group, settings], index) in groups" :key="group" :open="index === 0">
       <summary>{{ group }}</summary>
       <div v-for="field in settings" :key="field.name" class="env-field">
@@ -49,7 +48,7 @@
           </select>
           <input
             v-else
-            :type="field.name === 'N8N_ENCRYPTION_KEY' ? 'password' : 'text'"
+            :type="secretFields.has(field.name) ? 'password' : 'text'"
             :aria-label="field.name + ' value'"
             :value="field.value"
             :disabled="!field.enabled || field.ambiguous"
@@ -62,7 +61,7 @@
             type="button"
             class="action-button"
             :aria-label="'Browse for ' + field.name"
-            :disabled="!field.enabled || field.ambiguous || choosingPath"
+            :disabled="!field.enabled || field.ambiguous || configurationPathPicker.choosing"
             @click="choosePath(field)"
           >
             Browse…
@@ -75,27 +74,57 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onBeforeUnmount, ref } from 'vue'
+  import { computed, onBeforeUnmount, ref, watch } from 'vue'
   import type { CommonSetItem } from '@/components/Conf/setup'
   import { mailpitCommonFields } from '@/components/MailPit/commonFields'
+  import { meilisearchCommonFields } from '@/components/MeiliSearch/commonFields'
+  import { minioCommonFields } from '@/components/Minio/commonFields'
   import { n8nCommonFields } from '@/components/N8N/commonFields'
-  import { dialog } from '@/util/NodeFn'
+  import { rustfsCommonFields } from '@/components/Rustfs/commonFields'
   import { readEnvServiceFields, updateEnvServiceField, type EnvService } from './envServiceDraft'
+  import { readMeilisearchFields, updateMeilisearchField } from './meilisearchDraft'
+  import { configurationPathPicker } from './pathPickerController'
 
-  const props = defineProps<{ engine: EnvService; content: string; readOnly: boolean }>()
+  const props = defineProps<{
+    engine: EnvService | 'meilisearch'
+    content: string
+    readOnly: boolean
+  }>()
   const emit = defineEmits<{ update: [content: string] }>()
   const mode = ref<'raw' | 'common'>('common')
-  const error = ref('')
-  const choosingPath = ref(false)
+  const secretFields = new Set([
+    'N8N_ENCRYPTION_KEY',
+    'MINIO_ROOT_PASSWORD',
+    'master_key',
+    'RUSTFS_SECRET_KEY',
+    'RUSTFS_KMS_VAULT_TOKEN'
+  ])
   let mounted = true
+  let revision = 0
+  watch(
+    [mode, () => props.engine, () => props.content, () => props.readOnly],
+    () => {
+      revision++
+    },
+    { flush: 'sync' }
+  )
   onBeforeUnmount(() => {
     mounted = false
   })
 
-  const schema = computed(() =>
-    props.engine === 'n8n' ? n8nCommonFields() : mailpitCommonFields()
+  const schemas = {
+    n8n: n8nCommonFields,
+    mailpit: mailpitCommonFields,
+    meilisearch: meilisearchCommonFields,
+    minio: minioCommonFields,
+    rustfs: rustfsCommonFields
+  }
+  const schema = computed(() => schemas[props.engine]())
+  const fields = computed(() =>
+    props.engine === 'meilisearch'
+      ? readMeilisearchFields(props.content, schema.value)
+      : readEnvServiceFields(props.content, props.engine, schema.value)
   )
-  const fields = computed(() => readEnvServiceFields(props.content, props.engine, schema.value))
   const groups = computed(() => {
     const sections = new Map<string, typeof fields.value>()
     for (const field of fields.value) {
@@ -108,7 +137,10 @@
 
   const update = (field: CommonSetItem, enabled: boolean, value: string) => {
     if (props.readOnly) return false
-    const result = updateEnvServiceField(props.content, props.engine, field, enabled, value)
+    const result =
+      props.engine === 'meilisearch'
+        ? updateMeilisearchField(props.content, field, enabled, value)
+        : updateEnvServiceField(props.content, props.engine, field, enabled, value)
     if (result === props.content) return false
     emit('update', result)
     return true
@@ -119,25 +151,25 @@
     if (!update(field, true, input.value)) input.value = field.value
   }
 
-  const choosePath = async (field: CommonSetItem) => {
-    if (props.readOnly || choosingPath.value) return
-    const { engine, content } = props
-    choosingPath.value = true
-    error.value = ''
-    const current = () =>
-      mounted && mode.value === 'common' && engine === props.engine && content === props.content
-    try {
-      const result = await dialog.showOpenDialog({
-        properties: [field.isDir ? 'openDirectory' : 'openFile', 'showHiddenFiles'],
-        ...(field.value ? { defaultPath: field.value } : {})
-      })
-      const path = result.filePaths?.[0]
-      if (current() && !result.canceled && path) update(field, true, path)
-    } catch {
-      if (current()) error.value = 'The path picker could not open.'
-    } finally {
-      choosingPath.value = false
-    }
+  const editRaw = (value: string) => {
+    if (props.readOnly) return
+    const eol = props.content.match(/\r\n|\n|\r/)?.[0] ?? '\n'
+    emit('update', value.replaceAll('\n', eol))
+  }
+
+  const choosePath = (field: CommonSetItem) => {
+    if (props.readOnly) return
+    const snapshot = revision
+    const isCurrent = () => mounted && !props.readOnly && snapshot === revision
+    void configurationPathPicker.choose(
+      field.name,
+      Boolean(field.isDir),
+      field.value,
+      isCurrent,
+      (path) => {
+        update(field, true, path)
+      }
+    )
   }
 </script>
 

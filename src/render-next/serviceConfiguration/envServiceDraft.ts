@@ -1,6 +1,7 @@
 import type { CommonSetItem } from '@/components/Conf/setup'
+import { readConfigValue } from '@shared/ServiceWebAddress'
 
-export type EnvService = 'n8n' | 'mailpit'
+export type EnvService = 'n8n' | 'mailpit' | 'minio' | 'rustfs'
 
 function splitDraft(content: string) {
   const bom = content.startsWith('\uFEFF') ? '\uFEFF' : ''
@@ -19,10 +20,15 @@ function parseSetting(draft: ReturnType<typeof splitDraft>, name: string, engine
   const matches = draft.lines.filter((line) => line.assignment?.[2] === name)
   const target = matches[0]
   const assignment = target?.assignment
-  const ambiguous = matches.length > 1 || Boolean(assignment?.[3])
-  const raw = assignment?.[4].trimEnd()
-  // The n8n launcher removes boundary quotes. The Mailpit launcher passes them literally.
-  const value = engine === 'n8n' ? raw?.replace(/^["']|["']$/g, '') : raw
+  const ambiguous = matches.length > 1 || (engine !== 'minio' && Boolean(assignment?.[3]))
+  const raw = engine === 'minio' ? assignment?.[4].trim() : assignment?.[4].trimEnd()
+  // The launchers differ on spacing and boundary quotes.
+  const value =
+    engine === 'n8n'
+      ? raw?.replace(/^["']|["']$/g, '')
+      : engine === 'minio' && target
+        ? readConfigValue(target.text, name)
+        : raw
   return { target, ambiguous, raw, value }
 }
 
@@ -59,7 +65,8 @@ export function updateEnvServiceField(
   const oldQuote =
     firstQuote && /["']/.test(firstQuote) && raw?.at(-1) === firstQuote ? firstQuote : ''
   const quote =
-    engine === 'n8n' && (oldQuote || field.isString || /^[\s"']|[\s"']$/.test(value))
+    (engine === 'n8n' || engine === 'minio') &&
+    (oldQuote || field.isString || /^[\s"']|[\s"']$/.test(value))
       ? oldQuote || '"'
       : ''
   const assignment = `${field.name}=${quote}${value}${quote}`
