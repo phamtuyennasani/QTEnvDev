@@ -11,52 +11,21 @@
     </el-popover>
   </div>
   <div class="main reset-pass">
-    <el-switch v-model="autoLaunch"></el-switch>
+    <el-switch
+      :aria-label="$t('setup.autoLaunch')"
+      :disabled="autoLaunch.busy"
+      :model-value="enabled"
+      @change="autoLaunch.setEnabled($event === true)"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
   import { computed } from 'vue'
   import { AppStore } from '@/store/app'
-  import { app } from '@/util/NodeFn'
-  import { MessageError } from '@/util/Element'
-
-  const isMacOS = computed(() => {
-    return window.Server.isMacOS
-  })
+  import { autoLaunch } from './Controller'
 
   const store = AppStore()
-
-  const autoLaunch = computed({
-    get() {
-      return store.config.setup?.autoLaunch ?? false
-    },
-    set(v) {
-      app
-        .setLoginItemSettings({
-          openAtLogin: v
-        })
-        .then((res: any) => {
-          if (typeof res === 'boolean' && res === true) {
-            store.config.setup.autoLaunch = v
-            store.saveConfig()
-          } else {
-            // 兼容非 Windows 的旧字符串，Windows 结构化错误保留 code 供后续分类。
-            MessageError(typeof res === 'object' && res ? res.message : res)
-          }
-        })
-    }
-  })
-
-  const sysnAutoLunach = async () => {
-    const setting: any = await app.getLoginItemSettings()
-    console.log('setting: ', setting)
-    if (store.config.setup?.autoLaunch !== setting.openAtLogin) {
-      store.config.setup.autoLaunch = setting.openAtLogin
-    }
-  }
-
-  if (isMacOS.value) {
-    sysnAutoLunach().catch()
-  }
+  const enabled = computed(() => store.config.setup.autoLaunch === true)
+  void autoLaunch.syncMac()
 </script>

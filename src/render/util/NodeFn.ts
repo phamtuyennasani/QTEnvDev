@@ -186,7 +186,7 @@ export const app = {
     [{ openAtLogin?: boolean }],
     boolean | string | { message: string; errorCode?: string }
   >('app', 'setLoginItemSettings'),
-  getLoginItemSettings: createIPCCall<[], string>('app', 'getLoginItemSettings'),
+  getLoginItemSettings: createIPCCall<[], Electron.LoginItemSettings>('app', 'getLoginItemSettings'),
   getVersion: createIPCCall<[], string>('app', 'getVersion')
 }
 

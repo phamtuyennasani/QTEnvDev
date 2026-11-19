@@ -12,7 +12,7 @@
           </select>
         </section>
         <section class="settings-option"><TrayStyle /></section>
-        <section v-if="isMacOS || isWindows" class="settings-option"><AutoLaunch /></section>
+        <section v-if="supportsAutoLaunch" class="settings-option"><AutoLaunch /></section>
         <section class="settings-option"><AutoHide /></section>
         <section class="settings-option">
           <AutoStartService />
@@ -52,7 +52,7 @@
 
   const props = defineProps<{ section: 'general' | 'editors' | 'about' | 'licenses' }>()
   const isWindows = computed(() => window.Server?.isWindows)
-  const isMacOS = computed(() => window.Server?.isMacOS)
+  const supportsAutoLaunch = computed(() => window.Server?.isMacOS || window.Server?.isWindows || window.Server?.isLinux)
   const store = AppStore()
   const theme = computed({
     get: () => store.config.setup.theme || 'system',
