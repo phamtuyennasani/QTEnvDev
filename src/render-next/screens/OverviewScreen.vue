@@ -1,6 +1,6 @@
 <template>
   <section class="screen">
-    <header class="page-header"><div><p class="eyebrow">WORKSPACE / OVERVIEW</p><h1>Environment overview</h1><p class="subtitle">Your local development stack at a glance.</p></div><button class="primary-button" @click="startGroup"><span class="button-glyph">▶</span> Start group</button></header>
+    <header class="page-header"><div><p class="eyebrow">WORKSPACE / OVERVIEW</p><h1>Environment overview</h1><p class="subtitle">Your local development stack at a glance.</p></div><button v-if="isBuiltinModuleVisible('startup-group')" class="primary-button" @click="startGroup"><span class="button-glyph">▶</span> Start group</button></header>
     <div class="metric-grid">
       <article class="metric-card metric-card--accent">
         <span class="metric-label">Services running</span>
@@ -21,17 +21,18 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
 import { navigateNext } from '../state/app'
 import { serviceController } from '../state/serviceController'
 import { projectController } from '../state/projectController'
 import { startupGroupController } from '../state/startupGroupController'
-const services = serviceController.services
-const reportedCount = computed(() => services.filter((service) =>
+const services = serviceController.visibleServices
+const reportedCount = computed(() => services.value.filter((service) =>
   ['running', 'stopped', 'not-installed'].includes(service.state)
 ).length)
 const runningCount = computed(() => reportedCount.value ? serviceController.runningCount.value : '—')
-const unknownCount = computed(() => services.length - reportedCount.value)
-const visibleServices = computed(() => services.filter((service) => service.state === 'running'))
+const unknownCount = computed(() => services.value.length - reportedCount.value)
+const visibleServices = computed(() => services.value.filter((service) => service.state === 'running'))
 const websiteCount = computed(() => projectController.projects.length)
 const websiteMeta = computed(() => projectController.loading ? 'Loading saved hosts…' : projectController.error ? 'Unable to read saved hosts' : websiteCount.value === 0 ? 'No saved hosts' : `${websiteCount.value} saved host${websiteCount.value === 1 ? '' : 's'}`)
 const startGroup = () => { void startupGroupController.runDefault() }

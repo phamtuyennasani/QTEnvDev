@@ -1,4 +1,5 @@
 import { computed, reactive } from 'vue'
+import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
 import { showTask, closeTask, showNotice } from './app'
 import { readServiceSnapshot, runServiceLifecycle, serviceModuleFlags } from '../adapters/serviceAdapter'
 
@@ -7,6 +8,7 @@ export type ServiceItem = { name: string; kind: string; version: string; port?: 
 
 const kindFor = (name: string) => /SQL|Redis|Mongo|ClickHouse|Elastic|Qdrant|Neo4j|Memcached/i.test(name) ? 'Database' : /PHP|Node|Python|Go|Java/i.test(name) ? 'Runtime' : /FTP|Mail|Rabbit|N8N|Cloud/i.test(name) ? 'Integration' : 'Service'
 const services = reactive<ServiceItem[]>(Object.keys(serviceModuleFlags).map((name) => ({ name, kind: kindFor(name), version: '—', state: 'unknown' as ServiceState })))
+const visibleServices = computed(() => services.filter((service) => isBuiltinModuleVisible(serviceModuleFlags[service.name])))
 const selected = reactive<{ service?: ServiceItem }>({ service: services[0] })
 let operationSequence = 0
 const activeOperations = new WeakMap<ServiceItem, number>()
@@ -31,10 +33,10 @@ const run = async (service: ServiceItem, action: 'Start' | 'Stop' | 'Restart') =
   }
 }
 const runGroup = async () => {
-  const pending = services.filter((service) => service.state !== 'running' && service.state !== 'busy')
+  const pending = visibleServices.value.filter((service) => service.state !== 'running' && service.state !== 'busy')
   const results = []; for (const service of pending) results.push(await run(service, 'Start')); return { completed: results.filter(Boolean).length, failed: results.filter((item) => !item).length }
 }
-const refresh = async (targets = services) => {
+const refresh = async (targets = visibleServices.value) => {
   await Promise.all(targets.map(async (service) => {
     if (service.state === 'busy') return
     const snapshot = await readServiceSnapshot(service.name)
@@ -45,4 +47,4 @@ const refresh = async (targets = services) => {
     service.port = snapshot.port
   }))
 }
-export const serviceController = { services, selected, runningCount: computed(() => services.filter((service) => service.state === 'running').length), select(service: ServiceItem) { selected.service = service }, run, runGroup, refresh }
+export const serviceController = { services, visibleServices, selected, runningCount: computed(() => visibleServices.value.filter((service) => service.state === 'running').length), select(service: ServiceItem) { selected.service = service }, run, runGroup, refresh }

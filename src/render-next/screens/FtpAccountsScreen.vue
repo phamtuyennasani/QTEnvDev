@@ -9,7 +9,7 @@
         >
       </div>
     </header>
-    <div v-if="pureAvailable" class="filter-tabs ftp-tabs">
+    <div v-if="modes.length > 1" class="filter-tabs ftp-tabs">
       <button
         v-for="item in modes"
         :key="item"
@@ -202,15 +202,23 @@
   import type { FtpItem } from '@shared/app'
   import ForgeDialog from '../components/ForgeDialog.vue'
   import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
-  import { ftpAccounts, pureConfigFiles, pureFtpSupported } from '../ftpAccounts/state'
+  import { ftpAccounts, pureConfigFiles } from '../ftpAccounts/state'
+  import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
   import type { FtpMode } from '../ftpAccounts/Controller'
   import { navigateNext } from '../state/app'
 
   const props = defineProps<{ mode?: FtpMode }>()
-  const modes: FtpMode[] = ['ftp-srv', 'pure-ftpd']
+  const ftpModes: FtpMode[] = ['ftp-srv', 'pure-ftpd']
+  const modes = computed(() => ftpModes.filter(isBuiltinModuleVisible))
   const labels = { 'ftp-srv': 'FTP Server', 'pure-ftpd': 'Pure-FTPd' }
-  const pureAvailable = pureFtpSupported()
-  const mode = ref<FtpMode>(pureAvailable && props.mode ? props.mode : 'ftp-srv')
+  const selectedMode = ref(props.mode)
+  const mode = computed({
+    get: () =>
+      modes.value.find((item) => item === selectedMode.value) ?? modes.value[0] ?? 'ftp-srv',
+    set: (value: FtpMode) => {
+      selectedMode.value = value
+    }
+  })
   const controller = computed(() => ftpAccounts[mode.value])
   const draft = ref<FtpItem>()
   const editing = ref(false)
