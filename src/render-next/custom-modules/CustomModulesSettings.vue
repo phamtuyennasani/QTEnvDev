@@ -1,7 +1,7 @@
 <template>
   <div class="custom-modules">
-    <header class="custom-module-heading">
-      <div>
+    <header class="custom-module-heading" :class="{ 'custom-module-toolbar': workspace }">
+      <div v-if="!workspace">
         <h2>Custom modules</h2>
         <p class="muted">Run your own commands, with optional service control, configuration, and logs.</p>
       </div>
@@ -30,7 +30,20 @@
       </div>
 
       <p v-if="!modules.length" class="muted">No custom modules in this view.</p>
-      <article v-for="module in modules" :key="module.id" class="custom-module">
+      <div v-else class="custom-module-list" :class="{ 'custom-module-workspace': workspace }">
+        <nav v-if="workspace" class="custom-module-picker" aria-label="Custom modules">
+          <button
+            v-for="module in modules"
+            :key="module.id"
+            class="custom-module-link"
+            :aria-pressed="activeModule?.id === module.id"
+            @click="activeModuleId = module.id"
+          >
+            <strong>{{ module.label }}</strong>
+            <small>{{ module.item.length }} {{ module.item.length === 1 ? 'command' : 'commands' }}</small>
+          </button>
+        </nav>
+        <article v-for="module in visibleModules" :key="module.id" class="custom-module">
         <header class="custom-module-heading">
           <div>
             <h3>{{ module.label }}</h3>
@@ -62,7 +75,8 @@
             <button v-if="item.logPath?.length || canReadDefaultLogs" class="action-button" @click="openFiles(module, 'log', item)">Logs</button>
           </div>
         </div>
-      </article>
+        </article>
+      </div>
     </template>
 
     <ModuleEditor
@@ -116,8 +130,10 @@ import { customModulesController as controller } from './customModulesController
 import { customFilesController, type CustomModuleFileView } from './customModuleFiles'
 
 provideLegacyToolContext()
+const props = defineProps<{ workspace?: boolean }>()
 const ModuleEditor = defineAsyncComponent(() => import('@/components/Setup/Module/module/moduleAdd.vue'))
 const categoryId = ref('')
+const activeModuleId = ref('')
 const editor = shallowRef<{ module?: ModuleCustomer; draft: Partial<CustomerModuleItem> }>()
 const category = ref<{ group?: CustomerModuleCateItem; label: string }>()
 const removal = shallowRef<{ module?: ModuleCustomer; category?: CustomerModuleCateItem }>()
@@ -127,6 +143,8 @@ const selectedCategory = computed(() => controller.groups.find(group => group.id
 const modules = computed(() => selectedCategory.value
   ? controller.modules.filter(module => module.moduleType === selectedCategory.value?.moduleType)
   : controller.modules)
+const activeModule = computed(() => modules.value.find(module => module.id === activeModuleId.value) ?? modules.value[0])
+const visibleModules = computed(() => props.workspace && activeModule.value ? [activeModule.value] : modules.value)
 const canReadDefaultLogs = computed(() => Boolean(window.Server.BaseDir))
 
 function openEditor(module?: ModuleCustomer) {
@@ -185,10 +203,19 @@ void controller.load()
 .custom-modules { display: grid; gap: 16px; }
 .custom-module-heading, .custom-category-bar, .custom-command { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 .custom-module-heading p, .custom-module-heading h3 { margin: 0; }
+.custom-module-toolbar { justify-content: flex-end; }
+.custom-module-list { display: grid; gap: 16px; align-items: start; }
+.custom-module-workspace { grid-template-columns: minmax(150px, 230px) minmax(0, 1fr); }
+.custom-module-picker { display: grid; gap: 6px; }
+.custom-module-link { display: grid; gap: 5px; text-align: left; padding: 10px 12px; border: 1px solid var(--pqt-border); border-radius: 8px; background: var(--pqt-surface); color: inherit; cursor: pointer; }
+.custom-module-link small { color: var(--pqt-text-muted); }
+.custom-module-link strong { overflow-wrap: anywhere; }
+.custom-module-link:hover, .custom-module-link[aria-pressed="true"] { border-color: var(--pqt-accent); }
 .custom-module-heading .detail-actions, .custom-command .detail-actions { flex-wrap: wrap; }
 .custom-module { border: 1px solid var(--pqt-border); border-radius: 8px; padding: 14px; }
 .custom-module small { display: block; color: var(--pqt-text-muted); margin-top: 4px; }
 .custom-command { border-top: 1px solid var(--pqt-border); margin-top: 12px; padding-top: 12px; }
 .custom-category-bar label, .custom-category-field { display: flex; align-items: center; gap: 10px; }
 .custom-category-bar select, .custom-category-field input { background: var(--pqt-surface); color: inherit; border: 1px solid var(--pqt-border); border-radius: 6px; padding: 7px 10px; }
+@media (max-width: 760px) { .custom-module-workspace { grid-template-columns: minmax(0, 1fr); } }
 </style>
