@@ -1,5 +1,5 @@
 <template>
-  <button class="action-button package-launcher" @click="open = true"
+  <button class="action-button package-launcher" @click="show()"
     >Manage packages
     <span v-if="active"
       >·
@@ -253,15 +253,16 @@
   import SdkmanPackagePanel from './SdkmanPackagePanel.vue'
   import { sdkmanPackages } from '../state/sdkmanPackagesController'
   const props = defineProps<{ flag?: string; title?: string }>()
-  defineExpose({
-    show: () => {
-      open.value = true
-    }
-  })
   const modules = packageModules
   const groups = ['Runtimes', 'Services', 'Databases', 'Utilities'] as const
   const open = ref(false)
   const selectedFlag = ref(props.flag || 'php')
+  const show = (flag?: string) => {
+    if (flag && modules.some((item) => item.flag === flag)) selectPackage(flag)
+    else if (props.flag) selectedFlag.value = props.flag
+    open.value = true
+  }
+  defineExpose({ show })
   const query = ref('')
   const tab = ref<'available' | 'installed'>('available')
   const source = ref<'direct' | 'brew' | 'macports' | 'sdkman'>('direct')
@@ -322,7 +323,6 @@
   watch(open, async (value) => {
     if (value) {
       previousFocus = document.activeElement as HTMLElement
-      if (props.flag) selectedFlag.value = props.flag
       if (
         hasHomebrew.value &&
         (homebrewPackages.operationFlag === selectedFlag.value || homebrewBootstrap.busy)

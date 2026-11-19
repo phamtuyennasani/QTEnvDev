@@ -73,6 +73,7 @@
             ><button class="action-button" @click="phpConfigOpen = true">Edit php.ini</button
             ><button class="action-button" :disabled="!phpVersion" @click="extensionsOpen = true"
               >Manage extensions</button
+            ><button class="action-button" @click="composerOpen = true">Composer</button
             ></div
           ><p v-if="php.state.error" class="forge-alert forge-alert--error">{{ php.state.error }}</p
           ><div class="runtime-facts"
@@ -126,10 +127,15 @@
           :title="selectedRuntime.name" /></article></div
     ><RuntimeWorkflowDialog v-if="workflow" :workflow="workflow" @close="workflow = undefined" />
     <GitEnvironmentDialog v-if="gitOpen && gitVisible" @close="gitOpen = false" />
+    <ComposerVersionsDialog
+      v-if="composerOpen && selectedRuntime?.name === 'PHP'"
+      @close="composerOpen = false"
+      @packages="openComposerPackages"
+    />
   </section>
 </template>
 <script setup lang="ts">
-  import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
+  import { computed, defineAsyncComponent, nextTick, onMounted, ref } from 'vue'
   import { runtimeController } from '../state/runtimeController'
   import PackageBrowser from '../components/PackageBrowser.vue'
   import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
@@ -143,11 +149,20 @@
   const GitEnvironmentDialog = defineAsyncComponent(
     () => import('../components/GitEnvironmentDialog.vue')
   )
+  const ComposerVersionsDialog = defineAsyncComponent(
+    () => import('../components/ComposerVersionsDialog.vue')
+  )
   const gitVisible = computed(() => isBuiltinModuleVisible('git'))
   const gitOpen = ref(false)
   const workflow = ref<'node' | 'npm' | 'gvm'>()
   const supportsGvm = computed(() => Boolean(window.Server.isMacOS || window.Server.isLinux))
   const packageBrowser = ref<InstanceType<typeof PackageBrowser>>()
+  const composerOpen = ref(false)
+  const openComposerPackages = async () => {
+    composerOpen.value = false
+    await nextTick()
+    packageBrowser.value?.show('composer')
+  }
   const projects = phpProjectsController
   const phpConfigOpen = ref(false)
   const extensionsOpen = ref(false)
