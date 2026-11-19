@@ -111,9 +111,10 @@
         <div class="detail-actions">
           <label
             >Bind address
-            <select :value="bind" :disabled="!bind || busy" @change="changeBind">
-              <option v-if="!interfaces.some((item) => item.ip === bind)" :value="bind">{{
-                bind || 'Invalid JSON'
+            <select :value="bind" :disabled="!settings || busy" @change="changeBind">
+              <option value="">Use default (all network interfaces)</option>
+              <option v-if="bind && !interfaces.some((item) => item.ip === bind)" :value="bind">{{
+                bind
               }}</option>
               <option v-for="item in interfaces" :key="item.ip" :value="item.ip">{{
                 item.name
@@ -188,14 +189,18 @@
     }
     return status?.localIP
   })
-  const bind = computed(() => {
+  const settings = computed<Record<string, unknown> | undefined>(() => {
     try {
       const content = JSON.parse(draft.value)
-      if (!content || typeof content !== 'object' || Array.isArray(content)) return ''
-      return typeof content.bind === 'string' ? content.bind : '0.0.0.0'
+      if (!content || typeof content !== 'object' || Array.isArray(content)) return undefined
+      return content
     } catch {
-      return ''
+      return undefined
     }
+  })
+  const bind = computed(() => {
+    const address = settings.value?.bind
+    return typeof address === 'string' ? address : ''
   })
   const interfaces = computed(() => [
     { ip: '0.0.0.0', name: 'All network interfaces' },
@@ -211,8 +216,11 @@
     configOpen.value = true
   }
   const changeBind = (event: Event) => {
-    const content = JSON.parse(draft.value)
-    content.bind = (event.target as HTMLSelectElement).value
+    if (!settings.value || busy.value) return
+    const content = { ...settings.value }
+    const address = (event.target as HTMLSelectElement).value
+    if (address) content.bind = address
+    else delete content.bind
     draft.value = JSON.stringify(content, null, 2)
   }
   const useDefaults = () => {

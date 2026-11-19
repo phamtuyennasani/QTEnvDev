@@ -85,8 +85,13 @@ try {
   assert.equal(logs.length, 2)
   await fork.stopService()
   assert.equal((await fork.workspaceStatus()).running, false)
+  const withoutBind = JSON.stringify({ resolveIP: { '*.local.test': '127.0.0.8' } })
+  await fork.saveWorkspaceConfig(saved, withoutBind)
+  assert.equal(await readFile(config.path, 'utf8'), withoutBind)
   await fork.startService()
   assert.equal((await fork.workspaceStatus()).running, true)
+  assert.equal((await fork.workspaceStatus()).address, '0.0.0.0')
+  assert.equal((await query('child.local.test')).answers[0]?.address, '127.0.0.8')
 } finally {
   if (!claimClosed) claim.close()
   await fork.stopService()
