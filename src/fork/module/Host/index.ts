@@ -15,6 +15,12 @@ import type { PhpMyAdminTarget } from './PhpMyAdminProfile'
 import { fetchHostList, saveHostList } from './HostFile'
 import { exportWebsiteBackup, importWebsiteBackup, previewWebsiteBackup } from './WebsiteBackup'
 import { parkSubdirectories } from './ParkSubdirectories'
+import {
+  listNginxRewriteTemplates,
+  prepareNginxRewriteTemplateDirectory,
+  readNginxRewriteTemplate,
+  type NginxRewriteTemplateSource
+} from './NginxRewriteTemplates'
 import { validateTomcatSite, type TomcatSiteHost } from '../Tomcat/Site'
 import { appDebugLog, isMacOS, isWindows } from '@shared/utils'
 import { HostsFileLinux, HostsFileMacOS } from '@shared/PlatFormConst'
@@ -68,6 +74,24 @@ export class Host extends Base {
         host
       })
     })
+  }
+
+  listNginxRewriteTemplates(source: NginxRewriteTemplateSource) {
+    return new ForkPromise(async (resolve) =>
+      resolve(await listNginxRewriteTemplates(global.Server, source))
+    )
+  }
+
+  readNginxRewriteTemplate(source: NginxRewriteTemplateSource, filename: string) {
+    return new ForkPromise(async (resolve) =>
+      resolve(await readNginxRewriteTemplate(global.Server, source, filename))
+    )
+  }
+
+  prepareNginxRewriteTemplateDirectory() {
+    return new ForkPromise(async (resolve) =>
+      resolve(await prepareNginxRewriteTemplateDirectory(global.Server))
+    )
   }
 
   websiteBackupExport(file: string) {
