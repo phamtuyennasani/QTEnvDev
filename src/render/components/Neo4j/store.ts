@@ -1,5 +1,6 @@
 import { I18nT } from '@lang/index'
 import { BrewStore, type SoftInstalled } from '@/store/brew'
+import { MessageError } from '@/util/Element'
 import { reactiveBind } from '@/util/Index'
 import { dirname, join, normalize, resolve } from '@/util/path-browserify'
 import { StorageGetAsync, StorageSetAsync } from '@/util/Storage'
@@ -49,9 +50,13 @@ const copyBindings = (value: unknown): Record<string, Neo4jJavaBinding> => {
  */
 export class Neo4jJavaBindingManager {
   javaByBin: Record<string, Neo4jJavaBinding> = {}
+  savingJava: Record<string, boolean> = {}
+  discoveringJava = false
+  javaDiscoveryError = ''
   inited = false
   private initPromise?: Promise<void>
   private mutationQueue: Promise<void> = Promise.resolve()
+  private javaDiscovery?: Promise<void>
   private installedVersionsWatching = false
   private installedVersionsScope?: EffectScope
 
@@ -70,10 +75,10 @@ export class Neo4jJavaBindingManager {
       this.initPromise = StorageGetAsync<Record<string, Neo4jJavaBinding>>(storageKey)
         .then((saved) => {
           Object.assign(this.javaByBin, copyBindings(saved))
-        })
-        .catch(() => undefined)
-        .finally(() => {
           this.inited = true
+        })
+        .finally(() => {
+          this.initPromise = undefined
         })
     }
     await this.initPromise
@@ -99,21 +104,65 @@ export class Neo4jJavaBindingManager {
     }
     await this.init()
     return this.enqueueMutation(async () => {
-      this.javaByBin[key] = {
+      const next = {
         javaHome: binding.javaHome,
         javaMajor: Number(binding.javaMajor)
       }
-      await this.persist()
-      return this.javaByBin[key]
+      await this.persist({ ...this.javaByBin, [key]: next })
+      return next
     })
   }
 
   async removeBinding(bin: string) {
     await this.init()
     return this.enqueueMutation(async () => {
-      delete this.javaByBin[normalizeNeo4jBin(bin)]
-      await this.persist()
+      const next = { ...this.javaByBin }
+      delete next[normalizeNeo4jBin(bin)]
+      await this.persist(next)
     })
+  }
+
+  discoverJava() {
+    if (this.javaDiscovery) return this.javaDiscovery
+    this.discoveringJava = true
+    this.javaDiscoveryError = ''
+    this.javaDiscovery = Promise.resolve().then(async () => {
+      try {
+        const [, fetched] = await Promise.all([this.init(), BrewStore().module('java').fetchInstalled()])
+        if (!fetched) throw new Error('Installed Java versions could not be loaded.')
+      } catch (error) {
+        this.javaDiscoveryError = error instanceof Error ? error.message : String(error)
+      } finally {
+        this.discoveringJava = false
+        this.javaDiscovery = undefined
+      }
+    })
+    return this.javaDiscovery
+  }
+
+  async chooseJava(bin: string, javaHome: string) {
+    const key = normalizeNeo4jBin(bin)
+    if (!key || this.savingJava[key]) return
+    this.savingJava[key] = true
+    try {
+      await this.init()
+      await this.enqueueMutation(async () => {
+        const item = BrewStore().module('neo4j').installed.find((version) => version.bin === bin)
+        if (!item || item.run || item.running) {
+          throw new Error('Stop this Neo4j installation before changing Java.')
+        }
+        const candidate = this.candidatesForVersion(item.version).find((version) => version.path === javaHome)
+        const javaMajor = candidate && this.candidateMajor(candidate)
+        if (!candidate || !javaMajor) throw new Error('Select a compatible installed Java runtime.')
+        await this.persist({ ...this.javaByBin, [key]: { javaHome: candidate.path, javaMajor } })
+      })
+      return true
+    } catch (error) {
+      MessageError(error instanceof Error ? error.message : String(error))
+      return false
+    } finally {
+      delete this.savingJava[key]
+    }
   }
 
   watchInstalledVersions() {
@@ -153,10 +202,11 @@ export class Neo4jJavaBindingManager {
     await this.init()
     return this.enqueueMutation(async () => {
       const bins = new Set(installed.map((item) => normalizeNeo4jBin(item.bin)).filter(Boolean))
+      const next = { ...this.javaByBin }
       let changed = false
       Object.keys(this.javaByBin).forEach((bin) => {
         if (!bins.has(bin)) {
-          delete this.javaByBin[bin]
+          delete next[bin]
           changed = true
         }
       })
@@ -168,13 +218,13 @@ export class Neo4jJavaBindingManager {
         if (!candidate) return
         const javaMajor = this.candidateMajor(candidate)
         if (!javaMajor) return
-        this.javaByBin[normalizeNeo4jBin(item.bin)] = {
+        next[normalizeNeo4jBin(item.bin)] = {
           javaHome: candidate.path,
           javaMajor
         }
         changed = true
       })
-      if (changed) await this.persist()
+      if (changed) await this.persist(next)
     })
   }
 
@@ -217,6 +267,7 @@ export class Neo4jJavaBindingManager {
     item: SoftInstalled
   ): Promise<[{ javaHome: string; neo4jInstanceDir: string }]> {
     await this.init()
+    await this.mutationQueue
     const binding = this.getBinding(item.bin)
     if (!binding) throw new Error('Select a compatible Java runtime before starting Neo4j')
     const policy = resolveNeo4jJavaPolicy(item.version)
@@ -237,7 +288,7 @@ export class Neo4jJavaBindingManager {
   async stopParams(
     item: SoftInstalled
   ): Promise<[{ javaHome?: string; neo4jInstanceDir: string }]> {
-    await this.init()
+    await this.init().catch(() => undefined)
     return [
       {
         javaHome: this.getBinding(item.bin)?.javaHome,
@@ -246,8 +297,9 @@ export class Neo4jJavaBindingManager {
     ]
   }
 
-  async persist() {
-    await StorageSetAsync(storageKey, JSON.parse(JSON.stringify(this.javaByBin)))
+  private async persist(bindings: Record<string, Neo4jJavaBinding>) {
+    await StorageSetAsync(storageKey, copyBindings(bindings))
+    this.javaByBin = bindings
   }
 }
 

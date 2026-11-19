@@ -5,7 +5,14 @@
       <div class="service-file-editor">
         <p v-if="controller.loading" class="empty-copy">Loading file list…</p>
         <template v-else-if="controller.selected">
-          <div class="service-file-toolbar"><code>{{ controller.selected.path }}</code><button class="action-button" @click="controller.reveal()">Reveal</button><button class="action-button" @click="controller.readSelected()">Refresh</button><slot name="file-actions" :file="controller.selected" /></div>
+          <div class="service-file-toolbar"><code>{{ controller.selected.path }}</code><button class="action-button" @click="controller.reveal()">Reveal</button><button class="action-button" @click="controller.readSelected()">Refresh</button><slot name="file-actions" :file="controller.selected" />
+            <button
+              v-if="initialize && (controller.canRestore || controller.restoring)"
+              class="action-button"
+              :disabled="controller.restoring || controller.saving || controller.openingExternal || !!controller.configurationAction"
+              @click="initializeFile"
+            >{{ controller.restoring ? 'Initializing…' : 'Initialize configuration' }}</button>
+          </div>
           <div v-if="kind === 'config' && !$slots['file-actions']" class="config-file-actions">
             <button
               v-if="controller.selected.defaultPath"
@@ -31,7 +38,7 @@
             </select>
             <button
               class="action-button"
-              :disabled="controller.selected.exists === false || controller.saving || controller.openingExternal || !!controller.configurationAction"
+              :disabled="controller.selected.exists === false || controller.saving || controller.openingExternal || controller.restoring || !!controller.configurationAction"
               @click="controller.openExternal(controller.selected, editor)"
             >Open in editor</button>
           </div>
@@ -56,7 +63,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { SoftInstalled } from '@shared/app'
 import ForgeDialog from './ForgeDialog.vue'
-import { serviceFilesController, type ServiceFilesController, type ServiceFile, type ServiceFileEditor } from '../state/serviceFilesController'
+import { serviceFilesController, type ServiceFilesController, type ServiceFile, type ServiceFileEditor, type ServiceFileInitializer } from '../state/serviceFilesController'
 const props = defineProps<{
   name: string
   version?: string | SoftInstalled
@@ -66,6 +73,7 @@ const props = defineProps<{
   owner?: Pick<ServiceFilesController, keyof ServiceFilesController>
   provider?: () => Promise<ServiceFile[]>
   afterSave?: (file: ServiceFile) => Promise<string[]>
+  initialize?: ServiceFileInitializer
 }>()
 const controller = props.owner ?? serviceFilesController
 const emit = defineEmits<{ 'update:modelValue': [boolean] }>()
@@ -77,6 +85,7 @@ const description = computed(() => props.kind === 'config' ? 'Choose a configura
 const close = () => emit('update:modelValue', false)
 const updateContent = (content: string) => { if (controller.canEdit) controller.content = content }
 const save = async () => { if (await controller.save(props.afterSave) && !props.afterSave) close() }
+const initializeFile = () => { if (props.initialize) void controller.restoreSelected(props.initialize, true) }
 const clearLog = async () => {
   const path = pendingClear.value
   pendingClear.value = undefined

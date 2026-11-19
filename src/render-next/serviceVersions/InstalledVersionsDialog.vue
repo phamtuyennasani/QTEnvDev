@@ -11,7 +11,10 @@
           <PhpVersionActions v-if="flag === 'php'" :item="row" />
         </template>
       </RuntimeManager>
-      <ServiceManager v-else :type-flag="flag" :title="title">
+      <ServiceManager v-else :type-flag="flag" :title="title" column-label="Java" :column-width="180">
+        <template v-if="flag === 'neo4j'" #column="{ row }">
+          <Neo4jJavaVersionPicker :item="row" @open-java="openJava" />
+        </template>
         <template #action="{ row }">
           <PhpVersionActions v-if="flag === 'php'" :item="row" />
           <FrankenPhpVersionActions v-else-if="flag === 'frankenphp'" :item="row" />
@@ -26,16 +29,22 @@
   import type { AllAppModule } from '@/core/type'
   import { registerLifecycle } from '../adapters/lifecycleAdapter'
   import ForgeDialog from '../components/ForgeDialog.vue'
+  import { navigateNext } from '../state/app'
+  import { runtimeController } from '../state/runtimeController'
   import { provideLegacyToolContext } from '../tools/provideLegacyToolContext'
 
   const props = defineProps<{ flag: AllAppModule; title: string; runtime?: boolean }>()
-  defineEmits<{ close: [] }>()
+  const emit = defineEmits<{ close: [] }>()
 
   provideLegacyToolContext({ poperFix: true, detachedClass: 'pqt-installed-versions' })
 
   const ServiceManager = defineAsyncComponent({
     async loader() {
       await registerLifecycle(props.flag)
+      if (props.flag === 'neo4j') {
+        const { Neo4jManager } = await import('@/components/Neo4j/store')
+        void Neo4jManager.discoverJava()
+      }
       return import('@/components/ServiceManager/index.vue')
     },
     errorComponent: {
@@ -56,6 +65,14 @@
   const FrankenPhpVersionActions = defineAsyncComponent(
     () => import('@/components/FrankenPHP/VersionActions.vue')
   )
+  const Neo4jJavaVersionPicker = defineAsyncComponent(
+    () => import('@/components/Neo4j/JavaVersionPicker.vue')
+  )
+  const openJava = () => {
+    emit('close')
+    runtimeController.select('Java')
+    navigateNext('runtimes')
+  }
 </script>
 
 <style scoped>

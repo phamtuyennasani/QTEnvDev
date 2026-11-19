@@ -21,8 +21,8 @@ try {
     fixture,
     `<!doctype html><div id="app"></div><script>
     window.errors = []
-    window.addEventListener('error', e => errors.push(e.message))
-    window.addEventListener('unhandledrejection', e => errors.push(String(e.reason)))
+    window.addEventListener('error', e => errors.push(e.error?.stack || e.message))
+    window.addEventListener('unhandledrejection', e => errors.push(e.reason?.stack || String(e.reason)))
     let receive, discovery = 0, running = false
     const path = 'C:/fixture/shared'
     window.tunnelStops = 0
@@ -37,6 +37,7 @@ try {
     window.consulBrowserLaunches = []
     window.tomcatRequests = []
     window.tomcatDirectoryWrites = 0
+    window.n8nRequests = []
     window.failVersionStop = false
     const apacheVersions = ['2.4.60', '2.4.62'].map((version, num) => ({
       version, num, path: '/fixture/apache-' + version, bin: '/fixture/apache-' + version + '/httpd',
@@ -50,6 +51,22 @@ try {
       bin: '/fixture/tomcat-' + version + '/bin/startup.sh', enable: true
     }))
     const mongoVersion = { version: '8.2.1', num: 82, path: '/fixture/mongodb', bin: '/fixture/mongodb/mongod', enable: true }
+    const neo4jVersion = { version: '5.26.0', num: 526, path: '/fixture/neo4j-app', bin: '/fixture/neo4j-app/bin/neo4j', enable: true }
+    const clickhouseVersion = { version: '26.1.0', num: 261, path: '/fixture/clickhouse-app', bin: '/fixture/clickhouse-app/clickhouse', enable: true }
+    const javaVersions = ['17.0.2', '21.0.3', '25.0.1'].map(version => ({
+      version, num: Number(version.slice(0, 2)), path: '/fixture/java-' + version,
+      bin: '/fixture/java-' + version + '/bin/java', enable: true
+    }))
+    const databaseConfig = {
+      neo4j: [{ name: 'neo4j.conf', path: '/fixture/neo4j/instance/neo4j.conf', content: 'server.directories.data=data' }],
+      clickhouse: [
+        { name: 'config', path: '/fixture/clickhouse/config.xml', content: '<clickhouse />' },
+        { name: 'users', path: '/fixture/clickhouse/users.xml', content: '<clickhouse><users /></clickhouse>' }
+      ]
+    }
+    const initialized = new Set()
+    window.databaseInitializers = []
+    window.neo4jStarts = []
     const nodeVersion = { version: '24.13.0', num: 24, path: '/fixture/node', bin: '/fixture/node/node', enable: true }
     window.dbGateRuntimeInstalled = false
     window.dbGateRequests = []
@@ -75,8 +92,39 @@ try {
               : flag === 'consul' ? [consulVersion]
               : flag === 'tomcat' ? tomcatVersions
               : flag === 'mongodb' ? [mongoVersion]
+              : flag === 'neo4j' ? [neo4jVersion]
+              : flag === 'clickhouse' ? [clickhouseVersion]
+              : flag === 'java' ? javaVersions
               : flag === 'node' && window.dbGateRuntimeInstalled ? [nodeVersion] : []
           ])))
+        }
+        if (channel === 'app-fork:neo4j' && action === 'startService') {
+          window.neo4jStarts.push(args.slice(1))
+          return respond(0, { 'APP-Service-Start-PID': '4352' })
+        }
+        const configFlag = channel.split(':')[1]
+        const configs = databaseConfig[configFlag]
+        if (configs && action === 'listConfigFiles') {
+          return respond(0, configs.map(({name, path}) => ({ name, path,
+            exists: initialized.has(configFlag), defaultPath: initialized.has(configFlag) && configFlag === 'clickhouse' ? path + '.default' : undefined
+          })))
+        }
+        if (configs && action === 'initConfig') {
+          window.databaseInitializers.push([configFlag, args[1]?.bin])
+          respond(200)
+          window.finishDatabaseConfig = () => {
+            initialized.add(configFlag)
+            respond(0, configs[0].path)
+          }
+          return
+        }
+        if (channel === 'App-Node-FN' && action === 'fs') {
+          const owner = Object.entries(databaseConfig).find(([, files]) => files.some(file => file.path === args[2]))
+          if (owner && args[1] === 'readFile') {
+            const file = owner[1].find(file => file.path === args[2])
+            const response = initialized.has(owner[0]) ? file.content : { code: 1, errorCode: 'ENOENT', msg: 'File does not exist' }
+            return queueMicrotask(() => receive({}, channel, key, response))
+          }
         }
         if (channel === 'app-fork:mongodb' && action === 'startService') {
           return respond(0, { 'APP-Service-Start-PID': '4351' })
@@ -87,6 +135,20 @@ try {
           return respond(0, { 'APP-Service-Start-PID': '4851' })
         }
         if (channel === 'app-fork:consul' && action === 'stopService') return respond(0)
+        if (channel === 'app-fork:n8n') {
+          window.n8nRequests.push(action)
+          if (action === 'getDataDir') return respond(0, { path: '/fixture/n8n-data' })
+          if (action === 'userList') {
+            if (!key.startsWith('IPC-Key-Sensitive-')) errors.push('n8n user request used logging IPC')
+            return respond(0, [{
+              id: 'fixture-user', email: 'account@example.test', firstName: 'Fixture',
+              lastName: 'Account', roleSlug: 'global:member', disabled: false, isPending: false
+            }])
+          }
+          if (action === 'fetchAllOnlineVersion') return respond(0, [{
+            version: '2.0.1', mVersion: '2', url: 'https://www.npmjs.com/package/n8n'
+          }])
+        }
         if (channel === 'app-fork:tomcat') {
           window.tomcatRequests.push(args)
           if (action === 'startService') return respond(0, { 'APP-Service-Start-PID': '4852' })
@@ -355,6 +417,15 @@ try {
     ), 'Tomcat Start uses saved base')
     await wait(() => exact('Stop') && !exact('Stop').disabled, 'Tomcat running')
     await click('Stop')
+    serviceRow('N8N').click()
+    await click('Manage n8n users')
+    const n8nDialog = () => document.querySelector('.forge-dialog')
+    await wait(() => n8nDialog()?.querySelector('input')?.value === '/fixture/n8n-data' &&
+      n8nDialog()?.textContent.includes('account@example.test'), 'n8n stored directory and users')
+    document.querySelector('.forge-close').click()
+    await click('Manage n8n packages')
+    await wait(() => n8nDialog()?.textContent.includes('2.0.1'), 'n8n npm package catalog')
+    document.querySelector('.forge-close').click()
     const modulesButton = () => [...document.querySelectorAll('.settings-nav button')]
       .find(button => button.lastChild.textContent.trim() === 'Modules')
     const openModules = async () => {
@@ -396,6 +467,43 @@ try {
     if (window.redisConfigWrites[0] !== '# Redis\\nport 6381\\n# keep this setting\\nappendonly yes\\n') throw new Error('Redis common edit changed an unrelated setting')
     await wait(() => !exact('Save configuration', '[role=dialog] button'), 'Redis configuration dialog closed')
     if (exact('Open Redis Commander')) throw new Error('Stopped Redis exposes its admin panel')
+    const databaseRow = name => [...document.querySelectorAll('.database-item')].find(row => row.querySelector('b')?.textContent === name)
+    for (const [name, flag, path, contents] of [
+      ['Neo4j', 'neo4j', '/fixture/neo4j-app/bin/neo4j', 'server.directories.data=data'],
+      ['ClickHouse', 'clickhouse', '/fixture/clickhouse-app/clickhouse', '<clickhouse><users /></clickhouse>']
+    ]) {
+      await wait(() => databaseRow(name)?.querySelector('code').textContent !== '—' && databaseRow(name), name + ' installed version')
+      databaseRow(name).click()
+      await click('Configuration')
+      if (flag === 'clickhouse') {
+        await wait(() => document.querySelectorAll('.service-file-item').length === 2, 'ClickHouse configuration files')
+        document.querySelectorAll('.service-file-item')[1].click()
+      }
+      await click('Initialize configuration', '[role=dialog] button')
+      await wait(() => exact('Initializing…', '[role=dialog] button')?.disabled && window.databaseInitializers.some(request => request[0] === flag), name + ' initialization in progress')
+      window.finishDatabaseConfig()
+      await wait(() => document.querySelector('.service-file-editor textarea')?.value === contents && document.querySelector('.service-file-editor [role=status]')?.textContent.includes('created'), name + ' initialized configuration')
+      const requests = window.databaseInitializers.filter(request => request[0] === flag)
+      if (requests.length !== 1 || requests[0][1] !== path) throw new Error('Wrong initialization target: ' + name)
+      if (flag === 'clickhouse' && (!exact('Load default', '[role=dialog] button') || [...document.querySelectorAll('.service-file-item small')].some(item => item.textContent === 'Not found'))) {
+        throw new Error('ClickHouse file metadata was not refreshed')
+      }
+      await click('Close', '[role=dialog] button')
+    }
+    databaseRow('Neo4j').click()
+    await click('Installed versions')
+    const javaInput = () => document.querySelector('input[aria-label="Java runtime"]')
+    const javaOption = () => [...document.querySelectorAll('.el-select-dropdown__item')].find(item => item.textContent.includes('Java 17'))
+    await wait(() => javaInput(), 'Neo4j Java picker')
+    javaInput().click()
+    await wait(() => javaOption(), 'compatible Java versions')
+    if ([...document.querySelectorAll('.el-select-dropdown__item')].some(item => item.textContent.includes('Java 25'))) throw new Error('Neo4j offered incompatible Java 25')
+    javaOption().click()
+    await wait(() => document.querySelector('.installed-versions-surface .el-select__selected-item')?.textContent.includes('Java 17'), 'saved Neo4j Java binding')
+    document.querySelector('.forge-close').click()
+    await click('Start')
+    await wait(() => window.neo4jStarts.length === 1, 'Neo4j start with saved Java')
+    if (window.neo4jStarts[0][1].javaHome !== '/fixture/java-17.0.2') throw new Error('Neo4j did not start with the selected Java')
     const mongoRow = () => [...document.querySelectorAll('.database-item')].find(row => row.querySelector('b')?.textContent === 'MongoDB')
     await wait(() => mongoRow()?.textContent.includes('8.2.1'), 'installed MongoDB in Databases')
     mongoRow().click()

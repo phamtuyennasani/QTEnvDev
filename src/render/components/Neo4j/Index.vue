@@ -96,7 +96,7 @@
   const brewStore = BrewStore()
   const neo4jManager = Neo4jManager
   // Load persisted bindings before reconciliation; row helpers remain pure reads.
-  Neo4jManager.init().catch()
+  Neo4jManager.init().catch((error) => console.error('Could not load Neo4j Java bindings', error))
   const installed = computed(() => brewStore.module('neo4j').installed)
   const runningVersion = computed(() => installed.value.find((item) => item.run))
   const browserOpening = neo4jController.opening

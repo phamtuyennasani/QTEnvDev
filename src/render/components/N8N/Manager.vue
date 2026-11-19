@@ -30,6 +30,9 @@
       </div>
     </template>
 
+    <p v-if="setup.status" role="status">{{ setup.status }}</p>
+    <p v-if="setup.error" role="alert">{{ setup.error }}</p>
+    <p v-if="setup.unknown" role="alert">The npm result is unknown. Check n8n before repeating the operation.</p>
     <!-- xterm terminal shown while installing -->
     <template v-if="setup.installing">
       <div class="w-full h-full overflow-hidden p-2">
@@ -71,7 +74,7 @@
             <el-button
               type="primary"
               link
-              :disabled="setup.installing"
+              :disabled="setup.installing || setup.fetching || setup.unknown"
               @click.stop="handleAction(scope.row)"
             >
               {{ scope.row.installed ? I18nT('common.action.uninstall') : I18nT('base.install') }}
@@ -88,7 +91,10 @@
         }}</el-button>
       </template>
       <template v-else>
-        <el-button @click.stop="setup.onCancel()">{{ I18nT('base.cancel') }}</el-button>
+        <el-button
+          :disabled="setup.stopping || setup.refreshingInstalled"
+          @click.stop="setup.onCancel()"
+        >{{ I18nT('base.cancel') }}</el-button>
       </template>
     </template>
   </el-card>
@@ -108,7 +114,7 @@
   }
 
   const handleAction = (row: any) => {
-    setup.doAction(row.version, row.installed, xtermDom as any)
+    void setup.doAction(row.version, row.installed, xtermDom)
   }
 
   onMounted(() => {

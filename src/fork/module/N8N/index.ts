@@ -379,7 +379,7 @@ class N8N extends Base {
    * Works offline — n8n does not need to be running.
    * Also updates N8N_OWNER_PASSWORD in the env file for parity.
    */
-  userChangeOwnerPassword(newPassword: string): ForkPromise<void> {
+  userChangeOwnerPassword(newPassword: string): ForkPromise<{ warning?: string }> {
     return new ForkPromise(async (resolve, reject) => {
       try {
         if (!newPassword) throw new Error('New password is required')
@@ -388,24 +388,23 @@ class N8N extends Base {
 
         await userChangeOwnerPassword(newPassword, email)
 
-        // Keep stored password in sync
-        const envFile = getEnvFilePath()
-        if (existsSync(envFile)) {
-          let content = await readFile(envFile, 'utf-8')
-          if (/^N8N_OWNER_PASSWORD=/m.test(content)) {
-            content = content.replace(
-              /^N8N_OWNER_PASSWORD=.*/m,
-              `N8N_OWNER_PASSWORD="${newPassword}"`
-            )
-          } else {
-            content = content.replace(
-              /^# N8N_OWNER_PASSWORD=.*/m,
-              `N8N_OWNER_PASSWORD="${newPassword}"`
-            )
+        const warning = 'The owner password changed, but the saved n8n environment could not be updated.'
+        try {
+          const envFile = getEnvFilePath()
+          if (existsSync(envFile)) {
+            if (/[\r\n]/.test(newPassword)) return resolve({ warning })
+            const content = await readFile(envFile, 'utf-8')
+            const line = `N8N_OWNER_PASSWORD="${newPassword}"`
+            const pattern = /^N8N_OWNER_PASSWORD=/m.test(content)
+              ? /^N8N_OWNER_PASSWORD=.*/m
+              : /^# N8N_OWNER_PASSWORD=.*/m
+            if (!pattern.test(content)) return resolve({ warning })
+            await writeFile(envFile, content.replace(pattern, () => line))
           }
-          await writeFile(envFile, content)
+        } catch {
+          return resolve({ warning })
         }
-        resolve()
+        resolve({})
       } catch (e: any) {
         reject(e)
       }
@@ -429,9 +428,9 @@ class N8N extends Base {
         let content = existsSync(envFile) ? await readFile(envFile, 'utf-8') : ''
         const escaped = `N8N_USER_FOLDER="${newPath}"`
         if (/^N8N_USER_FOLDER=/m.test(content)) {
-          content = content.replace(/^N8N_USER_FOLDER=.*/m, escaped)
+          content = content.replace(/^N8N_USER_FOLDER=.*/m, () => escaped)
         } else if (/^# N8N_USER_FOLDER=/m.test(content)) {
-          content = content.replace(/^# N8N_USER_FOLDER=.*/m, escaped)
+          content = content.replace(/^# N8N_USER_FOLDER=.*/m, () => escaped)
         } else {
           content = escaped + '\n' + content
         }

@@ -8,10 +8,11 @@ import { showNotice } from './app'
 
 export type ServiceFile = { name: string; path: string; exists?: boolean; kind: 'config' | 'log'; readOnly?: boolean; defaultPath?: string }
 export type ServiceFileEditor = 'VSCode' | 'PhpStorm' | 'WebStorm' | 'Sublime'
+export type ServiceFileInitializer = (file: ServiceFile) => Promise<'created' | 'exists'>
 type ConfigurationAction = 'import' | 'default' | 'export'
 const maxConfigurationImportBytes = 5 * 1024 * 1024
 type Reply = { code?: number; data?: unknown; msg?: unknown }
-const request = (flag: string, method: string, version: unknown, ...context: unknown[]) => new Promise<unknown>((resolve, reject) => {
+export const requestServiceFile = (flag: string, method: string, version: unknown, ...context: unknown[]) => new Promise<unknown>((resolve, reject) => {
   const sent = IPC.send('app-fork:' + flag, method, version, ...context)
   const timer = setTimeout(() => { IPC.off(sent.key); reject(new Error('The service file request timed out.')) }, 60_000)
   sent.then((key: string, reply: Reply) => {
@@ -37,6 +38,7 @@ export class ServiceFilesController {
   warning = ''
   private generation = 0
   private readGeneration = 0
+  private loadFiles?: () => Promise<ServiceFile[]>
   get canEdit() {
     return this.selected?.kind === 'config' && !this.selected.readOnly &&
       !this.saving && !this.restoring && !this.configurationAction && this.loadedContent !== undefined
@@ -48,18 +50,21 @@ export class ServiceFilesController {
     return this.selected?.kind === 'config' && !this.selected.readOnly && this.missing
   }
 
-  async openProvided(provider: () => Promise<ServiceFile[]>) {
+  async openProvided(provider: () => Promise<ServiceFile[]>, preferExisting = false) {
     this.clear()
     const generation = this.generation
+    this.loadFiles = provider
     this.loading = true
     try {
       const files = await provider()
-      if (generation !== this.generation) return
+      if (generation !== this.generation) return false
       this.files = files
-      this.selected = files[0]
+      this.selected = (preferExisting ? files.find((item) => item.exists !== false) : undefined) ?? files[0]
       if (this.selected) await this.readSelected(generation)
+      return true
     } catch (error) {
       if (generation === this.generation) this.error = packageError(error)
+      return false
     } finally {
       if (generation === this.generation) this.loading = false
     }
@@ -68,31 +73,23 @@ export class ServiceFilesController {
   async open(name: string, version: unknown, kind: 'config' | 'log' = 'log', onlyName?: string) {
     const flag = serviceModuleFlags[name]
     if (!flag) { this.error = 'This service does not expose a migrated file provider.'; return false }
-    const generation = ++this.generation
-    this.loading = true; this.error = ''; this.content = ''; this.loadedContent = undefined; this.selected = undefined
-    try {
-      const target = typeof version === 'string' || version === undefined ? currentServiceVersion(name) : version
-      const snapshot = target ? JSON.parse(JSON.stringify(target)) : undefined
+    const target = typeof version === 'string' || version === undefined ? currentServiceVersion(name) : version
+    const snapshot = target ? JSON.parse(JSON.stringify(target)) : undefined
+    return this.openProvided(async () => {
       let data: unknown
       if (name === 'PHP' && kind === 'config') {
         if (!snapshot) throw new Error('Select an installed PHP version first.')
-        const path = await request(flag, 'getIniPath', snapshot)
+        const path = await requestServiceFile(flag, 'getIniPath', snapshot)
         if (typeof path !== 'string' || !path) throw new Error('PHP did not report its configuration file.')
         const candidate = `${path}.default`
         data = [{ name: 'php.ini', path, defaultPath: await fs.existsSync(candidate) ? candidate : undefined }]
       } else {
         const context = await serviceFileContext(flag, snapshot)
-        data = await request(flag, kind === 'config' ? 'listConfigFiles' : 'listLogFiles', snapshot, ...context)
+        data = await requestServiceFile(flag, kind === 'config' ? 'listConfigFiles' : 'listLogFiles', snapshot, ...context)
       }
-      if (generation !== this.generation) return false
       const list = Array.isArray(data) ? data : []
-      this.files = list.filter((item): item is Omit<ServiceFile, 'kind'> => Boolean(item && typeof item.name === 'string' && typeof item.path === 'string')).map((item) => ({ ...item, kind }))
-      if (onlyName) this.files = this.files.filter((item) => item.name === onlyName)
-      this.selected = this.files.find((item) => item.exists !== false) || this.files[0]
-      if (this.selected) await this.readSelected(generation)
-      return true
-    } catch (error) { if (generation === this.generation) this.error = packageError(error); return false }
-    finally { if (generation === this.generation) this.loading = false }
+      return list.filter((item): item is Omit<ServiceFile, 'kind'> => Boolean(item && typeof item.name === 'string' && typeof item.path === 'string' && (!onlyName || item.name === onlyName))).map((item) => ({ ...item, kind }))
+    }, true)
   }
   async select(file: ServiceFile) {
     if (this.saving) return
@@ -238,38 +235,60 @@ export class ServiceFilesController {
     }
   }
 
-  async restoreSelected(create: (file: ServiceFile) => Promise<'created' | 'exists'>) {
+  async restoreSelected(create: ServiceFileInitializer, reloadList = false) {
     const file = this.selected
-    if (!file || !this.canRestore || this.saving || this.openingExternal || this.restoring) {
+    if (!file || !this.canRestore || this.saving || this.openingExternal || this.restoring || this.configurationAction) {
       return false
     }
     const generation = this.generation
     const current = () => generation === this.generation && this.selected === file
+    const sameConfig = () => this.selected?.kind === 'config' && this.selected.path === file.path
     this.restoring = true
     this.error = ''
     this.warning = ''
-    let result: 'created' | 'exists'
     try {
-      result = await create(file)
-    } catch (error) {
-      if (this.selected?.path === file.path) {
-        // A read begun before the terminal reply cannot establish that a retry is needed.
-        this.readGeneration++
-        this.missing = false
+      let result: 'created' | 'exists'
+      try {
+        result = await create(file)
+      } catch (error) {
+        if (sameConfig()) {
+          // A read begun before the terminal reply cannot establish that a retry is needed.
+          this.readGeneration++
+          this.missing = false
+        }
+        if (current() || (reloadList && sameConfig())) this.error = packageError(error)
+        else if (reloadList) showNotice(packageError(error))
+        return false
       }
-      if (current()) this.error = packageError(error)
-      return false
+      let warning = result === 'created' ? 'Configuration created.' : 'The configuration already exists.'
+      if (!current() && !(reloadList && sameConfig())) {
+        if (reloadList) showNotice(warning)
+        return true
+      }
+      const viewGeneration = this.generation
+      const loadFiles = this.loadFiles
+      if (reloadList && loadFiles) {
+        try {
+          const files = await loadFiles()
+          if (viewGeneration !== this.generation) return true
+          const selection = this.selected?.path
+          this.files = files
+          this.selected = files.find((item) => item.path === selection) ?? files[0]
+        } catch (error) {
+          if (viewGeneration !== this.generation) return true
+          warning += ` Could not refresh the file list. ${packageError(error)}`
+        }
+      }
+      if (viewGeneration === this.generation) {
+        this.warning = warning
+        await this.readSelected(viewGeneration)
+      }
     } finally {
       this.restoring = false
-    }
-    if (current()) {
-      this.warning =
-        result === 'created' ? 'Configuration created.' : 'The configuration already exists.'
-      await this.readSelected(generation)
     }
     return true
   }
 
-  clear() { this.generation++; this.files = []; this.selected = undefined; this.content = ''; this.loadedContent = undefined; this.missing = false; this.error = ''; this.warning = ''; this.loading = false }
+  clear() { this.generation++; this.loadFiles = undefined; this.files = []; this.selected = undefined; this.content = ''; this.loadedContent = undefined; this.missing = false; this.error = ''; this.warning = ''; this.loading = false }
 }
 export const serviceFilesController = reactive(new ServiceFilesController())

@@ -4,27 +4,32 @@
       <!-- Data Directory row (always visible) -->
       <div class="flex items-center gap-3 h-[30px]">
         <span class="text-sm font-medium whitespace-nowrap">{{ I18nT('n8n.usersDataDir') }}</span>
-        <el-input v-model="dataDir" size="small" readonly class="flex-1" />
-        <el-button size="small" :loading="scanning" @click="scanDataDir">{{
+        <el-input :model-value="dataDir" size="small" readonly class="flex-1" />
+        <el-button size="small" :loading="scanning" :disabled="!controller.writable" @click="scanDataDir">{{
           I18nT('n8n.usersDataDirScan')
         }}</el-button>
-        <el-button size="small" @click="chooseDataDir">{{
+        <el-button size="small" :disabled="!controller.writable" @click="chooseDataDir">{{
           I18nT('n8n.usersDataDirChange')
         }}</el-button>
       </div>
     </template>
     <template #default>
       <div class="h-full overflow-hidden flex flex-col">
+        <el-alert v-if="controller.unknown" type="warning" :closable="false"
+          title="The last change is unconfirmed. Verify it in n8n before repeating the operation." />
         <!-- Toolbar -->
         <div class="flex items-center gap-2 mb-4 flex-shrink-0">
-          <el-button :loading="loading" @click="loadUsers">{{
+          <el-button :loading="loading" :disabled="!!controller.pending" @click="loadUsers">{{
             I18nT('common.action.refresh')
           }}</el-button>
-          <el-button type="primary" @click="openAddDialog">
+          <el-button type="primary" :disabled="!controller.canManageUsers" @click="openAddDialog">
             {{ I18nT('n8n.usersAddUser') }}
           </el-button>
-          <el-button @click="openChangePasswordDialog">{{
+          <el-button :disabled="!controller.canManageUsers" @click="openChangePasswordDialog">{{
             I18nT('common.action.changeOwnerPassword')
+          }}</el-button>
+          <el-button v-if="inviteUrl" @click="showInviteUrlDialog = true">{{
+            I18nT('n8n.usersInviteUrlTitle')
           }}</el-button>
         </div>
 
@@ -56,7 +61,7 @@
           <el-table-column :label="I18nT('n8n.usersActions')" width="80">
             <template #default="{ row }">
               <div class="w-full h-full flex items-center justify-center">
-                <el-dropdown trigger="click" @command="(cmd: string) => handleAction(cmd, row)">
+                <el-dropdown :disabled="!controller.canManageUsers" trigger="click" @command="(cmd: string) => handleAction(cmd, row)">
                   <el-button type="primary" link size="small">&#8943;</el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
@@ -242,7 +247,7 @@
       width="560px"
     >
       <p class="text-sm text-gray-500 mb-3">{{ I18nT('n8n.usersInviteUrlTip') }}</p>
-      <el-input v-model="inviteUrl" type="textarea" :rows="3" readonly />
+      <el-input :model-value="inviteUrl" type="textarea" :rows="3" readonly />
       <template #footer>
         <el-button type="primary" @click="copyInviteUrl">{{
           I18nT('common.action.copy')
@@ -274,343 +279,157 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted } from 'vue'
+  import { computed, onMounted, ref } from 'vue'
   import { I18nT } from '@lang/index'
-  import IPC from '@/util/IPC'
-  import { dialog } from '@/util/NodeFn'
-  import { ElMessage } from 'element-plus'
+  import { MessageWarning } from '@/util/Element'
+  import { n8nUsersController as controller, type N8nUser } from './UsersController'
 
-  // ── Data directory ───────────────────────────────────────────────────────
-  const dataDir = ref('')
-  const scanning = ref(false)
+  const dataDir = computed(() => controller.dataDir)
+  const users = computed(() => controller.users)
+  const scanning = computed(() => controller.pending === 'scan')
+  const loading = computed(() => controller.pending === 'load')
   const showScanDialog = ref(false)
   const scanResults = ref<string[]>([])
   const scanSelected = ref('')
 
-  const loadDataDir = () => {
-    IPC.send('app-fork:n8n', 'getDataDir').then((key: string, res: any) => {
-      IPC.off(key)
-      if (res?.code === 0) dataDir.value = res.data?.path ?? ''
-    })
+  const loadUsers = () => controller.load()
+  const chooseDataDir = () => controller.choose()
+  const scanDataDir = async () => {
+    const paths = await controller.scan()
+    if (paths.length === 0) return
+    scanResults.value = paths
+    scanSelected.value = paths[0]
+    showScanDialog.value = true
   }
-
-  const scanDataDir = () => {
-    scanning.value = true
-    IPC.send('app-fork:n8n', 'scanDataDir').then((key: string, res: any) => {
-      IPC.off(key)
-      scanning.value = false
-      if (res?.code !== 0) {
-        ElMessage.error(res?.msg ?? 'Scan failed')
-        return
-      }
-      const found: string[] = res.data ?? []
-      if (found.length === 0) {
-        ElMessage.warning(I18nT('n8n.usersDataDirScanNone'))
-      } else if (found.length === 1) {
-        // Only one result — apply directly
-        applyDataDir(found[0])
-      } else {
-        scanResults.value = found
-        scanSelected.value = found[0]
-        showScanDialog.value = true
-      }
-    })
-  }
-
   const applyScanResult = () => {
     showScanDialog.value = false
-    applyDataDir(scanSelected.value)
+    void controller.setDataDir(scanSelected.value)
   }
 
-  const applyDataDir = (newPath: string) => {
-    IPC.send('app-fork:n8n', 'setDataDir', newPath).then((key: string, res: any) => {
-      IPC.off(key)
-      if (res?.code === 0) {
-        dataDir.value = newPath
-        ElMessage.success(I18nT('n8n.usersDataDirChanged'))
-        loadUsers()
-      } else {
-        ElMessage.error(res?.msg ?? 'Failed')
-      }
-    })
-  }
-
-  const chooseDataDir = () => {
-    dialog
-      .showOpenDialog({ properties: ['openDirectory', 'createDirectory', 'showHiddenFiles'] })
-      .then(({ canceled, filePaths }: any) => {
-        if (canceled || !filePaths?.length) return
-        applyDataDir(filePaths[0])
-      })
-  }
-
-  // ── User list ────────────────────────────────────────────────────────────
-  const users = ref<any[]>([])
-  const loading = ref(false)
-
-  const loadUsers = () => {
-    loading.value = true
-    IPC.send('app-fork:n8n', 'userList').then((key: string, res: any) => {
-      IPC.off(key)
-      loading.value = false
-      if (res?.code === 0) {
-        users.value = res.data ?? []
-      } else {
-        ElMessage.error(res?.msg ?? I18nT('n8n.usersLoadFailed'))
-      }
-    })
-  }
-
-  const formatRole = (roleSlug: string) => {
-    if (roleSlug === 'global:owner') return I18nT('n8n.usersRoleOwner')
-    if (roleSlug === 'global:admin') return I18nT('n8n.usersRoleAdmin')
+  const formatRole = (role: string) => {
+    if (role === 'global:owner') return I18nT('n8n.usersRoleOwner')
+    if (role === 'global:admin') return I18nT('n8n.usersRoleAdmin')
     return I18nT('n8n.usersRoleMember')
   }
 
-  // ── Action dispatcher ────────────────────────────────────────────────────
-  const handleAction = (cmd: string, row: any) => {
-    if (cmd === 'delete') deleteUser(row)
-    else if (cmd === 'disable') toggleDisabled(row, true)
-    else if (cmd === 'enable') toggleDisabled(row, false)
-    else if (cmd === 'role') openChangeRoleDialog(row)
-    else if (cmd === 'name') openEditNameDialog(row)
-    else if (cmd === 'password') openResetPasswordDialog(row)
-  }
-
-  // ── Toggle disabled ──────────────────────────────────────────────────────
-  const toggleDisabled = (row: any, disabled: boolean) => {
-    IPC.send('app-fork:n8n', 'userSetDisabled', row.id, disabled).then((key: string, res: any) => {
-      IPC.off(key)
-      if (res?.code === 0) {
-        ElMessage.success(
-          disabled ? I18nT('n8n.usersDisableSuccess') : I18nT('n8n.usersEnableSuccess')
-        )
-        loadUsers()
-      } else {
-        ElMessage.error(res?.msg ?? I18nT('n8n.usersToggleStatusFailed'))
-      }
-    })
-  }
-
-  // ── Edit name ────────────────────────────────────────────────────────────
-  const showEditNameDialog = ref(false)
-  const editNameRow = ref<any>(null)
-  const editNameForm = ref({ firstName: '', lastName: '' })
-  const editNameLoading = ref(false)
-
-  const openEditNameDialog = (row: any) => {
-    editNameRow.value = row
-    editNameForm.value = { firstName: row.firstName ?? '', lastName: row.lastName ?? '' }
-    showEditNameDialog.value = true
-  }
-
-  const confirmEditName = () => {
-    if (!editNameRow.value) return
-    editNameLoading.value = true
-    IPC.send(
-      'app-fork:n8n',
-      'userSetName',
-      editNameRow.value.id,
-      editNameForm.value.firstName,
-      editNameForm.value.lastName
-    ).then((key: string, res: any) => {
-      IPC.off(key)
-      editNameLoading.value = false
-      if (res?.code === 0) {
-        showEditNameDialog.value = false
-        ElMessage.success(I18nT('n8n.usersChangeNameSuccess'))
-        loadUsers()
-      } else {
-        ElMessage.error(res?.msg ?? I18nT('n8n.usersChangeNameFailed'))
-      }
-    })
-  }
-
-  // ── Change role ──────────────────────────────────────────────────────────
-  const showChangeRoleDialog = ref(false)
-  const changeRoleRow = ref<any>(null)
-  const changeRoleForm = ref({ role: 'global:member' })
-  const changeRoleLoading = ref(false)
-
-  const openChangeRoleDialog = (row: any) => {
-    changeRoleRow.value = row
-    changeRoleForm.value = { role: row.roleSlug ?? 'global:member' }
-    showChangeRoleDialog.value = true
-  }
-
-  const confirmChangeRole = () => {
-    if (!changeRoleRow.value) return
-    changeRoleLoading.value = true
-    IPC.send('app-fork:n8n', 'userSetRole', changeRoleRow.value.id, changeRoleForm.value.role).then(
-      (key: string, res: any) => {
-        IPC.off(key)
-        changeRoleLoading.value = false
-        if (res?.code === 0) {
-          showChangeRoleDialog.value = false
-          ElMessage.success(I18nT('n8n.usersChangeRoleSuccess'))
-          loadUsers()
-        } else {
-          ElMessage.error(res?.msg ?? I18nT('n8n.usersChangeRoleFailed'))
-        }
-      }
-    )
-  }
-
-  // ── Reset password ───────────────────────────────────────────────────────
-  const showResetPasswordDialog = ref(false)
-  const resetPasswordRow = ref<any>(null)
-  const resetPasswordForm = ref({ password: '' })
-  const resetPasswordLoading = ref(false)
-
-  const openResetPasswordDialog = (row: any) => {
-    resetPasswordRow.value = row
-    resetPasswordForm.value = { password: '' }
-    showResetPasswordDialog.value = true
-  }
-
-  const confirmResetPassword = () => {
-    if (!resetPasswordRow.value) return
-    if (!resetPasswordForm.value.password) {
-      ElMessage.warning(I18nT('n8n.usersNewPassword') + ' required')
-      return
+  const handleAction = (command: string, user: N8nUser) => {
+    if (!controller.canManageUsers) return
+    if (command === 'delete') {
+      deletingRow.value = user
+      showDeleteDialog.value = true
+    } else if (command === 'disable' || command === 'enable') {
+      void controller.mutate('userSetDisabled', [user.id, command === 'disable'],
+        I18nT(command === 'disable' ? 'n8n.usersDisableSuccess' : 'n8n.usersEnableSuccess'))
+    } else if (command === 'role') {
+      changeRoleRow.value = user
+      changeRoleForm.value = { role: user.roleSlug || 'global:member' }
+      showChangeRoleDialog.value = true
+    } else if (command === 'name') {
+      editNameRow.value = user
+      editNameForm.value = { firstName: user.firstName ?? '', lastName: user.lastName ?? '' }
+      showEditNameDialog.value = true
+    } else if (command === 'password') {
+      resetPasswordRow.value = user
+      resetPasswordForm.value = { password: '' }
+      showResetPasswordDialog.value = true
     }
-    resetPasswordLoading.value = true
-    IPC.send(
-      'app-fork:n8n',
-      'userResetPassword',
-      resetPasswordRow.value.id,
-      resetPasswordForm.value.password
-    ).then((key: string, res: any) => {
-      IPC.off(key)
-      resetPasswordLoading.value = false
-      if (res?.code === 0) {
-        showResetPasswordDialog.value = false
-        ElMessage.success(I18nT('n8n.usersResetPasswordSuccess'))
-      } else {
-        ElMessage.error(res?.msg ?? I18nT('n8n.usersResetPasswordFailed'))
-      }
-    })
   }
 
-  // ── Delete user ──────────────────────────────────────────────────────────
-  const deletingId = ref<string | null>(null)
-  const deletingRow = ref<any>(null)
+  const showEditNameDialog = ref(false)
+  const editNameRow = ref<N8nUser>()
+  const editNameForm = ref({ firstName: '', lastName: '' })
+  const editNameLoading = computed(() => controller.pending === 'userSetName')
+  const confirmEditName = async () => {
+    const user = editNameRow.value
+    if (!user) return
+    const { firstName, lastName } = editNameForm.value
+    if (await controller.mutate('userSetName', [user.id, firstName, lastName], I18nT('n8n.usersChangeNameSuccess'))) {
+      showEditNameDialog.value = false
+    }
+  }
+
+  const showChangeRoleDialog = ref(false)
+  const changeRoleRow = ref<N8nUser>()
+  const changeRoleForm = ref({ role: 'global:member' })
+  const changeRoleLoading = computed(() => controller.pending === 'userSetRole')
+  const confirmChangeRole = async () => {
+    const user = changeRoleRow.value
+    if (!user) return
+    if (await controller.mutate('userSetRole', [user.id, changeRoleForm.value.role], I18nT('n8n.usersChangeRoleSuccess'))) {
+      showChangeRoleDialog.value = false
+    }
+  }
+
+  const showResetPasswordDialog = ref(false)
+  const resetPasswordRow = ref<N8nUser>()
+  const resetPasswordForm = ref({ password: '' })
+  const resetPasswordLoading = computed(() => controller.pending === 'userResetPassword')
+  const requirePassword = (value: string) => {
+    if (value) return true
+    MessageWarning(I18nT('n8n.usersNewPassword') + ' required')
+    return false
+  }
+  const confirmResetPassword = async () => {
+    const user = resetPasswordRow.value
+    const { password } = resetPasswordForm.value
+    if (!user || !requirePassword(password)) return
+    if (await controller.mutate('userResetPassword', [user.id, password], I18nT('n8n.usersResetPasswordSuccess'))) {
+      resetPasswordForm.value.password = ''
+      showResetPasswordDialog.value = false
+    }
+  }
+
+  const deletingRow = ref<N8nUser>()
+  const deletingId = computed(() => controller.pending === 'userDelete' ? deletingRow.value?.id : undefined)
   const showDeleteDialog = ref(false)
-
-  const deleteUser = (row: any) => {
-    deletingRow.value = row
-    showDeleteDialog.value = true
-  }
-
-  const confirmDelete = () => {
-    if (!deletingRow.value) return
-    deletingId.value = deletingRow.value.id
-    IPC.send('app-fork:n8n', 'userDelete', deletingRow.value.id).then((key: string, res: any) => {
-      IPC.off(key)
-      deletingId.value = null
+  const confirmDelete = async () => {
+    const user = deletingRow.value
+    if (!user) return
+    if (await controller.mutate('userDelete', [user.id], I18nT('n8n.usersDeleteSuccess'))) {
       showDeleteDialog.value = false
-      if (res?.code === 0) {
-        ElMessage.success(I18nT('n8n.usersDeleteSuccess'))
-        loadUsers()
-      } else {
-        ElMessage.error(res?.msg ?? I18nT('n8n.usersDeleteFailed'))
-      }
-    })
+    }
   }
 
-  // ── Add user ─────────────────────────────────────────────────────────────
+  const freshUser = () => ({ email: '', firstName: '', lastName: '', role: 'global:member', password: '' })
   const showAddDialog = ref(false)
-  const creating = ref(false)
-  const newUser = ref({
-    email: '',
-    firstName: '',
-    lastName: '',
-    role: 'global:member',
-    password: ''
-  })
+  const creating = computed(() => controller.pending === 'userCreate')
+  const newUser = ref(freshUser())
   const showInviteUrlDialog = ref(false)
-  const inviteUrl = ref('')
-
+  const inviteUrl = computed(() => controller.inviteUrl)
   const openAddDialog = () => {
-    newUser.value = { email: '', firstName: '', lastName: '', role: 'global:member', password: '' }
+    newUser.value = freshUser()
     showAddDialog.value = true
   }
-
-  const doCreateUser = () => {
-    if (!newUser.value.email) {
-      ElMessage.warning(I18nT('n8n.usersEmail') + ' required')
+  const doCreateUser = async () => {
+    const { email, firstName, lastName, role, password } = newUser.value
+    if (!email) {
+      MessageWarning(I18nT('n8n.usersEmail') + ' required')
       return
     }
-    if (!newUser.value.password) {
-      ElMessage.warning(I18nT('n8n.usersNewPassword') + ' required')
-      return
+    if (!requirePassword(password)) return
+    if (await controller.mutate('userCreate', [email, firstName, lastName, role, password], I18nT('n8n.usersCreateSuccess'))) {
+      newUser.value = freshUser()
+      showAddDialog.value = false
+      showInviteUrlDialog.value = !!inviteUrl.value
     }
-    creating.value = true
-    IPC.send(
-      'app-fork:n8n',
-      'userCreate',
-      newUser.value.email,
-      newUser.value.firstName,
-      newUser.value.lastName,
-      newUser.value.role,
-      newUser.value.password
-    ).then((key: string, res: any) => {
-      IPC.off(key)
-      creating.value = false
-      if (res?.code === 0) {
-        showAddDialog.value = false
-        ElMessage.success(I18nT('n8n.usersCreateSuccess'))
-        const url = res.data?.inviteAcceptUrl ?? res.data?.user?.inviteAcceptUrl ?? ''
-        if (url) {
-          inviteUrl.value = url
-          showInviteUrlDialog.value = true
-        }
-        loadUsers()
-      } else {
-        ElMessage.error(res?.msg ?? I18nT('n8n.usersCreateFailed'))
-      }
-    })
   }
+  const copyInviteUrl = () => controller.copyInvite()
 
-  const copyInviteUrl = () => {
-    navigator.clipboard.writeText(inviteUrl.value).then(() => {
-      ElMessage.success(I18nT('base.copySuccess'))
-    })
-  }
-
-  // ── Change owner password ────────────────────────────────────────────────
   const showChangePasswordDialog = ref(false)
-  const changingPassword = ref(false)
+  const changingPassword = computed(() => controller.pending === 'userChangeOwnerPassword')
   const passwordChange = ref({ newPass: '' })
-
   const openChangePasswordDialog = () => {
     passwordChange.value = { newPass: '' }
     showChangePasswordDialog.value = true
   }
-
-  const doChangePassword = () => {
-    if (!passwordChange.value.newPass) {
-      ElMessage.warning(I18nT('n8n.usersNewPassword') + ' required')
-      return
+  const doChangePassword = async () => {
+    const { newPass } = passwordChange.value
+    if (!requirePassword(newPass)) return
+    if (await controller.mutate('userChangeOwnerPassword', [newPass], I18nT('n8n.usersChangePasswordSuccess'))) {
+      passwordChange.value.newPass = ''
+      showChangePasswordDialog.value = false
     }
-    changingPassword.value = true
-    IPC.send('app-fork:n8n', 'userChangeOwnerPassword', passwordChange.value.newPass).then(
-      (key: string, res: any) => {
-        IPC.off(key)
-        changingPassword.value = false
-        if (res?.code === 0) {
-          showChangePasswordDialog.value = false
-          ElMessage.success(I18nT('n8n.usersChangePasswordSuccess'))
-        } else {
-          ElMessage.error(res?.msg ?? I18nT('n8n.usersChangePasswordFailed'))
-        }
-      }
-    )
   }
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────
-  onMounted(() => {
-    loadDataDir()
-    loadUsers()
-  })
+  onMounted(loadUsers)
 </script>

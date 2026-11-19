@@ -50,6 +50,7 @@
       :kind="fileKind"
       :only-file="onlyFile"
       :provider="redisConfiguration ? loadRedisConfiguration : undefined"
+      :initialize="configurationInitializer"
     >
       <template v-if="redisConfiguration || sqlConfiguration" #configuration="{ content, readOnly, update }">
         <RedisCommonConfiguration v-if="redisConfiguration" :content="content" :read-only="readOnly" @update="update" />
@@ -79,6 +80,7 @@
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { databaseController } from '../state/databaseController'
 import { databaseModuleFlags, databaseVersion } from '../adapters/databaseAdapter'
+import { databaseConfigurationInitializer } from '../adapters/databaseConfiguration'
 import { serviceController } from '../state/serviceController'
 import PackageBrowser from '../components/PackageBrowser.vue'
 import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
@@ -118,6 +120,14 @@ const closeVersions = () => { versionsOpen.value = false; void databaseControlle
 const filesOpen = ref(false); const fileKind = ref<'config' | 'log'>('log')
 const redisConfiguration = computed(() => selectedFlag.value === 'redis' && fileKind.value === 'config')
 const sqlConfiguration = computed(() => fileKind.value === 'config' ? manageEngine.value : undefined)
+const configurationInitializer = computed(() => {
+  const flag = selectedFlag.value
+  const version = selectedVersion.value
+  if (fileKind.value !== 'config' || !version?.version) return undefined
+  if (flag === 'neo4j') return databaseConfigurationInitializer('neo4j', version)
+  if (flag === 'clickhouse') return databaseConfigurationInitializer('clickhouse', version)
+  return undefined
+})
 const isWindows = computed(() => Boolean(window.Server?.isWindows))
 const loadRedisConfiguration = () => redisConfigurationFiles(selectedVersion.value?.version ?? '')
 const onlyFile = ref<string>()

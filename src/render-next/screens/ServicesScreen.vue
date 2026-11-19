@@ -50,8 +50,12 @@
           :has-version="selectedService.version !== '—'"
         />
         <div class="detail-actions"><button class="action-button" @click="openFiles('config')">Configuration</button><button class="action-button" @click="openFiles('log')">Logs</button></div>
+        <div v-if="moduleFlag === 'n8n'" class="detail-actions">
+          <button class="action-button" @click="n8nTab = 'packages'">Manage n8n packages</button>
+          <button class="action-button" @click="n8nTab = 'users'">Manage n8n users</button>
+        </div>
         <button v-if="installedFlag" class="action-button" @click="versionsOpen = true">Installed versions</button>
-        <PackageBrowser v-if="selectedFlag" :key="selectedFlag" :flag="selectedFlag" :title="selectedService.name" />
+        <PackageBrowser v-if="selectedFlag && moduleFlag !== 'n8n'" :key="selectedFlag" :flag="selectedFlag" :title="selectedService.name" />
         </template>
       </article>
     </div>
@@ -64,6 +68,7 @@
       @close="versionsOpen = false"
     />
     <TunnelDialog v-if="tunnelsOpen" @close="closeTunnels" />
+    <N8nToolsDialog v-if="n8nTab" :tab="n8nTab" @close="n8nTab = undefined" />
   </section>
 </template>
 <script setup lang="ts">
@@ -103,6 +108,8 @@ const dashboard = computed(() => {
 })
 const InstalledVersionsDialog = defineAsyncComponent(() => import('../serviceVersions/InstalledVersionsDialog.vue'))
 const TunnelDialog = defineAsyncComponent(() => import('../cloudflareTunnel/TunnelDialog.vue'))
+const N8nToolsDialog = defineAsyncComponent(() => import('../components/N8nToolsDialog.vue'))
+const n8nTab = ref<'users' | 'packages'>()
 const tunnelsOpen = ref(false)
 const closeTunnels = () => {
   tunnelsOpen.value = false
