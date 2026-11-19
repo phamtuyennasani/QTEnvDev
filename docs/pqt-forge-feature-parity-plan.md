@@ -23,12 +23,12 @@ See [the current parity audit](pqt-forge-parity-audit.md) for verified changes, 
 
 ## Phase 1 — websites and project workflows
 
-- [x] Migrate website list and CRUD, saved order and pins, templates, links and QR, vhost and rewrite files, log preview and clear, TLS settings, subdirectory websites, system hosts controls, and website backup import and export.
-- [x] Connect PHP, Node.js, Python and Go saved projects and scaffolding to the existing lifecycle, port and command editors, folders, configuration and logs. Java/Tomcat websites use the dedicated editor and backend.
+- [x] Migrate website list and CRUD, saved order and pins, vhost templates with bundled defaults and file import and export, Nginx rewrite templates, links and QR, vhost and rewrite editing and recovery, external editors, log preview and clear, TLS settings, subdirectory websites, system hosts controls, and website backup import and export.
+- [x] Connect PHP, Node.js, Python and Go saved projects and scaffolding to the existing lifecycle, port and command editors, folders, configuration and logs. Python and Go saved projects offer PyCharm and GoLand shortcuts. Java/Tomcat websites use the dedicated editor and backend.
 - [x] Keep unsupported project types unchanged until their structure is understood by the new editor.
 - [x] Verify ports, commands, TLS, proxy changes and post-save lifecycle behavior through the website and project controllers. Run native server fixtures with generated configurations.
 
-The Windows Electron fixture exercises Websites with isolated IPC, including scoped and system tasks, CA file and command shortcuts, a Laravel scaffold draft, backup, alias links, hosts shortcuts and subdirectory websites. Windows runtime fixtures passed with Nginx 1.28.0, Apache 2.4.66 with PHP-CGI 8.3.30, Tomcat 9.0.106, Caddy 2.11.9, and FrankenPHP 1.13.5 with PHP 8.5.12. They use temporary configuration, loopback requests and certificate trust scoped to the fixture. The Caddy and FrankenPHP fixture also verifies that HTTPS switches to the updated reverse proxy destination. System hosts writes, OS trust changes and native macOS and Linux execution remain open.
+The Windows Electron fixture exercises Websites with isolated IPC, including the bundled and custom rewrite picker, vhost template import and export, failed template reads, missing config recovery, external editor choices, scoped and system tasks, CA file and command shortcuts, a Laravel scaffold draft, backup, alias links, hosts shortcuts and subdirectory websites. Windows runtime fixtures passed with Nginx 1.28.0, Apache 2.4.66 with PHP-CGI 8.3.30, Tomcat 9.0.106, Caddy 2.11.9, and FrankenPHP 1.13.5 with PHP 8.5.12. They use temporary configuration, loopback requests and certificate trust scoped to the fixture. The Caddy and FrankenPHP fixture also verifies that HTTPS switches to the updated reverse proxy destination. System hosts writes, OS trust changes, launching each installed editor and native macOS and Linux execution remain open.
 
 ## Phase 2 — services, runtimes, packages, and databases
 
@@ -66,6 +66,8 @@ Relevant checks:
 - yarn test:pqt-forge-php-extensions-ui
 - yarn test:startup-group-runner
 - yarn test:pqt-forge-project-workflows
+- yarn tsx scripts/pqt-forge-language-ide-ui-test.ts
+- yarn tsx scripts/pqt-forge-project-editors-test.ts
 - yarn test:pqt-forge-phase3
 - yarn test:pqt-forge-tool-ui
 - yarn test:pqt-forge-native-tools
