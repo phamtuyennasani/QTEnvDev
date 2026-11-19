@@ -128,7 +128,10 @@ export class Neo4jJavaBindingManager {
     this.javaDiscoveryError = ''
     this.javaDiscovery = Promise.resolve().then(async () => {
       try {
-        const [, fetched] = await Promise.all([this.init(), BrewStore().module('java').fetchInstalled()])
+        const [, fetched] = await Promise.all([
+          this.init(),
+          BrewStore().module('java').fetchInstalled()
+        ])
         if (!fetched) throw new Error('Installed Java versions could not be loaded.')
       } catch (error) {
         this.javaDiscoveryError = error instanceof Error ? error.message : String(error)
@@ -147,11 +150,15 @@ export class Neo4jJavaBindingManager {
     try {
       await this.init()
       await this.enqueueMutation(async () => {
-        const item = BrewStore().module('neo4j').installed.find((version) => version.bin === bin)
+        const item = BrewStore()
+          .module('neo4j')
+          .installed.find((version) => version.bin === bin)
         if (!item || item.run || item.running) {
           throw new Error('Stop this Neo4j installation before changing Java.')
         }
-        const candidate = this.candidatesForVersion(item.version).find((version) => version.path === javaHome)
+        const candidate = this.candidatesForVersion(item.version).find(
+          (version) => version.path === javaHome
+        )
         const javaMajor = candidate && this.candidateMajor(candidate)
         if (!candidate || !javaMajor) throw new Error('Select a compatible installed Java runtime.')
         await this.persist({ ...this.javaByBin, [key]: { javaHome: candidate.path, javaMajor } })

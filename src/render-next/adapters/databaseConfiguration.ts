@@ -1,9 +1,6 @@
 import type { SoftInstalled } from '@shared/app'
 import { BrewStore } from '@/store/brew'
-import {
-  requestServiceFile,
-  type ServiceFileInitializer
-} from '../state/serviceFilesController'
+import { requestServiceFile, type ServiceFileInitializer } from '../state/serviceFilesController'
 
 export function databaseConfigurationInitializer(
   flag: 'clickhouse' | 'neo4j',
@@ -20,7 +17,8 @@ export function databaseConfigurationInitializer(
     const reported = files.find((item) => item?.path === file.path && item?.name === file.name)
     if (!reported) throw new Error('The database does not list this configuration file.')
     if (reported.exists === true) return 'exists'
-    if (reported.exists !== false) throw new Error('Could not check whether the configuration exists.')
+    if (reported.exists !== false)
+      throw new Error('Could not check whether the configuration exists.')
 
     const result = await requestServiceFile(flag, 'initConfig', target)
     const main = flag === 'neo4j' ? file.path : files.find((item) => item?.name === 'config')?.path
