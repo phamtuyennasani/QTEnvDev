@@ -1,4 +1,5 @@
 import { BrewStore } from '@/store/brew'
+import { AppStore } from '@/store/app'
 import { ensureDataDirectoryReady } from '@/core/DataDirectoryStartup'
 import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
 import { reactiveBind } from '@/util/Index'
@@ -10,11 +11,12 @@ import type { ServiceFile } from '../state/serviceFilesController'
 const builtinVersion = { version: '1.0', typeFlag: 'ftp-srv' }
 const pureVersion = () => {
   const store = BrewStore()
-  const module = store.module('pure-ftpd')
+  const versions = store.module('pure-ftpd').installed.filter((item) => item.enable && item.version)
+  const current = AppStore().config.server?.['pure-ftpd']?.current
   return (
-    module.installed.find((item) => item.run) ??
-    store.currentVersion('pure-ftpd') ??
-    module.installed[0]
+    versions.find((item) => item.run) ??
+    versions.find((item) => item.path === current?.path && item.version === current?.version) ??
+    versions[0]
   )
 }
 async function ftpRequest(
@@ -62,7 +64,7 @@ export const ftpAccounts = Object.fromEntries(
                 throw new Error('FTP status could not be verified.')
               return { installed: true, running: status.running, port: status.port }
             }
-            if (!(await BrewStore().module('pure-ftpd').fetchInstalled(false, { fresh: false }))) {
+            if (!(await BrewStore().module('pure-ftpd').fetchInstalled(true, { fresh: false }))) {
               throw new Error('Could not load installed Pure-FTPd versions.')
             }
             const port = Number(await ftpRequest(mode, 'getPort'))

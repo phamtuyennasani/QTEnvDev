@@ -110,6 +110,54 @@ unknown = true
 assert.equal(await controller.remove(account), false)
 assert.match(controller.error, /unknown/)
 assert.equal(controller.accountsVerified, false)
+
+let nativeStarted = 0
+const installed: unknown[] = []
+const { ftpAccounts } = await loadIsolated('src/render-next/ftpAccounts/state.ts', {
+  './Controller': { FtpAccountsController, FtpMutationUnknown },
+  '@/store/brew': {
+    BrewStore: () => ({
+      module: () => ({ installed, fetchInstalled: async () => true }),
+      currentVersion: () => ({ version: '1.0', bin: 'pure-ftpd' })
+    })
+  },
+  '@/store/app': {
+    AppStore: () => ({
+      config: {
+        server: { 'pure-ftpd': { current: { path: '/fixture/native', version: '1.0.52' } } }
+      }
+    })
+  },
+  '@/core/DataDirectoryStartup': { ensureDataDirectoryReady: async () => true },
+  '@/util/ForkTerminalRequest': {
+    forkTerminalRequest: async (_channel: string, [action]: string[]) => ({
+      code: 0,
+      data: action === 'getPort' ? 21 : []
+    })
+  },
+  '@/util/Index': { reactiveBind: (value: unknown) => value },
+  '@/util/NodeFn': { clipboard: {}, dialog: {}, shell: {}, ip: { addressList: async () => [] } }
+})
+const pure = ftpAccounts['pure-ftpd']
+assert.equal(await pure.refresh(), true)
+assert.equal(pure.status?.installed, false)
+assert.equal(await pure.change('start'), false)
+installed.push(
+  { enable: true, version: '1.0.50', path: '/fixture/other', start: async () => false },
+  {
+    enable: true,
+    version: '1.0.52',
+    path: '/fixture/native',
+    start: async () => {
+      nativeStarted++
+      return true
+    }
+  }
+)
+assert.equal(await pure.refresh(), true)
+assert.equal(pure.status?.installed, true)
+assert.equal(await pure.change('start'), true)
+assert.equal(nativeStarted, 1)
 console.log(
   'FTP accounts passed with confirmed service state, serialized saves and partial result reporting.'
 )
