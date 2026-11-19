@@ -154,7 +154,7 @@ class Manager extends Base {
     }
   }
 
-  delFtp(item: FtpItem, version: SoftInstalled) {
+  delFtp(item: FtpItem, version: SoftInstalled, reportCommit = false) {
     return new ForkPromise(async (resolve, reject) => {
       const bin = join(version.path, 'bin/pure-pw')
       if (!existsSync(bin)) {
@@ -177,12 +177,11 @@ class Manager extends Base {
         all.splice(findOld, 1)
       }
       await writeFile(json, JSON.stringify(all))
-      await this.refreshUnixUsers()
-      resolve(true)
+      resolve(await this.finishAccountWrite(reportCommit))
     })
   }
 
-  addFtp(item: FtpItem, version: SoftInstalled) {
+  addFtp(item: FtpItem, version: SoftInstalled, reportCommit = false) {
     return new ForkPromise(async (resolve, reject) => {
       const bin = join(version.path, 'bin/pure-pw')
       if (!existsSync(bin)) {
@@ -249,13 +248,22 @@ class Manager extends Base {
             all.unshift(item)
           }
           await writeFile(json, JSON.stringify(all))
-          await this.refreshUnixUsers()
-          resolve(true)
+          resolve(await this.finishAccountWrite(reportCommit))
         })
         .catch((error) => {
           reject(error instanceof Error ? error : new Error(stdout.join('')))
         })
     })
+  }
+
+  private async finishAccountWrite(reportCommit: boolean) {
+    try {
+      await this.refreshUnixUsers()
+      return true
+    } catch (error) {
+      if (!reportCommit) throw error
+      return { warning: error instanceof Error ? error.message : String(error) }
+    }
   }
 
   allInstalledVersions(setup: any) {

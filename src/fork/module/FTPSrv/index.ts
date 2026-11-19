@@ -7,15 +7,13 @@ import FtpServer from 'ftp-srv'
 import { readFile, writeFile, mkdirp, copyFile, remove } from '../../Fn'
 import { isWindows } from '@shared/utils'
 import { getPrimaryLocalIPAddress } from '@shared/network'
+import { stat, rename, rm } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 
 class Manager extends Base {
   server?: FtpServer
-  users: Array<{
-    user: string
-    pass: string
-    dir: string
-    id: string
-  }> = []
+  private readonly users = new Map<string, string>()
+  private accountWrites = Promise.resolve()
 
   baseDir: string = ''
 
@@ -26,6 +24,64 @@ class Manager extends Base {
   }
 
   init() {}
+
+  workspaceStatus() {
+    return new ForkPromise((resolve) => resolve({ running: Boolean(this.server), port: 21 }))
+  }
+
+  private async readAccounts(): Promise<FtpItem[]> {
+    const path = join(this.baseDir, 'ftp-srv.json')
+    try {
+      const accounts: unknown = JSON.parse(await readFile(path, 'utf8'))
+      if (!Array.isArray(accounts)) throw new Error('The saved FTP accounts are not a list.')
+      return accounts
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') return []
+      throw error
+    }
+  }
+
+  private async saveAccounts(accounts: FtpItem[]) {
+    const path = join(this.baseDir, 'ftp-srv.json')
+    const temporary = path + '.' + randomUUID() + '.tmp'
+    try {
+      await writeFile(temporary, JSON.stringify(accounts), { flag: 'wx', mode: 0o600 })
+      await rename(temporary, path)
+    } finally {
+      await rm(temporary, { force: true }).catch(() => undefined)
+    }
+  }
+
+  private changeAccounts(item: FtpItem, removeAccount: boolean, reportCommit: boolean) {
+    const next = this.accountWrites.then(async () => {
+      await this.fixJson()
+      const all = await this.readAccounts()
+      if (!removeAccount) {
+        if (!item.user?.trim() || !item.pass || !(await stat(item.dir)).isDirectory()) {
+          throw new Error('Choose a username, password and existing folder.')
+        }
+      }
+      const rest = all.filter((account) => account.user !== item.user)
+      await this.saveAccounts(removeAccount ? rest : [item, ...rest])
+      const active = [...this.users].filter(([, name]) => name === item.user)
+      const results = await Promise.allSettled(
+        active.map(async ([id]) => this.server?.disconnectClient(id))
+      )
+      if (results.some((result) => result.status === 'rejected') && reportCommit) {
+        return {
+          warning: 'The account was saved, but an existing FTP connection could not be closed.'
+        }
+      }
+      return true
+    })
+    this.accountWrites = next.then(
+      () => undefined,
+      () => undefined
+    )
+    return new ForkPromise<boolean | { warning: string }>((resolve, reject) =>
+      next.then(resolve, reject)
+    )
+  }
 
   async fixJson() {
     await mkdirp(this.baseDir)
@@ -43,6 +99,7 @@ class Manager extends Base {
       // FTP server 由专用 fork 持有；close 完成才报告停止，拒绝时 ForkPromise 保留失败。
       await this.server?.close()
       this.server = undefined
+      this.users.clear()
       // 这里只回传宿主 fork PID 用于注销运行登记，不按该 PID 结束 Electron worker。
       resolve({ 'APP-Service-Stop-PID': [`${process.pid}`] })
     })
@@ -58,7 +115,7 @@ class Manager extends Base {
 
     return new ForkPromise(async (resolve, reject) => {
       const port = 21
-      this.server = new FtpServer({
+      const server = new FtpServer({
         url: `ftp://0.0.0.0:${port}/`,
         anonymous: true,
         pasv_url: resolverFunction as any,
@@ -66,7 +123,7 @@ class Manager extends Base {
         pasv_max: 65535
       })
 
-      this.server.on('login', async ({ connection, username, password }, resolve, reject) => {
+      server.on('login', async ({ connection, username, password }, resolve, reject) => {
         connection.on('client-error', (error: any) => {
           console.error('FTP Client Error:', error)
         })
@@ -74,35 +131,26 @@ class Manager extends Base {
           if (error) console.error('Upload failed:', error)
         })
 
-        const json = join(this.baseDir, 'ftp-srv.json')
-        const all: Array<any> = []
-        if (existsSync(json)) {
-          try {
-            const txt = await readFile(json, 'utf-8')
-            const arr = JSON.parse(txt.toString())
-            all.push(...arr)
-          } catch {}
-        }
-
-        const finduser = all.find((a) => a.user === username && a.pass === password)
-        if (finduser) {
-          const find = this.users.find((u) => u.user === username && u.pass === password)
-          if (find) {
-            find.id = connection.id
-          } else {
-            this.users.push({
-              ...finduser,
-              id: connection.id
-            })
+        try {
+          const all = await this.readAccounts()
+          const account = all.find(
+            (item) => item.user === username && item.pass === password && !item.disabled
+          )
+          if (account) {
+            this.users.set(connection.id, username)
+            return resolve({ root: account.dir.split('\\').join('/') })
           }
-          return resolve({ root: finduser.dir.split('\\').join('/') })
-        }
+        } catch {}
         return reject(new Error('Invalid username or password'))
       })
+      server.on('disconnect', ({ id }) => {
+        this.users.delete(id)
+      })
 
-      this.server
+      server
         .listen()
         .then(() => {
+          this.server = server
           console.log('Ftp server is starting...')
           // 登记宿主 PID 仅用于状态与退出编排，stopService 自己关闭 FTP server。
           resolve({ 'APP-Service-Start-PID': `${process.pid}` })
@@ -120,67 +168,18 @@ class Manager extends Base {
 
   getAllFtp() {
     return new ForkPromise(async (resolve) => {
+      await this.accountWrites
       await this.fixJson()
-      const json = join(this.baseDir, 'ftp-srv.json')
-      const all = []
-      if (existsSync(json)) {
-        try {
-          const txt = await readFile(json, 'utf-8')
-          const arr = JSON.parse(txt.toString())
-          all.push(...arr)
-        } catch {}
-      }
-      resolve(all)
+      resolve(await this.readAccounts())
     })
   }
 
-  delFtp(item: FtpItem) {
-    return new ForkPromise(async (resolve) => {
-      await this.fixJson()
-      const find = this.users.find((u) => u.user === item.user && u.pass === item.pass)
-      if (find) {
-        const id = find.id
-        this.server?.disconnectClient(id)
-      }
-      const json = join(this.baseDir, 'ftp-srv.json')
-      const all = []
-      if (existsSync(json)) {
-        try {
-          const txt = await readFile(json, 'utf-8')
-          const arr = JSON.parse(txt.toString())
-          all.push(...arr)
-        } catch {}
-      }
-      const findOld = all.findIndex((a) => a.user === item.user)
-      if (findOld >= 0) {
-        all.splice(findOld, 1)
-      }
-      await writeFile(json, JSON.stringify(all))
-      resolve(true)
-    })
+  delFtp(item: FtpItem, reportCommit = false) {
+    return this.changeAccounts(item, true, reportCommit)
   }
 
-  addFtp(item: FtpItem) {
-    return new ForkPromise(async (resolve) => {
-      await this.fixJson()
-      const json = join(this.baseDir, 'ftp-srv.json')
-      const all = []
-      if (existsSync(json)) {
-        try {
-          const txt = await readFile(json, 'utf-8')
-          const arr = JSON.parse(txt.toString())
-          all.push(...arr)
-        } catch {}
-      }
-      const findOld = all.findIndex((a) => a.user === item.user)
-      if (findOld >= 0) {
-        all.splice(findOld, 1, item)
-      } else {
-        all.unshift(item)
-      }
-      await writeFile(json, JSON.stringify(all))
-      resolve(true)
-    })
+  addFtp(item: FtpItem, reportCommit = false) {
+    return this.changeAccounts(item, false, reportCommit)
   }
 
   getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
