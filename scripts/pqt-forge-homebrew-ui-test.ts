@@ -85,6 +85,8 @@ window.QTEnvDevNodeAPI = {
       success()
     } else if (channel === 'App-Node-FN' && action === 'nativeTheme') {
       send(true)
+    } else if (channel === 'App-Node-FN' && action === 'clipboard' && first === 'writeText') {
+      send(true)
     } else if (channel === 'app-refresh-macos-homebrew') {
       window.finishDiscovery = (ok) => {
         window.finishDiscovery = undefined
@@ -223,6 +225,8 @@ const checks = String.raw`(async () => {
     button(label).click()
   }
   const called = (action) => calls.filter(([, method]) => method === action).length
+  const copied = (text) => calls.some(([channel, area, method, value]) =>
+    channel === 'App-Node-FN' && area === 'clipboard' && method === 'writeText' && value === text)
   const contains = (value) => document.body.innerText.includes(value)
   await click('Manage packages')
   await wait(() => contains('No direct-download versions'))
@@ -237,6 +241,9 @@ const checks = String.raw`(async () => {
   await wait(() => called('brewinfo') === 1)
   const first = calls.find(([, action]) => action === 'brewinfo')
   if (first[0] !== 'app-fork:php' || first[2] !== 'php') throw new Error('Wrong catalog request')
+  await click('Copy command')
+  await wait(() => copied('brew install homebrew/core/php'))
+  if (called('packageOperation')) throw new Error('Copy initiated a Homebrew installation')
   await click('Install')
   await wait(() => contains('Homebrew is working…'))
   await click('Close package library')
@@ -250,6 +257,9 @@ const checks = String.raw`(async () => {
   await click('Confirm upgrade')
   await wait(() => called('executeUpgrade') === 1 && window.finishHomebrew)
   window.finishHomebrew()
+  await wait(() => button('Copy command')?.getAttribute('title') === 'brew uninstall homebrew/core/php')
+  await click('Copy command')
+  await wait(() => copied('brew uninstall homebrew/core/php'))
   await click('Uninstall')
   await wait(() => contains('Uninstall homebrew/core/php with Homebrew?'))
   if (called('packageOperation') !== 1) throw new Error('Uninstall started without confirmation')
@@ -261,8 +271,13 @@ const checks = String.raw`(async () => {
   packageSelect.value = 'typesense'
   packageSelect.dispatchEvent(new Event('change', { bubbles: true }))
   await wait(() => contains('Typesense tap is missing'))
+  await click('Copy tap command')
+  await wait(() => copied('brew tap typesense/homebrew-tap'))
+  if (called('addTap')) throw new Error('Copy enabled a Homebrew tap')
   await click('Enable tap')
   await wait(() => contains('typesense/tap/typesense-server'))
+  await click('Copy command')
+  await wait(() => copied('brew install typesense/tap/typesense-server'))
   if (called('addTap') !== 1 || contains('Typesense tap is missing')) throw new Error('Tap did not recover its catalog')
 })()`
 const bootstrapChecks = String.raw`(async () => {

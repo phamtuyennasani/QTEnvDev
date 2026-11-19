@@ -1,6 +1,6 @@
 import IPC from '@/util/IPC'
 import { reactiveBind } from '@/util/Index'
-import { shell } from '@/util/NodeFn'
+import { clipboard, shell } from '@/util/NodeFn'
 import { homebrewUpgrade } from '@/components/VersionManager/brew/Controller'
 import { findInstalledFormulaConflict } from '@/components/VersionManager/brew/FormulaConflict'
 import type { BrewUpgradePreview } from '@fork/module/Brew/UpgradeTypes'
@@ -12,6 +12,8 @@ import { homebrewBootstrap } from './homebrewBootstrapController'
 
 export type HomebrewFormula = { name: string; version: string; installed: boolean }
 type HomebrewCatalog = { rows: HomebrewFormula[]; loading: boolean; error: string; warning: string }
+
+const formulaIdentifier = /^(?:[a-zA-Z0-9_.+-]+\/){0,2}[a-zA-Z0-9_.+-]+(?:@[a-zA-Z0-9_.+-]+)?$/
 
 class HomebrewPackagesController {
   private catalogs: Record<string, HomebrewCatalog> = {}
@@ -81,6 +83,41 @@ class HomebrewPackagesController {
     await this.mutate(flag, () => homebrewUpgrade.package({ name, installed, typeFlag: flag }), () => {
       row.installed = !installed
     })
+  }
+
+  commandFor(row: HomebrewFormula) {
+    const { name, installed } = row
+    if (
+      !formulaIdentifier.test(name) ||
+      name.startsWith('-') ||
+      name.split('/').some((part) => part === '.' || part === '..')
+    ) {
+      return
+    }
+    return `brew ${installed ? 'uninstall' : 'install'} ${name}`
+  }
+
+  async copyCommand(flag: string, name: string) {
+    if (!this.available || !supportsHomebrew(flag, window.Server)) return
+    const row = this.catalog(flag).rows.find((item) => item.name === name)
+    const command = row && this.commandFor(row)
+    if (command) await this.copy(command)
+  }
+
+  async copyTapCommand(flag: string) {
+    if (!this.available || !supportsHomebrew(flag, window.Server)) return
+    const tap = homebrewTaps[flag]
+    if (tap) await this.copy(`brew tap ${tap}`)
+  }
+
+  private async copy(command: string) {
+    try {
+      const confirmation: unknown = await clipboard.writeText(command)
+      if (confirmation !== true) throw new Error('The clipboard did not confirm the copy.')
+      showNotice('Homebrew command copied.')
+    } catch (error) {
+      showNotice(packageError(error))
+    }
   }
 
   async prepareUpgrade(name: string) {

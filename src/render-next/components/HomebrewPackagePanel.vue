@@ -59,11 +59,14 @@
       </div>
       <div v-if="tap" class="brew-tap">
         <span>{{ tap }}</span>
-        <button
-          class="action-button"
-          :disabled="mutationBusy || controller.tapBlocked(flag)"
-          @click="controller.enableTap(flag)"
-        >{{ controller.tapBlocked(flag) ? 'Tap status unknown' : 'Enable tap' }}</button>
+        <div class="brew-actions">
+          <button class="action-button" @click="controller.copyTapCommand(flag)">Copy tap command</button>
+          <button
+            class="action-button"
+            :disabled="mutationBusy || controller.tapBlocked(flag)"
+            @click="controller.enableTap(flag)"
+          >{{ controller.tapBlocked(flag) ? 'Tap status unknown' : 'Enable tap' }}</button>
+        </div>
       </div>
       <p v-if="catalog.loading && !rows.length" class="empty-copy">Retrieving Homebrew formulae…</p>
       <p v-else-if="!rows.length && !catalog.error" class="empty-copy">
@@ -79,6 +82,12 @@
           <small v-if="info(row)?.reason">{{ upgradeReason(row) }}</small>
         </div>
         <div class="brew-actions">
+          <button
+            class="action-button"
+            :title="controller.commandFor(row)"
+            :disabled="!controller.commandFor(row)"
+            @click="controller.copyCommand(flag, row.name)"
+          >Copy command</button>
           <button
             v-if="info(row)?.outdated"
             class="action-button"
@@ -179,6 +188,7 @@ onBeforeUnmount(() => {
 .brew-status pre { max-height: 160px; overflow: auto; white-space: pre-wrap; }
 .brew-terminal { height: 240px; margin: 8px 0; padding: 8px; overflow: hidden; background: #282b3d; border-radius: 5px; }
 .brew-tap, .brew-row, .brew-actions { display: flex; align-items: center; gap: 8px; }
+.brew-actions { flex-wrap: wrap; }
 .brew-tap, .brew-row { justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--pqt-border); }
 .brew-formula { min-width: 0; overflow-wrap: anywhere; }
 .brew-formula small { display: block; margin-top: 3px; color: var(--pqt-text-muted); }

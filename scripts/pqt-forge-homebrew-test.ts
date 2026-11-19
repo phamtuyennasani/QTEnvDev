@@ -21,6 +21,9 @@ const removed: string[] = []
 const server = { isMacOS: true, BrewBin: '/opt/homebrew/bin/brew', BrewCellar: '/opt/homebrew/Cellar' }
 const operations: string[] = []
 const published: string[] = []
+const copied: string[] = []
+const copyNotices: string[] = []
+let clipboardAcknowledges = true
 let release: (result: unknown) => void = () => {}
 const brew = reactive(new HomebrewUpgradeController({
   async call(action, args, progress) {
@@ -46,14 +49,22 @@ const { homebrewPackages: controller } = await loadIsolated(
       off: (key: string) => removed.push(key)
     },
     '@/util/Index': { reactiveBind: reactive },
-    '@/util/NodeFn': { shell: {} },
+    '@/util/NodeFn': {
+      shell: {},
+      clipboard: {
+        async writeText(command: string) {
+          copied.push(command)
+          return clipboardAcknowledges
+        }
+      }
+    },
     '@/components/VersionManager/brew/Controller': { homebrewUpgrade: brew },
     '@/components/VersionManager/brew/FormulaConflict': conflicts,
     '../packages/homebrewSources': sources,
     '../packages/transport': transport,
     '../packages/types': types,
     './homebrewBootstrapController': { homebrewBootstrap: { busy: false } },
-    './app': { showNotice: () => {} }
+    './app': { showNotice: (message: string) => copyNotices.push(message) }
   },
   {
     window: {
@@ -83,6 +94,17 @@ assert.deepEqual(removed, [])
 reply(0, { code: 0, data: [{ name: 'homebrew/core/php', version: '8.5', installed: false }] })
 await load
 assert.deepEqual(removed, ['0'])
+await controller.copyCommand('php', 'homebrew/core/php')
+await controller.copyCommand('php', 'homebrew/core/php; echo other')
+assert.equal(controller.commandFor({ name: '-option', installed: false }), undefined)
+assert.equal(controller.commandFor({ name: '..', installed: true }), undefined)
+assert.deepEqual(copied, ['brew install homebrew/core/php'])
+assert.deepEqual(copyNotices, ['Homebrew command copied.'])
+clipboardAcknowledges = false
+await controller.copyTapCommand('php')
+assert.equal(copied.at(-1), 'brew tap shivammathur/php')
+assert.match(copyNotices.at(-1)!, /clipboard did not confirm/)
+clipboardAcknowledges = true
 
 const install = controller.change('php', 'homebrew/core/php', false)
 await controller.change('php', 'homebrew/core/php', false)
@@ -99,6 +121,8 @@ assert.equal(controller.catalog('php').error, 'Formula refresh failed')
 assert.equal(brew.phase, 'succeeded')
 assert.equal(brew.refreshFailed, true)
 assert.equal(controller.busy, false)
+await controller.copyCommand('php', 'homebrew/core/php')
+assert.equal(copied.at(-1), 'brew uninstall homebrew/core/php')
 assert.deepEqual(published, ['php'])
 
 const bin = '/opt/homebrew/bin/brew'
