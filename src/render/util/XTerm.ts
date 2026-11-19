@@ -110,9 +110,7 @@ export class XTerm implements XTermType {
       webglAddon = new WebglAddon()
       this.xterm.loadAddon(webglAddon)
     } catch {}
-    webglAddon?.onContextLoss?.(() => {
-      webglAddon?.dispose?.()
-    })
+    webglAddon?.onContextLoss?.(() => webglAddon?.dispose?.())
 
     const fitaddon = new FitAddon()
     this.xterm.loadAddon(fitaddon)
@@ -221,15 +219,16 @@ export class XTerm implements XTermType {
   unmounted() {
     this.mountToken = undefined
     window.removeEventListener('resize', this.onWindowResit)
-    try {
-      this.fitaddon?.dispose()
-      this.xterm?.dispose()
-    } catch {
-      /* empty */
-    }
+    const view = this.xterm
     this.xterm = undefined
     this.fitaddon = undefined
     this.dom = undefined
+    if (view) {
+      view.element?.remove()
+      // xterm schedules its first viewport sync with a timer in open(). Let
+      // that callback run before disposing the renderer it still references.
+      setTimeout(() => view.dispose())
+    }
   }
 
   releaseProcessOutput() {
