@@ -137,7 +137,9 @@ const reconcileSSLConfigs = (connector: XMLItem, group: TomcatSiteHost[]) => {
   }
   const retained = existing.filter((config) => !isQTEnvDev(config))
   for (const [name, paths] of desired) {
-    const config = existing.find((candidate) => isQTEnvDev(candidate) && candidate.hostName === name)
+    const config = existing.find(
+      (candidate) => isQTEnvDev(candidate) && candidate.hostName === name
+    )
     if (config) {
       Object.assign(config, sslHostConfig(name, paths.cert, paths.key))
       retained.push(config)
@@ -269,11 +271,15 @@ export const makeTomcatServerXML = (
   return builder.build(document)
 }
 
-export const reconcileTomcatBase = async (catalinaBase: string, suppliedHosts?: AppHost[]) => {
+export const reconcileTomcatBase = async (
+  catalinaBase: string,
+  suppliedHosts?: AppHost[],
+  provisionCertificates = true
+) => {
   const hosts = suppliedHosts ?? (await fetchHostList(false))
   const tomcatHosts = hosts.filter((host) => host.type === 'tomcat') as TomcatSiteHost[]
   for (const host of tomcatHosts) {
-    if (host.useSSL && host.autoSSL) {
+    if (provisionCertificates && host.useSSL && host.autoSSL) {
       await updateAutoSSL(host, host)
     }
   }

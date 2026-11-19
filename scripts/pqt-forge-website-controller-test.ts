@@ -131,6 +131,37 @@ assert.equal(writes, beforeReplay)
 await controller.refresh()
 assert.equal(await controller.save(host), false)
 assert.equal(writes, beforeReplay)
+
+let partialWrites = 0
+let partialSyncs = 0
+const partialController = new WebsiteController({
+  ...dependencies,
+  async list() {
+    return [host]
+  },
+  async write() {
+    partialWrites++
+    return {
+      hosts: [host, { ...host, id: host.id + 1, name: 'parked.test' }],
+      warnings: ['A second folder site could not be cleaned up.'],
+      message: '1 subdirectory website added.',
+      sync: true,
+      outcome: 'unknown'
+    }
+  },
+  async afterCommit() {
+    partialSyncs++
+    return []
+  }
+})
+assert.equal(await partialController.park(project), true)
+assert.equal(partialController.operation?.status, 'unknown')
+assert.match(partialController.operation?.message ?? '', /1 subdirectory website added/)
+assert.equal(partialController.projects[1].domain, 'parked.test')
+assert.equal(partialSyncs, 0)
+assert.equal(await partialController.park(project), false)
+assert.equal(partialWrites, 1)
+
 assert.throws(() => normalizeWebsite({ ...host, name: 'app.test/path' }))
 assert.throws(() => normalizeWebsite({ ...host, name: 'app.test:8080' }))
 assert.throws(() => normalizeWebsite({ ...host, name: 'app.test', useSSL: true, autoSSL: false }))

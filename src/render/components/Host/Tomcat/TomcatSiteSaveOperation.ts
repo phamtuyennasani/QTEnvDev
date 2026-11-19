@@ -9,9 +9,10 @@ export type TomcatSaveRequest = {
   wasRunning: boolean
 }
 
-export type TomcatSaveResult = { host: AppHost[] }
+export type TomcatSaveResult = { host: AppHost[]; warnings?: string[] }
 
-export type TomcatSiteSavePhase = 'idle' | 'saving' | 'restarting' | 'failed' | 'unknown' | 'savedWithWarning'
+export type TomcatSiteSavePhase =
+  'idle' | 'saving' | 'restarting' | 'failed' | 'unknown' | 'savedWithWarning'
 
 export class TomcatSiteOutcomeUnknown extends Error {}
 
@@ -60,7 +61,7 @@ export class TomcatSiteSaveOperation {
     }
     this.committed = result
 
-    const warnings: string[] = []
+    const warnings = [...(result.warnings ?? [])]
     try {
       this.dependencies.applyHosts(result.host)
     } catch (error) {

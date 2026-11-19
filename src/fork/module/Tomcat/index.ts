@@ -20,15 +20,14 @@ import {
   serviceStartExecCMD,
   waitTime,
   remove,
-  removeByRoot,
   zipUnpack,
   moveChildDirToParent
 } from '../../Fn'
 import TaskQueue from '../../TaskQueue'
 import { reconcileTomcatBase, restoreTomcatBase, snapshotTomcatBase } from './ServerXML'
+import { removeWebsiteFiles, websitePaths } from '../Host/Transaction'
 import { tomcatAutoSSLDeletionId } from './Site'
 import Host from '../Host'
-import { fetchHostList, saveHostList } from '../Host/HostFile'
 import { serviceStartSpawn } from '../../util/ServiceStart'
 import { I18nT } from '@lang/runtime'
 import { isLinux, isWindows } from '@shared/utils'
@@ -277,40 +276,57 @@ class Tomcat extends Base {
     old?: AppHost
   ) {
     return new ForkPromise(async (resolve, reject, on) => {
-      let before: AppHost[] = []
       let baseSnapshot: Awaited<ReturnType<typeof snapshotTomcatBase>> | undefined
-      let writingHosts = false
       try {
-        before = await fetchHostList()
         await this._initDefaultDir(version, catalinaBase).on(on)
-        baseSnapshot = await snapshotTomcatBase(catalinaBase)
-        writingHosts = true
-        const result: any = await Host.handleHost(host, flag, old)
-        const hostList: AppHost[] = result.host
-        await reconcileTomcatBase(catalinaBase, hostList)
-        if (flag === 'del') {
-          const certificateOwnerId = tomcatAutoSSLDeletionId(host as any, old as any)
-          if (certificateOwnerId !== undefined) {
-            await removeByRoot(join(global.Server.BaseDir!, `CA/${certificateOwnerId}`)).catch(
-              () => {}
-            )
+        const result = await Host.handleHost(host, flag, old, false, async (hostList) => {
+          baseSnapshot = await snapshotTomcatBase(catalinaBase)
+          await reconcileTomcatBase(catalinaBase, hostList, false)
+        })
+        if (
+          flag === 'del' &&
+          result &&
+          tomcatAutoSSLDeletionId(host as any, old as any) === host.id
+        ) {
+          const remaining = await removeWebsiteFiles([
+            websitePaths(global.Server.BaseDir!, host.id).certificate
+          ])
+          if (remaining.length) {
+            result.warnings = [
+              ...(result.warnings ?? []),
+              `The website was removed, but its generated certificate remains: ${remaining.join(', ')}`
+            ]
           }
         }
-        resolve({ host: hostList })
+        resolve(result)
       } catch (error) {
         try {
-          if (writingHosts) await saveHostList(before)
           if (baseSnapshot) {
             await restoreTomcatBase(catalinaBase, baseSnapshot)
           }
         } catch (rollbackError) {
           console.error('Tomcat site rollback failed', rollbackError)
-          reject(Object.assign(new Error('The Tomcat website change could not be rolled back completely.'), {
-            code: 'TOMCAT_SITE_OUTCOME_UNKNOWN'
-          }))
+          reject(
+            Object.assign(
+              new Error('The Tomcat website change could not be rolled back completely.', {
+                cause: error
+              }),
+              {
+                code: 'TOMCAT_SITE_OUTCOME_UNKNOWN'
+              }
+            )
+          )
           return
         }
-        reject(error)
+        if ((error as NodeJS.ErrnoException)?.code === 'WEBSITE_WRITE_OUTCOME_UNKNOWN') {
+          reject(
+            Object.assign(new Error((error as Error).message, { cause: error }), {
+              code: 'TOMCAT_SITE_OUTCOME_UNKNOWN'
+            })
+          )
+        } else {
+          reject(error)
+        }
       }
     })
   }

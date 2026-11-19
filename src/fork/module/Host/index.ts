@@ -3,29 +3,12 @@ import { existsSync } from 'fs'
 import { Base } from '../Base'
 import { I18nT } from '@lang/runtime'
 import type { AppHost, SoftInstalled } from '@shared/app'
-import {
-  hostAlias,
-  writeFile,
-  readdir,
-  remove,
-  removeByRoot,
-  readFileByRoot,
-  writeFileByRoot
-} from '../../Fn'
+import { hostAlias, writeFile, readdir, remove, readFileByRoot, writeFileByRoot } from '../../Fn'
 import { ForkPromise } from '@shared/ForkPromise'
-import { makeCaddyConf, updateCaddyConf, delVhost as delCaddyVhost } from '../Caddy/Host'
-import {
-  makeFrankenPHPConf,
-  updateFrankenPHPConf,
-  delVhost as delFrankenPHPVhost
-} from '../FrankenPHP/Host'
-import { makeApacheConf, updateApacheConf, delVhost as delApacheVhost } from '../Apache/Host'
-import {
-  autoFillNginxRewrite,
-  makeNginxConf,
-  updateNginxConf,
-  delVhost as delNginxVhost
-} from '../Nginx/Host'
+import { makeCaddyConf, updateCaddyConf } from '../Caddy/Host'
+import { makeFrankenPHPConf, updateFrankenPHPConf } from '../FrankenPHP/Host'
+import { makeApacheConf, updateApacheConf } from '../Apache/Host'
+import { autoFillNginxRewrite, makeNginxConf, updateNginxConf } from '../Nginx/Host'
 import { setDirRole, updateAutoSSL, updateRootRule } from './Host'
 import { TaskAddPhpMyAdminSite, TaskAddRandomSite } from './Task'
 import { fetchHostList, saveHostList } from './HostFile'
@@ -39,6 +22,20 @@ import { reconcileSystemHostsBlock } from './SystemHostsBlock'
 import { syncUnixHosts } from './UnixHosts'
 import { timeOperation, timeOperationSync } from '@shared/OperationTiming'
 import { launchWindowsDnsRefresh } from '@shared/WindowsDnsRefresh'
+import { removeWebsiteFiles, snapshotWebsiteFiles, websitePaths } from './Transaction'
+
+const isVhost = (host: AppHost) =>
+  !['java', 'node', 'go', 'python', 'tomcat'].includes(host.type ?? '')
+const websiteWriteUnknown = (error: unknown, paths: string[]) =>
+  Object.assign(
+    new Error(
+      `The website write failed (${String(error)}). Could not restore: ${paths.join(', ')}`,
+      {
+        cause: error
+      }
+    ),
+    { code: 'WEBSITE_WRITE_OUTCOME_UNKNOWN' }
+  )
 
 export class Host extends Base {
   hostsFile = ''
@@ -89,7 +86,7 @@ export class Host extends Base {
   reorderHost(id: number, order: number[], action: 'up' | 'down' | 'pin' | 'unpin') {
     return new ForkPromise(async (resolve, reject) => {
       try {
-        const host = await fetchHostList()
+        const host = await fetchHostList(false)
         if (
           !Array.isArray(order) ||
           host.length !== order.length ||
@@ -127,75 +124,38 @@ export class Host extends Base {
     })
   }
 
-  handleHost(host: AppHost, flag: string, old?: AppHost, park?: boolean) {
-    return new ForkPromise(async (resolve, reject) => {
-      let hostList: Array<AppHost> = []
-      try {
-        hostList = await fetchHostList()
-      } catch (e) {
-        reject(e)
-        return
+  handleHost(
+    host: AppHost,
+    flag: string,
+    old?: AppHost,
+    park?: boolean,
+    beforeCommit?: (hosts: AppHost[]) => Promise<void>
+  ) {
+    return new ForkPromise<{
+      host: AppHost[]
+      parked?: { count: number; warnings: string[] }
+      outcome?: 'unknown'
+      warnings?: string[]
+    }>(async (resolve) => {
+      const hostList = await fetchHostList(false)
+      const index = hostList.findIndex(
+        (item) => String(item.id).toLowerCase() === String(host.id).toLowerCase()
+      )
+      const current = hostList[index]
+      if (!['add', 'edit', 'del', 'park'].includes(flag)) throw new Error('Invalid website action.')
+      if (flag === 'add' && current) throw new Error('The website identifier is already in use.')
+      if (flag !== 'add' && (!current || current.id !== host.id)) {
+        throw new Error('The selected website was not found. Refresh the list.')
       }
-
-      let parked: Awaited<ReturnType<typeof parkSubdirectories>> | undefined
-      const removeParkedFiles = async (site: AppHost) => {
-        const base = global.Server.BaseDir!
-        const configPaths = ['nginx', 'apache', 'caddy', 'frankenphp', 'rewrite'].map((server) =>
-          join(base, 'vhost', server, site.id + '.conf')
+      if (flag === 'edit' && old?.id !== host.id) throw new Error('The website identity changed.')
+      if (
+        flag === 'park' &&
+        (JSON.stringify(current) !== JSON.stringify(old) ||
+          (current.type && current.type !== 'php'))
+      ) {
+        throw new Error(
+          'Choose a saved PHP or static website and refresh its settings before parking.'
         )
-        const results = await Promise.allSettled(
-          [...configPaths, join(base, 'CA', String(site.id))].map((file) => remove(file))
-        )
-        const errors = results.flatMap((result) =>
-          result.status === 'rejected' ? [String(result.reason)] : []
-        )
-        if (errors.length) throw new Error(errors.join('\n'))
-      }
-      const writeHostFile = async () => {
-        try {
-          await saveHostList(hostList)
-        } catch (e) {
-          const cleanup = await Promise.allSettled((parked?.added ?? []).map(removeParkedFiles))
-          const cleanupErrors = cleanup.flatMap((result) =>
-            result.status === 'rejected' ? [String(result.reason)] : []
-          )
-          if (cleanupErrors.length) {
-            reject(
-              Object.assign(
-                new Error(
-                  'The host list could not be saved and some new configuration files remain. ' +
-                    cleanupErrors.join(' '),
-                  { cause: e }
-                ),
-                { code: 'WEBSITE_WRITE_OUTCOME_UNKNOWN' }
-              )
-            )
-          } else {
-            appDebugLog('[handleHost][writeHostFile][error]', String(e)).catch()
-            reject(e)
-          }
-          return
-        }
-        resolve({
-          host: hostList,
-          ...(parked && { parked: { count: parked.added.length, warnings: parked.warnings } })
-        })
-      }
-
-      const isMakeConf = () => {
-        return !['java', 'node', 'go', 'python', 'tomcat'].includes(host?.type ?? '')
-      }
-
-      const doPark = async (parent: AppHost) => {
-        parked = await parkSubdirectories(
-          parent,
-          hostList,
-          (item) => this._addVhost(item, false),
-          removeParkedFiles
-        )
-        const index = hostList.findIndex((item) => !item.isTop)
-        hostList.splice(index < 0 ? hostList.length : index, 0, ...parked.added)
-        return parked
       }
 
       // License check removed
@@ -203,7 +163,7 @@ export class Host extends Base {
       // #700: backend symmetric check — reject add/edit when another site shares
       // the same name AND any same-protocol listening port (defends against
       // bypassing the frontend validation).
-      if ((flag === 'add' || flag === 'edit') && host?.name) {
+      if ((flag === 'add' || flag === 'edit') && isVhost(host) && host.name) {
         const samePort = (a: AppHost, b: AppHost) => {
           const httpDup =
             a.port?.nginx === b.port?.nginx ||
@@ -232,118 +192,116 @@ export class Host extends Base {
             samePort(h, host)
         )
         if (conflict) {
-          reject(new Error(I18nT('host.samePortTips')))
-          return
+          throw new Error(I18nT('host.samePortTips'))
         }
       }
 
-      if ((flag === 'add' || flag === 'edit') && host.type === 'tomcat') {
-        await validateTomcatSite(host as TomcatSiteHost, hostList as TomcatSiteHost[])
-        await updateAutoSSL(host, old ?? ({} as AppHost))
-        if (host.useSSL && (!host.ssl?.cert || !host.ssl?.key)) {
-          reject(new Error('Tomcat SSL requires a certificate and private key'))
-          return
-        }
+      const base = global.Server.BaseDir!
+      const legacyName = current?.name?.toLowerCase()
+      const legacyOwner =
+        legacyName &&
+        !hostList.some(
+          (item) =>
+            item !== current &&
+            (item.name?.toLowerCase() === legacyName ||
+              String(item.id).toLowerCase() === legacyName)
+        )
+          ? current.name
+          : undefined
+      const paths = websitePaths(base, host.id, legacyOwner)
+      const touched = new Map<AppHost, Awaited<ReturnType<typeof snapshotWebsiteFiles>>>()
+      const uncertainPaths: string[] = []
+      const cleanup = async (item: AppHost) => {
+        const snapshot = touched.get(item)
+        if (!snapshot) return
+        touched.delete(item)
+        const failures = await snapshot.restore()
+        uncertainPaths.push(...failures)
+        if (failures.length) throw new Error(failures.join(', '))
       }
-
-      let index: number
-      switch (flag) {
-        case 'park': {
-          const current = hostList.find((item) => item.id === host.id)
-          if (!current || JSON.stringify(current) !== JSON.stringify(old)) {
-            reject(new Error('The website changed. Refresh the list before adding sites.'))
-            break
-          }
-          if (current.type && current.type !== 'php') {
-            reject(new Error('Subdirectory sites require a PHP or static website.'))
-            break
-          }
-          const result = await doPark(current)
-          if (result.added.length) {
-            await writeHostFile()
-          } else {
-            resolve({ host: hostList, parked: { count: 0, warnings: result.warnings } })
-          }
-          break
-        }
-        case 'add':
-          {
-            if (isMakeConf()) {
-              await this._addVhost(host)
-            }
-            const topList = hostList.filter((h) => !!h?.isTop)
-            hostList.splice(topList.length, 0, host)
-            if (park && (!host.type || host.type === 'php')) await doPark(host)
-            await writeHostFile()
-          }
-          break
-        case 'del':
-          if (host?.name) {
-            if (host.type === 'tomcat') {
-              // Tomcat site reconciliation owns the transaction. Keep the generated
-              // certificate directory until the save has committed successfully.
-            } else {
-              await this._delVhost(host)
-            }
-          }
-          index = hostList.findIndex((h) => h.id === host.id)
-          if (index >= 0) {
-            hostList.splice(index, 1)
-          }
-          await writeHostFile()
-          break
-        case 'edit':
-          if (isMakeConf()) {
-            // vhost files are named by host.id (rename-stable). id is unchanged
-            // on edit, so old/host share the same base. (#700)
-            const confBase = `${old?.id}`
-            const nginxConfPath = join(global.Server.BaseDir!, 'vhost/nginx/', `${confBase}.conf`)
-            const apacheConfPath = join(global.Server.BaseDir!, 'vhost/apache/', `${confBase}.conf`)
-            const frankenphpConfPath = join(
-              global.Server.BaseDir!,
-              'vhost/frankenphp/',
-              `${confBase}.conf`
+      const removeRequired = async (files: string[]) => {
+        const failures = await removeWebsiteFiles(files)
+        if (failures.length)
+          throw new Error(`Could not remove website configuration: ${failures.join(', ')}`)
+      }
+      const dropVhost = Boolean(current && isVhost(current) && (flag === 'del' || !isVhost(host)))
+      let parked: Awaited<ReturnType<typeof parkSubdirectories>> | undefined
+      try {
+        if (flag !== 'park') {
+          const writesVhost = flag !== 'del' && isVhost(host)
+          const writesCertificate =
+            writesVhost || dropVhost || (host.type === 'tomcat' && flag !== 'del')
+          if (writesVhost || dropVhost || writesCertificate) {
+            touched.set(
+              host,
+              await snapshotWebsiteFiles(
+                writesVhost || dropVhost ? paths.configs : [],
+                writesCertificate ? paths.certificate : undefined
+              )
             )
+          }
+          if (dropVhost) await removeRequired([...paths.configs, paths.certificate])
+          if (writesVhost) {
             if (
-              !existsSync(nginxConfPath) ||
-              !existsSync(apacheConfPath) ||
-              !existsSync(frankenphpConfPath) ||
-              host.useSSL !== old?.useSSL
+              flag === 'edit' &&
+              current.useSSL === host.useSSL &&
+              paths.configs.slice(0, 4).every(existsSync)
             ) {
-              await this._delVhost(old!)
-              await this._addVhost(host)
+              await this._editVhost(host, current)
             } else {
-              await this._editVhost(host, old)
+              if (flag === 'edit') {
+                await removeRequired(paths.configs)
+                if (!host.useSSL) await removeRequired([paths.certificate])
+              }
+              await this._addVhost(host)
             }
-          } else if (host.type !== 'tomcat') {
-            if (old?.name) {
-              await this._delVhost(old!)
+          } else if (flag !== 'del' && host.type === 'tomcat') {
+            await validateTomcatSite(host as TomcatSiteHost, hostList as TomcatSiteHost[])
+            await updateAutoSSL(host, current ?? ({} as AppHost))
+            if (host.useSSL && (!host.ssl?.cert || !host.ssl?.key)) {
+              throw new Error('Tomcat SSL requires a certificate and private key')
             }
           }
-          index = hostList.findIndex((h) => h.id === old?.id)
-          if (index >= 0) {
-            hostList[index] = host
-          }
-          if (park && (!host.type || host.type === 'php')) await doPark(host)
-          await writeHostFile()
-          break
+          if (flag === 'add') hostList.splice(hostList.filter((site) => site.isTop).length, 0, host)
+          if (flag === 'edit') hostList[index] = host
+          if (flag === 'del') hostList.splice(index, 1)
+        }
+        if (flag === 'park' || (park && flag !== 'del' && (!host.type || host.type === 'php'))) {
+          parked = await parkSubdirectories(
+            flag === 'park' ? current : host,
+            hostList,
+            async (item) => {
+              const child = websitePaths(base, item.id)
+              touched.set(item, await snapshotWebsiteFiles(child.configs, child.certificate))
+              await this._addVhost(item, false)
+            },
+            cleanup
+          )
+          const insert = hostList.findIndex((site) => !site.isTop)
+          hostList.splice(insert < 0 ? hostList.length : insert, 0, ...parked.added)
+        }
+        if (flag !== 'park' || parked?.added.length) {
+          await beforeCommit?.(hostList)
+          await saveHostList(hostList)
+        }
+      } catch (error) {
+        await Promise.allSettled([...touched.keys()].map(cleanup))
+        if (uncertainPaths.length) throw websiteWriteUnknown(error, uncertainPaths)
+        throw error
       }
-    })
-  }
 
-  _delVhost(host: AppHost) {
-    return new ForkPromise(async (resolve) => {
-      await delNginxVhost(host)
-      await delApacheVhost(host)
-      await delCaddyVhost(host)
-      await delFrankenPHPVhost(host)
-      const autoCA = join(global.Server.BaseDir!, `CA/${host.id}`)
-      if (existsSync(autoCA)) {
-        try {
-          await removeByRoot(autoCA)
-        } catch {}
+      const warnings: string[] = []
+      if (flag === 'del' && dropVhost) {
+        const remainingLogs = await removeWebsiteFiles(paths.logs)
+        if (remainingLogs.length)
+          warnings.push(`Could not remove website logs: ${remainingLogs.join(', ')}`)
       }
-      resolve(true)
+      resolve({
+        host: hostList,
+        ...(parked && { parked: { count: parked.added.length, warnings: parked.warnings } }),
+        ...(uncertainPaths.length && { outcome: 'unknown' }),
+        ...(warnings.length && { warnings })
+      })
     })
   }
 
@@ -389,6 +347,9 @@ export class Host extends Base {
     return new ForkPromise(async (resolve) => {
       await updateRootRule(host, old)
       await updateAutoSSL(host, old)
+      if (host.useSSL && (!host.ssl?.cert || !host.ssl?.key)) {
+        throw new Error('HTTPS requires a certificate and private key.')
+      }
       await updateApacheConf(host, old)
       await updateNginxConf(host, old)
       await updateCaddyConf(host, old)
@@ -405,6 +366,9 @@ export class Host extends Base {
          */
         autoFillNginxRewrite(host, chmod)
         await updateAutoSSL(host, {} as any)
+        if (host.useSSL && (!host.ssl?.cert || !host.ssl?.key)) {
+          throw new Error('HTTPS requires a certificate and private key.')
+        }
 
         await makeCaddyConf(host)
         await makeFrankenPHPConf(host)

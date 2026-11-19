@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import type { AppHost } from '../src/shared/app'
 import { fetchHostList, saveHostList } from '../src/fork/module/Host/HostFile'
+import { parkSubdirectories } from '../src/fork/module/Host/ParkSubdirectories'
+import * as Transaction from '../src/fork/module/Host/Transaction'
 import {
   exportWebsiteBackup,
   importWebsiteBackup,
@@ -46,6 +48,116 @@ const noWrite = async () => {
 const file = (path: string, value: unknown) => writeFile(path, JSON.stringify(value))
 const assertAbsent = (path: string) => assert.rejects(readFile(path), { code: 'ENOENT' })
 
+async function verifyRegularWrites() {
+  const live = record(701, 'transaction.localhost') as AppHost
+  const other = record(702, 'sibling.localhost') as AppHost
+  const dirs = ['nginx', 'apache', 'caddy', 'frankenphp', 'rewrite']
+  await Promise.all(dirs.map((kind) => mkdir(join(base, 'vhost', kind), { recursive: true })))
+  await mkdir(join(root, 'good'), { recursive: true })
+  await mkdir(join(root, 'failed'), { recursive: true })
+  await file(hostFile, [live, other])
+  let failCommit = false
+  const { Host } = await loadIsolated(
+    'src/fork/module/Host/index.ts',
+    {
+      '../Base': { Base: class {} },
+      '@lang/runtime': { I18nT: (key: string) => key },
+      '../../Fn': {},
+      '@shared/ForkPromise': { ForkPromise },
+      '../Caddy/Host': {},
+      '../Apache/Host': {},
+      '../FrankenPHP/Host': {},
+      '../Nginx/Host': {},
+      './Host': {},
+      './Task': {},
+      './HostFile': {
+        fetchHostList,
+        saveHostList: (list: AppHost[]) => (failCommit ? noWrite() : saveHostList(list))
+      },
+      './WebsiteBackup': {},
+      './ParkSubdirectories': { parkSubdirectories },
+      '../Tomcat/Site': {},
+      '@shared/utils': { isWindows: () => false, isMacOS: () => false },
+      '@shared/PlatFormConst': {},
+      '@shared/WindowsSystemPaths': {},
+      './SystemHostsBlock': {},
+      './UnixHosts': {},
+      '@shared/OperationTiming': {},
+      '@shared/WindowsDnsRefresh': {},
+      './Transaction': Transaction
+    },
+    { global }
+  )
+  const host = new Host()
+  const siteFile = (kind: string, id: number) => join(base, 'vhost', kind, id + '.conf')
+  const certDir = join(base, 'CA', String(live.id))
+  const certFile = join(certDir, 'certificate.key')
+  const originalCert = Buffer.from([0xff, 0x0a, 0x00])
+  await mkdir(certDir, { recursive: true })
+  await writeFile(certFile, originalCert, { mode: 0o600 })
+  await Promise.all(dirs.map((kind) => writeFile(siteFile(kind, live.id), kind)))
+
+  host._editVhost = async () => {
+    await writeFile(siteFile('nginx', live.id), 'partial change')
+    await writeFile(certFile, 'replacement certificate')
+    await writeFile(join(certDir, 'new-file'), 'partial change')
+    throw new Error('fixture server file failed')
+  }
+  const originalList = await readFile(hostFile)
+  await assert.rejects(
+    Promise.resolve(host.handleHost({ ...live, mark: 'changed' }, 'edit', live)),
+    /fixture server file failed/
+  )
+  assert.equal(await readFile(siteFile('nginx', live.id), 'utf8'), 'nginx')
+  assert.deepEqual(await readFile(certFile), originalCert)
+  await assertAbsent(join(certDir, 'new-file'))
+  assert.deepEqual(await readFile(hostFile), originalList)
+
+  host._addVhost = async (item: AppHost) => {
+    await writeFile(siteFile('nginx', item.id), item.name)
+  }
+  failCommit = true
+  const unsaved = record(703, 'unsaved.localhost') as AppHost
+  await assert.rejects(
+    Promise.resolve(host.handleHost(unsaved, 'add')),
+    /fixture host-list write failed/
+  )
+  await assertAbsent(siteFile('nginx', unsaved.id))
+  const log = join(base, 'vhost', 'logs', live.id + '.log')
+  await mkdir(join(base, 'vhost', 'logs'), { recursive: true })
+  await writeFile(log, 'existing log')
+  await assert.rejects(
+    Promise.resolve(host.handleHost(live, 'del', live)),
+    /fixture host-list write failed/
+  )
+  assert.equal(await readFile(siteFile('apache', live.id), 'utf8'), 'apache')
+  assert.deepEqual(await readFile(certFile), originalCert)
+  assert.equal(await readFile(log, 'utf8'), 'existing log')
+  assert.deepEqual(await readFile(hostFile), originalList)
+
+  failCommit = false
+  let failedPath = ''
+  host._addVhost = async (item: AppHost) => {
+    const config = siteFile('nginx', item.id)
+    if (item.projectName === 'failed') {
+      failedPath = config
+      // Force a rollback error without depending on the test user's permissions.
+      await mkdir(config)
+      throw new Error('fixture parked write failed')
+    }
+    await writeFile(config, item.name)
+  }
+  const parked = await host.handleHost(live, 'park', live)
+  assert.equal(parked.outcome, 'unknown')
+  assert.equal(parked.parked.count, 1)
+  assert.match(parked.parked.warnings.join('\n'), /fixture parked write failed/)
+  assert.ok(parked.parked.warnings.some((warning: string) => warning.includes(failedPath)))
+  assert.deepEqual(
+    (await fetchHostList(false)).map((item) => item.name),
+    ['good.transaction.localhost', live.name, other.name]
+  )
+}
+
 try {
   await Promise.all([mkdir(base), mkdir(root), mkdir(templates)])
   const platform =
@@ -56,6 +168,9 @@ try {
     await cp(resolve('static/tmpl', name), join(destination, name))
   }
   global.Server = { BaseDir: base, Static: templates } as typeof global.Server
+  await verifyRegularWrites()
+  await rm(join(base, 'vhost'), { recursive: true })
+  await rm(join(base, 'CA'), { recursive: true })
   const legacy = record('Aa70c8Cj5miL3', 'old.localhost')
   const current = record(9, 'live.localhost')
   await file(hostFile, [current])
@@ -353,6 +468,16 @@ assert.equal(lostExport.dispatched[1].action, 'reorderHost')
 lostExport.dispatched[1].finish({ code: 0 })
 assert.equal((await following).code, 0)
 
+const partialPark = managerFixture()
+const parkedWrite = partialPark.manager.send('host', 'handleHost')
+const nextWrite = partialPark.manager.send('host', 'reorderHost')
+await flush()
+const partialResult = { outcome: 'unknown', host: [{ id: 1 }], parked: { count: 1 } }
+partialPark.dispatched[0].finish({ code: 0, data: partialResult })
+assert.deepEqual((await parkedWrite).data, partialResult)
+assert.match((await nextWrite).msg, /previous website write/)
+assert.equal(partialPark.dispatched.length, 1)
+
 console.log(
-  'Website backup roundtrip, legacy sidecars, rollback, controller lifecycle, and cross-worker admission passed.'
+  'Website backup roundtrip, regular write rollback, partial parking, and cross-worker admission passed.'
 )

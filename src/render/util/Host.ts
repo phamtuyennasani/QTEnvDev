@@ -64,8 +64,8 @@ export const handleHost = (
             IPC.off(key)
             if (res?.data?.host) {
               handleHostEnd(res.data.host, flag === 'add')
-              const warnings = res.data.parked?.warnings
-              if (Array.isArray(warnings) && warnings.length) {
+              const warnings = [...(res.data.warnings ?? []), ...(res.data.parked?.warnings ?? [])]
+              if (warnings.length) {
                 MessageWarning(warnings.join('\n'))
               }
               resolve(true)

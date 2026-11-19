@@ -224,7 +224,8 @@ export class WebsiteController {
           includeSubdirectories
         )
         const hosts = Array.isArray(result) ? result : result.hosts
-        operation.status = 'success'
+        const cleanupUnknown = !Array.isArray(result) && result.outcome === 'unknown'
+        operation.status = cleanupUnknown ? 'unknown' : 'success'
         operation.message =
           action === 'del'
             ? 'Website configuration removed. Project files were kept.'
@@ -232,6 +233,10 @@ export class WebsiteController {
         if (!Array.isArray(result)) {
           operation.warnings.push(...result.warnings)
           if (result.message) operation.message = result.message
+        }
+        if (cleanupUnknown) {
+          operation.message +=
+            ' Some configuration files could not be restored. Check the operation details before restarting the app.'
         }
         this.projects = hosts.map(projectFromHost)
         this.selected.project =
@@ -243,7 +248,7 @@ export class WebsiteController {
             operation.warnings.push('Domain refresh: ' + websiteError(error))
           }
         }
-        if (Array.isArray(result) || result.sync) {
+        if (!cleanupUnknown && (Array.isArray(result) || result.sync)) {
           try {
             operation.warnings.push(...(await this.deps.afterCommit()))
           } catch (error) {
@@ -251,7 +256,8 @@ export class WebsiteController {
           }
         }
         this.notify(
-          operation.message + (operation.warnings.length ? ' Check the operation details.' : '')
+          operation.message +
+            (operation.warnings.length && !cleanupUnknown ? ' Check the operation details.' : '')
         )
         return true
       })

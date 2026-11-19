@@ -126,17 +126,20 @@ export const websiteDependencies: WebsiteDependencies = {
     )
     try {
       const hosts = hostList(result)
-      if (action !== 'park' && !includeSubdirectories) return hosts
+      if (action !== 'park' && !includeSubdirectories && !result.warnings) return hosts
       const { count, warnings } = result.parked ?? { count: 0, warnings: [] }
       const added =
         count === 1 ? '1 subdirectory website added.' : count + ' subdirectory websites added.'
       return {
         hosts,
-        warnings,
+        warnings: [...(result.warnings ?? []), ...warnings],
         message:
-          (action === 'park' ? '' : 'Website configuration saved. ') +
-          (count ? added : 'No subdirectory websites added.'),
-        sync: action !== 'park' || count > 0
+          action === 'park' || includeSubdirectories
+            ? (action === 'park' ? '' : 'Website configuration saved. ') +
+              (count ? added : 'No subdirectory websites added.')
+            : undefined,
+        sync: action !== 'park' || count > 0,
+        outcome: result.outcome === 'unknown' ? 'unknown' : undefined
       }
     } catch (error) {
       throw new WebsiteOutcomeUnknown(

@@ -29,6 +29,7 @@ type WebsiteWriteResult = {
   warnings: string[]
   message?: string
   sync?: boolean
+  outcome?: 'unknown'
 }
 export type WebsiteDependencies = {
   ready(): boolean
