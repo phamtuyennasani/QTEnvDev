@@ -30,11 +30,23 @@ try {
     window.versionStarts = []
     window.versionStops = []
     window.visibilityWrites = []
+    window.composerScans = []
+    window.openedLinks = []
     window.failVersionStop = false
     const apacheVersions = ['2.4.60', '2.4.62'].map((version, num) => ({
       version, num, path: '/fixture/apache-' + version, bin: '/fixture/apache-' + version + '/httpd',
       enable: true
     }))
+    const composerVersions = [{ version: '2.8.6', num: 28, path: '/fixture/composer', bin: '/fixture/composer/composer', enable: true }]
+    const redisVersion = { version: '7.4.1', num: 74, path: '/fixture/redis', bin: '/fixture/redis/redis-server', enable: true }
+    const mongoVersion = { version: '8.2.1', num: 82, path: '/fixture/mongodb', bin: '/fixture/mongodb/mongod', enable: true }
+    const nodeVersion = { version: '24.13.0', num: 24, path: '/fixture/node', bin: '/fixture/node/node', enable: true }
+    window.dbGateRuntimeInstalled = false
+    window.dbGateRequests = []
+    const redisConfigPath = '/fixture/redis/redis-7.conf'
+    let redisConfig = ''
+    window.redisConfigInitializations = []
+    window.redisConfigWrites = []
     window.QTEnvDevNodeAPI = {
       ipcReceiveFromMain(listener) { receive = listener },
       ipcSendToMain(channel, key, ...args) {
@@ -45,7 +57,54 @@ try {
           return respond(0)
         }
         if (channel === 'app-fork:version' && action === 'allInstalledVersions') {
-          return respond(0, Object.fromEntries(args[1].map(flag => [flag, flag === 'apache' ? apacheVersions : []])))
+          if (args[1].includes('composer')) window.composerScans.push(args[2].composer?.dirs || [])
+          return respond(0, Object.fromEntries(args[1].map(flag => [
+            flag, flag === 'apache' ? apacheVersions
+              : flag === 'composer' ? composerVersions
+              : flag === 'redis' ? [redisVersion]
+              : flag === 'mongodb' ? [mongoVersion]
+              : flag === 'node' && window.dbGateRuntimeInstalled ? [nodeVersion] : []
+          ])))
+        }
+        if (channel === 'app-fork:mongodb' && action === 'startService') {
+          return respond(0, { 'APP-Service-Start-PID': '4351' })
+        }
+        if (channel === 'app-fork:mongodb' && action === 'stopService') return respond(0)
+        if (channel === 'app-fork:mongodb' && action === 'openDbGate') {
+          window.dbGateRequests.push(args[1])
+          respond(200)
+          window.finishDbGate = () => respond(0, { url: 'http://127.0.0.1:4262' })
+          return
+        }
+        if (channel === 'app-fork:redis' && action === 'listConfigFiles') {
+          return respond(0, [{ name: 'main', path: redisConfigPath, exists: Boolean(redisConfig) }])
+        }
+        if (channel === 'app-fork:redis' && action === 'initConf') {
+          window.redisConfigInitializations.push(args[1])
+          respond(200)
+          window.finishRedisConfig = () => {
+            redisConfig = '# Redis\\nport 6379\\n# keep this setting\\nappendonly yes\\n'
+            respond(0, redisConfigPath)
+          }
+          return
+        }
+        if (channel === 'App-Node-FN' && action === 'fs' && args[2] === redisConfigPath) {
+          if (!key.startsWith('IPC-Key-Sensitive-')) errors.push('Redis config content was sent through logging IPC')
+          if (args[1] === 'writeFile') {
+            redisConfig = args[3]
+            window.redisConfigWrites.push(redisConfig)
+          }
+          return queueMicrotask(() => receive({}, channel, key, args[1] === 'writeFile' ? true : redisConfig))
+        }
+        if (channel === 'app-fork:composer' && action === 'fetchAllOnlineVersion') {
+          return respond(0, [{ version: '2.9.1', appDir: '/fixture/composer-2.9.1', bin: '/fixture/composer-2.9.1/composer', url: 'https://getcomposer.org/download/2.9.1/composer.phar' }])
+        }
+        if (channel === 'App-Node-FN' && action === 'shell' && args[1] === 'openExternal') {
+          window.openedLinks.push(args[2])
+          return queueMicrotask(() => receive({}, channel, key, undefined))
+        }
+        if (channel === 'App-Node-FN' && action === 'dialog' && args[1] === 'showOpenDialog') {
+          return queueMicrotask(() => receive({}, channel, key, { canceled: false, filePaths: ['/other/composer'] }))
         }
         if (channel === 'app-fork:apache' && action === 'startService') {
           window.versionStarts.push(args[1].version)
@@ -67,6 +126,12 @@ try {
           return respond(0)
         }
         if (channel === 'app-fork:golang' && action === 'checkGvm') return respond(0, '')
+        if (channel === 'app-fork:git' && action === 'checkInstalled') {
+          return respond(0, { installed: true, version: 'git version 2.54.0' })
+        }
+        if (channel === 'app-fork:git' && action === 'check') {
+          return respond(0, { items: [{ label: 'Git LFS', ok: false, value: 'git-lfs --version', message: 'Not found' }] })
+        }
         if (channel === 'app-http-serve-manage') {
           if (action === 'start') running = true
           if (action === 'stop') running = false
@@ -115,7 +180,7 @@ try {
   const address = vite.httpServer?.address()
   assert(address && typeof address === 'object')
   const checks = `(async () => {
-    const exact = label => [...document.querySelectorAll('main button')].find(button => button.textContent.trim() === label)
+    const exact = (label, selector = 'main button') => [...document.querySelectorAll(selector)].find(button => button.textContent.trim() === label)
     const has = label => document.querySelector('main').textContent.includes(label)
     const wait = async (condition, label) => {
       for (let i = 0; i < 240; i++) {
@@ -125,9 +190,9 @@ try {
       }
       throw new Error('Timed out: ' + label)
     }
-    const click = async label => {
-      await wait(() => exact(label) && !exact(label).disabled, label)
-      exact(label).click()
+    const click = async (label, selector) => {
+      await wait(() => exact(label, selector) && !exact(label, selector).disabled, label)
+      exact(label, selector).click()
     }
     await wait(() => document.querySelector('.nav-item'), 'shell')
     ;[...document.querySelectorAll('.nav-item')].find(button => button.textContent.includes('Services')).click()
@@ -166,6 +231,44 @@ try {
     navigation('Databases').click()
     await wait(() => document.querySelector('.database-detail-panel h2')?.textContent === 'MariaDB', 'first visible database selected')
     if ([...document.querySelectorAll('.database-item b')].some(b => b.textContent === 'MySQL')) throw new Error('Hidden MySQL is in the database list')
+    const redisRow = () => [...document.querySelectorAll('.database-item')].find(row => row.querySelector('b')?.textContent === 'Redis')
+    await wait(() => redisRow()?.textContent.includes('7.4.1'), 'installed Redis in Databases')
+    redisRow().click()
+    await click('Configuration')
+    await wait(() => typeof window.finishRedisConfig === 'function', 'missing Redis config initialization')
+    await click('Close', '[role=dialog] button')
+    await click('Configuration')
+    window.finishRedisConfig()
+    const redisPort = () => document.querySelector('input[aria-label="Port value"]')
+    await wait(() => redisPort()?.value === '6379' && !redisPort().disabled, 'Redis common settings after reopening')
+    if (window.redisConfigInitializations.length !== 1 || window.redisConfigInitializations[0].bin !== '/fixture/redis/redis-server') {
+      throw new Error('Redis initialization did not target the selected version exactly once')
+    }
+    redisPort().value = '6381'
+    redisPort().dispatchEvent(new Event('input', { bubbles: true }))
+    await click('Raw file', '[role=dialog] button')
+    await wait(() => document.querySelector('[aria-label="Redis configuration file"]')?.value.includes('port 6381'), 'Redis common edit in raw file')
+    await click('Save configuration', '[role=dialog] button')
+    await wait(() => window.redisConfigWrites.length === 1, 'saved Redis configuration')
+    if (window.redisConfigWrites[0] !== '# Redis\\nport 6381\\n# keep this setting\\nappendonly yes\\n') throw new Error('Redis common edit changed an unrelated setting')
+    await wait(() => !exact('Save configuration', '[role=dialog] button'), 'Redis configuration dialog closed')
+    if (exact('Open Redis Commander')) throw new Error('Stopped Redis exposes its admin panel')
+    const mongoRow = () => [...document.querySelectorAll('.database-item')].find(row => row.querySelector('b')?.textContent === 'MongoDB')
+    await wait(() => mongoRow()?.textContent.includes('8.2.1'), 'installed MongoDB in Databases')
+    mongoRow().click()
+    await wait(() => exact('Start') && !exact('Open DbGate'), 'stopped MongoDB admin gate')
+    await click('Start')
+    await click('Open DbGate')
+    await wait(() => document.body.textContent.includes('DbGate requires NodeJS.') && exact('Open DbGate'), 'DbGate preparation reports missing Node')
+    if (window.dbGateRequests.length) throw new Error('DbGate started without Node')
+    window.dbGateRuntimeInstalled = true
+    await click('Open DbGate')
+    await wait(() => window.dbGateRequests.length === 1 && exact('Opening…')?.disabled, 'DbGate starts after Node is detected in Databases')
+    if (window.dbGateRequests[0].bin !== '/fixture/node/node') throw new Error('DbGate did not use the discovered Node binary')
+    window.finishDbGate()
+    await wait(() => window.openedLinks.includes('http://127.0.0.1:4262') && exact('Open DbGate'), 'DbGate terminal result')
+    await click('Stop')
+    await wait(() => !exact('Open DbGate') && exact('Start'), 'DbGate gated after MongoDB stops')
     navigation('Services').click()
     await wait(() => document.querySelector('.service-detail-panel h2')?.textContent !== 'Apache', 'next visible service selected')
     if ([...document.querySelectorAll('.service-item b')].some(b => b.textContent === 'Apache')) throw new Error('Hidden Apache is in the service list')
@@ -228,6 +331,31 @@ try {
     runtime('Go').click()
     await click('Go Version Manager')
     await wait(() => document.querySelector('.runtime-workflow')?.textContent.includes('Install GVM?'), 'GVM controls')
+    document.querySelector('.forge-close').click()
+    await click('Git environment')
+    await wait(() => {
+      const dialog = document.querySelector('.forge-dialog')
+      return dialog?.textContent.includes('git version 2.54.0') &&
+        dialog.textContent.includes('Git LFS') && dialog.textContent.includes('Unavailable')
+    }, 'Git diagnostics and individual unavailable tools')
+    document.querySelector('.forge-close').click()
+    runtime('PHP').click()
+    await click('Composer')
+    await wait(() => document.querySelector('.composer-versions')?.textContent.includes('/fixture/composer'), 'installed Composer')
+    await click('Official downloads', '.composer-actions button')
+    if (!window.openedLinks.includes('https://getcomposer.org/download/')) throw new Error('Composer did not open its official download page')
+    await click('Discovery folders', '.composer-actions button')
+    await wait(() => document.querySelector('.custom-path .add'), 'Composer discovery folder controls')
+    document.querySelector('.custom-path .add').dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await wait(() => document.querySelector('.custom-path input')?.value === '/other/composer', 'Composer custom folder')
+    document.querySelector('.custom-path .el-dialog__headerbtn').click()
+    await wait(() => window.composerScans.some(dirs => dirs.includes('/other/composer')), 'Composer rescanned custom folder')
+    await click('Manage Composer packages', '.composer-actions button')
+    await wait(() => document.querySelector('.package-toolbar select')?.value === 'composer' &&
+      document.querySelector('.package-table')?.textContent.includes('2.9.1'), 'Composer package catalog')
+    document.querySelector('.package-close').click()
+    await click('+ Add runtime')
+    await wait(() => document.querySelector('.package-toolbar select')?.value === 'php', 'ordinary package entry selects PHP again')
   })()`
   const entry = join(directory, 'main.cjs')
   await writeFile(
@@ -263,7 +391,7 @@ try {
   })
   assert.equal(result.code, 0, result.output)
   console.log(
-    'Services Electron UI passed: installed versions, module visibility, tunnel lifecycle, HTTP Serve, Podman and runtime managers.'
+    'Services Electron UI passed: installed versions, module visibility, Redis configuration, database admin gates, tunnel lifecycle, HTTP Serve, Podman, runtime managers, Git diagnostics and Composer.'
   )
 } finally {
   await vite.close()
