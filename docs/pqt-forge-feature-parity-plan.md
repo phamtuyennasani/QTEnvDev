@@ -35,8 +35,8 @@ This document tracks the migration from the legacy renderer (src/render) to the 
 
 ## Phase 3 — toolbox parity
 
-- [ ] Compare every legacy tool input/action/output with its new panel.
-- [x] Migrate Capturer and Site Sucker with progress, cancellation, cleanup, and explicit file/network limits.
+- [ ] Compare every legacy tool input/action/output with its new panel. Source audit is being recorded in `docs/pqt-forge-tool-audit.md`; panel wiring alone does not prove parity.
+- [ ] Migrate Capturer and Site Sucker with progress, cancellation, cleanup, and explicit file/network limits. Preserve the legacy URL substring filter separately from the numeric page cap.
 - [ ] Complete image pipeline options, favorites, custom tools, and tool-specific settings.
 
 ## Verification

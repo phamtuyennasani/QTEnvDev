@@ -1,11 +1,23 @@
-import { reactiveBind } from '@/util/Index'
+import { reactiveBind, uuid } from '@/util/Index'
 import IPC from '@/util/IPC'
-type CapturerConfig = { key: string[]; dir: string; name: string; trialStartTime: number }
-class CapturerController {
-  config: CapturerConfig = { key: [], dir: '', name: 'qtenvdev-capturer-{timestamp}', trialStartTime: 0 }; running = false; error = ''; status = 'Idle'
-  async saveConfig() { await this.request('Capturer:Config-Update', this.config); this.status = 'Configuration saved' }
-  async capture(hideWindow = false) { if (this.running) return false; this.running = true; this.error = ''; this.status = 'Capturing'; try { await this.request('Capturer:doCapturer', hideWindow); this.status = 'Capture window opened'; return true } catch (e) { this.error = String(e); this.status = 'Failed'; return false } finally { this.running = false } }
-  async cancel() { await this.request('Capturer:doStopCapturer'); this.status = 'Capture stopped'; this.running = false }
-  private request(command: string, ...args: unknown[]) { return new Promise<any>((resolve, reject) => { IPC.send(command, ...args).then((key: string, response: any) => { IPC.off(key); if (response?.code === 0 || response === true || response === undefined) resolve(response); else reject(new Error(response?.msg ?? (command + ' failed'))) }) }) }
-}
-export const capturerController = reactiveBind(new CapturerController())
+import { StorageGetAsync, StorageSetAsync } from '@/util/Storage'
+import localForage from 'localforage'
+import { SetupStore } from '@/components/Setup/store'
+import { CapturerOperation, CapturerOutcomeUnknown } from './CapturerOperation'
+const request = (command: string, ...args: unknown[]) => new Promise<any>((resolve, reject) => {
+  const sent = IPC.send(command, ...args)
+  const timer = setTimeout(() => { IPC.off(sent.key); reject(new CapturerOutcomeUnknown('The native capture command did not reply. Check status before retrying.')) }, 15000)
+  sent.then((key: string, response: any) => {
+    clearTimeout(timer); IPC.off(key)
+    if (response?.code === 1) reject(new Error(response.msg || command + ' failed'))
+    else resolve(response?.code === 0 ? response.data : response)
+  })
+})
+export const capturerController = reactiveBind(new CapturerOperation({
+  load: () => StorageGetAsync('pqt-forge-capturer-config'),
+  legacy: () => localForage.getItem('qtenvdev-capturer-setup'),
+  save: (config) => StorageSetAsync('pqt-forge-capturer-config', config),
+  request,
+  subscribe(callback) { IPC.on('App-Capturer-State').then((_key: string, event: any) => callback(event)); return () => IPC.off('App-Capturer-State') },
+  id: uuid, now: () => Math.floor(Date.now() / 1000), active: () => SetupStore().isActive
+}))

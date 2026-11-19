@@ -48,6 +48,7 @@ export const Setup: SetupType = reactive<SetupType>({
     }
     this.fetchListing = true
     IPC.send('app-fork:tools', 'envPathList').then((key: any, res: any) => {
+      if (res?.code === 200) return
       IPC.off(key)
       this.fetchListing = false
       if (res?.code === 0) {
@@ -75,6 +76,7 @@ export const Setup: SetupType = reactive<SetupType>({
     this.updating = true
     IPC.send('app-fork:tools', 'envPathUpdate', JSON.parse(JSON.stringify(arr)), expectedPath).then(
       (key: any, res: any) => {
+        if (res?.code === 200) return
         IPC.off(key)
         if (res?.code === 0) {
           this.fetchList()
@@ -89,8 +91,9 @@ export const Setup: SetupType = reactive<SetupType>({
     )
   },
   rebackPath() {
+    if (this.updating || this.fetchListing) return
     this.list.splice(0)
-    this.list.push(...this.listBack)
+    this.list.push(...JSON.parse(JSON.stringify(this.listBack)))
   },
   savePath() {
     const list = this.list.map((p) => p.path)

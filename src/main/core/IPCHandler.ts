@@ -65,6 +65,8 @@ export interface IPCHandlerDependencies {
 export default class IPCHandler extends EventEmitter {
   private deps: IPCHandlerDependencies
   private capturerConfig?: any
+  private siteSuckerEpoch = 0
+  private siteSuckerStarting = false
 
   constructor(dependencies: IPCHandlerDependencies) {
     super()
@@ -73,6 +75,7 @@ export default class IPCHandler extends EventEmitter {
 
   private loadCapturer() {
     return capturerRuntime.load().then((capturer) => {
+      capturer.setCallback((event) => this.sendToMainWindow('App-Capturer-State', 'App-Capturer-State', event))
       if (this.capturerConfig) capturer.configUpdate(this.capturerConfig)
       return capturer
     })
@@ -98,6 +101,13 @@ export default class IPCHandler extends EventEmitter {
 
   private handleSiteSuckerLink(link: any) {
     if (!this.deps.mainWindow) return
+    if (link?.operationId && link?.kind) {
+      this.deps.windowManager.sendCommandTo(this.deps.mainWindow, 'App-SiteSucker-State', 'App-SiteSucker-State', link)
+      // Preserve the legacy progress bridge while the new renderer uses correlated events.
+      if (link.kind === 'link') this.deps.windowManager.sendCommandTo(this.deps.mainWindow, 'App-SiteSucker-Link', 'App-SiteSucker-Link', link.link)
+      else if (link.kind === 'terminal') this.deps.windowManager.sendCommandTo(this.deps.mainWindow, 'App-SiteSucker-Link-Stop', 'App-SiteSucker-Link-Stop', link.result)
+      return
+    }
     if (link === 'window-close') {
       this.deps.windowManager.sendCommandTo(
         this.deps.mainWindow,
@@ -600,7 +610,10 @@ export default class IPCHandler extends EventEmitter {
         this.handleCapturer(command, key, args)
         break
       case 'Capturer:doStopCapturer':
-        this.handleStopCapturer(command, key)
+        this.handleStopCapturer(command, key, args)
+        break
+      case 'Capturer:status':
+        this.sendToMainWindow(command, key, { code: 0, data: capturerRuntime.peek()?.status() ?? { id: '', status: 'idle' } })
         break
       case 'Capturer:getWindowCapturer':
         this.handleGetWindowCapturer(command, key, args)
@@ -641,6 +654,9 @@ export default class IPCHandler extends EventEmitter {
         break
       case 'app-sitesucker-stop':
         this.handleSiteSuckerStop(command, key)
+        break
+      case 'app-sitesucker-status':
+        this.sendToMainWindow(command, key, { code: 0, data: siteSuckerRuntime.peek()?.status() ?? null })
         break
       case 'app-sitesucker-setup':
         this.handleSiteSuckerSetup(command, key)
@@ -967,28 +983,23 @@ export default class IPCHandler extends EventEmitter {
 
   private handleCapturer(command: string, key: string, args: any[]) {
     this.loadCapturer()
-      .then((capturer) => {
+      .then(async (capturer) => {
         const isHide: any = args[0]
         if (isHide && this.deps.mainWindow?.isVisible()) {
-          this.deps.mainWindow.once('hide', () => {
-            setTimeout(() => {
-              capturer.initWatchPointWindow().catch()
-              this.deps.mainWindow?.setOpacity(1)
-            }, 150)
-          })
           this.deps.mainWindow.setOpacity(0)
           this.deps.mainWindow.hide()
-        } else {
-          capturer.initWatchPointWindow().catch()
+          await new Promise((resolve) => setTimeout(resolve, 150))
         }
-        this.sendToMainWindow(command, key, true)
+        try { const result = await capturer.initWatchPointWindow(args[1]); this.sendToMainWindow(command, key, { code: 0, data: result }) }
+        finally { this.deps.mainWindow?.setOpacity(1) }
       })
       .catch((error) => this.sendRuntimeError(command, key, error))
   }
 
-  private handleStopCapturer(command: string, key: string) {
+  private handleStopCapturer(command: string, key: string, args: any[]) {
     const capturer = capturerRuntime.peek()
-    capturer?.stopCapturer()
+    const result = capturer?.stopCapturer(args[0] === 'saving' ? 'saving' : 'cancelled')
+    this.sendToMainWindow(command, key, { code: 0, data: result ?? { id: '', status: 'idle' } })
     if (capturer?.window) {
       this.deps.windowManager.sendCommandTo(capturer.window, command, key, true)
     }
@@ -1015,10 +1026,11 @@ export default class IPCHandler extends EventEmitter {
 
   private handleSaveImage(command: string, key: string, args: any[]) {
     const capturer = capturerRuntime.peek()
-    capturer?.saveImage(args[0], args[1])
-    if (capturer?.window) {
-      this.deps.windowManager.sendCommandTo(capturer.window, command, key, true)
-    }
+    if (!capturer) { this.sendRuntimeError(command, key, new Error('Capturer is not initialized')); return }
+    capturer.saveImage(args[0], args[1]).then((result) => {
+      this.sendToMainWindow(command, key, { code: 0, data: result })
+      if (capturer.window) this.deps.windowManager.sendCommandTo(capturer.window, command, key, true)
+    }).catch((error) => this.sendRuntimeError(command, key, error))
   }
 
   private handleCapturerConfigUpdate(command: string, key: string, args: any[]) {
@@ -1065,17 +1077,29 @@ export default class IPCHandler extends EventEmitter {
   // ===== SiteSucker =====
 
   private handleSiteSuckerRun(command: string, key: string, args: any[]) {
+    if (this.siteSuckerStarting || siteSuckerRuntime.peek()?.status()?.state === 'running') {
+      this.sendRuntimeError(command, key, new Error('A mirror is already starting or running'))
+      return
+    }
+    this.siteSuckerStarting = true
+    const epoch = ++this.siteSuckerEpoch
     this.loadSiteSucker()
       .then((siteSucker) => {
-        siteSucker.show(args[0])
-        this.sendToMainWindow(command, key, true)
+        if (epoch !== this.siteSuckerEpoch) throw new Error('Mirror start was cancelled')
+        const result = siteSucker.show(args[0])
+        this.sendToMainWindow(command, key, { code: 0, data: result })
       })
       .catch((error) => this.sendRuntimeError(command, key, error))
+      .finally(() => { this.siteSuckerStarting = false })
   }
 
   private handleSiteSuckerStop(command: string, key: string) {
-    siteSuckerRuntime.peek()?.destroy()
-    this.sendToMainWindow(command, key, { code: 0, data: true })
+    this.siteSuckerEpoch += 1
+    // Await the same lazy load so a stop cannot acknowledge before a pending start.
+    const runtime = this.siteSuckerStarting ? this.loadSiteSucker() : Promise.resolve(siteSuckerRuntime.peek())
+    runtime.then((siteSucker) => siteSucker?.destroy())
+      .then((result) => this.sendToMainWindow(command, key, { code: 0, data: result ?? null }))
+      .catch((error) => this.sendRuntimeError(command, key, error))
   }
 
   private handleSiteSuckerSetup(command: string, key: string) {

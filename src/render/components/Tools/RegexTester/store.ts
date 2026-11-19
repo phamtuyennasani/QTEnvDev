@@ -14,6 +14,7 @@ const store = reactive({
   visualizerSVG: undefined,
   regexError: undefined,
   results: [],
+  resultsLimited: false,
   sample: '',
   regexValidation() {
     try {
@@ -43,8 +44,10 @@ const store = reactive({
       flags += 'v'
     }
     this.results = reactive([])
+    this.resultsLimited = false
     try {
       this.results = reactive(matchRegex(this.regex, this.text, flags)) as any
+      this.resultsLimited = this.results.length >= 10000
     } catch (_) {}
   },
   computedSample() {

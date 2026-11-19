@@ -32,7 +32,7 @@
   </el-drawer>
 </template>
 <script lang="ts" setup>
-  import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+  import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
   import { AsyncComponentSetup } from '@/util/AsyncComponent'
   import { I18nT } from '@lang/index'
   import type { editor } from 'monaco-editor/esm/vs/editor/editor.api.js'
@@ -40,7 +40,7 @@
   import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController.js'
   import 'monaco-editor/esm/vs/basic-languages/ini/ini.contribution.js'
   import { EditorConfigMake, EditorCreate, EditorDestroy } from '@/util/Editor'
-  import IPC from '@/util/IPC'
+  import { environmentSaveOperation } from './Operation'
   import { MessageError, MessageSuccess } from '@/util/Element'
   import Base from '@/core/Base'
   import { fs } from '@/util/NodeFn'
@@ -56,7 +56,7 @@
     !window.Server.isWindows && /^\/(?:etc|private\/etc|opt\/local)(?:\/|$)/.test(props.file)
   const content = ref('')
   const input = ref()
-  const saving = ref(false)
+  const saving = computed(() => environmentSaveOperation.running)
   let monacoInstance: editor.IStandaloneCodeEditor | undefined
 
   const initEditor = async () => {
@@ -103,20 +103,10 @@
       return
     }
     Base.ConfirmWarning(I18nT('util.toolSaveConfirm')).then(() => {
-      saving.value = true
-      IPC.send(
-        'app-fork:tools',
-        'systemEnvSave',
-        props.file,
-        monacoInstance?.getValue() ?? ''
-      ).then((key: string, res: any) => {
-        IPC.off(key)
-        if (res?.code === 0) {
+      environmentSaveOperation.run('app-fork:tools', ['systemEnvSave', props.file, monacoInstance?.getValue() ?? ''], () => {
           MessageSuccess(I18nT('base.success'))
-        } else {
-          MessageError(res?.msg ?? I18nT('base.fail'))
-        }
-        saving.value = false
+      }).then((done) => {
+        if (!done) MessageError(environmentSaveOperation.error)
       })
     })
   }

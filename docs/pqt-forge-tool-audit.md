@@ -1,0 +1,103 @@
+# PQT Forge toolbox input/action/output audit
+
+Audited: 2026-11-19. Scope: every `src/render/components/Tools/*/Module.ts` discovered by `src/render/core/AppTool.ts`, plus the unregistered `CodeMake` view exposed by the new renderer. `.codegraph/` is absent, so this audit reads the current sources directly.
+
+This is a source audit, not interactive acceptance. **Equivalent** below means the listed input/action/output contract is present in source. **Partial** names a remaining behavior difference. A rendered name, a successful TypeScript build, or the regex assertions in `pqt-forge-phase3-smoke.ts` cannot prove full parity.
+
+## Local utility changes in this audit
+
+- Hash now offers the legacy MD5, SHA1, SHA224, SHA256, SHA384, SHA512, SHA3 (CryptoJS's legacy Keccak implementation), and RIPEMD160 algorithms, with hex, binary, Base64, and Base64url output. Behavioral checks include known MD5, RIPEMD160, SHA256, Base64 and binary vectors.
+- String Base64 now has the legacy URL-safe encode/decode alphabet option.
+- File-to-Base64 now reads a browser `File` as a data URL, preserving arbitrary binary bytes. The previous UTF-8 filesystem read corrupted binary inputs. Both conversion directions enforce a 20 MB limit; invalid Base64 is rejected before opening a save dialog.
+- Token generation validates the length as an integer from 1 to 512 and uses rejection sampling to avoid modulo bias. The default length and symbol alphabet match the legacy tool.
+- HTTP status reference now uses the complete legacy `codesByCategories` dataset. Git and regex references render the complete local legacy Markdown instead of shortened hand-written lists.
+- URL parser now includes username, password and raw search fields that were absent from the new panel.
+
+These changes add no shared configuration, Pinia state, external process or background operation. Inputs/results are view state and helpers are local to `render-next/tools`. Existing file-save execution still uses the established NodeFn filesystem API. A file write is required; cancellation produces no write. Reference rendering is local, with raw HTML disabled.
+
+## Current routing after the audit
+
+`ToolsScreen.vue` now routes the IDs below through `LegacyToolPanel.vue`. The complete established view and its store are reused, including the inputs/actions that were absent from the initial small panels. The initial comparison table that follows is retained as the change rationale; its partial rows for these IDs no longer describe the selected surface.
+
+| New ID | Selected established content | Capabilities restored |
+| --- | --- | --- |
+| `json` | `Json/Index.vue` | Input autodetection, complete output formats, sorting, file open/save, multiple editor tabs |
+| `jwt` | `JWT/Index.vue` | none/HS256/HS384/HS512 token creation, header/payload editing, HMAC signature comparison |
+| `code-library` | `CodeLibrary/index.vue` | Existing persisted data, language visibility, groups/snippet CRUD, ordering, batch moves/deletes |
+| `regex-tester` | `RegexTester/index.vue` | Independent flags, capture/group ranges, sample generation and SVG visualization |
+| `diff` | `DiffCompare/Index.vue` | Inline/line highlights, synchronized editors, navigation, swap/sample/summary |
+| `markdown` | `MarkdownPreview/index.vue` | Existing rich Markdown renderer, multiple tabs, resizable split |
+| `qrcode` | `QRCodeGenerator/index.vue` | Foreground/background colors, correction levels, 1024px output, native save/reveal |
+| `wifi-qrcode` | `WifiQRCodeGenerator/index.vue` | WPA2-EAP method/phase2/identity, colors, hidden SSID, full payload escaping |
+| `file-info` | `FileInfo/Index.vue` | Drag/drop, formatted size, all timestamps and per-hash copy/partial outcomes |
+| `keycode` | `KeycodeInfo/index.vue` | Document key events and per-field copy |
+| `cron-parser` | `CronParser/Index.vue` | Full count control and existing parser/generator |
+| `timestamp` | `Timestamp/Index.vue` | Live current timestamp, datetime picker, unit choices/copy |
+| `websocket` | `WebSocketSSE/Index.vue` | Headers/query/auth/protocols/heartbeat/SSE filters/last ID, JSON message options and logs |
+| `environment` | `SystenEnv/main.vue` | Windows PATH CRUD/order/revert/save/native GUI, Unix startup-file editor |
+| `ssl-maker` | `SSLMake/Index.vue` | Existing path/domain validation and CA/save options |
+| `bom-clean` | `BomClean/Index.vue` | Extension allow-list, progress, per-file outcomes and established scan inputs |
+| `php-obfuscator` | `PhpObfuscator/Index.vue` | Runtime, file/folder inputs, config editor/presets and streamed logs |
+| `playground` | `CodePlayground/index.vue` | Runtime binary choice, tabs, file input/output, format conversion |
+
+Process control has a dedicated Forge wrapper containing the complete PortKill/ProcessKill views and their established validated controller. Capturer, Site Sucker and image pipeline retain dedicated migrations. `provideLegacyToolContext()` supplies Element Plus components/directives, YbIcon, translations and Base helpers through a private descendant context; Tailwind utilities are nested beneath `.pqt-established-tool`, keeping selectors out of the shell.
+
+Reusing a view preserves its feature surface; operation lifecycle correctness still requires the separate operation migrations and tests. The wrapper itself has no operation IPC or replay.
+
+The selected WebSocket/SSE store now rejects duplicate connects, guards WebSocket callbacks by the current socket identity, clears handlers before close, ignores stale SSE results while cleaning terminal listeners, and limits unfinished SSE data to 1 MB. `test:pqt-forge-realtime` exercises those behaviors using controlled WebSocket and IPC transports; it does not establish connectivity with a real remote service.
+
+Regex matching now also preserves zero-width matches with Unicode-aware progress and skips unmatched optional capture ranges instead of throwing away the complete result. A visible 10,000-match limit bounds result rendering. Behavioral checks cover optional captures, named captures, zero-width matches and the nonglobal case.
+
+## Initial per-tool comparison
+
+Legacy paths in this table are relative to `src/render/components/Tools/`; new paths are relative to `src/render-next/`.
+
+| Legacy module | Inputs and actions in legacy | New panel / output | Result and remaining work |
+| --- | --- | --- | --- |
+| `Base64StringConverter` | Independent encode/decode text, URL-safe toggles, copy each result (`store.ts`) | `tools/LocalToolPanel.vue` + `transforms.ts`: operation select, Unicode Base64 and URL-safe option, copy result | Equivalent conversion/output contract; one mode replaces two simultaneous columns. |
+| `Base64FileConverter` | File picker/drop → data URL/copy; Base64 validation, image preview, save/reveal file (`index.vue`) | `components/Base64FilePanel.vue`: binary-safe picker/drop → data URL/copy, preview, validated save/reveal, 20 MB cap | Equivalent visible actions, with strict bounds and a stale-read guard. A folder-reveal failure preserves the successful saved path. |
+| `BomClean` | Multiple scan tabs, exclusions, extension selection, progress, end/stop, candidate list and per-file state (`Index.vue`, `store.ts`) | `components/BomCleanPanel.vue`: one path/exclusions, scan list, clean counts | Partial: extension allow-list, per-file progress, stop, multiple tabs and operation ownership are absent. Panel still owns IPC and loading state. |
+| `Capturer` | Shortcut input, save folder, naming tokens, configuration persistence/trial gate, capture window (`index.vue`, `setup.ts`) | `components/CapturerPanel.vue`, `state/capturerController.ts` | Partial pending lifecycle work: open acknowledgement is not a saved/cancelled terminal event; initial controller clears running on open and disables stop, has read-only shortcut and no legacy settings migration. See capture/site contract document. |
+| `ChmodCalculator` | Nine owner/group/public permission checkboxes → octal + symbolic; copy chmod command | `components/ChmodPanel.vue`: same permissions/output/copy | Equivalent input/output contract. |
+| `CodeLibrary` | Persistent language visibility, language tabs, group CRUD/reorder/move-to-top, snippet CRUD/group moves, Monaco editor (`setup.ts`, group/content views) | `components/CodeLibraryPanel.vue`: search/language filter, snippet CRUD, free text group, textarea, separate localStorage | Partial: existing `qtenvdev-code-library` data is not loaded; dedicated groups/reorder/move, visibility and established persistence are absent. |
+| `CodePlayground` | Multiple tabs, detected/input language, installed runtime binary selection, open file, run, output conversion, save output (`index.vue`, `setup.ts`) | `components/CodePlaygroundPanel.vue`, `state/codePlaygroundController.ts`: one language/code, run/clear text output | Partial: explicit runtime binary selection, file input, tabs, output conversion/save absent. Verify `codeRun` arguments against fork signature; new controller passes empty runtime path. |
+| `CronParser` | Unix/Quartz mode, generator presets/fields, expression examples, count 1–30, descriptions, next runs (`Index.vue`, `store.ts`) | `components/CronParserPanel.vue`: uses same established store/modes/generator/parser | Partial: run count control is absent in the new panel (store count remains available). |
+| `DiffCompare` | Two synchronized Monaco editors, line + inline diff, line numbers, next/previous change, swap, sample, copy summary (`Index.vue`) | `tools/LocalToolPanel.vue` + `transforms.ts`: two textareas, LCS unified line output/copy, 700-line cap | Partial: inline highlighting, navigation, swap/sample and synchronized editors absent. |
+| `Encryption` | AES/TripleDES/Rabbit/RC4; independent plaintext/secret/algo and ciphertext/secret/algo, copy outputs (`store.ts`) | `components/EncryptionPanel.vue`: same algorithm/input/output choices | Equivalent algorithm/input/output contract. Decrypt failures produce an empty string as in legacy. |
+| `EscapeHTML` | Escape/unescape the five lodash HTML entities, independent input/output and copy (`store.ts`) | `tools/LocalToolPanel.vue` + `transforms.ts`: selected direction and copy | Equivalent transformation contract; one mode replaces simultaneous columns. |
+| `FileInfo` | File picker/drop; formatted byte size; access, modify, change, birth times; md5/sha1/sha256/sha512/sha512Base64; individual copy (`Index.vue`) | `components/FileInfoPanel.vue`: picker, raw bytes, access/modify/birth times and same hashes | Partial: change time, formatted size, drop, copy actions absent; one hash rejection currently rejects all hash display instead of preserving siblings. |
+| `GitCheatsheet` | Complete local English/Vietnamese Markdown reference (`lang/*.md`, `index.vue`) | `components/GitCheatsheetPanel.vue`: same full local references, explicit language select | Equivalent reference content. Legacy editor-specific layout differs. |
+| `HashText` | Eight algorithms displayed simultaneously, four digest encodings and per-result copy (`store.ts`) | `tools/LocalToolPanel.vue` + `transforms.ts`: same algorithms/encodings, selected algorithm + result/copy | Equivalent algorithm/output choices; simultaneous matrix replaced by selected algorithm. |
+| `HTTPStatusCodes` | Category/code/name/description/type reference (`http-status-codes.constants.ts`) | `components/HttpStatusPanel.vue`: complete same dataset, text filter | Equivalent dataset; dedicated category headings/type display absent. Search includes the type. |
+| `ImageCompress` | Basic resize/fit/kernel/position, no enlargement/reduction, seven format options, metadata/ICC/timeout, all effects, watermark, texture, previews; batch save/overwrite/backup/progress (`setup.ts`, configuration components) | `components/ImageCompressPanel.vue`, `ImagePipelineOptions.vue`: legacy config/batch integration | Owned by image migration. Completeness requires all configuration groups and persistence plus operation lifecycle verification; original seven-field options were only partial. |
+| `Json` | Auto parse JSON/PHP/Plist/XML/YAML/TOML/JavaScript; JSON/minify/JS/PHP/XML/Plist/YAML/TS/TOML/Go/BSON/Java/Kotlin/Rust/JSDoc/MySQL outputs; key sort; tabs; file input/save (`store.ts`, `Index.vue`) | `tools/LocalToolPanel.vue`: JSON parse/pretty/minify only | Partial: all other input/output formats, key sort, tabs, file input/save absent. |
+| `JWT` | Header/payload JSON + none/HS256/HS384/HS512/secret → token; decode + signature compare + copy (`store.ts`, `Index.vue`) | `tools/LocalToolPanel.vue`: header/payload decode only with unverified warning | Partial: token creation and HMAC signature verification absent. Warning correctly describes the current capability. |
+| `KeycodeInfo` | Document keyboard listener → key/keyCode/code/location/modifiers, copy fields (`index.vue`) | `components/KeycodePanel.vue`: focused listener → same fields | Partial: per-field copy absent. Focus is deliberately confined to panel. |
+| `MarkdownPreview` | Multiple tabs, open file, source/HTML, rich Markdown rendering, resizable split (`index.vue`, `setup.ts`) | `components/MarkdownPanel.vue`: one source, open file/copy, MarkdownIt preview with raw HTML disabled | Partial: tabs, resizable split and legacy renderer/plugin formatting absent. |
+| `MIMETypes` | MIME→extensions, extension→MIME, complete table through `mime.types()` (`index.vue`) | `components/MimeTypesPanel.vue`: same source/lookups + text filter | Equivalent lookup contract. Filtered display capped at 300 rows; exact lookups use complete maps. |
+| `PhpObfuscator` | PHP runtime/source/destination, file/folder chooser, config editor with predefined reset presets, streamed logs (`Index.vue`, `Config.vue`, `Logs.vue`) | `components/PhpObfuscatorPanel.vue`: same base inputs, free text config, done/reveal | Partial: config presets, streamed logs, controller lifecycle and terminal cleanup absent. |
+| `PortKill` | Port lookup, PID selection, signals, audited stop/partial outcomes (`Controller.ts`, shared `ProcessControl/Controller.ts`) | `components/ProcessPanel.vue`: port lookup and selected PID `killPids('-9')` | Partial: signal choice and established process-validation/partial-outcome controller are bypassed. This needs controller reuse before parity. |
+| `ProcessKill` | Command search, PID selection, signal and audited stop/partial outcomes (`Controller.ts`) | Same `components/ProcessPanel.vue`, process tab | Partial for the same reasons as PortKill. |
+| `QRCodeGenerator` | Text, foreground/background alpha colors, correction level → 1024px data URL, save/reveal (`index.vue`, `useQRCode.ts`) | `components/QrCodePanel.vue`: text/correction → 320px PNG browser download | Partial: color options, 1024px output and native save/reveal absent. Async render rejection also needs visible error handling. |
+| `RegexCheatsheet` | Full local Markdown syntax reference (`regex-memo.content.md`) | `components/RegexCheatsheetPanel.vue`: complete same Markdown | Equivalent reference content. |
+| `RegexTester` | Pattern/text; g/i/m/s/u/v flags, d indices; full match/capture groups/ranges, generated sample, SVG visualization (`store.ts`, `index.vue`) | `components/RegexTesterPanel.vue`: four flags presets, full-match strings, first 500 results | Partial: flag independence, dotAll/Unicode sets, captures/ranges, sample generation and visualization absent. |
+| `RequestTime` | URL → same tools/requestTimeFetch metric list (`setup.ts`) | `state/requestTimingController.ts`, `components/RequestTimingPanel.vue` → metrics | Equivalent request/metric contract; timeout/unknown result and page re-entry tests still needed. |
+| `RSAKeyGenerator` | Bits 512–16384, multiple of 8 → public/private PEM, copy, debounced regenerate (`store.ts`) | `components/RsaPanel.vue`: same bit validation/PEM/copy, explicit button | Equivalent generation/output contract. New panel owns an async operation and needs lifecycle isolation if expected to survive page close. |
+| `SiteSucker` | URL, save dir/proxy/exclude/page/timeout/media/window limits; link states, hosts/exclude, URL open; settings (`Index.vue`, `setup.vue`, `store.ts`) | `components/SiteSuckerPanel.vue`, controller/native runtime | Owned by Site Sucker migration. Verify backend-enforced bounds, true completion, task correlation, cancellation, retained outcomes and settings migration before completion. |
+| `SSLMake` | Domains, optional CA file, save folder, validation → sslMake files + open folder (`Index.vue`) | `components/SslMakerPanel.vue`: same base fields/backend | Partial: full legacy validation is absent; panel owns IPC; folder-open error can overwrite the successful generation report. |
+| `SystenEnv` | Windows PATH entries CRUD/reorder/revert/save and native GUI; Unix startup-file list/editor (`Index.win.vue`, `Index.vue`, `setup.ts`) | `components/EnvironmentPanel.vue`: file list/editor using systemEnvFiles | Partial: Windows PATH workflow absent, read/write concurrency and external-change protection absent; panel owns IPC and rejects one failed file load globally. |
+| `Timestamp` | Live current timestamp/copy, Unix seconds/milliseconds→local date; date picker→seconds/milliseconds (`Index.vue`) | `tools/LocalToolPanel.vue`: numeric/ISO+timezone→ISO, seconds, milliseconds, local text | Partial: live now/copy action and native datetime picker absent. Numeric and ISO conversion outputs present. |
+| `TokenGenerator` | Length (default 64), uppercase/lowercase/number/symbol sets, refresh/copy (`store.ts`) | `components/TokenPanel.vue`: same sets/length/refresh/copy; bounded secure generator | Equivalent visible choices; stronger uniform random generation. |
+| `UrlEncode` | encodeURIComponent/decodeURIComponent, two inputs/results and copy (`store.ts`) | `tools/LocalToolPanel.vue`: selected direction/output/copy | Equivalent transformation contract. |
+| `URLParse` | URL → protocol/username/password/hostname/port/path/search and copy (`store.ts`) | `components/UrlParsePanel.vue`: all fields + href/origin/host/hash/query entries | Partial: per-field copy absent; parsed field coverage now complete. |
+| `WebSocketSSE` | Query/header rows, bearer token, protocols, heartbeat, SSE event filter/last ID, text/JSON sending, logs, connect/disconnect (`Index.vue`, `store.ts`) | `components/RealtimePanel.vue`, `state/realtimeController.ts`: native WS/EventSource, URL/message/events, connect/disconnect | Partial: advanced connection/auth/protocol/heartbeat/filter options absent; EventSource cannot set legacy custom headers; unbounded event list and error cleanup need ownership tests. |
+| `WifiQRCodeGenerator` | SSID/password; WPA/WEP/nopass/WPA2-EAP, EAP method/phase2/identity/anonymous, hidden SSID, foreground/background → QR/save (`index.vue`, `useQRCode.ts`) | `components/WifiQrPanel.vue`: SSID/password/WPA/WEP/nopass/hidden → PNG download | Partial: enterprise EAP options, colors, quote escaping and native save/reveal absent; hidden toggle displayed only for WPA. |
+| `CodeMake` (not registered by `Module.ts`) | Connection credentials → database list in `store.ts`; current `choose.vue` is empty and `index.vue` only renders Connect | `components/MysqlCodePanel.vue`: credentials/connect/database list | Equivalent to currently implemented legacy behavior. No source evidence of a working legacy generation workflow; do not invent it as a parity requirement. New panel still owns operation IPC. |
+
+## Verification and interpretation
+
+`yarn test:pqt-forge-local-tools` exercises actual transform functions, known hash vectors/encodings, URL-safe Unicode Base64, strict binary Base64 validation and token bounds/alphabet. `yarn typecheck` validates the Vue/TypeScript integration. The source smoke test verifies wiring only.
+
+`yarn test:pqt-forge-tool-parity` exercises the selected legacy JWT store against Node HMAC vectors for HS256/HS384/HS512, wrong secrets and tampered payloads, none tokens and invalid JSON. It also tests regex capture/named-group ranges, dotAll/multiline behavior, nested JSON key sorting and the full HTTP reference. These checks prove the tested model behavior; they do not replace interactive render verification of the private compatibility context or operation lifecycle checks.
+
+The current routing table above resolves the initial broad UI reductions. Completion still depends on verifying the selected full views render and their operations satisfy the contracts, plus the dedicated Capturer/Site Sucker/image changes. The native Base64 file converter now restores drag/drop, image preview and reveal-after-save in addition to binary-safe bounded conversion; its save result is retained if only revealing the folder fails.

@@ -23,9 +23,10 @@
     </div>
 
     <div v-loading="data.loading" class="main-wapper overflow-hidden">
+      <p v-if="bomScan.error || bomClean.error" class="px-3 py-2 text-red-500" role="alert">{{ bomScan.error || bomClean.error }}</p>
       <el-scrollbar>
         <div class="main flex flex-col gap-7 pt-7">
-          <el-input v-model="data.path" placeholder="Directory or file">
+          <el-input v-model="data.path" :disabled="data.loading || (data.running && !data.end)" placeholder="Directory or file">
             <template #append>
               <el-button :icon="FolderOpened" @click.stop="chooseDir"></el-button>
             </template>
@@ -51,7 +52,7 @@
             </div>
           </el-card>
 
-          <template v-if="!data.running">
+          <template v-if="!data.running && !data.end">
             <el-progress :text-inside="true" :stroke-width="20" :percentage="0">
               <span>0 / {{ files.length }}</span>
             </el-progress>
@@ -119,10 +120,8 @@
 
 <script lang="ts" setup>
   import { computed, reactive, watch } from 'vue'
-  import store, { Ext } from './store'
-  import IPC from '@/util/IPC'
-  import { MessageError } from '@/util/Element'
-  import { I18nT } from '@lang/index'
+  import store, { Ext, scanBomFiles, cleanBomFiles } from './store'
+  import { bomScan, bomClean } from './Operation'
   import { extname } from '@/util/path-browserify'
   import { dialog } from '@/util/NodeFn'
   import { FolderOpened } from '@element-plus/icons-vue'
@@ -167,7 +166,7 @@
   })
   const currentProgress = computed(() => {
     const progress = store.value.progress
-    return Math.floor((progress.finish / progress.count) * 100.0)
+    return progress.count ? Math.floor((progress.finish / progress.count) * 100.0) : 0
   })
   const chooseDir = () => {
     if (store.value.running && !store.value.end) {
@@ -188,33 +187,13 @@
       })
   }
   const getAllFile = () => {
-    store.value.loading = true
-    IPC.send('app-fork:tools', 'getAllFile', store.value.path).then((key: string, res: any) => {
-      IPC.off(key)
-      if (res?.code === 0) {
-        const files: Array<string> = res?.data ?? []
-        store.value.files = reactive(files)
-      } else {
-        MessageError(res?.msg ?? I18nT('util.toolFileTooMore'))
-      }
-      store.value.loading = false
-    })
+    scanBomFiles()
   }
   const doClean = () => {
-    store.value.running = true
-    IPC.send('app-fork:tools', 'cleanBom', JSON.parse(JSON.stringify(files.value))).then(
-      (key: string, res: any) => {
-        if (res?.code === 200) {
-          const progress = res?.msg ?? {}
-          Object.assign(store.value.progress, reactive(progress))
-        } else {
-          IPC.off(key)
-          store.value.end = true
-        }
-      }
-    )
+    cleanBomFiles(files.value)
   }
   const doEnd = () => {
+    if (store.value.loading || (store.value.running && !store.value.end)) return
     store.value.path = ''
     store.value.files.splice(0)
     store.value.allExt.splice(0)

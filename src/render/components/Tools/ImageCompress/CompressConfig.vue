@@ -204,7 +204,7 @@
           :show-after="600"
           :content="I18nT('tools.ImageCompress.compressConfig.iccProfileTooltip')"
         >
-          <el-checkbox v-model="config.withIccProfile">{{
+          <el-checkbox :model-value="Boolean(config.withIccProfile)" @update:model-value="(enabled: unknown) => config.withIccProfile = enabled ? 'srgb' : ''">{{
             I18nT('tools.ImageCompress.compressConfig.preserveIccProfile')
           }}</el-checkbox>
         </el-tooltip>

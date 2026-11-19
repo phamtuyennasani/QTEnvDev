@@ -1,7 +1,15 @@
-<template><ForgeDialog title="Regex cheatsheet" description="Common regular expression syntax with examples." eyebrow="WORKSPACE / CODE" wide @close="emit('close')"><div class="regex-panel"><input v-model="query" placeholder="Filter regex references" /><article v-for="item in filtered" :key="item.token"><code>{{ item.token }}</code><div><b>{{ item.title }}</b><small>{{ item.description }}</small><em>Example: {{ item.example }}</em></div></article></div></ForgeDialog></template>
+<template>
+  <ForgeDialog title="Regex cheatsheet" description="Complete syntax and examples from the local reference." eyebrow="WORKSPACE / CODE" wide @close="emit('close')">
+    <article class="reference" v-html="rendered" />
+  </ForgeDialog>
+</template>
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import MarkdownIt from 'markdown-it'
 import ForgeDialog from './ForgeDialog.vue'
-const emit=defineEmits<{close:[]}>(); const query=ref(''); const entries=[{token:'^',title:'Start of string',description:'Matches the beginning of a line or string.',example:'^https'},{token:'$',title:'End of string',description:'Matches the end of a line or string.',example:'done$'},{token:'.',title:'Any character',description:'Matches one character except line breaks.',example:'a.c'},{token:'\\d',title:'Digit',description:'Matches an ASCII digit.',example:'\\d{4}'},{token:'\\w',title:'Word character',description:'Matches a letter, digit or underscore.',example:'\\w+'},{token:'*',title:'Zero or more',description:'Repeats the preceding token zero or more times.',example:'ab*'},{token:'+',title:'One or more',description:'Repeats the preceding token one or more times.',example:'ab+'},{token:'?',title:'Optional',description:'Makes the preceding token optional.',example:'colou?r'},{token:'[abc]',title:'Character set',description:'Matches one character from the set.',example:'[A-Z]'},{token:'[^abc]',title:'Negated set',description:'Matches one character outside the set.',example:'[^0-9]'},{token:'(foo|bar)',title:'Alternation',description:'Matches one of several grouped alternatives.',example:'(jpg|png)'},{token:'\\b',title:'Word boundary',description:'Matches the boundary between word and non-word characters.',example:'\\bcat\\b'}]; const filtered=computed(()=>entries.filter(item=>(item.token+' '+item.title+' '+item.description+' '+item.example).toLowerCase().includes(query.value.toLowerCase())))
+import reference from '@/components/Tools/RegexCheatsheet/regex-memo.content.md?raw'
+const emit = defineEmits<{ close: [] }>()
+const rendered = new MarkdownIt({ html: false, linkify: true }).render(reference)
 </script>
-<style scoped>.regex-panel{display:grid;gap:8px}.regex-panel>input{padding:9px 10px;color:var(--pqt-text);background:var(--pqt-canvas);border:1px solid var(--pqt-border-strong);border-radius:7px;font:12px var(--pqt-font-mono)}.regex-panel article{display:grid;grid-template-columns:100px 1fr;gap:14px;padding:10px;border:1px solid var(--pqt-border);border-radius:7px}.regex-panel article>code{color:var(--pqt-accent);font:16px var(--pqt-font-mono)}.regex-panel article div{display:grid;gap:3px}.regex-panel small{color:var(--pqt-text-muted)}.regex-panel em{color:var(--pqt-text-dim);font:10px var(--pqt-font-mono);font-style:normal}</style>
+<style scoped>
+.reference{max-height:520px;overflow:auto;color:var(--pqt-text);font-size:12px;line-height:1.7}.reference :deep(pre){padding:12px;overflow:auto;background:var(--pqt-canvas);border-radius:6px}.reference :deep(table){width:100%;border-collapse:collapse}.reference :deep(td),.reference :deep(th){padding:8px;border:1px solid var(--pqt-border);text-align:left}.reference :deep(code){font-family:var(--pqt-font-mono)}.reference :deep(a){color:var(--pqt-accent)}
+</style>

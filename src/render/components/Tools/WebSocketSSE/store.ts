@@ -198,6 +198,7 @@ const store = reactive({
     this.error = ''
   },
   connect() {
+    if (this.status === 'Connecting' || this.status === 'Connected') return false
     this.error = ''
     this.disconnect(false)
     try {
@@ -211,7 +212,9 @@ const store = reactive({
       this.status = 'Error'
       this.error = error?.message ?? 'Invalid URL'
       this.addLog('error', 'Invalid URL', this.error)
+      return false
     }
+    return true
   },
   connectWebSocket(finalUrl: string) {
     if (!/^wss?:\/\//i.test(finalUrl)) {
@@ -219,22 +222,29 @@ const store = reactive({
     }
     this.status = 'Connecting'
     this.addLog('info', 'Connecting', finalUrl)
-    socket = new WebSocket(finalUrl, parseProtocols(this.protocols))
-    socket.onopen = () => {
+    const connection = new WebSocket(finalUrl, parseProtocols(this.protocols))
+    socket = connection
+    connection.onopen = () => {
+      if (socket !== connection) return
       this.status = 'Connected'
       connectedAt = Date.now()
       this.addLog('info', 'Connected', finalUrl)
       this.startHeartbeat()
     }
-    socket.onmessage = (event) => {
+    connection.onmessage = (event) => {
+      if (socket !== connection) return
       this.addLog('received', 'Received', String(event.data))
     }
-    socket.onerror = () => {
+    connection.onerror = () => {
+      if (socket !== connection) return
+      stopHeartbeat()
       this.status = 'Error'
       this.error = 'WebSocket connection error'
       this.addLog('error', 'WebSocket error', this.error)
     }
-    socket.onclose = (event) => {
+    connection.onclose = (event) => {
+      if (socket !== connection) return
+      socket = null
       stopHeartbeat()
       this.status = 'Disconnected'
       this.addLog('closed', `Closed (${event.code})`, event.reason)
@@ -258,7 +268,8 @@ const store = reactive({
       headers,
       connectionKey: currentConnectionKey
     }).then((key: string, res: any) => {
-      if (sseConnectionKey !== currentConnectionKey && res?.code !== 0) {
+      if (sseConnectionKey !== currentConnectionKey) {
+        if (res?.code === 0 || res?.code === 500) IPC.off(key)
         return
       }
       if (res?.code === 100) {
@@ -292,8 +303,13 @@ const store = reactive({
   disconnect(addLog = true) {
     stopHeartbeat()
     if (socket) {
-      socket.close()
+      const connection = socket
       socket = null
+      connection.onopen = null
+      connection.onmessage = null
+      connection.onerror = null
+      connection.onclose = null
+      connection.close()
     }
     if (sseConnectionKey) {
       IPC.send('App-Node-FN', 'realtime', 'sseStop', sseConnectionKey).then((key: string) => {
@@ -311,6 +327,13 @@ const store = reactive({
     }
   },
   handleSseChunk(chunk: string) {
+    if (sseBuffer.length + chunk.length > 1024 * 1024) {
+      this.disconnect(false)
+      this.status = 'Error'
+      this.error = 'SSE event exceeded the 1 MB buffer limit.'
+      this.addLog('error', 'SSE event too large', this.error)
+      return
+    }
     sseBuffer += chunk
     const chunks = sseBuffer.split(/\r?\n\r?\n/)
     sseBuffer = chunks.pop() ?? ''

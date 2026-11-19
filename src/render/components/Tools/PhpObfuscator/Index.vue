@@ -11,6 +11,8 @@
     </div>
 
     <div class="main-wapper">
+      <p v-if="controller.operation.error" class="px-3 py-2 text-red-500" role="alert">{{ controller.operation.error }}</p>
+      <p v-if="controller.operation.warning" class="px-3 py-2" role="status">{{ controller.operation.warning }}</p>
       <div class="main flex flex-col gap-7 pt-7">
         <el-select
           v-model="item.phpversion"
@@ -55,25 +57,20 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch, nextTick } from 'vue'
+  import { ref, computed, watch } from 'vue'
   import { BrewStore } from '@/store/brew'
-  import IPC from '@/util/IPC'
-  import { MessageError, MessageSuccess } from '@/util/Element'
+  import { MessageError } from '@/util/Element'
   import { join } from '@/util/path-browserify'
-  import { dialog, shell, fs } from '@/util/NodeFn'
+  import { dialog, fs } from '@/util/NodeFn'
   import { AsyncComponentShow } from '@/util/AsyncComponent'
   import { I18nT } from '@lang/index'
   import { FolderOpened } from '@element-plus/icons-vue'
+  import controller from './Controller'
 
-  const running = ref(false)
+  const running = computed(() => controller.operation.running)
   const descType = ref('')
 
-  const item = ref({
-    phpversion: '',
-    src: '',
-    desc: '',
-    config: ''
-  })
+  const item = computed(() => controller.item)
 
   const errs = ref<Record<string, boolean>>({
     phpversion: false,
@@ -98,6 +95,7 @@
   )
 
   const showConfig = () => {
+    if (running.value) return
     import('./Config.vue').then((res) => {
       AsyncComponentShow(res.default, {
         customConfig: item.value.config
@@ -114,34 +112,10 @@
       return
     }
 
-    running.value = true
-    const php = phpVersions.value.find((p) => `${p.path}-${p.version}` === item.value.phpversion)
-    const bin = join(php!.path, 'bin/php')
-    const params = JSON.parse(
-      JSON.stringify({
-        ...item.value,
-        bin
-      })
-    )
-
-    IPC.send('app-fork:php', 'doObfuscator', params).then((key: string, res: any) => {
-      IPC.off(key)
-      if (res?.code === 0) {
-        MessageSuccess(I18nT('base.success'))
-        shell.showItemInFolder(item.value.desc)
-      } else {
-        const msg = res.msg
-        import('./Logs.vue').then((res) => {
-          AsyncComponentShow(res.default, {
-            content: msg
-          })
-          nextTick().then(() => {
-            MessageError(I18nT('base.fail'))
-          })
-        })
-      }
-      running.value = false
-    })
+    const php = phpVersions.value.find((runtime) => runtime.path + '-' + runtime.version === item.value.phpversion)
+    if (!php) { MessageError('Choose an installed PHP runtime.'); return }
+    await controller.run(php.bin || join(php.path, window.Server.isWindows ? 'php.exe' : 'bin/php'))
+    if (controller.operation.done) await controller.reveal()
   }
 
   const checkItem = () => {
@@ -149,13 +123,14 @@
     errs.value.src = item.value.src.length === 0
     errs.value.desc =
       item.value.desc.length === 0 ||
-      item.value.src === item.value.desc ||
-      item.value.desc.includes(item.value.src)
+      item.value.src.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase() === item.value.desc.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase() ||
+      item.value.desc.replace(/\\/g, '/').toLowerCase().startsWith(item.value.src.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase() + '/')
 
     return !Object.values(errs.value).some(Boolean)
   }
 
   const chooseSrc = async () => {
+    if (running.value) return
     const opt = ['openDirectory', 'openFile', 'showHiddenFiles']
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: opt,
@@ -186,6 +161,7 @@
   }
 
   const chooseDesc = async () => {
+    if (running.value) return
     if (!descType.value) return
 
     if (descType.value === 'dir') {

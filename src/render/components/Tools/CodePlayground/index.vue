@@ -267,7 +267,7 @@
       CodePlay.tabs[tabName] = tab
       CodePlay.currentTab = tabName
     } else if (action === 'remove') {
-      if (targetName === 'tab-1') {
+      if (targetName === 'tab-1' || CodePlay.tabs[targetName!]?.execing) {
         return
       }
       const allKeys = Object.keys(CodePlay.tabs)

@@ -1,15 +1,22 @@
-import { reactiveBind } from '@/util/Index'
+import { reactiveBind, uuid } from '@/util/Index'
 import { StorageGetAsync, StorageSetAsync } from '@/util/Storage'
-export type CustomTool = { id: string; label: string; component: string }
-type ToolLibraryData = { favorites: string[]; custom: CustomTool[] }
-const key = 'pqt-forge-tool-library'
-class ToolLibraryController {
-  favorites: string[] = []; custom: CustomTool[] = []; ready = false
-  async init() { if (this.ready) return; const saved = await StorageGetAsync<ToolLibraryData>(key); this.favorites = Array.isArray(saved?.favorites) ? saved!.favorites : []; this.custom = Array.isArray(saved?.custom) ? saved!.custom : []; this.ready = true }
-  private persist() { return StorageSetAsync(key, { favorites: this.favorites, custom: this.custom }) }
-  isFavorite(id: string) { return this.favorites.includes(id) }
-  async toggleFavorite(id: string) { this.favorites = this.isFavorite(id) ? this.favorites.filter((item) => item !== id) : [...this.favorites, id]; await this.persist() }
-  async addCustom(label: string, component: string) { const cleanLabel = label.trim(); const cleanComponent = component.trim(); if (!cleanLabel || !cleanComponent) throw new Error('Label and component are required'); this.custom = [{ id: 'custom-' + Date.now(), label: cleanLabel, component: cleanComponent }, ...this.custom]; await this.persist() }
-  async removeCustom(id: string) { this.custom = this.custom.filter((item) => item.id !== id); this.favorites = this.favorites.filter((item) => item !== id); await this.persist() }
-}
-export const toolLibraryController = reactiveBind(new ToolLibraryController())
+import { fs, shell } from '@/util/NodeFn'
+import { join } from '@/util/path-browserify'
+import { ToolLibraryController } from './ToolLibraryModel'
+import { toolController } from './toolController'
+export type { CustomTool } from './ToolLibraryModel'
+export { customToolUrl } from './ToolLibraryModel'
+
+export const toolLibraryController = reactiveBind(new ToolLibraryController({
+  load: () => StorageGetAsync('pqt-forge-tool-library'),
+  save: (data) => StorageSetAsync('pqt-forge-tool-library', data),
+  async readLegacy() {
+    if (!window.Server?.BaseDir) return undefined
+    const path = join(window.Server.BaseDir, 'app.tools.json')
+    if (!await fs.existsSync(path)) return undefined
+    return JSON.parse(await fs.readFile(path))
+  },
+  id: uuid,
+  aliases: toolController.tools.map((tool) => tool.id),
+  openExternal: (url) => shell.openExternal(url)
+}))

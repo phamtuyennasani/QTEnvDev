@@ -1,5 +1,7 @@
 export type LocalTool = 'json' | 'base64' | 'jwt' | 'hash' | 'diff' | 'url' | 'timestamp' | 'html'
-export type TransformOptions = { mode?: string; second?: string; algorithm?: 'SHA-1' | 'SHA-256' | 'SHA-512'; subtle?: SubtleCrypto }
+export type HashAlgorithm = 'MD5' | 'SHA-1' | 'SHA-224' | 'SHA-256' | 'SHA-384' | 'SHA-512' | 'SHA3' | 'RIPEMD160'
+export type HashEncoding = 'hex' | 'binary' | 'base64' | 'base64url'
+export type TransformOptions = { mode?: string; second?: string; algorithm?: HashAlgorithm; encoding?: HashEncoding; urlSafe?: boolean; subtle?: SubtleCrypto }
 const MAX_INPUT = 200000
 
 export function encodeBase64(value: string): string {
@@ -42,13 +44,30 @@ export async function transform(tool: LocalTool, input: string, options: Transfo
   if (input.length > MAX_INPUT || (options.second?.length || 0) > MAX_INPUT) throw new Error('Use up to 200,000 characters per input.')
   switch (tool) {
     case 'json': return JSON.stringify(JSON.parse(input), null, options.mode === 'minify' ? undefined : 2)
-    case 'base64': return options.mode === 'decode' ? decodeBase64(input) : encodeBase64(input)
+    case 'base64': {
+      if (options.mode === 'decode') return decodeBase64(options.urlSafe ? input.replace(/-/g, '+').replace(/_/g, '/') : input)
+      const encoded = encodeBase64(input)
+      return options.urlSafe ? encoded.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_') : encoded
+    }
     case 'jwt': return JSON.stringify(inspectJwt(input), null, 2)
     case 'hash': {
+      const algorithm = options.algorithm || 'SHA-256'
       const subtle = options.subtle || globalThis.crypto?.subtle
-      if (!subtle) throw new Error('Cryptographic hashing is unavailable in this environment.')
-      const bytes = await subtle.digest(options.algorithm || 'SHA-256', new TextEncoder().encode(input))
-      return Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, '0')).join('')
+      let hex: string
+      if (subtle && ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'].includes(algorithm)) {
+        const bytes = await subtle.digest(algorithm, new TextEncoder().encode(input))
+        hex = Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, '0')).join('')
+      } else {
+        const { default: cryptoJs } = await import('crypto-js')
+        const algorithms = { MD5: cryptoJs.MD5, 'SHA-1': cryptoJs.SHA1, 'SHA-224': cryptoJs.SHA224, 'SHA-256': cryptoJs.SHA256, 'SHA-384': cryptoJs.SHA384, 'SHA-512': cryptoJs.SHA512, SHA3: cryptoJs.SHA3, RIPEMD160: cryptoJs.RIPEMD160 }
+        hex = algorithms[algorithm](input).toString(cryptoJs.enc.Hex)
+      }
+      if (options.encoding === 'binary') return Array.from(hex, (digit) => parseInt(digit, 16).toString(2).padStart(4, '0')).join('')
+      if (options.encoding === 'base64' || options.encoding === 'base64url') {
+        const encoded = btoa(String.fromCharCode(...hex.match(/../g)!.map((byte) => parseInt(byte, 16))))
+        return options.encoding === 'base64url' ? encoded.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_') : encoded
+      }
+      return hex
     }
     case 'diff': return lineDiff(input, options.second || '')
     case 'url': return options.mode === 'decode' ? decodeURIComponent(input) : encodeURIComponent(input)

@@ -9,9 +9,11 @@ import type {
   WatermarkConfig,
   WatermarkPosition
 } from './imageCompress.type'
-import { stat, mkdir, copyFile } from 'fs/promises'
+import { stat, mkdir, copyFile, writeFile, rename, rm } from 'fs/promises'
+import { constants } from 'node:fs'
+import { randomUUID } from 'node:crypto'
 import { ImageInfoFetchTask } from './ImageInfoFetchTask'
-import { dirname, extname, join, basename } from 'node:path'
+import { dirname, extname, join, basename, resolve } from 'node:path'
 
 export class ImageCompressTask implements TaskItem {
   /** 需要处理的图片 */
@@ -947,7 +949,7 @@ export class ImageCompressTask implements TaskItem {
   private async saveBackupImage() {
     if (this.backupPath) {
       await mkdir(dirname(this.backupPath), { recursive: true })
-      await copyFile(this.image.path, this.backupPath)
+      await copyFile(this.image.path, this.backupPath, constants.COPYFILE_EXCL)
     }
   }
 
@@ -985,7 +987,7 @@ export class ImageCompressTask implements TaskItem {
           pipeline = pipeline.timeout({ seconds: this.config.timeoutSeconds })
 
         await this.saveBackupImage()
-        await pipeline.toFile(this.path)
+        await this.writeOutput(pipeline)
         return true
       }
 
@@ -1028,7 +1030,7 @@ export class ImageCompressTask implements TaskItem {
       }
 
       await this.saveBackupImage()
-      await finalPipeline.toFile(this.path)
+      await this.writeOutput(finalPipeline)
       return true
     } catch (error: any) {
       this.errorMessage = `保存图片失败: ${error.message}`
@@ -1037,10 +1039,26 @@ export class ImageCompressTask implements TaskItem {
     }
   }
 
+  private async writeOutput(pipeline: Sharp) {
+    const output = await pipeline.toBuffer()
+    const temporary = this.path + '.qtenvdev-' + randomUUID() + '.tmp'
+    try {
+      await writeFile(temporary, output, { flag: 'wx' })
+      await rename(temporary, this.path)
+    } finally {
+      await rm(temporary, { force: true }).catch(() => undefined)
+    }
+  }
+
   private validateConfig(): boolean {
     if (!this.image) {
       this.errorMessage = '图片信息未提供'
       this.hasError = true
+      return false
+    }
+    if (resolve(this.path).toLowerCase() === resolve(this.image.path).toLowerCase() && !this.backupPath) {
+      this.hasError = true
+      this.errorMessage = 'Overwriting the source requires a separate backup path.'
       return false
     }
 

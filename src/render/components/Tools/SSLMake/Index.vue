@@ -11,6 +11,8 @@
     </div>
 
     <el-scrollbar class="flex-1">
+      <p v-if="sslOperation.error" class="px-3 py-2 text-red-500" role="alert">{{ sslOperation.error }}</p>
+      <p v-if="sslOperation.warning" class="px-3 py-2" role="status">{{ sslOperation.warning }}</p>
       <div class="main-wapper">
         <div class="main flex flex-col gap-7 pt-7">
           <el-input
@@ -54,14 +56,11 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, watch } from 'vue'
-  import { join, basename } from '@/util/path-browserify'
-  import { uuid } from '@/util/Index'
-  import { MessageError, MessageSuccess } from '@/util/Element'
-  import { dialog, shell, fs, exec } from '@/util/NodeFn'
+  import { computed, ref, watch } from 'vue'
+  import { dialog } from '@/util/NodeFn'
   import { I18nT } from '@lang/index'
-  import Base from '@/core/Base'
-  import IPC from '@/util/IPC'
+  import { sslOperation } from './Operation'
+  import { generateCertificates } from './Controller'
   import { FolderOpened } from '@element-plus/icons-vue'
 
   interface SSLItem {
@@ -76,10 +75,9 @@
     savePath: boolean
   }
 
-  const EOL = '\n'
 
   // Reactive state
-  const running = ref(false)
+  const running = computed(() => sslOperation.running)
   const item = ref<SSLItem>({
     domains: '',
     root: '',
@@ -132,83 +130,6 @@
     return !Object.values(errs.value).some((error) => error)
   }
 
-  const doSave = async () => {
-    if (!checkItem()) return
-    running.value = true
-    if (window.Server.isWindows) {
-      IPC.send('app-fork:tools', 'sslMake', JSON.parse(JSON.stringify(item.value))).then(
-        (key: string, res: any) => {
-          IPC.off(key)
-          running.value = false
-          if (res?.code === 0) {
-            MessageSuccess(I18nT('base.success'))
-            shell.openPath(item.value.savePath)
-          } else {
-            MessageError(I18nT('base.fail'))
-          }
-        }
-      )
-      return
-    }
-    try {
-      const domains = item.value.domains
-        .split('\n')
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0)
+  const doSave = () => { if (checkItem()) generateCertificates(item.value) }
 
-      const saveName = uuid(6) + '.' + domains[0].replace('*.', '')
-      let caFile = item.value.root
-      let caFileName = basename(caFile)
-
-      if (caFile.length === 0) {
-        caFile = join(item.value.savePath, uuid(6) + '.RootCA.crt')
-        caFileName = basename(caFile)
-      }
-
-      caFile = caFile.replace('.crt', '')
-      caFileName = caFileName.replace('.crt', '')
-      const opt: any = { cwd: item.value.savePath }
-
-      let exists = await fs.existsSync(caFile + '.crt')
-      if (!exists) {
-        let command = `openssl genrsa -out "${caFileName}.key" 2048;`
-        command += `openssl req -new -key "${caFileName}.key" -out "${caFileName}.csr" -sha256 -subj "/CN=Dev Root CA ${caFileName}";`
-        command += `echo "basicConstraints = critical,CA:TRUE\nkeyUsage = critical,keyCertSign,cRLSign\nsubjectKeyIdentifier = hash\nauthorityKeyIdentifier = keyid:always,issuer" > "${caFileName}.cnf";`
-        command += `openssl x509 -req -in "${caFileName}.csr" -signkey "${caFileName}.key" -out "${caFileName}.crt" -extfile "${caFileName}.cnf" -sha256 -days 3650;`
-        await exec.exec(command, opt)
-      }
-
-      let ext = `authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage=digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-subjectAltName=@alt_names
-
-[alt_names]${EOL}`
-      domains.forEach((item, index) => {
-        ext += `DNS.${index + 1} = ${item}${EOL}`
-      })
-      ext += `IP.1 = 127.0.0.1${EOL}`
-      await fs.writeFile(join(item.value.savePath, `${saveName}.ext`), ext)
-
-      let command = `openssl req -new -newkey rsa:2048 -nodes -keyout "${saveName}.key" -out "${saveName}.csr" -sha256 -subj "/CN=${saveName}";`
-      command += `openssl x509 -req -in "${saveName}.csr" -out "${saveName}.crt" -extfile "${saveName}.ext" -CA "${caFile}.crt" -CAkey "${caFile}.key" -CAcreateserial -CAserial "${caFile}.srl" -sha256 -days 3650;`
-      await exec.exec(command, opt)
-
-      exists = await fs.existsSync(join(item.value.savePath, `${saveName}.crt`))
-      if (exists) {
-        Base.Alert(I18nT('base.sslMakeAlert', { caFileName }), I18nT('base.prompt'))
-          .then(() => {
-            shell.showItemInFolder(`${caFile}.crt`)
-          })
-          .catch()
-      } else {
-        MessageError(I18nT('base.fail'))
-      }
-    } catch (error) {
-      console.error('Error generating SSL:', error)
-      MessageError(I18nT('base.fail'))
-    } finally {
-      running.value = false
-    }
-  }
 </script>

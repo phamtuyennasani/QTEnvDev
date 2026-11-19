@@ -14,10 +14,11 @@ import { join } from 'node:path'
 import is from 'electron-is'
 import { ViteDevPort } from '../../../configs/vite.port'
 import { isWindows } from '@shared/utils'
-import { existsSync, mkdirp, readdir, writeFile } from '@shared/fs-extra'
+import { mkdirp, readdir, writeFile } from '@shared/fs-extra'
 import { randomUUID } from 'node:crypto'
 import { I18nT } from '@lang/runtime'
 import { getRendererResourcePath } from '../utils/AppRuntimePath'
+import { CAPTURER_MAX_BYTES, CAPTURER_MAX_PIXELS, capturerFileName, validateCapturerName, type CapturerEvent } from '@shared/CapturerContract'
 
 const index = getRendererResourcePath('capturer', 'capturer.html')
 
@@ -45,6 +46,17 @@ type CapturerConfig = {
 }
 
 class Capturer {
+  private callback?: (event: CapturerEvent) => void
+  private captureState: CapturerEvent = { id: '', status: 'idle' }
+  private captureConfig?: CapturerConfig
+  private saveFlight?: Promise<CapturerEvent>
+  private writing = false
+  setCallback(callback: (event: CapturerEvent) => void) { this.callback = callback }
+  status() { return { ...this.captureState } }
+  private publish(status: CapturerEvent['status'], extra: Partial<CapturerEvent> = {}) {
+    this.captureState = { id: this.captureState.id, status, ...extra }
+    this.callback?.(this.status())
+  }
   isFullScreen: boolean = false
   useWindow: boolean = true
   capturerWindow: Window | undefined = undefined
@@ -71,6 +83,7 @@ class Capturer {
   windowImage: Record<number, string> | null = null
 
   private handleWindowLoadError(window: BrowserWindow, error: unknown) {
+    this.publish('failed', { error: error instanceof Error ? error.message : String(error) })
     globalShortcut.unregister('Escape')
     this.windowImage = null
     this.capturering = false
@@ -87,28 +100,33 @@ class Capturer {
     )
   }
 
-  stopCapturer() {
+  stopCapturer(reason: 'cancelled' | 'saving' = 'cancelled') {
+    if (this.writing) return this.status()
+    const active = ['opening', 'opened', 'saving'].includes(this.captureState.status)
     globalShortcut.unregister('Escape')
     this.windowImage = null
     clearInterval(this.timer)
     this.timer = undefined
-    this.window?.hide()
+    if (!this.window?.isDestroyed()) this.window?.hide()
     this.isFullScreen = false
+    clearTimeout(this.destroyTimer)
     this.destroyTimer = setTimeout(
       () => {
-        this.window?.destroy()
+        if (!this.window?.isDestroyed()) this.window?.destroy()
         this.window = undefined
         this.capturerWindowID = 0
         this.capturerWindow = undefined
       },
       2 * 60 * 1000
     )
-    this.window?.webContents?.send?.(
+    if (!this.window?.isDestroyed()) this.window?.webContents?.send?.(
       'command',
       'APP:Capturer-Window-Clean',
       'APP:Capturer-Window-Clean'
     )
     this.capturering = false
+    if (active) this.publish(reason)
+    return this.status()
   }
 
   getWindowCapturer(id: number) {
@@ -133,7 +151,20 @@ class Capturer {
     }
   }
 
-  async initWatchPointWindow() {
+  async initWatchPointWindow(operationId = randomUUID()) {
+    if (this.capturering || ['opening', 'opened', 'saving'].includes(this.captureState.status)) throw new Error('A capture is already active')
+    try { return await this.openCaptureWindow(operationId) }
+    catch (error) {
+      this.stopCapturer()
+      this.publish('failed', { error: error instanceof Error ? error.message : String(error) })
+      throw error
+    }
+  }
+
+  private async openCaptureWindow(operationId: string) {
+    this.captureState = { id: operationId, status: 'opening' }
+    this.captureConfig = { ...this.config, key: [...this.config.key] }
+    this.publish('opening')
     globalShortcut.register('Escape', () => {
       this.stopCapturer()
     })
@@ -147,6 +178,7 @@ class Capturer {
     let base64Image = ''
     const title = 'QTEnvDev-Capturer-Window-I3MCDmGbp2IJy9T69RHFs7p0mwGg1WHB'
     const display = screen.getPrimaryDisplay()
+    if (Math.floor(display.bounds.width * display.scaleFactor) * Math.floor(display.bounds.height * display.scaleFactor) > CAPTURER_MAX_PIXELS) throw new Error('The desktop exceeds the 100 megapixel capture limit.')
     console.log('scaleFactor: ', display.scaleFactor)
     console.log('原始bounds:', display.bounds)
     let screenRect = undefined
@@ -176,8 +208,10 @@ class Capturer {
         const deskID = windowManager.getDesktopWindowID()
         base64Image = windowManager.captureWindow(deskID)
       } catch {
+        this.stopCapturer()
+        this.publish('failed', { error: 'The desktop image could not be captured.' })
         dialog.showErrorBox(I18nT('tools.CapturerFailTitle'), I18nT('tools.CapturerFailContent'))
-        return
+        throw new Error('The desktop image could not be captured.')
       }
       screenRect = {
         x: 0,
@@ -214,8 +248,10 @@ class Capturer {
       }
       const res = await getScreenThumbnail(0)
       if (!res) {
+        this.stopCapturer()
+        this.publish('failed', { error: 'The desktop image could not be captured.' })
         dialog.showErrorBox(I18nT('tools.CapturerFailTitle'), I18nT('tools.CapturerFailContent'))
-        return
+        throw new Error('The desktop image could not be captured.')
       }
       screenRect = {
         x: 0,
@@ -225,7 +261,9 @@ class Capturer {
       }
     }
 
+    if (this.captureState.status !== 'opening' || this.captureState.id !== operationId) return this.status()
     const init = (window: BrowserWindow) => {
+      if (this.captureState.status !== 'opening' || this.captureState.id !== operationId) return
       this.isFullScreen = false
       window.setAlwaysOnTop(true, 'screen-saver')
       // window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
@@ -337,11 +375,12 @@ class Capturer {
       this.timer = setInterval(() => {
         fetchTopWindow()
       }, 150)
+      this.publish('opened')
     }
 
     if (this.window) {
       init(this.window)
-      return
+      return this.status()
     }
 
     const window = new BrowserWindow({
@@ -391,6 +430,8 @@ class Capturer {
       }
     })
     this.window = window
+    window.once('closed', () => { if (this.window !== window) return; this.window = undefined; if (['opening', 'opened'].includes(this.captureState.status)) this.stopCapturer() })
+    return this.status()
   }
 
   stopCheckWindowInPoint() {
@@ -431,88 +472,75 @@ class Capturer {
     }
   }
 
-  async saveImage(base64: string, userConfig?: boolean) {
-    const buffer = Buffer.from(base64, 'base64')
-    clipboard.writeImage(nativeImage.createFromBuffer(buffer))
-    const chooseDirSave = () => {
-      const timestamp = Math.floor(new Date().getTime() / 1000)
-      const name = `qtenvdev-capturer-${timestamp}.png`
-      dialog
-        .showSaveDialog({
-          properties: ['showHiddenFiles', 'createDirectory', 'showOverwriteConfirmation'],
-          defaultPath: name,
-          filters: [
-            {
-              name: 'PNG Files',
-              extensions: ['png']
-            }
-          ]
-        })
-        .then(({ canceled, filePath }: any) => {
-          if (canceled || !filePath) {
-            return
-          }
-          const buffer = Buffer.from(base64, 'base64')
-          writeFile(filePath, buffer).then(() => {
-            shell.showItemInFolder(filePath)
-          })
-        })
-    }
-    if (!userConfig || !this.config.dir) {
-      chooseDirSave()
-      return
-    }
-    try {
-      await mkdirp(this.config.dir)
-    } catch {}
-    if (!existsSync(this.config.dir)) {
-      chooseDirSave()
-      return
-    }
-    const date = new Date()
-    const timestamp = Math.floor(date.getTime() / 1000)
-    let name = this.config.name.trim()
-    if (name) {
-      const time = date.toISOString()
-      const uuid = randomUUID()
-      name = name
-        .replace(/\{timestamp}/g, `${timestamp}`)
-        .replace(/\{datetime}/g, `${time}`)
-        .replace(/\{uuid}/g, `${uuid}`)
-      if (name.includes('{index}')) {
-        let all = await readdir(this.config.dir)
-        all = all.map((f) => f.toLowerCase())
-        const pngCount = all.filter((a) => a.endsWith('.png')).length
-        let index = pngCount + 1
-        let tmplName = name.replace(/\{index}/g, `${index}`)
-        while (all.includes(`${tmplName}.png`.toLowerCase())) {
-          index += 1
-          tmplName = name.replace(/\{index}/g, `${index}`)
-        }
-        name = tmplName
-      }
-      name += '.png'
-    } else {
-      name = `qtenvdev-capturer-${timestamp}.png`
-    }
-    const filePath = join(this.config.dir, name)
-    writeFile(filePath, buffer).then(() => {
-      shell.showItemInFolder(filePath)
-    })
+  saveImage(base64: string, userConfig?: boolean): Promise<CapturerEvent> {
+    if (this.saveFlight) return this.saveFlight
+    if (!['opened', 'saving'].includes(this.captureState.status)) return Promise.reject(new Error('There is no active capture to save.'))
+    this.saveFlight = this.writeImage(base64, userConfig).finally(() => { this.saveFlight = undefined; this.writing = false })
+    return this.saveFlight
   }
 
+  private async writeImage(base64: string, userConfig?: boolean) {
+    this.publish('saving')
+    try {
+      if (typeof base64 !== 'string' || base64.length > Math.ceil(CAPTURER_MAX_BYTES * 4 / 3) + 4) throw new Error('Capture exceeds the 50 MB file limit.')
+      const buffer = Buffer.from(base64, 'base64')
+      if (buffer.length > CAPTURER_MAX_BYTES || buffer.length < 24 || buffer.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') throw new Error('Capture must be a PNG image below 50 MB.')
+      const width = buffer.readUInt32BE(16); const height = buffer.readUInt32BE(20)
+      if (!width || !height || width * height > CAPTURER_MAX_PIXELS) throw new Error('Capture exceeds the 100 megapixel limit.')
+      const image = nativeImage.createFromBuffer(buffer)
+      if (image.isEmpty()) throw new Error('The capture image could not be decoded.')
+      const config = this.captureConfig ?? this.config
+      let filePath: string
+      let exclusive = false
+      const date = new Date(); const id = randomUUID()
+      if (userConfig && config.dir) {
+        validateCapturerName(config.name)
+        await mkdirp(config.dir)
+        const existing = new Set((await readdir(config.dir)).map((name) => name.toLowerCase()))
+        let index = existing.size + 1
+        let name = capturerFileName(config.name, index, date, id)
+        while (existing.has(name.toLowerCase())) {
+          if (!config.name.includes('{index}')) throw new Error('The capture file already exists. Use {index} or {uuid} in the name pattern.')
+          name = capturerFileName(config.name, ++index, date, id)
+        }
+        filePath = join(config.dir, name)
+        exclusive = true
+      } else {
+        const result = await dialog.showSaveDialog({
+          properties: ['showHiddenFiles', 'createDirectory', 'showOverwriteConfirmation'],
+          defaultPath: capturerFileName('qtenvdev-capturer-{timestamp}', 1, date, id),
+          filters: [{ name: 'PNG Files', extensions: ['png'] }]
+        })
+        if (result.canceled || !result.filePath) { this.publish('cancelled'); return this.status() }
+        filePath = result.filePath
+      }
+      if (this.captureState.status === 'cancelled') return this.status()
+      this.writing = true
+      await writeFile(filePath, buffer, exclusive ? { flag: 'wx' } : undefined)
+      const warnings: string[] = []
+      try { clipboard.writeImage(image) } catch (error) { warnings.push('Clipboard copy failed: ' + String(error)) }
+      try { shell.showItemInFolder(filePath) } catch (error) { warnings.push('Reveal file failed: ' + String(error)) }
+      this.publish('saved', { path: filePath, warning: warnings.join(' ') || undefined })
+      return this.status()
+    } catch (error) {
+      this.publish('failed', { error: error instanceof Error ? error.message : String(error) })
+      throw error
+    }
+  }
   configUpdate(config: CapturerConfig) {
+    validateCapturerName(config.name)
     if (this.config.key.length) {
       globalShortcut.unregister(this.config.key.join('+'))
     }
-    this.config = config
+    this.config = { ...config, key: [...config.key] }
     if (this.config.key.length) {
-      globalShortcut.register(this.config.key.join('+'), () => {
+      const registered = globalShortcut.register(this.config.key.join('+'), () => {
         if (this.capturering) {
           return
         }
-        this.initWatchPointWindow().catch()
+        this.initWatchPointWindow().catch((error) => this.publish('failed', { error: String(error) }))
       })
+      if (!registered) throw new Error('The capture shortcut could not be registered. It may already be in use.')
     }
   }
 }

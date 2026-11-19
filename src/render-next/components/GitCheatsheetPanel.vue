@@ -1,7 +1,20 @@
-<template><ForgeDialog title="Git cheatsheet" description="Common commands for daily repository work." eyebrow="WORKSPACE / CODE" wide @close="emit('close')"><div class="git-panel"><div v-for="section in sections" :key="section.title" class="git-section"><h3>{{ section.title }}</h3><button v-for="command in section.commands" :key="command" class="git-command" @click="copy(command)"><code>{{ command }}</code><span>Copy</span></button></div></div><template #footer><span class="website-help">Commands are copied to the clipboard without running them.</span></template></ForgeDialog></template>
+<template>
+  <ForgeDialog title="Git cheatsheet" description="Browse the complete command reference." eyebrow="WORKSPACE / CODE" wide @close="emit('close')">
+    <label class="language">Reference language<select v-model="language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select></label>
+    <article class="reference" v-html="rendered" />
+  </ForgeDialog>
+</template>
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import MarkdownIt from 'markdown-it'
 import ForgeDialog from './ForgeDialog.vue'
-import { clipboard } from '@/util/NodeFn'
-const emit=defineEmits<{close:[]}>(); const sections=[{title:'Inspect',commands:['git status','git log --oneline --decorate -10','git diff --stat']},{title:'Branching',commands:['git switch -c feature/name','git switch main','git branch -vv']},{title:'Commit',commands:['git add -A','git commit -m "message"','git push -u origin HEAD']},{title:'Recover',commands:['git restore --staged .','git reflog','git stash push -m "work in progress"']}]; const copy=(command:string)=>clipboard.writeText(command)
+import english from '@/components/Tools/GitCheatsheet/lang/git-memo.en.md?raw'
+import vietnamese from '@/components/Tools/GitCheatsheet/lang/git-memo.vi.md?raw'
+const emit = defineEmits<{ close: [] }>()
+const language = ref('en')
+const markdown = new MarkdownIt({ html: false, linkify: true })
+const rendered = computed(() => markdown.render(language.value === 'vi' ? vietnamese : english))
 </script>
-<style scoped>.git-panel{display:grid;grid-template-columns:1fr 1fr;gap:14px}.git-section{display:grid;gap:6px}.git-section h3{margin:0 0 4px;color:var(--pqt-text);font-size:13px}.git-command{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--pqt-border);border-radius:7px;color:var(--pqt-text-muted);background:var(--pqt-canvas);cursor:pointer;text-align:left}.git-command:hover{border-color:var(--pqt-accent);color:var(--pqt-text)}.git-command code{font:11px var(--pqt-font-mono)}.git-command span{font-size:10px;color:var(--pqt-accent)}</style>
+<style scoped>
+.language{display:flex;gap:10px;align-items:center;color:var(--pqt-text-muted);font-size:12px}.language select{padding:8px;background:var(--pqt-canvas);color:var(--pqt-text);border:1px solid var(--pqt-border);border-radius:6px}.reference{max-height:520px;overflow:auto;color:var(--pqt-text);font-size:12px;line-height:1.7}.reference :deep(pre){padding:12px;overflow:auto;background:var(--pqt-canvas);border-radius:6px}.reference :deep(table){width:100%;border-collapse:collapse}.reference :deep(td),.reference :deep(th){padding:8px;border:1px solid var(--pqt-border);text-align:left}.reference :deep(code){font-family:var(--pqt-font-mono)}.reference :deep(a){color:var(--pqt-accent)}
+</style>

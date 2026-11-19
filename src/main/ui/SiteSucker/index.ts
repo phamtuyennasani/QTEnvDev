@@ -1,59 +1,23 @@
-import Config, { type RunConfig } from './Config'
-import PageTask from './PageTask'
-import LinkTask from './LinkTask'
-import { join } from 'path'
-import { Store } from './Store'
-import { urlToDir } from './Fn'
-import { Callback, LinkItem, type PageLink } from './LinkItem'
-import { cpus } from 'os'
+import { randomUUID } from 'node:crypto'
+import { MirrorOperation, type MirrorEvent } from './Operation'
+import { MirrorBrowserAdapter } from './BrowserAdapter'
+import type { MirrorConfig } from './Policy'
 import type { CallbackFn } from '@shared/app'
-
-const CPU_Count = cpus().length
-
-type RunParams = {
-  url: string
-  config: RunConfig
-}
 class SiteSucker {
-  setCallback(fn: CallbackFn) {
-    Callback.fn = fn
+  private operation?: MirrorOperation
+  private callback: CallbackFn = () => {}
+  setCallback(callback: CallbackFn) { this.callback = callback }
+  show(item: { operationId?: string; url: string; config: Partial<MirrorConfig> }) {
+    if (this.operation?.snapshot().state === 'running') throw new Error('A mirror is already running')
+    const id = item.operationId || randomUUID()
+    const adapter = new MirrorBrowserAdapter(id, () => { void this.destroy() })
+    this.operation = new MirrorOperation(id, item.url, item.config, adapter, (event: MirrorEvent) => this.callback(event))
+    void this.operation.run()
+    return this.operation.snapshot()
   }
-  show(item: RunParams) {
-    this.destroy()
-    let url = item.url
-    const urlObj = new URL(url)
-    urlObj.hash = ''
-    url = urlObj.toString()
-    Store.host = urlObj.host
-    Store.dir = join(item.config.dir, urlObj.host)
-    Config.update(item.config)
-
-    const saveFile = urlToDir(url, true)
-    const currentPage: PageLink = {
-      url,
-      saveFile,
-      state: 'wait',
-      type: 'text/html'
-    }
-    Store.Pages.push(new LinkItem(currentPage))
-    PageTask.init(item?.config?.windowCount ?? 2)
-    LinkTask.init(CPU_Count - 1)
-    PageTask.updateConfig()
-    PageTask.run().then()
-    LinkTask.run().then()
-    Store.ExcludeUrl.add(url)
-  }
-
-  updateConfig(config: RunConfig) {
-    Config.update(config)
-    PageTask.updateConfig()
-  }
-
-  destroy() {
-    PageTask.destroy()
-    LinkTask.destroy()
-    Store.reinit()
-  }
+  status() { return this.operation?.snapshot() }
+  // A running operation retains its request snapshot; edits apply to the next run.
+  updateConfig(_config: unknown) {}
+  async destroy() { return this.operation?.cancel() }
 }
-
 export default new SiteSucker()

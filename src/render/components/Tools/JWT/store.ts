@@ -1,5 +1,6 @@
 import { reactive } from 'vue'
-import { enc, HmacSHA256, HmacSHA384, HmacSHA512 } from 'crypto-js'
+import CryptoJS from 'crypto-js'
+const { enc, HmacSHA256, HmacSHA384, HmacSHA512 } = CryptoJS
 
 type JwtAlgorithm = 'none' | 'HS256' | 'HS384' | 'HS512'
 

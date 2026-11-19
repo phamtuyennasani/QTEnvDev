@@ -174,6 +174,7 @@
     EditVM = res.default
   })
   const toEdit = (p: string, index: number) => {
+    if (Setup.updating || Setup.fetchListing) return
     AsyncComponentShow(EditVM, {
       item: p,
       index
@@ -202,16 +203,19 @@
   }
 
   const doDel = (item: any, index: number) => {
+    if (Setup.updating || Setup.fetchListing) return
     Setup.list.splice(index, 1)
   }
 
   const doDown = (item: any, index: number) => {
+    if (Setup.updating || Setup.fetchListing) return
     const arr = ArrayMoveItem(Setup.list, index, index + 1)
     Setup.list.splice(0)
     Setup.list.push(...arr)
   }
 
   const doUp = (item: any, index: number) => {
+    if (Setup.updating || Setup.fetchListing) return
     const arr = ArrayMoveItem(Setup.list, index, index - 1)
     Setup.list.splice(0)
     Setup.list.push(...arr)

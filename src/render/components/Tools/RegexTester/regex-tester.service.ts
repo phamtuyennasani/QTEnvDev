@@ -15,33 +15,33 @@ interface GroupCapture {
 }
 
 export function matchRegex(regex: string, text: string, flags: string) {
-  let lastIndex = -1
   const re = new RegExp(regex, flags)
   const results = []
   let match = re.exec(text) as RegExpExecArrayWithIndices
   while (match !== null) {
-    if (re.lastIndex === lastIndex || match[0] === '') {
-      break
-    }
     const indices = match.indices
     const captures: Array<GroupCapture> = []
     Object.entries(match).forEach(([captureName, captureValue]) => {
       if (captureName !== '0' && captureName.match(/\d+/)) {
+        const range = indices[Number(captureName)]
+        if (!range) return
         captures.push({
           name: captureName,
           value: captureValue,
-          start: indices[Number(captureName)][0],
-          end: indices[Number(captureName)][1]
+          start: range[0],
+          end: range[1]
         })
       }
     })
     const groups: Array<GroupCapture> = []
     Object.entries(match.groups || {}).forEach(([groupName, groupValue]) => {
+      const range = indices.groups[groupName]
+      if (!range) return
       groups.push({
         name: groupName,
         value: groupValue,
-        start: indices.groups[groupName][0],
-        end: indices.groups[groupName][1]
+        start: range[0],
+        end: range[1]
       })
     })
     results.push({
@@ -50,7 +50,11 @@ export function matchRegex(regex: string, text: string, flags: string) {
       captures,
       groups
     })
-    lastIndex = re.lastIndex
+    if (!re.global || results.length >= 10000) break
+    if (match[0] === '') {
+      const codePoint = text.codePointAt(re.lastIndex)
+      re.lastIndex += (re.unicode || re.unicodeSets) && codePoint !== undefined && codePoint > 0xffff ? 2 : 1
+    }
     match = re.exec(text) as RegExpExecArrayWithIndices
   }
   return results

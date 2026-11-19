@@ -57,8 +57,9 @@ class Image extends Base {
             all.push(...arr)
           }
         } catch (e) {
-          reject(e)
-          return
+          const failed = { path: dir, hasError: true, errorMessage: String(e) }
+          on({ allFile: [failed] })
+          on({ successTask: [], failTask: [failed] })
         }
       }
       if (!all.length) {
@@ -77,7 +78,10 @@ class Image extends Base {
         })
         .initQueue(
           all.map((p) => {
-            return new ImageInfoFetchTask(p.path)
+            const task = new ImageInfoFetchTask(p.path)
+            const run = task.run.bind(task)
+            task.run = async () => { if (!await run()) throw new Error(task.errorMessage || 'Image metadata failed'); return true }
+            return task
           })
         )
         .run()
@@ -172,12 +176,12 @@ class Image extends Base {
             let backupPath = backPath ? join(backPath, name) : ''
             if (format !== 'none') {
               path = path.replace(extname(path), `.${format}`)
-              if (backupPath) {
-                backupPath = backupPath.replace(extname(backupPath), `.${format}`)
-              }
             }
             console.log('doCompressTask name', name, path, backupPath)
-            return new ImageCompressTask(p, config, path, backupPath)
+            const task = new ImageCompressTask(p, config, path, backupPath)
+            const run = task.run.bind(task)
+            task.run = async () => { if (!await run()) throw new Error(task.errorMessage || 'Image processing failed'); return true }
+            return task
           })
         )
         .run()

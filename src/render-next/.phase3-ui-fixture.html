@@ -1,0 +1,17 @@
+<!doctype html><html class="dark"><head><meta charset="utf-8"></head><body><div id="app"></div><script>window.fixtureErrors=[];window.fixtureWarnings=[];window.Server={isWindows:true,BaseDir:'C:/fixture/',Static:'C:/fixture/',AppDir:'C:/fixture/',SetupDir:'C:/fixture/',PhpDir:'C:/fixture/',NodeDir:'C:/fixture/'};window.process={platform:'win32',env:{},arch:'x64'};
+window.addEventListener('error',e=>fixtureErrors.push(String(e.error||e.message)));window.addEventListener('unhandledrejection',e=>fixtureErrors.push(String(e.reason)));
+let receive;window.QTEnvDevNodeAPI={ipcReceiveFromMain(fn){receive=fn},ipcSendToMain(command,key,...args){let data={code:0,data:[]};if(command==='App-Node-FN'){const [namespace,method]=args;data=method==='existsSync'?false:method==='readFile'?'':method==='readdir'?[]:method==='types'?{}:method==='getConfig'?{setup:{},server:{}}:method==='showOpenDialog'?{canceled:true,filePaths:[]}:method==='shouldUseDarkColors'?true:[];}if(command==='app-sitesucker-status')data={code:0,data:null};if(command==='app-sitesucker-setup')data={commonSetup:{dir:'C:/fixture/'}};if(command==='Capturer:status')data={code:0,data:{id:'',status:'idle'}};queueMicrotask(()=>receive?.({},command,key,data));}};</script><script type="module">import {createApp,ref,h,nextTick} from 'vue'
+import {createPinia} from 'pinia'
+import LegacyToolPanel from './components/LegacyToolPanel.vue'
+import ImageCompressPanel from './components/ImageCompressPanel.vue'
+import ProcessPanel from './components/ProcessPanel.vue'
+import CapturerPanel from './components/CapturerPanel.vue'
+import SiteSuckerPanel from './components/SiteSuckerPanel.vue'
+import CustomToolPanel from './components/CustomToolPanel.vue'
+import {toolLibraryController} from './state/toolLibraryController'
+import './styles/app.css'
+const active=ref('jwt'), shown=ref(true)
+const app=createApp({setup:()=>()=>shown.value?h(active.value==='image-compress'?ImageCompressPanel:active.value==='process'?ProcessPanel:active.value==='capturer'?CapturerPanel:active.value==='site-sucker'?SiteSuckerPanel:active.value==='custom'?CustomToolPanel:LegacyToolPanel,{tool:active.value,onClose:()=>{shown.value=false}}):null})
+app.use(createPinia());app.config.warnHandler=(message)=>window.fixtureWarnings.push(message);app.config.errorHandler=(error)=>window.fixtureErrors.push(String(error));app.mount('#app')
+window.fixture={async open(id){shown.value=false;await nextTick();active.value=id;shown.value=true;await nextTick()},async custom(){toolLibraryController.open({id:'fixture-custom',label:'Fixture',component:location.origin+'/render-next/.phase3-ui-fixture.html?guest'});await this.open('custom')}}
+window.fixtureReady=true</script></body></html>

@@ -30,6 +30,7 @@ import type { AllAppModule } from '@/core/type'
 import { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
 import IPC from '@/util/IPC'
 import { MessageError } from '@/util/Element'
+import { ToolOperation } from '../../../../render-next/tools/ToolOperation'
 
 export class CodePlayTab {
   value = ''
@@ -42,6 +43,7 @@ export class CodePlayTab {
   editor!: () => editor.IStandaloneCodeEditor
   fromEditor!: () => editor.IStandaloneCodeEditor
   execing = false
+  execution = new ToolOperation(IPC)
 
   watcher1: any = null
   watcher2: any = null
@@ -79,23 +81,20 @@ export class CodePlayTab {
     if (this.execing) {
       return
     }
+    const modules: AllAppModule[] = this.fromType === 'typescript' || this.fromType === 'javascript' ? ['node', 'bun', 'deno'] : [this.fromType as AllAppModule]
+    const installed = modules.flatMap((module) => BrewStore().module(module).installed)
+    if (!this.value.trim() || !installed.some((runtime) => runtime.path === this.fromPath)) {
+      MessageError('Choose an installed runtime and enter code before running.')
+      return
+    }
     this.execing = true
-    console.log('codeRun: ', Math.round(new Date().getTime() / 1000))
-    console.time('codeRun')
-    IPC.send(`app-fork:code`, 'codeRun', this.value, this.fromType, this.fromPath).then(
-      async (key: string, res: any) => {
-        if (res.code === 0) {
-          IPC.off(key)
-          this.toValue = res?.data ?? ''
-          this.transformTo().catch()
-        } else if (res.code === 1) {
-          IPC.off(key)
-          MessageError(res?.msg ?? '')
-        }
-        this.execing = false
-        console.timeEnd('codeRun')
-      }
-    )
+    this.execution.run('app-fork:code', ['codeRun', this.value, this.fromType, this.fromPath], (data) => {
+      this.toValue = data ?? ''
+      this.transformTo().catch((error) => MessageError(String(error)))
+    }).then((done) => {
+      this.execing = false
+      if (!done) MessageError(this.execution.error)
+    })
   }
 
   initWatch() {
@@ -547,6 +546,7 @@ let style: any = localStorage.getItem('QTEnvDev-CodePlay-LeftStyle')
 if (style) {
   style = JSON.parse(style)
 }
+let initialization: Promise<void> | undefined
 
 const CodePlay: CodePlayType = reactive({
   index: 1,
@@ -557,7 +557,8 @@ const CodePlay: CodePlayType = reactive({
     'tab-1': reactive(new CodePlayTab())
   },
   init() {
-    localForage
+    if (initialization) return
+    initialization = localForage
       .getItem('qtenvdev-code-playground')
       .then((res: any) => {
         if (res && res?.langBin) {
@@ -566,6 +567,7 @@ const CodePlay: CodePlayType = reactive({
         if (res && res?.tabs) {
           let index = 0
           for (const k in res.tabs) {
+            if (CodePlay.tabs[k]?.execing) continue
             const i = Number(k.split('-').pop())
             index = Math.max(index, i)
             CodePlay.tabs?.[k]?.destroy?.()

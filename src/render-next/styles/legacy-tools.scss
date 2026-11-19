@@ -1,0 +1,37 @@
+.pqt-established-tool {
+  @tailwind utilities;
+  height: min(640px, calc(100vh - 200px));
+  min-height: 320px;
+  overflow: auto;
+  color: var(--pqt-text);
+  --el-color-primary: #439c8f;
+  --el-bg-color: var(--pqt-surface);
+  --el-fill-color-blank: var(--pqt-canvas);
+  --el-text-color-primary: var(--pqt-text);
+  --el-text-color-regular: var(--pqt-text-muted);
+  --el-border-color: var(--pqt-border-strong);
+  --el-border-color-light: var(--pqt-border);
+  .host-edit { display:flex;flex-direction:column;width:100%;height:100%;min-height:0; }
+  .host-edit > .nav { display:flex;align-items:center;justify-content:space-between;min-height:42px;flex-shrink:0;margin-bottom:10px; }
+  .host-edit > .nav > .left { display:flex;align-items:center; }
+  .main-wapper { width:100%;min-height:0;flex:1; }
+  .main-wapper > .main { display:flex;flex-direction:column;min-height:0; }
+  .json-parse .main-wapper { display:flex;flex-direction:column; }
+  .json-parse .main-wapper > .main { flex:1;display:flex;flex-direction:row;gap:8px;overflow:hidden; }
+  .json-parse .main > .left,.json-parse .main > .right { display:flex;flex-direction:column;min-width:0;flex:1;height:100%;overflow:hidden; }
+  .json-parse .main > .left > .editor,.json-parse .main > .right > .editor { flex:1;min-height:220px;padding:0;overflow:hidden; }
+  .json-parse .main > .handle { flex:0 0 8px;cursor:ew-resize; }
+  .app-json-toolbar { display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:38px;flex-wrap:wrap;margin-bottom:8px; }
+  .el-tabs-content-flex-1 { height:100%;display:flex;flex-direction:column; }
+  .el-tabs-content-flex-1 > .el-tabs__content { min-height:0;flex:1; }
+  .el-tabs-content-flex-1 > .el-tabs__content > .el-tab-pane { height:100%; }
+  .el-scrollbar { min-height:0; }
+  .path-choose { display:flex;gap:12px;align-items:end; }
+  .vp-doc { user-select:text;line-height:1.65;overflow-wrap:anywhere; }
+  .vp-doc pre { position:relative;padding:14px;margin:12px 0;overflow:auto;background:var(--pqt-canvas);border:1px solid var(--pqt-border);border-radius:6px; }
+  .vp-doc code { font-family:var(--pqt-font-mono); }
+  .vp-doc table { width:100%;border-collapse:collapse; }
+  .vp-doc td,.vp-doc th { padding:8px;border:1px solid var(--pqt-border); }
+  .vp-doc a { color:var(--pqt-accent); }
+  .vp-doc h1,.vp-doc h2,.vp-doc h3 { margin:14px 0 10px; }
+}

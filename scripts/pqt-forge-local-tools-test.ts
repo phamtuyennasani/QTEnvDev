@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import { webcrypto } from 'node:crypto'
 import { encodeBase64, decodeBase64, inspectJwt, lineDiff, transform } from '../src/render-next/tools/transforms'
+import { generateToken } from '../src/render-next/tools/token'
+import { validateBase64File } from '../src/render-next/tools/fileBase64'
 
 const unicode = 'Tiếng Việt · PQT Forge 🛠️'
 assert.equal(decodeBase64(encodeBase64(unicode)), unicode)
@@ -24,4 +26,23 @@ assert.equal(JSON.parse(await transform('timestamp', '0')).iso, '1970-01-01T00:0
 assert.equal(JSON.parse(await transform('timestamp', '1000', { mode: 'milliseconds' })).unixSeconds, 1)
 await assert.rejects(transform('timestamp', '2026-11-18T12:00:00'))
 await assert.rejects(transform('json', ' '.repeat(200001)))
+assert.equal(await transform('hash', 'abc', { algorithm: 'MD5' }), '900150983cd24fb0d6963f7d28e17f72')
+assert.equal(await transform('hash', 'abc', { algorithm: 'RIPEMD160' }), '8eb208f7e05d987a9b044a8e98c6b087f15a0bfc')
+assert.equal(await transform('hash', 'abc', { algorithm: 'SHA-256', encoding: 'base64', subtle: webcrypto.subtle as SubtleCrypto }), 'ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=')
+assert.equal(await transform('hash', 'abc', { algorithm: 'SHA-256', encoding: 'base64url', subtle: webcrypto.subtle as SubtleCrypto }), 'ungWv48Bz-pBQUDeXa4iI7ADYaOWF3qctBD_YfIAFa0')
+assert.equal((await transform('hash', 'abc', { algorithm: 'MD5', encoding: 'binary' })).length, 128)
+assert.equal(validateBase64File('data:application/octet-stream;base64,AP+A'), 'AP+A')
+assert.equal(validateBase64File('AP+A\r\n'), 'AP+A')
+assert.throws(() => validateBase64File('%%%'))
+assert.throws(() => validateBase64File(''))
+assert.equal(await transform('base64', 'ÿ?', { urlSafe: true }), 'w78_')
+assert.equal(await transform('base64', 'w78_', { urlSafe: true, mode: 'decode' }), 'ÿ?')
+assert.throws(() => generateToken(-1, 'abc'))
+assert.throws(() => generateToken(513, 'abc'))
+assert.throws(() => generateToken(1.5, 'abc'))
+assert.throws(() => generateToken(8, ''))
+assert.equal(generateToken(512, 'x'), 'x'.repeat(512))
+const tokenSample = generateToken(512, 'aAbB0123', webcrypto as unknown as Crypto)
+assert.equal(tokenSample.length, 512)
+assert.match(tokenSample, /^[aAbB0123]+$/)
 console.log('PQT Forge local utilities passed: Unicode Base64, JWT decode warning, JSON errors, SHA-256 known vector, line diff, URL, HTML and timestamp units.')

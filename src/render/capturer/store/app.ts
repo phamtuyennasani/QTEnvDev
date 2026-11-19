@@ -295,9 +295,9 @@ export const CapturerStore = defineStore('capturerStore', {
       }
     },
 
-    async exitCapturer() {
+    async exitCapturer(reason?: 'saving') {
       return new Promise((resolve) => {
-        IPC.send('Capturer:doStopCapturer').then((key: string) => {
+        IPC.send('Capturer:doStopCapturer', reason).then((key: string) => {
           IPC.off(key)
           resolve(true)
         })
@@ -370,7 +370,7 @@ export const CapturerStore = defineStore('capturerStore', {
 
     async saveImage(useConfig: boolean) {
       const image = await this.exportCanvasToBase64()
-      await this.exitCapturer()
+      await this.exitCapturer('saving')
       const base64 = image.replace(/^data:image\/\w+;base64,/, '')
       IPC.send('Capturer:saveImage', base64, useConfig).then((key: string) => {
         IPC.off(key)

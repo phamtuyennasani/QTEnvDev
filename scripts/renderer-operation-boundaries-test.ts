@@ -30,9 +30,6 @@ const walk = (dir: string): string[] => {
 const legacyDirectIpcIndexPages = [
   'Aside/Index.vue',
   'Temporal/Index.vue',
-  'Tools/BomClean/Index.vue',
-  'Tools/PhpObfuscator/Index.vue',
-  'Tools/SSLMake/Index.vue',
   'Tools/SiteSucker/Index.vue',
   'Tools/SystenEnv/Index.vue'
 ]
@@ -442,6 +439,15 @@ assert.match(privilegeController, /snapshot\.revision < /)
 await import('./language-project-ports-test')
 
 console.log('renderer operation boundary tests passed')
+
+// New toolbox owners must survive their initiating panel. Behavior fixtures exercise
+// duplicate invocation, terminal events, stale callbacks and unknown-result recovery.
+for (const name of ['CapturerPanel', 'SiteSuckerPanel', 'ImageCompressPanel']) {
+  assert.doesNotMatch(readFileSync(join(root, 'src/render-next/components', name + '.vue'), 'utf8'), /IPC\.send/)
+}
+await import('./pqt-forge-capturer-test')
+await import('./pqt-forge-site-sucker-test')
+await import('./pqt-forge-image-pipeline-test')
 
 // Homebrew formula mutations are controller/fork owned; only bootstrap retains XTerm.
 const homebrewPage = readFileSync(join(componentsDir, 'VersionManager/brew/index.vue'), 'utf8')

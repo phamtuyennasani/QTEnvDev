@@ -38,7 +38,8 @@ const config: UserConfig = {
     monacoEditorPlugin({}),
     wasm(),
     vue({
-      include: [/\.vue$/, /\.md$/] // <-- allows Vue to compile Markdown files
+      include: [/\.vue$/, /\.md$/], // <-- allows Vue to compile Markdown files
+      template: { compilerOptions: { isCustomElement: (tag) => tag === 'webview' } }
     }),
     vueJsx({
       transformOn: true,

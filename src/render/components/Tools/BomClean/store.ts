@@ -1,4 +1,6 @@
 import { ref, Ref } from 'vue'
+import { bomScan, bomClean } from './Operation'
+import { MessageError } from '@/util/Element'
 export type Ext = {
   ext: string
   count: number
@@ -44,3 +46,13 @@ node_modules`,
   }
 })
 export default store
+export function scanBomFiles() {
+  if (store.value.loading || (store.value.running && !store.value.end)) return
+  store.value.loading = true
+  return bomScan.run('app-fork:tools', ['getAllFile', store.value.path], (data) => { store.value.files = Array.isArray(data) ? data : [] }).then((done) => { store.value.loading = false; if (!done) MessageError(bomScan.error) })
+}
+export function cleanBomFiles(files: string[]) {
+  if (store.value.loading || (store.value.running && !store.value.end)) return
+  store.value.running = true
+  return bomClean.run('app-fork:tools', ['cleanBom', [...files]], () => undefined, (progress) => { Object.assign(store.value.progress, progress ?? {}) }).then((done) => { store.value.end = true; store.value.running = false; if (!done) MessageError(bomClean.error) })
+}

@@ -117,6 +117,7 @@
         </el-card>
 
         <el-card header="Matches" class="mb-1 mt-3">
+          <el-alert v-if="Store.resultsLimited" title="Showing the first 10,000 matches." type="info" :closable="false" />
           <el-table v-if="Store.results?.length > 0" :data="Store.results">
             <el-table-column label="Index" prop="index"></el-table-column>
             <el-table-column label="Value" prop="value"></el-table-column>

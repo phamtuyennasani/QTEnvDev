@@ -1,7 +1,5 @@
 import { reactiveBind } from '@/util/Index'
 import type {
-  BatchImageInfoItem,
-  BatchImageResultItem,
   SharpConfig,
   TextureOptions,
   WatermarkConfig
@@ -11,10 +9,11 @@ import { dialog, fs, shell } from '@/util/NodeFn'
 import { MessageError } from '@/util/Element'
 import { I18nT } from '@lang/index'
 import IPC from '@/util/IPC'
-import { reactive } from 'vue'
 import localForage from 'localforage'
-import { SetupStore } from '@/components/Setup/store'
-import { ElMessageBox } from 'element-plus'
+import { ImageBatchOperation } from './ImageBatchOperation'
+import { snapshotImageConfig } from './ImagePipelineConfig'
+import { StorageGetAsync, StorageSetAsync } from '@/util/Storage'
+import { watch } from 'vue'
 
 class ImageCompressSetup implements SharpConfig {
   // 基本配置
@@ -268,237 +267,76 @@ class ImageCompressSetup implements SharpConfig {
 const setup = reactiveBind(new ImageCompressSetup())
 export default setup
 
-class ImageBatchProcess {
-  saveDir: string = ''
-  backupDir: string = ''
-  rewrite: boolean = false
-  trialStartTime: number = 0
-  images: Array<BatchImageInfoItem> = []
-
+class ImageBatchProcess extends ImageBatchOperation {
   wordWidths: Record<string, number> = {}
-
-  processing = false
-
-  private storeKey = 'qtenvdev-tools-imagecompress'
-  private inited: boolean = false
-
+  private initialized?: Promise<void>
+  private storageKey = 'qtenvdev-tools-imagecompress-v2'
+  private saves = Promise.resolve()
+  private watching = false
+  constructor() {
+    super({ ipc: IPC, config: () => setup, notice: (message) => MessageError(message) })
+  }
   init() {
-    return new Promise((resolve) => {
-      if (this.inited) {
-        resolve(true)
-        return
+    if (this.initialized) return this.initialized
+    this.initialized = (async () => {
+      try {
+        const saved = await StorageGetAsync<{ config?: SharpConfig; trialStartTime?: number; saveDir?: string; backupDir?: string; rewrite?: boolean }>(this.storageKey)
+          ?? await localForage.getItem<any>('qtenvdev-tools-imagecompress')
+        if (saved?.config) Object.assign(setup, snapshotImageConfig({ ...setup, ...saved.config, withIccProfile: typeof saved.config.withIccProfile === 'boolean' ? saved.config.withIccProfile ? 'srgb' : '' : saved.config.withIccProfile ?? setup.withIccProfile }))
+        this.trialStartTime = saved?.trialStartTime ?? 0
+        this.saveDir = saved?.saveDir ?? ''
+        this.backupDir = saved?.backupDir ?? ''
+        this.rewrite = Boolean(saved?.rewrite)
+      } catch (error) { this.warnings.push('Image settings could not be loaded: ' + String(error)) }
+      if (!this.watching) {
+        this.watching = true
+        watch(() => [setup, this.saveDir, this.backupDir, this.rewrite], () => this.save(), { deep: true })
       }
-      localForage
-        .getItem(this.storeKey)
-        .then((res: any) => {
-          if (res && res?.config) {
-            Object.assign(setup, res?.config)
-          }
-          if (res && res?.trialStartTime) {
-            this.trialStartTime = res.trialStartTime
-          }
-        })
-        .catch()
-        .finally(() => {
-          this.inited = true
-          resolve(true)
-        })
-    })
+    })()
+    return this.initialized
   }
-
   save() {
-    localForage
-      .setItem(
-        this.storeKey,
-        JSON.parse(
-          JSON.stringify({
-            config: setup,
-            trialStartTime: this.trialStartTime
-          })
-        )
-      )
-      .then()
-      .catch()
+    let data: unknown
+    try { data = { config: snapshotImageConfig(setup), trialStartTime: this.trialStartTime, saveDir: this.saveDir, backupDir: this.backupDir, rewrite: this.rewrite } }
+    catch { return this.saves }
+    this.saves = this.saves.then(() => StorageSetAsync(this.storageKey, data)).catch((error) => { this.warnings.push('Image settings could not be saved: ' + String(error)) })
+    return this.saves
   }
-
   getWordWidths(word: string) {
-    const arr = Array.from(new Set([...word.split(''), '.']))
-    for (const word of arr) {
-      if (this.wordWidths[word]) {
-        continue
-      }
-      let dom: HTMLElement | null = document.createElement('span')
-      dom.innerHTML = word
-      dom.style.opacity = '0'
-      dom.style.pointerEvents = 'none'
-      document.body.appendChild(dom)
-      const rect = dom.getBoundingClientRect()
-      this.wordWidths[word] = rect.width
-      dom.remove()
-      dom = null
+    for (const character of new Set([...word, '.'])) {
+      if (this.wordWidths[character]) continue
+      const element = document.createElement('span')
+      element.textContent = character
+      element.style.opacity = '0'
+      element.style.pointerEvents = 'none'
+      document.body.appendChild(element)
+      this.wordWidths[character] = element.getBoundingClientRect().width
+      element.remove()
     }
-    console.log('getWordWidths: ', word, this.wordWidths)
   }
-
-  imageSelected(paths: string[]) {
-    const all = paths.filter((filePath: string) => !this.images.some((i) => i.path === filePath))
-    if (!all.length) {
-      return
-    }
-    IPC.send('app-fork:image', 'fetchDirFile', all).then((key, res) => {
-      if (res?.code === 0 || res?.code === 1) {
-        IPC.off(key)
-        return
-      }
-      const data:
-        | {
-            allFile?: BatchImageInfoItem[]
-            successTask?: BatchImageInfoItem[]
-            failTask?: BatchImageInfoItem[]
-          }
-        | undefined = res?.msg
-      if (data) {
-        const allFile = data?.allFile
-        if (allFile) {
-          const files = allFile.filter((a) => !this.images.some((i) => i.path === a.path))
-          if (files.length > 0) {
-            const images: BatchImageInfoItem[] = reactive(
-              files.map((m) => {
-                return {
-                  path: m.path,
-                  status: 'fetching'
-                }
-              })
-            ) as any
-            this.images.push(...images)
-          }
-          return
-        }
-        const successTask = data?.successTask ?? []
-        const failTask = data?.failTask ?? []
-        for (const task of [...successTask, ...failTask]) {
-          const find = this.images.find((i) => i.path === task.path)
-          if (find) {
-            Object.assign(find, task, { status: 'fetched' })
-          }
-        }
-      }
-    })
+  async selectDir(type?: 'file' | 'folder') {
+    if (this.busy) return
+    try {
+      const result = await dialog.showOpenDialog({
+        properties: type === 'file' ? ['openFile', 'showHiddenFiles', 'multiSelections'] : type === 'folder' ? ['openDirectory', 'showHiddenFiles', 'multiSelections'] : ['openFile', 'openDirectory', 'showHiddenFiles', 'multiSelections'],
+        filters: type === 'file' ? [{ name: 'Image files', extensions: ['jpeg', 'jpg', 'png', 'webp', 'avif', 'gif', 'tiff', 'heif'] }] : []
+      })
+      if (!result.canceled && !this.busy) this.imageSelected(result.filePaths)
+    } catch (error) { this.error = String(error); MessageError(this.error) }
   }
-
-  selectDir(type?: 'file' | 'folder') {
-    let properties: any = ['openFile', 'openDirectory', 'showHiddenFiles', 'multiSelections']
-    let filters: any = []
-    if (type === 'file') {
-      properties = ['openFile', 'showHiddenFiles', 'multiSelections']
-      filters = [
-        {
-          name: 'Image Files',
-          extensions: ['jpeg', 'jpg', 'png', 'webp', 'avif', 'gif', 'tiff', 'heif']
-        }
-      ]
-    } else if (type === 'folder') {
-      properties = ['openDirectory', 'showHiddenFiles', 'multiSelections']
-    }
-    dialog
-      .showOpenDialog({
-        properties,
-        filters
-      })
-      .then(({ canceled, filePaths }: { canceled: boolean; filePaths: string[] }) => {
-        if (canceled || filePaths.length === 0) {
-          return
-        }
-        this.imageSelected(filePaths)
-      })
-  }
-
-  selectSaveDir(type: 'save' | 'backup') {
-    dialog
-      .showOpenDialog({
-        properties: ['openDirectory', 'showHiddenFiles', 'createDirectory', 'promptToCreate']
-      })
-      .then(({ canceled, filePaths }: { canceled: boolean; filePaths: string[] }) => {
-        if (canceled || filePaths.length === 0) {
-          return
-        }
-        const path = filePaths[0]
-        if (type === 'save') {
-          this.saveDir = path
-        } else {
-          this.backupDir = path
-        }
-      })
-  }
-
-  doProcess() {
-    const setupStore = SetupStore()
-    if (!setupStore.isActive && this.trialStartTime === 0) {
-      ElMessageBox.alert(I18nT('ai.noLiencesTips')).catch()
-      this.trialStartTime = Math.round(new Date().getTime() / 1000)
+  async selectSaveDir(type: 'save' | 'backup') {
+    if (this.busy) return
+    try {
+      const result = await dialog.showOpenDialog({ properties: ['openDirectory', 'showHiddenFiles', 'createDirectory', 'promptToCreate'] })
+      if (result.canceled || !result.filePaths[0] || this.busy) return
+      if (type === 'save') this.saveDir = result.filePaths[0]
+      else this.backupDir = result.filePaths[0]
       this.save()
-    }
-    if (this.processing) {
-      return
-    }
-    if (this.rewrite) {
-      if (!this.backupDir) {
-        MessageError(I18nT('tools.ImageCompress.batchProcessing.backupDirTips'))
-        return
-      }
-      this.saveDir = ''
-    } else {
-      if (!this.saveDir) {
-        MessageError(I18nT('tools.ImageCompress.batchProcessing.saveDirTips'))
-        return
-      }
-      this.backupDir = ''
-    }
-    this.processing = true
-    this.images.forEach((image) => {
-      delete image?.result
-      image.status = 'processing'
-    })
-    IPC.send(
-      'app-fork:image',
-      'doCompressTask',
-      JSON.parse(JSON.stringify(this.images)),
-      JSON.parse(JSON.stringify(setup)),
-      this.saveDir,
-      this.backupDir,
-      this.trialStartTime
-    ).then((key, res) => {
-      if (res?.code === 0) {
-        IPC.off(key)
-        this.processing = false
-        shell.openPath(this.saveDir || this.backupDir).catch()
-        return
-      }
-      if (res?.code === 1) {
-        IPC.off(key)
-        this.processing = false
-        MessageError(res?.msg ?? I18nT('base.fail'))
-        return
-      }
-      const data:
-        | {
-            successTask: BatchImageResultItem[]
-            failTask: BatchImageResultItem[]
-          }
-        | undefined = res?.msg
-      if (data) {
-        const successTask = data?.successTask ?? []
-        const failTask = data?.failTask ?? []
-        for (const task of [...successTask, ...failTask]) {
-          const find = this.images.find((i) => i.path === task.image.path)
-          if (find) {
-            find.result = task
-            find.status = 'processed'
-          }
-        }
-      }
-    })
+    } catch (error) { this.error = String(error); MessageError(this.error) }
+  }
+  async openOutput() {
+    try { const error = await shell.openPath(this.rewrite ? this.backupDir : this.saveDir); if (error) this.warnings.push('Files were preserved, but the output folder could not be opened: ' + String(error)) }
+    catch (error) { this.warnings.push('Files were preserved, but the output folder could not be opened: ' + String(error)) }
   }
 }
-
 export const ImageBatch = reactiveBind(new ImageBatchProcess())
