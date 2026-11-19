@@ -10,70 +10,133 @@ import { dirname, join } from 'node:path'
 import { HostsFileLinux, HostsFileMacOS } from '@shared/PlatFormConst'
 import { windowsSystemDirectory } from '@shared/WindowsSystemPaths'
 import { getPrimaryLocalIPAddress } from '@shared/network'
+import { isIPv4 } from 'node:net'
+import { rename, rm } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
+import { Buffer } from 'node:buffer'
 
 const require = createRequire(import.meta.url)
 const Tangerine = require('tangerine')
 
 const { createServer, Packet } = DNS2
-const tangerine = new Tangerine()
 
 class Manager extends Base {
-  server: any
+  private server?: ReturnType<typeof createServer>
   lastTime: number
-  hosts: any
-  ipcCommand: string
-  ipcCommandKey: string
-  appHosts: Record<string, string> = {}
+  private hosts: Record<string, string> = Object.create(null)
+  private systemHosts: Record<string, string> = Object.create(null)
+  private appHosts = new Set<string>()
   localIP: string = ''
+  private activeAddress = ''
+  private operation: Promise<unknown> = Promise.resolve()
 
   constructor() {
     super()
     this.server = undefined
     this.lastTime = 0
-    this.hosts = {}
-    this.ipcCommand = 'App_DNS_Log'
-    this.ipcCommandKey = 'App_DNS_Log'
   }
 
   initConfig() {
-    return new ForkPromise(async (resolve) => {
-      const file = join(global.Server.BaseDir!, 'dns/dns.json')
-      await mkdirp(dirname(file))
-      if (existsSync(file)) {
-        resolve(file)
-        return
+    return this.exclusive(() => this.ensureConfig())
+  }
+
+  private async ensureConfig() {
+    const file = join(global.Server.BaseDir!, 'dns/dns.json')
+    await mkdirp(dirname(file))
+    const json = {
+      resolveServer:
+        global.Server.Lang === 'zh'
+          ? ['223.5.5.5', '119.29.29.29', '180.76.76.76', '114.114.114.119']
+          : ['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4'],
+      resolveIP: { 'phpmyadmin.test': '127.0.0.1' },
+      bind: '0.0.0.0'
+    }
+    const defaultFile = join(global.Server.BaseDir!, 'dns/dns.default.json')
+    const source = JSON.stringify(json, null, 2)
+    if (!existsSync(defaultFile)) await writeFile(defaultFile, source)
+    if (!existsSync(file)) await writeFile(file, source)
+    return file
+  }
+
+  private exclusive<T>(task: () => T | PromiseLike<T>) {
+    const next = this.operation.then(task)
+    this.operation = next.then(
+      () => undefined,
+      () => undefined
+    )
+    return new ForkPromise<T>((resolve, reject) => next.then(resolve, reject))
+  }
+
+  workspaceStatus() {
+    return this.exclusive(() => ({
+      running: Boolean(this.activeAddress),
+      address: this.activeAddress,
+      localIP: this.localIP
+    }))
+  }
+
+  workspaceConfig() {
+    return this.exclusive(async () => {
+      const path = await this.ensureConfig()
+      const [content, defaults] = await Promise.all([
+        readFile(path, 'utf8'),
+        readFile(join(dirname(path), 'dns.default.json'), 'utf8')
+      ])
+      return { path, content, defaults }
+    })
+  }
+
+  saveWorkspaceConfig(expected: string, content: string) {
+    return this.exclusive(async () => {
+      if (typeof content !== 'string' || Buffer.byteLength(content) > 256 * 1024) {
+        throw new Error('Use a DNS settings file smaller than 256 KB.')
       }
-      let json: any = {}
-      if (global.Server.Lang === 'zh') {
-        json = {
-          resolveServer: ['223.5.5.5', '119.29.29.29', '180.76.76.76', '114.114.114.119'],
-          resolveIP: {
-            'phpmyadmin.test': '127.0.0.1'
-          },
-          bind: '0.0.0.0'
-        }
-      } else {
-        json = {
-          resolveServer: ['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4'],
-          resolveIP: {
-            'phpmyadmin.test': '127.0.0.1'
-          },
-          bind: '0.0.0.0'
-        }
+      const config = JSON.parse(content)
+      if (!config || typeof config !== 'object' || Array.isArray(config)) {
+        throw new Error('DNS settings must be a JSON object.')
       }
-      const defaultFile = join(global.Server.BaseDir!, 'dns/dns.default.json')
-      await writeFile(file, JSON.stringify(json, null, 2))
-      await writeFile(defaultFile, JSON.stringify(json, null, 2))
-      resolve(file)
+      if (config.bind !== undefined && !isIPv4(config.bind)) {
+        throw new Error('Bind must be an IPv4 address.')
+      }
+      if (
+        config.resolveServer !== undefined &&
+        (!Array.isArray(config.resolveServer) ||
+          config.resolveServer.some(
+            (server: unknown) => typeof server !== 'string' || !server.trim()
+          ))
+      ) {
+        throw new Error('Resolve servers must be a list of addresses.')
+      }
+      if (
+        config.resolveIP !== undefined &&
+        (!config.resolveIP ||
+          typeof config.resolveIP !== 'object' ||
+          Array.isArray(config.resolveIP) ||
+          Object.values(config.resolveIP).some((address) => !isIPv4(String(address))))
+      ) {
+        throw new Error('Host records must map hostnames to IPv4 addresses.')
+      }
+      const path = await this.ensureConfig()
+      if ((await readFile(path, 'utf8')) !== expected) {
+        throw new Error('The configuration changed. Refresh before saving.')
+      }
+      const temporary = path + '.' + randomUUID() + '.tmp'
+      try {
+        await writeFile(temporary, content, { flag: 'wx' })
+        await rename(temporary, path)
+      } finally {
+        await rm(temporary, { force: true }).catch(() => undefined)
+      }
+      return { content }
     })
   }
 
   initAppHosts(appHosts: string[]) {
     return new ForkPromise((resolve) => {
-      this.appHosts = {}
-      appHosts.forEach((h) => {
-        this.appHosts[h] = this.localIP
-      })
+      if (!Array.isArray(appHosts) || appHosts.some((host) => typeof host !== 'string')) {
+        throw new Error('Expected a list of site hostnames.')
+      }
+      this.appHosts = new Set(appHosts.map((name) => name.toLowerCase()))
       resolve(true)
     })
   }
@@ -92,22 +155,14 @@ class Manager extends Base {
     if (time - this.lastTime > 60000) {
       this.lastTime = time
       try {
-        let hosts = ''
-        hosts = (await readFileByRoot(hostFile)) as string
-        const arrs = hosts.split('\n').filter((s) => s.trim().indexOf('#') !== 0)
-        arrs.forEach((s) => {
-          const items = s
-            .split(' ')
-            .filter((a) => !!a.trim())
-            .map((a) => a.trim())
-          const ip = items?.shift()?.toLowerCase()
-          if (ip) {
-            items.filter(Boolean).forEach((i) => {
-              this.hosts[i] =
-                ip === '::1' || ip === '127.0.0.1' || ip === 'localhost' ? LOCAL_IP : ip
-            })
-          }
-        })
+        const hosts = Object.create(null)
+        const source = await readFileByRoot(hostFile)
+        for (const line of source.split('\n')) {
+          const [raw, ...names] = line.split('#', 1)[0].trim().split(/\s+/)
+          const ip = ['::1', '127.0.0.1'].includes(raw) ? LOCAL_IP : raw
+          if (isIPv4(ip)) for (const name of names) hosts[name.toLowerCase()] = ip
+        }
+        this.systemHosts = hosts
       } catch {}
     }
   }
@@ -124,13 +179,12 @@ class Manager extends Base {
       arr.shift()
       domains.push(`${['*', ...arr].join('.')}`)
     }
-    return domains.find((f) => this.hosts?.[f])
+    return domains.find((name) => this.systemHosts[name] || this.hosts[name])
   }
 
   start() {
     return new ForkPromise(async (resolve, reject) => {
-      const lang = global.Server.Lang
-      console.log('lang: ', lang)
+      const tangerine = new Tangerine()
       const file = join(global.Server.BaseDir!, 'dns/dns.json')
       let resolveIP: Record<string, string> = {}
       let bind = '0.0.0.0'
@@ -144,22 +198,36 @@ class Manager extends Base {
         }
         bind = json?.bind ?? '0.0.0.0'
       }
-      this.hosts = { ...resolveIP }
-      const LOCAL_IP = getPrimaryLocalIPAddress()
-      this.localIP = LOCAL_IP
+      this.hosts = Object.create(null)
+      for (const [name, ip] of Object.entries(resolveIP)) {
+        if (typeof ip === 'string' && isIPv4(ip)) this.hosts[name.toLowerCase()] = ip
+      }
+      this.systemHosts = Object.create(null)
+      this.lastTime = 0
+      const LOCAL_IP = getPrimaryLocalIPAddress() || '127.0.0.1'
       const server = createServer({
         udp: true,
-        handle: (request: any, send: (response: any) => void) => {
+        handle: (request, send) => {
           const response = Packet.createResponseFromRequest(request)
           const [question] = request.questions
-          const { name } = question
-          console.log('question: ', question, name)
-          this.initHosts(LOCAL_IP!)
-          Object.assign(this.hosts, this.appHosts)
-          console.log('this.hosts: ', this.hosts)
-          const wildcard = this.checkWildcardDomainMatch(name)
-          if (this.hosts?.[name] || wildcard) {
-            const ip = this.hosts?.[name] ?? wildcard
+          const name = question?.name
+          const sendResponse = () => {
+            void Promise.resolve(send(response)).catch(() => undefined)
+          }
+          if (!name || question.type !== Packet.TYPE.A) {
+            sendResponse()
+            return
+          }
+          void this.initHosts(LOCAL_IP)
+          const lookup = name.toLowerCase()
+          const wildcard = this.checkWildcardDomainMatch(lookup)
+          const local =
+            (this.appHosts.has(lookup) ? this.localIP : '') ||
+            this.systemHosts[lookup] ||
+            this.hosts[lookup] ||
+            (wildcard && (this.systemHosts[wildcard] || this.hosts[wildcard]))
+          if (local) {
+            const ip = local
             const item: any = {
               name,
               type: Packet.TYPE.A,
@@ -169,7 +237,7 @@ class Manager extends Base {
             }
             process?.send?.({
               on: true,
-              key: this.ipcCommandKey,
+              key: 'App_DNS_Log',
               info: {
                 host: name,
                 ttl: 60,
@@ -177,7 +245,7 @@ class Manager extends Base {
               }
             })
             response.answers.push(item)
-            send(response)
+            sendResponse()
             return
           }
           try {
@@ -197,7 +265,7 @@ class Manager extends Base {
                     } as any)
                     process?.send?.({
                       on: true,
-                      key: this.ipcCommandKey,
+                      key: 'App_DNS_Log',
                       info: {
                         host: name,
                         ttl: item.ttl,
@@ -205,75 +273,72 @@ class Manager extends Base {
                       }
                     })
                   })
-                  send(response)
                 }
+                sendResponse()
               })
               .catch((e: any) => {
                 console.log(`tangerine resolve error: ${e}`)
-                send(response)
+                sendResponse()
               })
           } catch {
-            send(response)
+            sendResponse()
           }
         }
       })
 
-      server.on('listening', () => {
-        console.log('Start Success')
+      server.once('listening', () => {
+        this.server = server
+        this.activeAddress = bind
+        this.localIP = bind === '0.0.0.0' ? LOCAL_IP : bind
         resolve(true)
+      })
+
+      server.once('close', () => {
+        if (this.server === server) {
+          this.server = undefined
+          this.activeAddress = ''
+          this.localIP = ''
+        }
       })
 
       server.on('error', (error) => {
         reject(error)
       })
 
-      server
-        .listen({
-          // Optionally specify port, address and/or the family of socket() for udp server:
-          udp: {
-            port: 53,
-            address: bind
-          },
-
-          // Optionally specify port and/or address for tcp server:
-          tcp: {
-            port: 53,
-            address: bind
-          }
-        })
-        .then()
-        .catch((error) => {
-          reject(error)
-        })
-      this.server = server
+      void server.listen({ udp: { port: 53, address: bind } }).catch(reject)
     })
   }
   async close() {
     // DNS server 由专用 fork 持有；await close 确认 socket 已释放，拒绝时保留实例供重试。
     await this.server?.close?.()
-    this.server = null
+    this.server = undefined
+    this.activeAddress = ''
+    this.localIP = ''
   }
 
   stopService(_version?: SoftInstalled, stopOptions?: ServiceStopContext): any {
     // 与其他模块使用同一可选参数位置；DNS 仅关闭自己 socket，不消费列表或 kill 宿主。
-    return withServiceStopContext(
-      stopOptions,
-      () =>
-        new ForkPromise(async (resolve) => {
-          await this.close()
-          // 回传的是宿主 fork PID 供登记清理，绝不把宿主 Electron worker 当作外部服务去 kill。
-          resolve({ 'APP-Service-Stop-PID': [`${process.pid}`] })
-        })
+    return withServiceStopContext(stopOptions, () =>
+      this.exclusive(async () => {
+        await this.close()
+        // 回传的是宿主 fork PID 供登记清理，绝不把宿主 Electron worker 当作外部服务去 kill。
+        return { 'APP-Service-Stop-PID': [`${process.pid}`] }
+      })
     )
   }
 
   startService(): ForkPromise<any> {
-    return new ForkPromise((resolve, reject, on) => {
+    return this.exclusive(async () => {
       // 与外部服务采用同一成功终态登记，但停止动作仅关闭模块自己的 socket。
-      this.start()
-        .on(on)
-        .then(() => resolve({ 'APP-Service-Start-PID': `${process.pid}` }))
-        .catch(reject)
+      if (!this.activeAddress) {
+        await this.ensureConfig()
+        await this.start()
+      }
+      return {
+        'APP-Service-Start-PID': `${process.pid}`,
+        address: this.activeAddress,
+        localIP: this.localIP
+      }
     })
   }
 
