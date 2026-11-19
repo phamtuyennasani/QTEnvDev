@@ -16,9 +16,10 @@
         <section class="settings-option"><AutoHide /></section>
         <section class="settings-option">
           <AutoStartService />
-          <p class="muted">Uses the default group in Startup groups.</p>
+          <p class="muted">Uses the default startup group, or starts enabled services when no group is selected.</p>
         </section>
         <section class="settings-option"><AutoUpdate /></section>
+        <section v-if="isUnix" class="settings-option"><UnixHelperMaintenance /></section>
         <section class="settings-option settings-option-wide"><ProxySetting /></section>
         <section v-if="isWindows" class="settings-option settings-option-wide">
           <WindowsElevationMethod />
@@ -52,7 +53,8 @@
 
   const props = defineProps<{ section: 'general' | 'editors' | 'about' | 'licenses' }>()
   const isWindows = computed(() => window.Server?.isWindows)
-  const supportsAutoLaunch = computed(() => window.Server?.isMacOS || window.Server?.isWindows || window.Server?.isLinux)
+  const isUnix = computed(() => window.Server?.isMacOS || window.Server?.isLinux)
+  const supportsAutoLaunch = computed(() => isWindows.value || isUnix.value)
   const store = AppStore()
   const theme = computed({
     get: () => store.config.setup.theme || 'system',
@@ -63,6 +65,9 @@
   })
   const WindowsElevationMethod = defineAsyncComponent(
     () => import('@/components/Setup/WindowsElevationMethod/index.vue')
+  )
+  const UnixHelperMaintenance = defineAsyncComponent(
+    () => import('@/components/Setup/QTEnvDevHelper/index.vue')
   )
   const EditorSettings = defineAsyncComponent(() => import('@/components/Setup/EditorConfig/index.vue'))
   const CodeFont = defineAsyncComponent(() => import('@/components/Setup/CodeFont/index.vue'))

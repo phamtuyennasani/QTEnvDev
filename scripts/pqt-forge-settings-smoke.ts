@@ -22,8 +22,11 @@ const server = await createServer({
 const fixtureHtml = String.raw`<!doctype html><div id="app"></div>
 <script>
   const windows = location.search === '?windows'
-  window.Server = { isWindows: windows, isLinux: !windows, isMacOS: false }
+  const macOS = location.search === '?macos'
+  window.Server = { isWindows: windows, isLinux: !windows && !macOS, isMacOS: macOS }
   window.preferences = []
+  window.loginRequests = []
+  window.helperRequests = []
   window.settingsErrors = []
   let receive
   window.QTEnvDevNodeAPI = {
@@ -36,8 +39,38 @@ const fixtureHtml = String.raw`<!doctype html><div id="app"></div>
         response = { code: 0 }
       } else if (channel === 'application:language-list-custom') response = { code: 0, data: [] }
       else if (scope === 'nativeTheme' && action === 'shouldUseDarkColors') response = true
-      else if (scope === 'app' && action === 'setLoginItemSettings') response = true
+      else if (scope === 'app' && action === 'getLoginItemSettings') response = { openAtLogin: false }
+      else if (scope === 'app' && action === 'setLoginItemSettings') {
+        loginRequests.push(args[2].openAtLogin)
+        if (!windows) {
+          window.finishLoginRequest = (result) => {
+            delete window.finishLoginRequest
+            queueMicrotask(() => receive({}, channel, key, result))
+          }
+          return
+        }
+        response = true
+      }
       else if (scope === 'app' && action === 'getVersion') response = '4.17.0-fixture'
+      else if (channel === 'APP:QTEnvDev-Helper-Check') {
+        helperRequests.push(channel)
+        window.finishHelperCheck = (result) => queueMicrotask(() => receive({}, channel, key, result))
+        return
+      }
+      else if (channel === 'NodePty:init') {
+        helperRequests.push(channel)
+        response = { code: 0, data: 'fixture-helper-pty' }
+      }
+      else if (channel === 'APP:QTEnvDev-Helper-Terminal-Install') {
+        helperRequests.push(channel)
+        if (scope !== 'fixture-helper-pty') settingsErrors.push('Helper launch had the wrong terminal identity')
+        window.replyHelperInstall = (result) => queueMicrotask(() => receive({}, channel, key, result))
+        return
+      }
+      else if (channel === 'NodePty:stop') {
+        helperRequests.push(channel)
+        response = { code: 0 }
+      }
       else response = { code: 0, data: [] }
       queueMicrotask(() => receive({}, channel, key, response))
     }
@@ -72,6 +105,7 @@ const fixtureHtml = String.raw`<!doctype html><div id="app"></div>
 
 const checks = String.raw`(async () => {
   const windows = location.search === '?windows'
+  const macOS = location.search === '?macos'
   const text = (part) => document.body.innerText.includes(part)
   const wait = async (condition) => {
     for (let attempt = 0; attempt < 400; ++attempt) {
@@ -87,12 +121,74 @@ const checks = String.raw`(async () => {
   const card = (label) => [...document.querySelectorAll('.settings-option')]
     .find((item) => item.innerText.includes(label))
   await wait(() => card('Tray Popup Style') && card('Server Proxy') && card('Auto Update'))
+  const helperButton = () => card('Fix QTEnvDev Helper')?.querySelector('button')
+  if (!windows) await wait(helperButton)
+  if (helperRequests.length || (windows && helperButton())) throw new Error('Helper maintenance was launched by mounting Settings or shown on Windows')
+  if (macOS) {
+    helperButton().click()
+    helperButton().click()
+    await wait(() => helperButton()?.disabled && helperRequests.length === 1)
+    finishHelperCheck({ code: 200 })
+    await new Promise((done) => setTimeout(done, 25))
+    if (!helperButton().disabled) throw new Error('Helper progress cleared the maintenance operation')
+    finishHelperCheck({ code: 0, data: true })
+    await wait(() => !helperButton()?.disabled && text('QTEnvDev Helper Fixed Successfully'))
+    if (helperRequests.length !== 1) throw new Error('Healthy macOS helper opened an installer')
+    return
+  }
   if (windows) {
     await wait(() => card('Authorization Method'))
     card('Auto Launch At Boot').querySelector('.el-switch').click()
     await wait(() => preferences.some((setup) => setup.autoLaunch === true))
-  } else if (card('Auto Launch At Boot') || card('Authorization Method')) {
-    throw new Error('Platform-specific settings leaked into Linux')
+  } else {
+    if (card('Authorization Method')) throw new Error('Windows authorization settings leaked into Linux')
+    const launchSwitch = () => card('Auto Launch At Boot')?.querySelector('.el-switch')
+    const checked = () => launchSwitch()?.querySelector('input').checked
+    const disabled = () => launchSwitch()?.querySelector('input').disabled
+    await wait(() => launchSwitch())
+    launchSwitch().click()
+    launchSwitch().click()
+    await wait(() => disabled() && loginRequests.length > 0)
+    if (loginRequests.length !== 1 || loginRequests[0] !== true || checked()) throw new Error('Linux launch changed before native confirmation or dispatched a duplicate request')
+    section('About PQT Forge')
+    await wait(() => !launchSwitch())
+    section('General')
+    await wait(() => disabled())
+    finishLoginRequest('Linux fixture denied launch at sign-in')
+    await wait(() => disabled() === false && text('Linux fixture denied launch at sign-in'))
+    if (checked() || preferences.some((setup) => setup.autoLaunch === true)) throw new Error('Rejected Linux login request changed the saved setting')
+    launchSwitch().click()
+    await wait(() => typeof window.finishLoginRequest === 'function')
+    section('About PQT Forge')
+    await wait(() => !launchSwitch())
+    finishLoginRequest(true)
+    await wait(() => preferences.some((setup) => setup.autoLaunch === true))
+    section('General')
+    await wait(checked)
+    launchSwitch().click()
+    await wait(() => typeof window.finishLoginRequest === 'function')
+    finishLoginRequest(true)
+    await wait(() => !checked() && preferences.at(-1)?.autoLaunch === false)
+    if (JSON.stringify(loginRequests) !== JSON.stringify([true, true, false])) throw new Error('Linux login changes did not match the requested settings')
+
+    await wait(helperButton)
+    if (helperRequests.length) throw new Error('Reopening Settings started maintenance without a click')
+    helperButton().click()
+    helperButton().click()
+    const helperDialog = () => document.querySelector('.pqt-established-detached-tool [role="dialog"]')
+    await wait(() => typeof window.replyHelperInstall === 'function' && helperDialog()?.querySelector('.xterm'))
+    replyHelperInstall({ code: 200, command: 'fixture terminal progress' })
+    await new Promise((done) => setTimeout(done, 25))
+    if (!helperButton()?.disabled || helperRequests.filter((call) => call === 'APP:QTEnvDev-Helper-Terminal-Install').length !== 1) {
+      throw new Error('Helper installation progress allowed a duplicate request')
+    }
+    if (helperDialog().querySelector('.helper-terminal').getBoundingClientRect().height < 160) throw new Error('The terminal has no usable height')
+    replyHelperInstall({ code: 1, msg: 'Fixture helper rejected repair' })
+    await wait(() => text('Fixture helper rejected repair') && helperRequests.includes('NodePty:stop'))
+    const confirm = () => [...helperDialog()?.querySelectorAll('button') ?? []].find((button) => button.textContent.trim() === 'OK')
+    await wait(() => confirm()?.disabled === false)
+    confirm().click()
+    await wait(() => !helperDialog() && helperButton()?.disabled === false)
   }
   const trayStyle = windows ? 'Classic' : 'Modern'
   const trayValue = trayStyle.toLowerCase()
@@ -136,6 +232,7 @@ const startupHtml = String.raw`<!doctype html><div id="pqt-forge-app"></div>
   window.addEventListener('unhandledrejection', (event) => startupErrors.push(event.reason?.stack || String(event.reason)))
   const bootstrap = window.bootstrap = { isWindows: true, isLinux: false, isMacOS: false, DataDirectoryReady: false,
     BaseDir: 'C:/fixture/', Static: 'C:/fixture/', AppDir: 'C:/fixture/', SetupDir: 'C:/fixture/' }
+  let ftpRunning = false
   let receive
   window.deliver = (command, ...values) => receive({}, command, command, ...values)
   window.QTEnvDevNodeAPI = {
@@ -146,7 +243,7 @@ const startupHtml = String.raw`<!doctype html><div id="pqt-forge-app"></div>
       let response = { code: 0, data: [] }
       if (scope === 'app' && action === 'getConfig') response = {
         password: 'fixture-private-password', server: {}, setup: { lang: 'en', theme: 'dark', autoCheck: false, autoHide: enabled,
-          autoStartService: enabled, common: { showItem: { apache: false, 'ftp-srv': false } }, hosts: { write: false }, editorConfig: {} }
+          autoStartService: enabled, common: { showItem: { apache: false, 'ftp-srv': fallback } }, hosts: { write: false }, editorConfig: {} }
       }
       else if (command === 'application:language-bootstrap') response = { code: 0, data: { payload: {
         locale: 'en', fallbackLocale: 'en', messages: {}, fallbackMessages: {}
@@ -161,6 +258,14 @@ const startupHtml = String.raw`<!doctype html><div id="pqt-forge-app"></div>
       }
       else if (command === 'app-fork:dns' && scope === 'workspaceStatus') {
         response = { code: 0, data: { running: false, address: '127.0.0.1', localIP: '127.0.0.1' } }
+      }
+      else if (command.endsWith(':ftp-srv')) {
+        if (scope === 'startService') ftpRunning = true
+        if (scope === 'stopService') ftpRunning = false
+        response = { code: 0, data: scope === 'workspaceStatus' ? { running: ftpRunning, port: 2121 } : true }
+      }
+      else if (command.endsWith(':cloudflare-tunnel') && scope === 'start') {
+        response = { code: 0, data: { 'APP-Service-Start-PID': 4243 } }
       }
       else if (command === 'app-fork:module-customer' && scope === 'stopService') {
         receive({}, command, key, { code: 200, data: 'Stopping' })
@@ -180,6 +285,9 @@ const startupHtml = String.raw`<!doctype html><div id="pqt-forge-app"></div>
   const command = { id: 'fixture-worker', name: 'Worker', commandType: 'command', command: 'echo fixture', comment: '' }
   await localForage.setItem('qtenvdev-customer-module', [{ id, typeFlag: id, label: 'Fixture', icon: '<svg />',
     item: [command], isService: true, isCustomer: true, moduleType: 'other', configPath: [], logPath: [] }])
+  await localForage.setItem('qtenvdev-cloudflare-tunnel-store', { data: fallback ? [{
+    id: 'test-tunnel', tunnelName: 'Test tunnel', cloudflaredBin: 'C:/fixture/cloudflared.exe'
+  }] : [] })
   await localForage.setItem('qtenvdev-startup-groups', { data: { defaultStartupGroupId: fallback ? '' : 'default', groups: [
     { id: 'default', name: 'Default fixture', createdAt: 0, updatedAt: 0, items: [
       { id: 'member', type: 'service-version', module: 'custom-module:' + id, versionBin: command.name, versionPath: command.id }
@@ -233,10 +341,16 @@ const startupChecks = String.raw`(async () => {
   if (enabled && starts()[0][0] !== 'app-fork-background:module-customer') throw new Error('Auto-start attempted an interactive launch')
   if (fallback) {
     hideTrayIcon()
-    await wait(() => lastSnapshot()?.groupIsRunning && service('nginx')?.run && service('dns')?.disabled === false)
+    await wait(() => lastSnapshot()?.groupIsRunning && service('nginx')?.run && service('ftp-srv')?.run && service('cloudflare-tunnel')?.run && service('dns')?.disabled === false)
     const nginxStart = commandLog.filter(([command, action]) => command.endsWith(':nginx') && action === 'startService')
     if (nginxStart.length !== 1 || nginxStart[0][0] !== 'app-fork-background:nginx' || nginxStart[0][2].version !== '1.2') {
       throw new Error('Fallback missed the enabled installed version or used interactive startup')
+    }
+    for (const [flag, action] of [['ftp-srv', 'startService'], ['cloudflare-tunnel', 'start']]) {
+      const commands = commandLog.filter(([channel, method]) => channel.endsWith(':' + flag) && method === action)
+      if (commands.length !== 1 || commands[0][0] !== 'app-fork-background:' + flag) {
+        throw new Error('Fallback used the interactive channel for ' + flag)
+      }
     }
     if (!service('mysql')?.disabled || service('apache') || service('redis') || service('dns').run) {
       throw new Error('Fallback did not preserve confirmed, visible tray state')
@@ -254,7 +368,7 @@ const startupChecks = String.raw`(async () => {
     await wait(() => typeof finishTrayStop === 'function')
     trayCommand('groupDo')
     finishTrayStop()
-    await wait(() => !service('nginx')?.run && !service('fixture-module')?.run && !lastSnapshot()?.groupDisabled)
+    await wait(() => ['nginx', 'fixture-module', 'ftp-srv', 'cloudflare-tunnel'].every((id) => service(id)?.run === false) && !lastSnapshot()?.groupDisabled)
     if (count('app-fork:module-customer') !== 1 || count('app-fork:nginx') !== 1) throw new Error('Fallback stop was submitted multiple times')
   } else if (enabled) {
     await wait(() => lastSnapshot()?.startupGroups[0]?.run && !lastSnapshot()?.groupDisabled)
@@ -283,7 +397,7 @@ try {
 app.setPath('userData', ${JSON.stringify(join(directory, 'profile'))})
 app.whenReady().then(async () => {
   const win = new BrowserWindow({ show: false, width: 1200, height: 800, webPreferences: { backgroundThrottling: false } })
-  for (const platform of ['windows', 'linux']) {
+  for (const platform of ['windows', 'linux', 'macos']) {
     await win.loadURL(${JSON.stringify(url)} + '?' + platform)
     await win.webContents.executeJavaScript(${JSON.stringify(checks)})
   }
@@ -302,7 +416,7 @@ setTimeout(() => app.exit(2), 90000)`)
     child.once('close', resolve)
   })
   assert.equal(code, 0)
-  console.log('PQT Forge settings Electron UI passed: platform gating, preferences, editor preview, system tray commands and background startup.')
+  console.log('PQT Forge settings Electron UI passed: launch at sign-in, platform gating, preferences, editor preview, system tray commands and background startup.')
 } finally {
   await server.close()
   await rm(fixture, { force: true })

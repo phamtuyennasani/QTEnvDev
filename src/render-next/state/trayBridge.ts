@@ -148,7 +148,8 @@ function builtinService(module: AppModuleItem): Service {
         disabled: !controller.status?.installed || controller.busy
       },
       managed: true,
-      change: async (action, interactive) => (await controller.change(action, interactive)) || controller.error || false
+      change: async (action, interactive) =>
+        (await controller.change(action, interactive)) || controller.error || false
     }
   }
   if (flag === 'cloudflare-tunnel') {
