@@ -28,6 +28,7 @@ import {
   remove
 } from '../../Fn'
 import { serviceStartSpawn } from '../../util/ServiceStart'
+import { pgvectorStatus } from './pgvector'
 import { ForkPromise } from '@shared/ForkPromise'
 import axios from 'axios'
 import TaskQueue from '../../TaskQueue'
@@ -184,6 +185,10 @@ class Manager extends Base {
       dataDirectory,
       port: Number.isInteger(port) && port >= 1 && port <= 65535 ? port : undefined
     }
+  }
+
+  pgvectorStatus(version: { bin: string; version: string }) {
+    return pgvectorStatus(version)
   }
 
   getLogFiles(version?: SoftInstalled, dataDirectory?: string) {

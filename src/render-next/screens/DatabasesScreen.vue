@@ -37,6 +37,7 @@
         <button v-if="manageEngine === 'mysql'" class="action-button" :disabled="!groupsAvailable" @click="groupsOpen = true">MySQL instance groups</button>
         <button v-if="selectedFlag" class="action-button" @click="versionsOpen = true">Installed versions</button>
         <PostgreSqlDataDirectory v-if="selectedFlag === 'postgresql'" />
+        <button v-if="selectedFlag === 'postgresql' && selectedVersion?.version" class="action-button" @click="openExtensions">Extensions</button>
         <DatabaseToolsPanel :name="selectedDatabase.name" />
         <PackageBrowser v-if="selectedFlag" ref="packageBrowser" :key="selectedFlag" :flag="selectedFlag" :title="selectedDatabase.name" />
       </article>
@@ -50,11 +51,21 @@
       :only-file="onlyFile"
       :provider="redisConfiguration ? loadRedisConfiguration : undefined"
     >
-      <template v-if="redisConfiguration" #configuration="{ content, readOnly, update }">
-        <RedisCommonConfiguration :content="content" :read-only="readOnly" @update="update" />
+      <template v-if="redisConfiguration || sqlConfiguration" #configuration="{ content, readOnly, update }">
+        <RedisCommonConfiguration v-if="redisConfiguration" :content="content" :read-only="readOnly" @update="update" />
+        <SqlCommonConfiguration
+          v-else-if="sqlConfiguration"
+          :content="content"
+          :read-only="readOnly"
+          :engine="sqlConfiguration"
+          :version="selectedVersion?.version ?? ''"
+          :windows="isWindows"
+          @update="update"
+        />
       </template>
     </ServiceFilesDialog>
     <MySQLGroupsPanel v-if="groupsOpen" @close="groupsOpen = false" />
+    <PgvectorDialog v-if="extensionsTarget" :target="extensionsTarget" @close="extensionsTarget = undefined" />
     <InstalledVersionsDialog
       v-if="versionsOpen && selectedFlag && selectedDatabase"
       :key="selectedFlag"
@@ -77,6 +88,7 @@ import { databaseManageController } from '../state/databaseManageController'
 import { databaseToolsController } from '../state/databaseToolsController'
 import RedisCommonConfiguration from '../redis/CommonConfiguration.vue'
 import { redisConfigurationFiles } from '../redis/configuration'
+import SqlCommonConfiguration from '../mysql/CommonConfiguration.vue'
 const packageBrowser = ref<InstanceType<typeof PackageBrowser>>()
 const visibleDatabases = databaseController.visibleDatabases
 const selectedDatabase = computed(() => {
@@ -92,13 +104,21 @@ const service = computed(() => serviceController.services.find((item) => item.na
 const busy = computed(() => service.value?.state === 'busy')
 const MySQLGroupsPanel = defineAsyncComponent(() => import('../components/MySQLGroupsPanel.vue'))
 const PostgreSqlDataDirectory = defineAsyncComponent(() => import('@/components/PostgreSql/DataDirectoryControls.vue'))
+const PgvectorDialog = defineAsyncComponent(() => import('../postgresql/PgvectorDialog.vue'))
 const InstalledVersionsDialog = defineAsyncComponent(() => import('../serviceVersions/InstalledVersionsDialog.vue'))
 const groupsAvailable = computed(() => Boolean(window.QTEnvDevNodeAPI && window.Server?.DataDirectoryReady && window.Server.MysqlDir))
 const groupsOpen = ref(false)
+const extensionsTarget = ref<{ version: string; bin: string }>()
+const openExtensions = () => {
+  const item = selectedVersion.value
+  if (item?.version) extensionsTarget.value = { version: item.version, bin: item.bin }
+}
 const versionsOpen = ref(false)
 const closeVersions = () => { versionsOpen.value = false; void databaseController.refresh() }
 const filesOpen = ref(false); const fileKind = ref<'config' | 'log'>('log')
 const redisConfiguration = computed(() => selectedFlag.value === 'redis' && fileKind.value === 'config')
+const sqlConfiguration = computed(() => fileKind.value === 'config' ? manageEngine.value : undefined)
+const isWindows = computed(() => Boolean(window.Server?.isWindows))
 const loadRedisConfiguration = () => redisConfigurationFiles(selectedVersion.value?.version ?? '')
 const onlyFile = ref<string>()
 const openFiles = (kind: 'config' | 'log', file?: string) => { fileKind.value = kind; onlyFile.value = file; filesOpen.value = true }

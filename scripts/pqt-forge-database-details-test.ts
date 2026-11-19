@@ -6,6 +6,12 @@ import mongodb from '../src/fork/module/Mongodb'
 import postgresql from '../src/fork/module/Postgresql'
 import redis from '../src/fork/module/Redis'
 import type { SoftInstalled } from '../src/shared/app'
+import {
+  readSqlField,
+  sqlCommonFields,
+  updateSqlField,
+  visibleSqlFields
+} from '../src/render-next/mysql/commonConfig'
 import { loadIsolated } from './helpers/load-isolated'
 
 type FixtureVersion = { bin: string; version: string; run: boolean; rootPassword?: string }
@@ -139,6 +145,122 @@ try {
   await rm(root, { recursive: true, force: true })
 }
 
+const port = sqlCommonFields[0]
+const originalIni =
+  '# Fixture\r\n[client]\r\nport = 3306\r\n[mysqld]\r\n  port = 3307 # earlier\r\n[mariadbd]\r\nport = 3308  # local port\r\n'
+assert.equal(readSqlField(originalIni, 'mariadb', port).value, '3308')
+const updatedIni = updateSqlField(originalIni, 'mariadb', port, true, '3311')
+assert.equal(updatedIni, originalIni.replace('3308', '3311'))
+const disabledIni = updateSqlField(updatedIni, 'mariadb', port, false, '')
+assert.equal(readSqlField(disabledIni, 'mariadb', port).enabled, false)
+assert.match(disabledIni, /\[client\]\r\nport = 3306/)
+assert.match(disabledIni, /# port = 3311  # local port/)
+assert.equal(updateSqlField('[mysqld]\n', 'mysql', port, true, '3312'), '[mysqld]\nport = 3312\n')
+assert.equal(updateSqlField('[mariadbd]', 'mariadb', port, true, '3312'), '[mariadbd]\nport = 3312')
+assert.equal(updateSqlField(originalIni, 'mysql', port, true, '3312\nfoo = bar'), originalIni)
+assert.ok(
+  visibleSqlFields('mysql', '5.7.0', false).some((field) => field.name === 'query_cache_size')
+)
+assert.ok(
+  !visibleSqlFields('mysql', '8.0.0', true).some(
+    (field) => field.name === 'query_cache_size' || field.name === 'socket'
+  )
+)
+
+let installed = false
+let complete!: () => void
+let commands = 0
+let statusRequests = 0
+class TerminalFixture {
+  ptyKey = 'fixture-terminal'
+  destroyed = false
+  detached = false
+  released = false
+  async initialize() {}
+  async mount() {}
+  unmounted() {
+    this.detached = true
+  }
+  releaseProcessOutput() {
+    this.released = true
+  }
+  destroy() {
+    this.destroyed = true
+  }
+  send(command: string[], singleFile: boolean, reportExit: boolean) {
+    assert.match(command[0], /sudo -- make PG_CONFIG=/)
+    assert.equal(singleFile, true)
+    assert.equal(reportExit, true)
+    commands++
+    return new Promise<void>((resolve) => {
+      complete = resolve
+    })
+  }
+}
+const { pgvectorController, pgvectorInstallCommand } = await loadIsolated(
+  'src/render-next/postgresql/PgvectorController.ts',
+  {
+    '@/util/Index': { reactiveBind: (value: unknown) => value },
+    '@/util/XTerm': Object.assign(TerminalFixture, { TerminalExitError: Error }),
+    '@/util/ForkTerminalRequest': {
+      forkTerminalRequest: async (channel: string, args: string[]) => {
+        assert.equal(channel, 'app-fork:postgresql')
+        assert.equal(args[0], 'pgvectorStatus')
+        statusRequests++
+        return {
+          code: 0,
+          data: {
+            installed,
+            pgConfig: "/fixture/one's files/bin/pg_config",
+            requiresAdministrator: true
+          }
+        }
+      }
+    },
+    '../state/app': { showNotice: () => undefined }
+  },
+  { window: { Server: { isLinux: true } } }
+)
+assert.match(
+  pgvectorInstallCommand("/fixture/one's files/bin/pg_config", false),
+  /make PG_CONFIG="\$build_dir\/pg_config"/
+)
+const selectedPostgres = { version: '18.0.0', bin: '/fixture/pgsql18/bin/pg_ctl' }
+assert.equal(await pgvectorController.check(selectedPostgres), true)
+assert.equal(pgvectorController.canInstall, true)
+const pending = pgvectorController.install()
+assert.equal(pgvectorController.install(), pending)
+await tick()
+assert.equal(commands, 1)
+const terminal = pgvectorController.terminal
+const view = {} as HTMLElement
+await pgvectorController.attach(view)
+pgvectorController.detach(view)
+assert.equal(terminal.detached, true)
+assert.equal(terminal.destroyed, false)
+assert.equal(pgvectorController.phase, 'installing')
+assert.equal(
+  pgvectorController.check({ version: '17.1.0', bin: '/fixture/pgsql17/bin/pg_ctl' }),
+  pending
+)
+assert.equal(pgvectorController.target.version, selectedPostgres.version)
+installed = true
+complete()
+assert.equal(await pending, true)
+assert.equal(statusRequests, 2)
+assert.equal(terminal.released, true)
+assert.equal(pgvectorController.phase, 'installed')
+
+installed = false
+assert.equal(await pgvectorController.check({ version: '17.1.0', bin: '/fixture/pgsql17/bin/pg_ctl' }), true)
+const unverified = pgvectorController.install()
+await tick()
+complete()
+assert.equal(await unverified, false)
+assert.equal(pgvectorController.phase, 'failed')
+assert.match(pgvectorController.message, /could not be verified/)
+assert.equal(pgvectorController.canInstall, false)
+
 console.log(
-  'Forge database details passed: binary snapshots, SQL partial failures, and saved MongoDB, Redis and PostgreSQL configuration.'
+  'Forge database details passed: selected versions, connection metadata, section-aware SQL edits, and pgvector lifecycle.'
 )
