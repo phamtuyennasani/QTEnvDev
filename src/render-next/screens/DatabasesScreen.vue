@@ -13,6 +13,7 @@
         <p v-else-if="manageEngine && adminController.phpMyAdminStatus.message" class="website-help" role="status">{{ adminController.phpMyAdminStatus.message }}</p>
         <button v-if="manageEngine" class="action-button" :disabled="busy || opening || Boolean(active) || selectedDatabase.version === '—'" @click="databaseManageController.open(manageEngine)">{{ opening ? 'Opening…' : 'Manage databases' }}</button>
         <button v-if="manageEngine === 'mysql'" class="action-button" :disabled="!groupsAvailable" @click="groupsOpen = true">MySQL instance groups</button>
+        <PostgreSqlDataDirectory v-if="selectedFlag === 'postgresql'" />
         <DatabaseToolsPanel :name="selectedDatabase.name" />
         <PackageBrowser v-if="selectedFlag" ref="packageBrowser" :key="selectedFlag" :flag="selectedFlag" :title="selectedDatabase.name" />
       </article>
@@ -43,6 +44,7 @@ const { active, opening } = databaseManageController
 const service = computed(() => serviceController.services.find((item) => item.name === selectedDatabase.value?.name))
 const busy = computed(() => service.value?.state === 'busy')
 const MySQLGroupsPanel = defineAsyncComponent(() => import('../components/MySQLGroupsPanel.vue'))
+const PostgreSqlDataDirectory = defineAsyncComponent(() => import('@/components/PostgreSql/DataDirectoryControls.vue'))
 const groupsAvailable = computed(() => Boolean(window.QTEnvDevNodeAPI && window.Server?.DataDirectoryReady && window.Server.MysqlDir))
 const groupsOpen = ref(false)
 const filesOpen = ref(false); const fileKind = ref<'config' | 'log'>('log')

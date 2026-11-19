@@ -29,21 +29,7 @@
               :svg="import('@/svg/http.svg?raw')"
             ></yb-icon>
           </el-button>
-          <div class="flex items-center gap-1 pl-4 pr-2">
-            <span class="flex-shrink-0">{{ I18nT('util.mysqlDataDir') }}: </span>
-            <span
-              class="cursor-pointer hover:text-yellow-500 truncate"
-              @click.stop="shell.openPath(DATA_DIR)"
-              >{{ DATA_DIR }}</span
-            >
-            <el-button
-              class="flex-shrink-0"
-              :disabled="isRunning || !DATA_DIR"
-              link
-              :icon="Edit"
-              @click.stop="chooseDir"
-            ></el-button>
-          </div>
+          <DataDirectoryControls class="pl-4 pr-2" />
         </template>
       </Service>
       <Manager
@@ -65,16 +51,13 @@
   import Manager from '../VersionManager/index.vue'
   import { AppModuleSetup } from '@/core/Module'
   import { I18nT } from '@lang/index'
-  import { join } from '@/util/path-browserify'
   import { BrewStore } from '@/store/brew'
-  import { computed, ref, watch } from 'vue'
-  import { PostgreSqlSetup } from './setup'
-  import { chooseFolder } from '@/util/File'
-  import { Edit, Loading } from '@element-plus/icons-vue'
-  import { shell } from '@/util/NodeFn'
+  import { computed } from 'vue'
+  import { Loading } from '@element-plus/icons-vue'
+  import DataDirectoryControls from './DataDirectoryControls.vue'
   import pgAdminPanel from './PgAdminPanel'
 
-  const { tab, checkVersion } = AppModuleSetup('nginx')
+  const { tab, checkVersion } = AppModuleSetup('postgresql')
   const tabs = [
     I18nT('base.service'),
     I18nT('base.versionManager'),
@@ -85,62 +68,8 @@
 
   const brewStore = BrewStore()
 
-  const currentVersion = computed(() => {
-    return brewStore.currentVersion('postgresql')
-  })
-  const runningVersion = computed(() => {
-    return brewStore.module('postgresql').installed.find((item) => item.run)
-  })
-  const isRunning = computed(() => !!runningVersion.value)
-  const runningDataDir = ref('')
-  const updateRunningDataDir = (version: typeof runningVersion.value) => {
-    if (!version?.bin) {
-      runningDataDir.value = ''
-      return
-    }
-    const versionTop = version.version?.split('.')?.shift() ?? ''
-    runningDataDir.value =
-      PostgreSqlSetup.dir[version.bin] ??
-      join(window.Server.PostgreSqlDir!, `postgresql${versionTop}`)
-  }
-  watch(runningVersion, updateRunningDataDir, { immediate: true })
-  const refreshRunningDataDir = () => updateRunningDataDir(runningVersion.value)
+  const isRunning = computed(() =>
+    brewStore.module('postgresql').installed.some((item) => item.run)
+  )
   const pgAdminOpening = pgAdminPanel.opening
-  PostgreSqlSetup.init()
-    .then(() => {
-      refreshRunningDataDir()
-    })
-    .catch()
-
-  const DATA_DIR = computed({
-    get() {
-      if (currentVersion?.value?.bin) {
-        if (PostgreSqlSetup.dir[currentVersion.value.bin]) {
-          return PostgreSqlSetup.dir[currentVersion.value.bin]
-        }
-        const versionTop = currentVersion?.value?.version?.split('.')?.shift() ?? ''
-        const dir = join(window.Server.PostgreSqlDir!, `postgresql${versionTop}`)
-        return dir
-      }
-      return I18nT('base.needSelectVersion')
-    },
-    set(v: string) {
-      if (isRunning.value || !currentVersion?.value?.bin) {
-        return
-      }
-      PostgreSqlSetup.dir[currentVersion.value.bin] = v
-      PostgreSqlSetup.save()
-    }
-  })
-
-  const chooseDir = () => {
-    if (isRunning.value) {
-      return
-    }
-    chooseFolder()
-      .then((path: string) => {
-        DATA_DIR.value = path
-      })
-      .catch()
-  }
 </script>

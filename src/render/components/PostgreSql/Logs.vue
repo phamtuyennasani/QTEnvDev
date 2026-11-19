@@ -15,23 +15,22 @@
   import ToolVM from '@/components/Log/tool.vue'
   import { BrewStore } from '@/store/brew'
   import { join } from '@/util/path-browserify'
-  import { PostgreSqlSetup } from '@/components/PostgreSql/setup'
+  import { postgreSqlDataDirectoryPath } from './lifecycle'
 
   const brewStore = BrewStore()
 
   const currentVersion = computed(() => {
-    return brewStore.currentVersion('postgresql')
+    return (
+      brewStore.module('postgresql').installed.find((item) => item.run) ??
+      brewStore.currentVersion('postgresql')
+    )
   })
 
   const log = ref()
   const filepath = computed(() => {
-    if (!currentVersion?.value) {
+    if (!currentVersion.value?.version || !window.Server?.PostgreSqlDir) {
       return ''
     }
-    const version = currentVersion.value?.version
-    const versionTop = version?.split('.')?.shift()
-    const dir = join(window.Server.PostgreSqlDir!, `postgresql${versionTop}`)
-    const dbPath = PostgreSqlSetup.dir?.[currentVersion.value.bin] ?? dir
-    return join(dbPath, 'pg.log')
+    return join(postgreSqlDataDirectoryPath(currentVersion.value), 'pg.log')
   })
 </script>

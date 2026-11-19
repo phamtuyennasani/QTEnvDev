@@ -13,24 +13,25 @@
 <script lang="ts" setup>
   import { computed, ref } from 'vue'
   import Conf from '@/components/Conf/index.vue'
-  import { AppStore } from '@/store/app'
+  import { BrewStore } from '@/store/brew'
   import { join, dirname } from '@/util/path-browserify'
+  import { postgreSqlDataDirectoryPath } from './lifecycle'
 
-  const appStore = AppStore()
+  const store = BrewStore()
 
   const currentVersion = computed(() => {
-    return appStore.config?.server?.postgresql?.current?.version
+    return (
+      store.module('postgresql').installed.find((item) => item.run) ??
+      store.currentVersion('postgresql')
+    )
   })
 
   const conf = ref()
   const file = computed(() => {
-    if (!currentVersion.value) {
+    if (!currentVersion.value?.version || !window.Server?.PostgreSqlDir) {
       return ''
     }
-    const version = currentVersion?.value ?? ''
-    const versionTop = version.split('.').shift()
-    const dbPath = join(window.Server.PostgreSqlDir!, `postgresql${versionTop}`)
-    return join(dbPath, 'postgresql.conf')
+    return join(postgreSqlDataDirectoryPath(currentVersion.value), 'postgresql.conf')
   })
 
   const defaultFile = computed(() => {
