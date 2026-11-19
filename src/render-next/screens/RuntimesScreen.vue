@@ -76,7 +76,8 @@
               php.state.loading ? 'Reading PHP…' : 'Refresh PHP details'
             }}</button
             ><button class="action-button" @click="php.openFolder()">Open PHP folder</button
-            ><button class="action-button" @click="phpConfigOpen = true">Edit php.ini</button
+            ><button class="action-button" :disabled="!phpVersion" @click="phpConfigOpen = true"
+              >Edit php.ini</button
             ><button class="action-button" :disabled="!phpVersion" @click="extensionsOpen = true"
               >Manage extensions</button
             ><button class="action-button" @click="composerOpen = true">Composer</button></div
@@ -107,11 +108,16 @@
             ></div
           ></div
         ><ServiceFilesDialog
-          v-if="phpConfigOpen"
+          v-if="phpConfigOpen && phpVersion"
           v-model="phpConfigOpen"
           name="PHP"
-          :version="selectedRuntime.version"
-          kind="config" /><PhpExtensionsPanel
+          :version="phpVersion"
+          kind="config"
+        >
+          <template #configuration="{ content, readOnly, update }">
+            <PhpCommonConfiguration :content="content" :read-only="readOnly" @update="update" />
+          </template>
+        </ServiceFilesDialog><PhpExtensionsPanel
           v-if="extensionsOpen && phpVersion"
           :version="phpVersion"
           @close="extensionsOpen = false" /><div
@@ -163,6 +169,7 @@
   import { runtimeController } from '../state/runtimeController'
   import PackageBrowser from '../components/PackageBrowser.vue'
   import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
+  import PhpCommonConfiguration from '../php/CommonConfiguration.vue'
   import PhpExtensionsPanel from '../components/PhpExtensionsPanel.vue'
   import { phpProjectsController } from '../state/phpProjectsController'
   import { phpController } from '../state/phpController'

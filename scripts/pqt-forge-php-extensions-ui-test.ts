@@ -25,6 +25,19 @@ const path = windows ? 'C:/fixture/php' : macports ? '/opt/local' : brew ? cella
 const bin = path + (windows ? '/php.exe' : '/sbin/php-fpm')
 const version = { typeFlag: 'php', version: '8.4.3', num: 84, bin, path, enable: true, run: false, running: false, flag: macports ? 'macports' : undefined }
 const profile = { bin, ini: path + '/php.ini', version: '8.4.3', architecture: 'x64', threadSafety: 'NTS', build: 'VS17', extensionDir: path + '/ext', loaded: ['json'], configured: [] }
+window.iniFixture = [
+  '[PHP]',
+  '; Keep PHP comments as written',
+  'memory_limit = 32M  ; earlier global value',
+  'memory_limit = 128M  ; effective global value',
+  'memory_limit_extra = 11M',
+  'error_log = "C:\\logs\\php;errors.log" ; log destination',
+  '[PATH=/site]',
+  'memory_limit = 64M',
+  '[Date]',
+  'date.timezone = UTC',
+  ''
+].join('\r\n')
 window.Server = {
   isWindows: windows, isMacOS: !windows && source !== 'linux', isLinux: source === 'linux',
   BrewCellar: cellar, DataDirectoryReady: true, BaseDir: '/fixture/', AppDir: '/fixture/', PhpDir: '/fixture/php/'
@@ -41,6 +54,8 @@ window.QTEnvDevNodeAPI = {
     const send = (response) => queueMicrotask(() => receive({}, channel, key, response))
     const reply = (data) => send({ code: 0, data })
     if (method === 'allInstalledVersions') reply(Object.fromEntries(target.map((flag) => [flag, flag === 'php' ? [version] : []])))
+    else if (method === 'getIniPath') reply(profile.ini)
+    else if (method === 'initCACertPEM') reply(true)
     else if (method === 'fetchLoadedExtensions') reply([{ name: 'fixture-loaded' }])
     else if (method === 'fetchExtensionDir') reply(profile.extensionDir)
     else if (method === 'fetchLocalExtend') reply({ used: [], local: [] })
@@ -58,6 +73,9 @@ window.QTEnvDevNodeAPI = {
       }
     } else if (channel === 'App-Node-FN') {
       if (method === 'exec') send({ stdout: path + '/ext' })
+      else if (target === 'readFile' && args[2] === profile.ini) send(iniFixture)
+      else if (target === 'writeFile' && args[2] === profile.ini) { window.iniFixture = args[3]; send(true) }
+      else if (target === 'showOpenDialog') window.finishPicker = (file) => send({ canceled: !file, filePaths: file ? [file] : [] })
       else if (target === 'existsSync') send(false)
       else if (target === 'readdir') send([])
       else send(true)
@@ -88,6 +106,67 @@ const checks = String.raw`(async () => {
     input.dispatchEvent(new Event('change', { bubbles: true }))
   }
   const called = (method) => calls.find(([, action]) => action === method)
+  if (source === 'windows') {
+    stage = 'common PHP configuration'
+    await wait(() => button('Edit php.ini')).then((edit) => edit.click())
+    const setting = (name) => document.querySelector('[aria-label="' + name + ' value"]')
+    const check = (name) => [...document.querySelectorAll('.php-config-field label')]
+      .find((label) => label.textContent.trim() === name).querySelector('input')
+    const input = (node, value) => {
+      node.value = value
+      node.dispatchEvent(new Event('input', { bubbles: true }))
+    }
+    const memory = await wait(() => setting('memory_limit')?.value === '128M' && setting('memory_limit'))
+    if (!called('getIniPath')?.[2]?.bin?.endsWith('/php.exe')) throw new Error('PHP configuration did not target the selected binary')
+    if (setting('error_log').value !== 'C:\\logs\\php;errors.log') throw new Error('Quoted path was parsed incorrectly')
+    if (check('date.timezone').checked || setting('date.timezone').value !== 'PRC') throw new Error('Scoped timezone was mistaken for a global assignment')
+    check('date.timezone').click()
+    await wait(() => !setting('date.timezone').disabled)
+    check('memory_limit').click()
+    await wait(() => memory.disabled)
+    check('memory_limit').click()
+    await wait(() => !memory.disabled)
+    input(memory, '256M')
+    await wait(() => called('initCACertPEM'))
+    stage = 'picking PHP log path'
+    const browse = () => document.querySelector('[aria-label="Browse for error_log"]')
+    browse().click()
+    await wait(() => window.finishPicker && browse().disabled)
+    window.finishPicker('C:\\other logs\\new;log.txt')
+    await wait(() => !browse().disabled)
+    if (setting('error_log').value !== 'C:\\other logs\\new;log.txt') throw new Error('Selected path was not applied: ' + JSON.stringify(setting('error_log').value))
+    stage = 'editing the raw PHP configuration'
+    button('Raw file').click()
+    const raw = await wait(() => document.querySelector('[aria-label="PHP configuration file"]'))
+    if (!raw.value.includes(';memory_limit = 32M  ; earlier global value\nmemory_limit = 256M  ; effective global value')) throw new Error('Duplicate global settings were handled incorrectly')
+    if (!raw.value.includes('date.timezone = PRC\n[PATH=/site]\nmemory_limit = 64M\n[Date]\ndate.timezone = UTC')) throw new Error('New global setting did not precede scoped sections')
+    input(raw, raw.value.replace('memory_limit = 256M', 'memory_limit = 512M'))
+    button('Common settings').click()
+    await wait(() => setting('memory_limit')?.value === '512M')
+    button('Save configuration').click()
+    await wait(() => !setting('memory_limit'))
+    if (iniFixture.includes('\n') && /(^|[^\r])\n/.test(iniFixture)) throw new Error('Windows line endings were lost')
+    if (!iniFixture.includes('; Keep PHP comments as written\r\n') ||
+        !iniFixture.includes('memory_limit_extra = 11M\r\n') ||
+        !iniFixture.includes('error_log = "C:\\\\other logs\\\\new;log.txt" ; log destination\r\n')) {
+      throw new Error('PHP configuration save damaged unrelated text or the selected path')
+    }
+    stage = 'discarding a pending PHP file picker'
+    await wait(() => button('Edit php.ini')).then((edit) => edit.click())
+    await wait(() => setting('memory_limit')?.value === '512M')
+    window.finishPicker = undefined
+    browse().click()
+    await wait(() => window.finishPicker && browse().disabled)
+    button('Close').click()
+    await wait(() => !setting('memory_limit'))
+    await wait(() => button('Edit php.ini')).then((edit) => edit.click())
+    await wait(() => browse()?.disabled)
+    window.finishPicker('C:\\discarded.log')
+    await wait(() => !browse().disabled)
+    if (setting('error_log').value !== 'C:\\other logs\\new;log.txt') throw new Error('A closed draft received a stale file picker reply')
+    button('Close').click()
+  }
+  stage = 'opening extensions'
   const launch = await wait(() => button('Manage extensions'))
   launch.click()
   await wait(() => drawer()?.textContent.includes('fixture-loaded'))
@@ -170,7 +249,7 @@ setTimeout(() => app.exit(2), 60000)`)
     child.once('close', (code) => done({ code, output }))
   })
   assert.equal(result.code, 0, result.output)
-  console.log('PHP extension Electron UI passed: Runtimes entry, loaded and Homebrew/MacPorts routing, close/reopen, Windows local and release confirmation.')
+  console.log('PHP Electron UI passed: common and raw configuration, path selection and draft lifetime, loaded and Homebrew/MacPorts extensions, Windows release confirmation.')
 } finally {
   await server.close()
   await rm(fixture, { force: true })
