@@ -6,6 +6,21 @@ import { readLogTail } from '../src/main/core/readLogTail'
 import { launchFirstEditor, windowsEditorCandidates } from '../src/fork/module/Tool/openEditor'
 import { loadIsolated } from './helpers/load-isolated'
 
+const externalEditorModule = await import('../src/fork/module/Tool/openEditor')
+const launchMocks = { '../../Fn': {}, '@shared/ForkPromise': { ForkPromise: Promise } }
+const unixTools = await loadIsolated('src/fork/module/Tool/terminal.ts', {
+  ...launchMocks,
+  '@shared/utils': { isMacOS: () => false },
+  './openEditor': externalEditorModule
+})
+const windowsTools = await loadIsolated('src/fork/module/Tool.win/ide.ts', {
+  ...launchMocks,
+  '../Tool/openEditor': externalEditorModule
+})
+for (const [tools, file] of [[unixTools, '/fixture/config.conf'], [windowsTools, 'C:/fixture/config.conf']]) {
+  await assert.rejects(tools.openPathByApp(file, 'Unsupported app'), /not supported on this platform/)
+}
+
 const root = await mkdtemp(join(tmpdir(), 'pqt-service-files-'))
 try {
   const path = join(root, 'service.log')
