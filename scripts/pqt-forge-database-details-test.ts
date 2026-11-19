@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import clickhouse from '../src/fork/module/ClickHouse'
 import mongodb from '../src/fork/module/Mongodb'
+import neo4j from '../src/fork/module/Neo4j'
 import postgresql from '../src/fork/module/Postgresql'
 import qdrant from '../src/fork/module/Qdrant'
 import redis from '../src/fork/module/Redis'
@@ -100,7 +102,13 @@ const previousServer = global.Server
 const version = (value: string) => ({ version: value }) as SoftInstalled
 const path = root.replaceAll('\\', '/')
 try {
-  global.Server = { MongoDBDir: root, RedisDir: root, PostgreSqlDir: root } as typeof global.Server
+  global.Server = {
+    MongoDBDir: root,
+    RedisDir: root,
+    PostgreSqlDir: root,
+    ClickHouseDir: join(root, 'clickhouse'),
+    Neo4jDir: join(root, 'neo4j')
+  } as typeof global.Server
   assert.deepEqual(await mongodb.databaseConnectionEndpoint(version('8.0.1')), {})
   await writeFile(
     join(root, 'mongodb-8.0.conf'),
@@ -154,6 +162,24 @@ try {
       exists: true
     }
   ])
+
+  const pendingClickhouse = await clickhouse.listConfigFiles()
+  assert.ok(pendingClickhouse.every((file) => !file.exists))
+  assert.equal(await clickhouse.initConfig(), pendingClickhouse[0].path)
+  const clickhouseFiles = await clickhouse.listConfigFiles()
+  assert.deepEqual(clickhouseFiles.map((file) => file.name), ['config', 'users'])
+  assert.ok(clickhouseFiles.every((file) => file.exists && file.defaultPath))
+
+  const neo4jVersion = {
+    version: '5.26.0',
+    path: join(root, 'neo4j-dist'),
+    bin: join(root, 'neo4j-dist', 'bin', 'neo4j')
+  } as SoftInstalled
+  const pendingNeo4j = await neo4j.listConfigFiles(neo4jVersion)
+  assert.equal(pendingNeo4j.length, 1)
+  assert.equal(pendingNeo4j[0].exists, false)
+  assert.equal(await neo4j.initConfig(neo4jVersion), pendingNeo4j[0].path)
+  assert.equal((await neo4j.listConfigFiles(neo4jVersion))[0].exists, true)
   await writeFile(join(configDirectory, 'config.default.yaml'), 'service: {http_port: 6333}')
   assert.deepEqual(await qdrant.listConfigFiles(qdrantVersion), [
     {
@@ -327,5 +353,5 @@ assert.match(pgvectorController.message, /could not be verified/)
 assert.equal(pgvectorController.canInstall, false)
 
 console.log(
-  'Forge database details passed: selected versions, connection metadata, Qdrant configuration and dashboard, section-aware SQL edits, and pgvector lifecycle.'
+  'Forge database details passed: connection metadata, Qdrant dashboard, database configuration initialization, section-aware SQL edits, and pgvector lifecycle.'
 )
