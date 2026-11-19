@@ -34,4 +34,18 @@
   .vp-doc td,.vp-doc th { padding:8px;border:1px solid var(--pqt-border); }
   .vp-doc a { color:var(--pqt-accent); }
   .vp-doc h1,.vp-doc h2,.vp-doc h3 { margin:14px 0 10px; }
+  &.pqt-established-detached-tool {
+    height:0;
+    min-height:0;
+    overflow:visible;
+    .el-drawer__body { height:100%;min-height:0;overflow:hidden; }
+    .host-edit,.host-vhost { display:flex;flex-direction:column;height:100%;min-height:0; }
+    .host-edit > .nav,.host-vhost > .nav { display:flex;align-items:center;justify-content:space-between;min-height:42px;flex-shrink:0; }
+    .host-edit > .nav > .left,.host-vhost > .nav > .left { display:flex;align-items:center; }
+    .top-back-icon { width:24px;height:24px;padding:3px;cursor:pointer; }
+    .main-wapper { flex:1;min-height:0;overflow:hidden; }
+    .main-wapper > .block { height:100%; }
+    .el-dialog-content-flex-1 { height:auto;max-height:calc(100vh - 48px); }
+    .el-dialog-content-flex-1 > .el-dialog__body { flex:1;min-height:0;overflow:hidden; }
+  }
 }

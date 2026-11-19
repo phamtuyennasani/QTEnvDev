@@ -14,6 +14,8 @@
           <span>{{ I18nT('base.fileInfoTips') }}</span>
         </div>
       </div>
+      <p v-if="controller.running" class="px-3 py-2" role="status">{{ controller.unknown ? 'Some file reads have not returned yet. The results below are incomplete; the original reads are still being observed.' : 'Reading file information…' }}</p>
+      <p v-for="(reason, field) in controller.errors" :key="field" class="px-3 py-2 text-red-500" role="alert">{{ field }}: {{ reason }}</p>
       <ul v-if="path" class="info-wapper select-text">
         <el-descriptions border :title="path" :column="2" :direction="'vertical'">
           <el-descriptions-item label="file size">
@@ -46,35 +48,25 @@
           <el-descriptions-item label="">
             {{ info.mtime }}
           </el-descriptions-item>
-          <el-descriptions-item label="MD5" :span="2">
-            {{ info.md5 }}
-          </el-descriptions-item>
-          <el-descriptions-item label="SHA-1" :span="2">
-            {{ info.sha1 }}
-          </el-descriptions-item>
-          <el-descriptions-item label="SHA-256" :span="2">
-            {{ info.sha256 }}
-          </el-descriptions-item>
-          <el-descriptions-item class-name="w-full overflow-hidden" label="SHA-512" :span="2">
-            <div class="w-full overflow-hidden break-all whitespace-pre-wrap">{{
-              info.sha512
-            }}</div>
-          </el-descriptions-item>
-          <el-descriptions-item label="SHA-512-Base64" :span="2">
-            {{ info.sha512Base64 }}
+          <el-descriptions-item v-for="algorithm in fileHashAlgorithms" :key="algorithm" class-name="w-full overflow-hidden" :label="algorithm" :span="2">
+            <div class="w-full overflow-hidden break-all whitespace-pre-wrap">{{ info[algorithm] }}</div>
+            <el-button link :disabled="!info[algorithm]" @click="copyHash(info[algorithm])">Copy</el-button>
           </el-descriptions-item>
         </el-descriptions>
+        <p v-if="copyStatus" role="status">{{ copyStatus }}</p>
       </ul>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, watch, onMounted, onUnmounted } from 'vue'
+  import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
   import { formatBytes } from '@/util/Index'
   import { formatISO } from 'date-fns'
-  import { dialog, fs } from '@/util/NodeFn'
+  import { clipboard, dialog } from '@/util/NodeFn'
   import { I18nT } from '@lang/index'
+  import { fileInfoController as controller } from './Controller'
+  import { fileHashAlgorithms } from './FileInfoModel'
 
   interface FileInfo {
     size_str: string
@@ -94,8 +86,8 @@
     sha512Base64: string
   }
 
-  const path = ref('')
-  const info = ref<FileInfo>({
+  const path = computed(() => controller.path)
+  const emptyInfo: FileInfo = {
     size_str: '',
     size: 0,
     atime_str: '',
@@ -111,7 +103,26 @@
     sha256: '',
     sha512: '',
     sha512Base64: ''
+  }
+  const info = computed<FileInfo>(() => {
+    const stats = controller.metadata
+    return {
+      ...emptyInfo,
+      ...controller.hashes,
+      ...(stats ? {
+        size: stats.size, size_str: formatBytes(stats.size),
+        atime: stats.atimeMs, atime_str: formatISO(stats.atimeMs),
+        btime: stats.birthtimeMs, btime_str: formatISO(stats.birthtimeMs),
+        ctime: stats.ctimeMs, ctime_str: formatISO(stats.ctimeMs),
+        mtime: stats.mtimeMs, mtime_str: formatISO(stats.mtimeMs)
+      } : {})
+    }
   })
+  const copyStatus = ref('')
+  const copyHash = async (value: string) => {
+    try { await clipboard.writeText(value); copyStatus.value = 'Copied.' }
+    catch { copyStatus.value = 'Clipboard access failed.' }
+  }
   const timer = ref<number | null>(null)
 
   const choosePath = async () => {
@@ -120,52 +131,7 @@
     })
 
     if (canceled || filePaths.length === 0) return
-    path.value = filePaths[0]
-  }
-
-  const getInfo = async () => {
-    try {
-      const stats = await fs.stat(path.value)
-      info.value = {
-        ...info.value,
-        size: stats.size,
-        size_str: formatBytes(stats.size),
-        atime: stats.atimeMs,
-        atime_str: formatISO(stats.atimeMs),
-        btime: stats.birthtimeMs,
-        btime_str: formatISO(stats.birthtimeMs),
-        ctime: stats.ctimeMs,
-        ctime_str: formatISO(stats.ctimeMs),
-        mtime: stats.mtimeMs,
-        mtime_str: formatISO(stats.mtimeMs)
-      }
-
-      // Get hash values in parallel
-      await Promise.all([
-        getHashValue('md5'),
-        getHashValue('sha1'),
-        getHashValue('sha256'),
-        getHashValue('sha512'),
-        getHashValue('sha512Base64')
-      ])
-
-      // Scroll to bottom
-      const container = document.querySelector('.main-wapper')
-      if (container) {
-        scrollToBottom(container)
-      }
-    } catch (error) {
-      console.error('Error getting file info:', error)
-    }
-  }
-
-  const getHashValue = async (hashType: 'md5' | 'sha1' | 'sha256' | 'sha512' | 'sha512Base64') => {
-    try {
-      const value = await fs.getFileHash(path.value, hashType)
-      info.value = { ...info.value, [hashType]: value }
-    } catch {
-      info.value = { ...info.value, [hashType]: '' }
-    }
+    void controller.inspect(filePaths[0])
   }
 
   const scrollToBottom = (container: Element) => {
@@ -191,7 +157,7 @@
       e.preventDefault()
       e.stopPropagation()
       if (e.dataTransfer?.files.length) {
-        path.value = window.QTEnvDevNodeAPI.showFilePath(e.dataTransfer.files[0])
+        void controller.inspect(window.QTEnvDevNodeAPI.showFilePath(e.dataTransfer.files[0]))
       }
     }
 
@@ -209,11 +175,11 @@
     }
   }
 
-  // Watch for path changes
-  watch(path, (newPath) => {
-    if (newPath) {
-      getInfo()
-    }
+  // Scroll only the mounted view after the controller receives every independent result.
+  watch(() => controller.running, (running) => {
+    if (running) return
+    const container = document.getElementById('FileInfoDroper')
+    if (container) scrollToBottom(container)
   })
 
   // Setup drag and drop on mount

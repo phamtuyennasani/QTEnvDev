@@ -2,8 +2,10 @@ import { defineStore } from 'pinia'
 import RectSelect from '@/capturer/RectSelector/RectSelect'
 import RectCanvas from '@/capturer/RectCanvas/RectCanvas'
 import IPC from '@/util/IPC'
-import { loadImage } from '@/util/Index'
+import { loadImage, reactiveBind } from '@/util/Index'
 import localForage from 'localforage'
+import { CapturerSaveOperation } from '../CapturerSaveOperation'
+import type { CapturerEvent } from '@shared/CapturerContract'
 
 export type Rect = {
   x: number
@@ -312,20 +314,23 @@ export const CapturerStore = defineStore('capturerStore', {
        */
       const rect = RectSelect.editRect!
       const rectID = RectSelect.editRectId
+      if (!rect || !Number.isFinite(rect.width) || !Number.isFinite(rect.height) || rect.width <= 0 || rect.height <= 0) throw new Error('Select a nonempty region before saving.')
 
       const canvas = document.createElement('canvas')!
       canvas.width = rect.width * this.scaleFactor
       canvas.height = rect.height * this.scaleFactor
       const ctx = canvas.getContext('2d')!
       ctx.imageSmoothingEnabled = false
-      if (rectID) {
+      if (rectID && rectID > 0) {
         const img = ScreenStore.windowImagesDom[rectID]
+        if (!img) throw new Error('The selected window image is not ready. Select a region or try again.')
         ctx.drawImage(img, 0, 0)
       } else {
         /**
          * 底图
          */
-        const baseCanvas = ScreenStore.canvas!
+        const baseCanvas = ScreenStore.canvas
+        if (!baseCanvas) throw new Error('The desktop image is not ready.')
         /**
          * 把baseCanvas的rect选区的图像, 绘制到canvas上
          */
@@ -368,16 +373,24 @@ export const CapturerStore = defineStore('capturerStore', {
       return canvas.toDataURL('image/png')
     },
 
-    async saveImage(useConfig: boolean) {
-      const image = await this.exportCanvasToBase64()
-      await this.exitCapturer('saving')
-      const base64 = image.replace(/^data:image\/\w+;base64,/, '')
-      IPC.send('Capturer:saveImage', base64, useConfig).then((key: string) => {
-        IPC.off(key)
-      })
+    saveImage(useConfig: boolean) {
+      return capturerSaveOperation.save(useConfig)
     }
   }
 })
+
+export const capturerSaveOperation = reactiveBind(new CapturerSaveOperation({
+  exportImage: () => CapturerStore().exportCanvasToBase64(),
+  hide: () => CapturerStore().exitCapturer('saving'),
+  save: (base64, useConfig) => new Promise<CapturerEvent>((resolve, reject) => {
+    IPC.sendSensitive('Capturer:saveImage', base64, useConfig).then((key: string, response: any) => {
+      IPC.off(key)
+      if (response?.code === 1) reject(new Error(response.msg || 'Screenshot save failed.'))
+      else if (!response?.data?.status) reject(new Error('The native screenshot save did not return an outcome.'))
+      else resolve(response.data)
+    })
+  })
+}))
 
 type ScreenStoreType = {
   canvas: HTMLCanvasElement | undefined | null

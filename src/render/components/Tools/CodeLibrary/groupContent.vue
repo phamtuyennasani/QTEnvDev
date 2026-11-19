@@ -150,7 +150,9 @@
   import { Delete, Edit, Folder, Plus, SetUp, Search, Top } from '@element-plus/icons-vue'
   import CodeLibrary from './setup'
   import Base from '@/core/Base'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { MessageError } from '@/util/Element'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  const AsyncComponentShow = useAsyncComponentShow()
 
   const props = defineProps<{
     langType: string
@@ -195,17 +197,10 @@
     )
   })
 
-  let CodeAddVM: any
-  import('./codeAdd.vue').then((res) => {
-    CodeAddVM = res.default
-  })
-
-  const addCode = (item?: any) => {
-    AsyncComponentShow(CodeAddVM, {
-      langType: props.langType,
-      item,
-      groupID: currentGroupID.value
-    }).then()
+  const addCode = async (item?: any) => {
+    const snapshot = { langType: props.langType, item: item ? JSON.parse(JSON.stringify(item)) : undefined, groupID: currentGroupID.value }
+    try { const { default: component } = await import('./codeAdd.vue'); await AsyncComponentShow(component, snapshot) }
+    catch (error) { MessageError(String(error)) }
   }
 
   const emptyClick = (e: MouseEvent) => {
@@ -265,22 +260,19 @@
       .catch(() => {})
   }
 
-  let GroupChangedVM: any
-  import('./groupChange.vue').then((res) => {
-    GroupChangedVM = res.default
-  })
-
-  const doChangeGroups = () => {
-    AsyncComponentShow(GroupChangedVM, {
-      langType: props.langType
-    }).then((groupID: string) => {
+  const doChangeGroups = async () => {
+    const langType = props.langType
+    const selectedIDs = [...choosedItemID.value]
+    try {
+      const { default: component } = await import('./groupChange.vue')
+      const groupID = await AsyncComponentShow(component, { langType }) as string
       console.log('doChangeGroups groupID: ', groupID)
-      for (const id of choosedItemID.value) {
+      for (const id of selectedIDs) {
         const find = CodeLibrary.items.find((f) => f.id === id)
         if (find) {
           find.groupID = groupID
         }
       }
-    })
+    } catch (error) { MessageError(String(error)) }
   }
 </script>

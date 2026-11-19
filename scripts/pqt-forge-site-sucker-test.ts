@@ -121,4 +121,22 @@ await starting.init(); starting.url = model.url
 const startRun = starting.run(); await new Promise((resolve) => setTimeout(resolve, 0))
 await starting.cancel(); rejectStart(new Error('Mirror start was cancelled'))
 await startRun; assert.equal(starting.status, 'Cancelled'); assert.equal(starting.running, false)
-console.log('Site Sucker behavior passed: URL/count policy, bounded streamed writes, independent results, cancellation, stale events, duplicate calls and unknown recovery.')
+let loadSettings!: (value: { dir: string; maxPages: number }) => void
+let releaseSave!: () => void
+const stored: string[] = []
+const initializing = new SiteSuckerModel({ request: async () => null, subscribe: () => () => {}, load: () => new Promise((resolve) => { loadSettings = resolve }), save: async (config) => { stored.push(config.dir); if (stored.length === 1) await new Promise<void>((resolve) => { releaseSave = resolve }) }, id: () => 'settings' })
+const initial = initializing.init()
+const coldSave = initializing.saveConfig()
+assert.equal(initializing.settingsReady, false)
+assert.equal(stored.length, 0, 'cold save must await saved settings')
+loadSettings({ dir: 'saved-output', maxPages: 7 })
+await initial
+await new Promise((resolve) => setTimeout(resolve, 0))
+initializing.config.dir = 'second-output'
+const secondSave = initializing.saveConfig()
+await new Promise((resolve) => setTimeout(resolve, 0))
+assert.deepEqual(stored, ['saved-output'], 'writes must remain serialized')
+releaseSave()
+await Promise.all([coldSave, secondSave])
+assert.deepEqual(stored, ['saved-output', 'second-output'])
+console.log('Site Sucker behavior passed: URL/count policy, bounded streamed writes, independent results, cancellation, stale events, duplicate calls, settings initialization/order and unknown recovery.')

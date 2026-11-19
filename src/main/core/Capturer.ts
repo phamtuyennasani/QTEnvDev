@@ -45,7 +45,7 @@ type CapturerConfig = {
   name: string
 }
 
-class Capturer {
+export class Capturer {
   private callback?: (event: CapturerEvent) => void
   private captureState: CapturerEvent = { id: '', status: 'idle' }
   private captureConfig?: CapturerConfig
@@ -55,7 +55,7 @@ class Capturer {
   status() { return { ...this.captureState } }
   private publish(status: CapturerEvent['status'], extra: Partial<CapturerEvent> = {}) {
     this.captureState = { id: this.captureState.id, status, ...extra }
-    this.callback?.(this.status())
+    try { this.callback?.(this.status()) } catch (error) { console.warn('Capture status notification failed:', error) }
   }
   isFullScreen: boolean = false
   useWindow: boolean = true
@@ -82,11 +82,21 @@ class Capturer {
 
   windowImage: Record<number, string> | null = null
 
-  private handleWindowLoadError(window: BrowserWindow, error: unknown) {
+  private handleWindowLoadError(window: BrowserWindow, operationId: string, error: unknown) {
+    if (this.captureState.id !== operationId || this.window !== window || !['opening', 'opened'].includes(this.captureState.status)) {
+      if (!window.isDestroyed()) window.destroy()
+      if (this.window === window) this.window = undefined
+      return
+    }
     this.publish('failed', { error: error instanceof Error ? error.message : String(error) })
     globalShortcut.unregister('Escape')
     this.windowImage = null
     this.capturering = false
+    clearInterval(this.timer)
+    this.timer = undefined
+    this.needCheckWindowInPoint = false
+    this.capturerWindowID = 0
+    this.capturerWindow = undefined
     if (this.window === window) {
       this.window = undefined
     }
@@ -151,8 +161,8 @@ class Capturer {
     }
   }
 
-  async initWatchPointWindow(operationId = randomUUID()) {
-    if (this.capturering || ['opening', 'opened', 'saving'].includes(this.captureState.status)) throw new Error('A capture is already active')
+  async initWatchPointWindow(operationId: string = randomUUID()) {
+    if (this.saveFlight || this.capturering || ['opening', 'opened', 'saving'].includes(this.captureState.status)) throw new Error('A capture is already active')
     try { return await this.openCaptureWindow(operationId) }
     catch (error) {
       this.stopCapturer()
@@ -201,12 +211,15 @@ class Capturer {
         this.windowImage[pointWindow.id] = windowManager.captureWindow(pointWindow.id)
       }
     }
-    captureActiveWindow()
+    // Window previews are supplementary; a window closing under the cursor must
+    // not prevent capturing the desktop itself.
+    try { captureActiveWindow() } catch (error) { console.warn('Active window preview unavailable:', error) }
 
     if (isWindows()) {
       try {
         const deskID = windowManager.getDesktopWindowID()
         base64Image = windowManager.captureWindow(deskID)
+        if (!base64Image) throw new Error('Empty desktop image')
       } catch {
         this.stopCapturer()
         this.publish('failed', { error: 'The desktop image could not be captured.' })
@@ -234,7 +247,9 @@ class Capturer {
             }
           })
           console.log('desktopCapturer.getSources sources: ', sources)
-          const image = sources[0].thumbnail
+          const source = sources.find((item) => item.display_id === String(display.id)) ?? sources[0]
+          if (!source || source.thumbnail.isEmpty()) throw new Error('Empty desktop image')
+          const image = source.thumbnail
           base64Image = image.toDataURL()
           console.log('desktopCapturer.getSources base64Image: ', base64Image.length)
           if (base64Image.length < 500) {
@@ -269,7 +284,7 @@ class Capturer {
       // window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
       window.show()
       setTimeout(() => {
-        window.setAlwaysOnTop(true, 'screen-saver')
+        if (!window.isDestroyed() && this.captureState.id === operationId && this.captureState.status === 'opened') window.setAlwaysOnTop(true, 'screen-saver')
       }, 100)
       window.focus()
       window.moveTop()
@@ -299,13 +314,13 @@ class Capturer {
         }
       }
 
-      const fetchTopWindow = () => {
+      const fetchTopWindow = (force = false) => {
         if (!this.needCheckWindowInPoint) {
           clearInterval(this.timer)
           return
         }
         const point = screen.getCursorScreenPoint()
-        if (point.x === this.currentPoint.x && point.y === this.currentPoint.y) {
+        if (!force && point.x === this.currentPoint.x && point.y === this.currentPoint.y) {
           return
         }
         this.currentPoint.x = point.x
@@ -371,9 +386,12 @@ class Capturer {
           )
         }
       }
-      fetchTopWindow()
+      const updateWindowPreview = (force = false) => {
+        try { fetchTopWindow(force) } catch (error) { console.warn('Window preview unavailable:', error) }
+      }
+      updateWindowPreview(true)
       this.timer = setInterval(() => {
-        fetchTopWindow()
+        updateWindowPreview()
       }, 150)
       this.publish('opened')
     }
@@ -400,6 +418,7 @@ class Capturer {
       skipTaskbar: true,
       enableLargerThanScreen: true,
       title,
+      show: false,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -412,10 +431,10 @@ class Capturer {
     window.setMenu(null)
 
     const loadPage = is.dev()
-      ? window.loadURL(`http://localhost:${ViteDevPort}/capturer/capturer.html`)
+      ? window.loadURL(`http://localhost:${ViteDevPort}/render/capturer/capturer.html`)
       : window.loadFile(index)
     void loadPage.catch((error) => {
-      this.handleWindowLoadError(window, error)
+      this.handleWindowLoadError(window, operationId, error)
     })
     window.once('ready-to-show', () => {
       init(window)
@@ -480,6 +499,7 @@ class Capturer {
   }
 
   private async writeImage(base64: string, userConfig?: boolean) {
+    const operationId = this.captureState.id
     this.publish('saving')
     try {
       if (typeof base64 !== 'string' || base64.length > Math.ceil(CAPTURER_MAX_BYTES * 4 / 3) + 4) throw new Error('Capture exceeds the 50 MB file limit.')
@@ -511,10 +531,11 @@ class Capturer {
           defaultPath: capturerFileName('qtenvdev-capturer-{timestamp}', 1, date, id),
           filters: [{ name: 'PNG Files', extensions: ['png'] }]
         })
+        if (this.captureState.id !== operationId || this.captureState.status === 'cancelled') return this.status()
         if (result.canceled || !result.filePath) { this.publish('cancelled'); return this.status() }
         filePath = result.filePath
       }
-      if (this.captureState.status === 'cancelled') return this.status()
+      if (this.captureState.id !== operationId || this.captureState.status === 'cancelled') return this.status()
       this.writing = true
       await writeFile(filePath, buffer, exclusive ? { flag: 'wx' } : undefined)
       const warnings: string[] = []
@@ -523,18 +544,19 @@ class Capturer {
       this.publish('saved', { path: filePath, warning: warnings.join(' ') || undefined })
       return this.status()
     } catch (error) {
-      this.publish('failed', { error: error instanceof Error ? error.message : String(error) })
+      if (this.captureState.id === operationId && this.captureState.status !== 'cancelled') this.publish('failed', { error: error instanceof Error ? error.message : String(error) })
       throw error
     }
   }
   configUpdate(config: CapturerConfig) {
+    if (!config || !Array.isArray(config.key) || config.key.some((key) => typeof key !== 'string' || !key.trim() || key.includes('+') || key.length > 30) || config.key.length > 5 || typeof config.name !== 'string' || typeof config.dir !== 'string') throw new Error('Invalid capture settings.')
     validateCapturerName(config.name)
-    if (this.config.key.length) {
-      globalShortcut.unregister(this.config.key.join('+'))
-    }
-    this.config = { ...config, key: [...config.key] }
-    if (this.config.key.length) {
-      const registered = globalShortcut.register(this.config.key.join('+'), () => {
+    const next = { ...config, key: config.key.map((key) => key.trim()) }
+    const previousShortcut = this.config.key.join('+')
+    const nextShortcut = next.key.join('+')
+    if (nextShortcut.toLowerCase() === 'escape') throw new Error('Escape is reserved for cancelling the capture.')
+    if (nextShortcut !== previousShortcut && nextShortcut) {
+      const registered = globalShortcut.register(nextShortcut, () => {
         if (this.capturering) {
           return
         }
@@ -542,6 +564,10 @@ class Capturer {
       })
       if (!registered) throw new Error('The capture shortcut could not be registered. It may already be in use.')
     }
+    // Register the replacement first. A rejected accelerator must leave the
+    // working shortcut and settings intact.
+    if (previousShortcut && previousShortcut !== nextShortcut) globalShortcut.unregister(previousShortcut)
+    this.config = next
   }
 }
 

@@ -104,7 +104,9 @@
   import { dialog, nativeTheme, fs } from '@/util/NodeFn'
   import { BrewStore } from '@/store/brew'
   import { languagesToCheck } from '@/components/Tools/CodePlayground/languageDetector'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  import { MessageError } from '@/util/Element'
+  const AsyncComponentShow = useAsyncComponentShow()
 
   CodePlay.init()
 
@@ -442,19 +444,16 @@
     currentTab.value.run()
   }
 
-  let CodeAddVM: any
-  import('@/components/Tools/CodeLibrary/codeAdd.vue').then((res) => {
-    CodeAddVM = res.default
-  })
-
-  const saveToLocal = () => {
-    AsyncComponentShow(CodeAddVM, {
+  const saveToLocal = async () => {
+    const snapshot = {
       langType: currentTab.value.fromType,
       item: {
         value: currentTab.value.value,
         toValue: currentTab.value.toValue
       }
-    }).then()
+    }
+    try { const { default: component } = await import('@/components/Tools/CodeLibrary/codeAdd.vue'); await AsyncComponentShow(component, snapshot) }
+    catch (error) { MessageError(String(error)) }
   }
 
   onMounted(() => {

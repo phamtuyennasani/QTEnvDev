@@ -30,6 +30,7 @@ export class CapturerOperation {
   private disposeListener?: () => void
   private initializing?: Promise<boolean>
   private launch?: Promise<boolean>
+  private launchEpoch = 0
   constructor(private deps: Dependencies) {}
   init() {
     if (!this.disposeListener) this.disposeListener = this.deps.subscribe((event) => this.receive(event))
@@ -43,12 +44,13 @@ export class CapturerOperation {
         const oldTrial = parse(legacy).trialStartTime
         if (oldTrial && (!this.config.trialStartTime || oldTrial < this.config.trialStartTime)) this.config.trialStartTime = oldTrial
         if (saved === undefined || oldTrial && this.config.trialStartTime !== parse(saved).trialStartTime) await this.deps.save({ ...this.config, key: [...this.config.key] })
-        this.ready = true; this.error = ''
+        this.error = ''
         if (this.deps.active() || !this.config.trialStartTime || this.config.trialStartTime + 3 * 86400 >= this.deps.now()) {
           try { await this.deps.request('Capturer:Config-Update', this.snapshot(this.config)) }
           catch (error) { this.warning = 'Saved capture settings could not be applied: ' + String(error) }
         }
         await this.reconcile()
+        this.ready = true
         return true
       } catch (error) { this.error = error instanceof Error ? error.message : String(error); return false }
       finally { this.initializing = undefined }
@@ -59,13 +61,16 @@ export class CapturerOperation {
     validateCapturerName(config.name)
     const keys = config.key.map((key) => key.trim()).filter(Boolean)
     if (keys.some((key) => key.includes('+') || key.length > 30) || keys.length > 5) throw new Error('Shortcut must contain a supported key combination.')
+    if (keys.join('+').toLowerCase() === 'escape') throw new Error('Escape is reserved for cancelling the capture.')
     return { ...config, key: keys }
   }
-  async saveConfig(config = this.config) {
+  async saveConfig(config?: CapturerConfig) {
     if (this.saving || this.running) return false
     this.saving = true
     try {
-      const next = this.snapshot(config)
+      const requested = config ? this.snapshot(config) : undefined
+      if (!this.ready && !await this.init()) throw new Error(this.error || 'Capture settings could not be loaded.')
+      const next = requested ?? this.snapshot(this.config)
       next.trialStartTime = this.config.trialStartTime
       if (!this.deps.active() && next.trialStartTime > 0 && next.trialStartTime + 3 * 86400 < this.deps.now()) throw new Error('The capturer trial has ended.')
       await this.deps.request('Capturer:Config-Update', next)
@@ -75,27 +80,31 @@ export class CapturerOperation {
     } catch (error) { this.error = error instanceof Error ? error.message : String(error); return false }
     finally { this.saving = false }
   }
-  capture(hideWindow = false, config = this.config): Promise<boolean> {
+  capture(hideWindow = false, config?: CapturerConfig): Promise<boolean> {
     if (this.launch) return this.launch
-    if (this.running || this.outcome === 'unknown') return Promise.resolve(false)
-    const requestedConfig = { ...config, key: [...config.key] }
+    if (this.saving || this.running || this.outcome === 'unknown') return Promise.resolve(false)
+    const requestedConfig = config ? { ...config, key: [...config.key] } : undefined
+    const epoch = ++this.launchEpoch
     this.running = true; this.error = ''; this.warning = ''; this.path = ''; this.status = 'Opening capture'; this.outcome = 'opening'
     this.launch = Promise.resolve().then(async () => {
       try {
         if (!this.ready && !await this.init()) throw new Error(this.error)
+        if (epoch !== this.launchEpoch) return false
         this.running = true; this.outcome = 'opening'; this.status = 'Opening capture'
-        const next = this.snapshot(requestedConfig); next.trialStartTime = this.config.trialStartTime
+        const next = this.snapshot(requestedConfig ?? this.config); next.trialStartTime = this.config.trialStartTime
         if (!this.deps.active()) {
           if (next.trialStartTime > 0 && next.trialStartTime + 3 * 86400 < this.deps.now()) throw new Error('The capturer trial has ended.')
           if (!next.trialStartTime) { next.trialStartTime = this.deps.now(); await this.deps.save(next); this.config.trialStartTime = next.trialStartTime }
         }
         this.operationId = this.deps.id()
         await this.deps.request('Capturer:Config-Update', next)
+        if (epoch !== this.launchEpoch) return false
         this.config = next
         const ack = await this.deps.request('Capturer:doCapturer', hideWindow, this.operationId)
-        if (ack?.status) this.receive(ack)
+        if (epoch === this.launchEpoch && ack?.status) this.receive(ack)
         return true
       } catch (error) {
+        if (epoch !== this.launchEpoch) return false
         if (error instanceof CapturerOutcomeUnknown) { this.outcome = 'unknown'; this.status = 'Capture outcome unknown'; this.running = true }
         else { this.outcome = 'failed'; this.status = 'Capture failed'; this.running = false }
         this.error = error instanceof Error ? error.message : String(error)
@@ -111,7 +120,8 @@ export class CapturerOperation {
     this.path = event.path ?? this.path; this.error = event.error ?? ''; this.warning = event.warning ?? this.warning
   }
   async cancel() {
-    try { const event = await this.deps.request('Capturer:doStopCapturer'); if (event?.status) this.receive(event); else await this.reconcile(); return !this.running }
+    this.launchEpoch += 1
+    try { const event = await this.deps.request('Capturer:doStopCapturer'); if (event?.id) this.receive(event); else await this.reconcile(); return !this.running }
     catch (error) { this.outcome = 'unknown'; this.status = 'Capture outcome unknown'; this.running = true; this.error = String(error); return false }
   }
   async reconcile() {

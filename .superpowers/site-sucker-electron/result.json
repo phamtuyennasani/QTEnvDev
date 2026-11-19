@@ -1,0 +1,607 @@
+{
+  "success": true,
+  "results": {
+    "success": {
+      "operationId": "success",
+      "state": "completed",
+      "links": [
+        {
+          "url": "http://127.0.0.1:53291/",
+          "file": "index.html",
+          "state": "success",
+          "type": "text/html",
+          "size": 388
+        },
+        {
+          "url": "http://127.0.0.1:53291/app.css",
+          "file": "assets/b87baf95faac774aa4bc6f0f.css",
+          "state": "success",
+          "type": "text/css",
+          "size": 32
+        },
+        {
+          "url": "http://127.0.0.1:53291/image.png",
+          "file": "assets/9cea547f199344d478ef25af.png",
+          "state": "success",
+          "type": "image/png",
+          "size": 68
+        },
+        {
+          "url": "http://127.0.0.1:53291/second",
+          "file": "pages/024ebb8f30ac2b198011f763.html",
+          "state": "success",
+          "type": "text/html",
+          "size": 50
+        },
+        {
+          "url": "http://127.0.0.1:53291/third",
+          "file": "pages/e823e62a683de854e240b9ea.html",
+          "state": "success",
+          "type": "text/html",
+          "size": 49
+        }
+      ],
+      "bytes": 428
+    },
+    "retry": {
+      "operationId": "retry",
+      "state": "completed",
+      "links": [
+        {
+          "url": "http://127.0.0.1:53291/retry",
+          "file": "index.html",
+          "state": "success",
+          "type": "text/html",
+          "size": 53
+        }
+      ],
+      "bytes": 53
+    },
+    "cancel": {
+      "operationId": "cancel",
+      "state": "cancelled",
+      "links": [
+        {
+          "url": "http://127.0.0.1:53291/slow",
+          "file": "index.html",
+          "state": "skipped",
+          "reason": "Cancelled"
+        }
+      ],
+      "bytes": 0
+    },
+    "bounded": {
+      "operationId": "bounded",
+      "state": "partial",
+      "links": [
+        {
+          "url": "http://127.0.0.1:53291/large",
+          "file": "index.html",
+          "state": "success",
+          "type": "text/html",
+          "size": 86
+        },
+        {
+          "url": "http://127.0.0.1:53291/large.png",
+          "file": "assets/d91deb78c4964e0bdf195083.png",
+          "state": "fail",
+          "type": "image/png",
+          "reason": "File exceeds 1 MB"
+        }
+      ],
+      "bytes": 1048637
+    },
+    "page-bound": {
+      "operationId": "page-bound",
+      "state": "partial",
+      "links": [
+        {
+          "url": "http://127.0.0.1:53291/large-page",
+          "file": "index.html",
+          "state": "fail",
+          "reason": "ERR_BLOCKED_BY_CLIENT (-20) loading 'http://127.0.0.1:53291/large-page'"
+        }
+      ],
+      "bytes": 0
+    },
+    "windowClose": {
+      "operationId": "window-close",
+      "state": "cancelled",
+      "links": [
+        {
+          "url": "http://127.0.0.1:53291/slow",
+          "file": "index.html",
+          "state": "skipped",
+          "reason": "Cancelled"
+        }
+      ],
+      "bytes": 0
+    }
+  },
+  "hits": {
+    "/": 1,
+    "/app.css": 2,
+    "/image.png": 3,
+    "/second": 1,
+    "/third": 1,
+    "/retry": 2,
+    "/slow": 2,
+    "/large": 1,
+    "/large.png": 2,
+    "/large-page": 2
+  },
+  "events": [
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/",
+        "file": "index.html",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/",
+        "file": "index.html",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/app.css",
+        "file": "assets/b87baf95faac774aa4bc6f0f.css",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/image.png",
+        "file": "assets/9cea547f199344d478ef25af.png",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/second",
+        "file": "pages/024ebb8f30ac2b198011f763.html",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/third",
+        "file": "pages/e823e62a683de854e240b9ea.html",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/",
+        "file": "index.html",
+        "state": "success",
+        "type": "text/html",
+        "size": 388
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/app.css",
+        "file": "assets/b87baf95faac774aa4bc6f0f.css",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/image.png",
+        "file": "assets/9cea547f199344d478ef25af.png",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/app.css",
+        "file": "assets/b87baf95faac774aa4bc6f0f.css",
+        "state": "success",
+        "type": "text/css",
+        "size": 32
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/second",
+        "file": "pages/024ebb8f30ac2b198011f763.html",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/image.png",
+        "file": "assets/9cea547f199344d478ef25af.png",
+        "state": "success",
+        "type": "image/png",
+        "size": 68
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/third",
+        "file": "pages/e823e62a683de854e240b9ea.html",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/third",
+        "file": "pages/e823e62a683de854e240b9ea.html",
+        "state": "success",
+        "type": "text/html",
+        "size": 49
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/second",
+        "file": "pages/024ebb8f30ac2b198011f763.html",
+        "state": "success",
+        "type": "text/html",
+        "size": 50
+      }
+    },
+    {
+      "operationId": "success",
+      "kind": "terminal",
+      "result": {
+        "operationId": "success",
+        "state": "completed",
+        "links": [
+          {
+            "url": "http://127.0.0.1:53291/",
+            "file": "index.html",
+            "state": "success",
+            "type": "text/html",
+            "size": 388
+          },
+          {
+            "url": "http://127.0.0.1:53291/app.css",
+            "file": "assets/b87baf95faac774aa4bc6f0f.css",
+            "state": "success",
+            "type": "text/css",
+            "size": 32
+          },
+          {
+            "url": "http://127.0.0.1:53291/image.png",
+            "file": "assets/9cea547f199344d478ef25af.png",
+            "state": "success",
+            "type": "image/png",
+            "size": 68
+          },
+          {
+            "url": "http://127.0.0.1:53291/second",
+            "file": "pages/024ebb8f30ac2b198011f763.html",
+            "state": "success",
+            "type": "text/html",
+            "size": 50
+          },
+          {
+            "url": "http://127.0.0.1:53291/third",
+            "file": "pages/e823e62a683de854e240b9ea.html",
+            "state": "success",
+            "type": "text/html",
+            "size": 49
+          }
+        ],
+        "bytes": 428
+      }
+    },
+    {
+      "operationId": "retry",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/retry",
+        "file": "index.html",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "retry",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/retry",
+        "file": "index.html",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "retry",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/retry",
+        "file": "index.html",
+        "state": "wait",
+        "reason": "Retrying after attempt 1: Error: ERR_EMPTY_RESPONSE (-324) loading 'http://127.0.0.1:53291/retry'"
+      }
+    },
+    {
+      "operationId": "retry",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/retry",
+        "file": "index.html",
+        "state": "running",
+        "reason": "Retrying after attempt 1: Error: ERR_EMPTY_RESPONSE (-324) loading 'http://127.0.0.1:53291/retry'"
+      }
+    },
+    {
+      "operationId": "retry",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/retry",
+        "file": "index.html",
+        "state": "success",
+        "type": "text/html",
+        "size": 53
+      }
+    },
+    {
+      "operationId": "retry",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/retry",
+        "file": "index.html",
+        "state": "success",
+        "type": "text/html",
+        "size": 53
+      }
+    },
+    {
+      "operationId": "retry",
+      "kind": "terminal",
+      "result": {
+        "operationId": "retry",
+        "state": "completed",
+        "links": [
+          {
+            "url": "http://127.0.0.1:53291/retry",
+            "file": "index.html",
+            "state": "success",
+            "type": "text/html",
+            "size": 53
+          }
+        ],
+        "bytes": 53
+      }
+    },
+    {
+      "operationId": "cancel",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/slow",
+        "file": "index.html",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "cancel",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/slow",
+        "file": "index.html",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "cancel",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/slow",
+        "file": "index.html",
+        "state": "skipped",
+        "reason": "Cancelled"
+      }
+    },
+    {
+      "operationId": "cancel",
+      "kind": "terminal",
+      "result": {
+        "operationId": "cancel",
+        "state": "cancelled",
+        "links": [
+          {
+            "url": "http://127.0.0.1:53291/slow",
+            "file": "index.html",
+            "state": "skipped",
+            "reason": "Cancelled"
+          }
+        ],
+        "bytes": 0
+      }
+    },
+    {
+      "operationId": "bounded",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large",
+        "file": "index.html",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "bounded",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large",
+        "file": "index.html",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "bounded",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large.png",
+        "file": "assets/d91deb78c4964e0bdf195083.png",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "bounded",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large",
+        "file": "index.html",
+        "state": "success",
+        "type": "text/html",
+        "size": 86
+      }
+    },
+    {
+      "operationId": "bounded",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large.png",
+        "file": "assets/d91deb78c4964e0bdf195083.png",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "bounded",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large.png",
+        "file": "assets/d91deb78c4964e0bdf195083.png",
+        "state": "fail",
+        "type": "image/png",
+        "reason": "File exceeds 1 MB"
+      }
+    },
+    {
+      "operationId": "bounded",
+      "kind": "terminal",
+      "result": {
+        "operationId": "bounded",
+        "state": "partial",
+        "links": [
+          {
+            "url": "http://127.0.0.1:53291/large",
+            "file": "index.html",
+            "state": "success",
+            "type": "text/html",
+            "size": 86
+          },
+          {
+            "url": "http://127.0.0.1:53291/large.png",
+            "file": "assets/d91deb78c4964e0bdf195083.png",
+            "state": "fail",
+            "type": "image/png",
+            "reason": "File exceeds 1 MB"
+          }
+        ],
+        "bytes": 1048637
+      }
+    },
+    {
+      "operationId": "page-bound",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large-page",
+        "file": "index.html",
+        "state": "wait"
+      }
+    },
+    {
+      "operationId": "page-bound",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large-page",
+        "file": "index.html",
+        "state": "running"
+      }
+    },
+    {
+      "operationId": "page-bound",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large-page",
+        "file": "index.html",
+        "state": "wait",
+        "reason": "Retrying after attempt 1: Error: ERR_BLOCKED_BY_CLIENT (-20) loading 'http://127.0.0.1:53291/large-page'"
+      }
+    },
+    {
+      "operationId": "page-bound",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large-page",
+        "file": "index.html",
+        "state": "running",
+        "reason": "Retrying after attempt 1: Error: ERR_BLOCKED_BY_CLIENT (-20) loading 'http://127.0.0.1:53291/large-page'"
+      }
+    },
+    {
+      "operationId": "page-bound",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large-page",
+        "file": "index.html",
+        "state": "fail",
+        "reason": "ERR_BLOCKED_BY_CLIENT (-20) loading 'http://127.0.0.1:53291/large-page'"
+      }
+    },
+    {
+      "operationId": "page-bound",
+      "kind": "link",
+      "link": {
+        "url": "http://127.0.0.1:53291/large-page",
+        "file": "index.html",
+        "state": "fail",
+        "reason": "ERR_BLOCKED_BY_CLIENT (-20) loading 'http://127.0.0.1:53291/large-page'"
+      }
+    },
+    {
+      "operationId": "page-bound",
+      "kind": "terminal",
+      "result": {
+        "operationId": "page-bound",
+        "state": "partial",
+        "links": [
+          {
+            "url": "http://127.0.0.1:53291/large-page",
+            "file": "index.html",
+            "state": "fail",
+            "reason": "ERR_BLOCKED_BY_CLIENT (-20) loading 'http://127.0.0.1:53291/large-page'"
+          }
+        ],
+        "bytes": 0
+      }
+    }
+  ]
+}

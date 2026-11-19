@@ -10,5 +10,8 @@ Operation lifetimes belong to the module-local controller; mounted panels own in
 | SSL maker | module-local controller | terminal code 0/1 | validated domain/root/output snapshot; folder-open failure supplementary | preconditions and result preservation |
 | Environment files | module-local controller | list/read/save terminal | file/content snapshot; stale reads ignored; system read-only policy | read revision, save guard, failure |
 | PHP obfuscator | module-local controller | terminal code 0/1 with logs | installed PHP and non-nested source/output snapshot | path/runtime validation, terminal cleanup |
+| Request timing | request-timing singleton | progress 100/200; terminal 0/1; 60s observation bound | HTTP(S) snapshot, duplicate/unknown replay guard; prior metrics retained | URL validation, late terminal, re-entry |
+| RSA generation | RSA singleton | promise resolution/rejection; 120s observation bound | finite allowed bit size, frozen request, prior keys retained; late promise settles unknown | duplicate, timeout, result retention |
+| MySQL code connection | MySQL-code singleton | progress 100/200; terminal 0/1; 60s observation bound | frozen validated host/port/user credentials; sensitive IPC; prior database list retained | validation, duplicate, unknown and cleanup |
 
 Completed writes and stops remain completed when folder opening or refresh fails. Observation timeout is unknown, retains the original listener and blocks replay; it never implies cancellation.

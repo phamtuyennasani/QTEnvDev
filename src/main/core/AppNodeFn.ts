@@ -609,12 +609,16 @@ X-GNOME-Autostart-enabled=true`
 
   fs_stat(command: string, key: string, path: string) {
     stat(path, (err, stats) => {
+      if (err || !stats) {
+        this?.mainWindow?.webContents.send('command', command, key, null)
+        return
+      }
       const obj: any = JSON.parse(JSON.stringify(stats))
       obj.isDirectory = stats.isDirectory()
       obj.isFile = stats.isFile()
       obj.isSymbolicLink = stats.isSymbolicLink()
       obj.isSocket = stats.isSocket()
-      this?.mainWindow?.webContents.send('command', command, key, err ? null : obj)
+      this?.mainWindow?.webContents.send('command', command, key, obj)
     })
   }
 

@@ -17,7 +17,10 @@ export class SiteSuckerModel {
   warning = ''
   status = 'Idle'
   operationId = ''
+  settingsReady = false
+  settingsLoading = false
   private ready?: Promise<void>
+  private saves = Promise.resolve()
   private unsubscribe?: () => void
   private reconciling = false
   private stopRequested = false
@@ -28,11 +31,14 @@ export class SiteSuckerModel {
     return this.ready
   }
   private async initialize() {
+    this.settingsLoading = true
     try {
       const saved = await this.deps.load()
       const legacy = saved ?? await this.deps.request('app-sitesucker-setup')
       this.config = mirrorConfig(legacy?.commonSetup || legacy || {})
-    } catch (error) { this.warning = `Settings could not be loaded: ${String(error)}` }
+      this.settingsReady = true
+    } catch (error) { this.warning = `Settings could not be loaded: ${String(error)}`; this.ready = undefined }
+    finally { this.settingsLoading = false }
     await this.reconcile()
   }
   private event(event: MirrorEvent) {
@@ -63,10 +69,19 @@ export class SiteSuckerModel {
     finally { this.reconciling = false }
   }
   async saveConfig() {
-    try { this.config = mirrorConfig(this.config); await this.deps.save({ ...this.config }); this.warning = ''; return true }
+    await this.init()
+    if (!this.settingsReady) return false
+    try { this.config = mirrorConfig(this.config); await this.persist({ ...this.config }); this.warning = ''; return true }
     catch (error) { this.warning = `Settings were not saved: ${String(error)}`; return false }
   }
+  private persist(config: MirrorConfig) {
+    const saved = this.saves.then(() => this.deps.save(config))
+    this.saves = saved.catch(() => {})
+    return saved
+  }
   async setExcludedHost(host: string) {
+    await this.init()
+    if (!this.settingsReady) return false
     const excluded = new Set(this.config.excludeLink.split('\n').map((line) => line.trim()).filter(Boolean))
     if (excluded.has(host)) excluded.delete(host); else excluded.add(host)
     this.config.excludeLink = [...excluded].join('\n')
@@ -74,6 +89,7 @@ export class SiteSuckerModel {
   }
   async run() {
     await this.init()
+    if (!this.settingsReady) return false
     if (this.running || this.unknown) return false
     let url: URL
     try {
@@ -89,7 +105,7 @@ export class SiteSuckerModel {
       const response = await this.deps.request('app-sitesucker-run', snapshot) as MirrorSnapshot
       // Progress/terminal can arrive before the opening acknowledgement.
       if (this.running && response?.operationId === this.operationId) this.result(response)
-      try { await this.deps.save({ ...snapshot.config }) }
+      try { await this.persist({ ...snapshot.config }) }
       catch (error) { this.warning = 'Settings were not saved: ' + String(error) }
       return true
     } catch (error) {

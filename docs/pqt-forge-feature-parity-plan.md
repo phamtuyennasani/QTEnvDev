@@ -1,6 +1,6 @@
 ﻿# PQT Forge feature parity plan
 
-Updated: 2026-11-18
+Updated: 2026-11-19
 
 This document tracks the migration from the legacy renderer (src/render) to the independent renderer in src/render-next. A screen listed in the sidebar is not, by itself, evidence of parity. Each workflow must use a real domain adapter or clearly report that it is unavailable or incomplete.
 
@@ -35,9 +35,13 @@ This document tracks the migration from the legacy renderer (src/render) to the 
 
 ## Phase 3 — toolbox parity
 
-- [ ] Compare every legacy tool input/action/output with its new panel. Source audit is being recorded in `docs/pqt-forge-tool-audit.md`; panel wiring alone does not prove parity.
-- [ ] Migrate Capturer and Site Sucker with progress, cancellation, cleanup, and explicit file/network limits. Preserve the legacy URL substring filter separately from the numeric page cap.
-- [ ] Complete image pipeline options, favorites, custom tools, and tool-specific settings.
+- [x] Compare all 36 registered legacy tools and the implemented CodeMake surface. `docs/pqt-forge-tool-audit.md` records the current routing and original gaps; complete established views restore the richer editors and controls, with separate behavior and render evidence.
+- [x] Migrate Capturer and Site Sucker with correlated progress, cancellation, cleanup, duplicate/unknown guards, and file/network limits. Site Sucker preserves the URL substring filter separately from its numeric page cap. Local Electron integration covers real browser workers and native capture APIs/save behavior.
+- [x] Complete all image option/preview groups, validated advanced options, favorites, custom URL tools/webview, and settings migrations. Settings initialization and serialized writes protect saved data during rapid panel closure or Save actions.
+
+Phase 3 verification includes `test:pqt-forge-phase3`, `test:pqt-forge-tool-ui`, `test:pqt-forge-native-tools`, renderer operation boundaries, typecheck and the production renderer build. The UI fixture opens 38 panels and exercises JSON conversion, PHP's detached config editor, code-library Add, SVG cleanup, custom webview load/reload, and delayed settings initialization. Its IPC is isolated and is not native service acceptance.
+
+Native Site Sucker evidence uses a local HTTP server to test pages/assets/CSS, retry, cancellation/window closure, limits and cleanup. Capturer evidence reads real Windows/Electron desktop sources without persisting desktop pixels, uses synthetic PNGs for real nativeImage/filesystem saves, and separately exercises the actual overlay canvas export. Interactive selection/annotations and user interaction with Save As remain manual acceptance; remote WebSocket/SSE endpoints and every installed service/tool combination were not exercised. These limits do not represent missing migrated controls or simulated completion of native operations.
 
 ## Verification
 
@@ -51,6 +55,10 @@ Relevant checks:
 - yarn test:pqt-forge-tools
 - yarn test:pqt-forge-websites
 - yarn test:startup-group-runner
+- yarn test:pqt-forge-project-workflows
+- yarn test:pqt-forge-phase3
+- yarn test:pqt-forge-tool-ui
+- yarn test:pqt-forge-native-tools
 
 The build smoke test verifies dist/render/next.html; it does not prove interactive UI parity.
 

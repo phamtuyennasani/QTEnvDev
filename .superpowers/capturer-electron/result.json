@@ -1,0 +1,61 @@
+{
+  "success": true,
+  "tests": [
+    "native PNG decode and exact file bytes",
+    "duplicate save identity",
+    "supplementary failures preserve success",
+    "disconnected status observer preserves write",
+    "required filesystem failure propagates",
+    "collision refuses overwrite",
+    "invalid PNG rejected",
+    "cancel pending dialog blocks reopen and write",
+    "stale save cannot affect new session",
+    "shortcut failure retains previous config",
+    "Escape reserved for cancellation"
+  ],
+  "events": [
+    {
+      "id": "save",
+      "status": "saving"
+    },
+    {
+      "id": "save",
+      "status": "saved",
+      "path": "C:\\Users\\Admin\\AppData\\Local\\Temp\\qtenvdev-capturer-test-Tb9CpY\\shot-1.png",
+      "warning": "Clipboard copy failed: Error: fixture clipboard unavailable Reveal file failed: Error: fixture reveal unavailable"
+    }
+  ],
+  "desktop": {
+    "primary": {
+      "width": 2560,
+      "height": 1440
+    },
+    "nodeWindowManager": {
+      "decoded": true,
+      "size": {
+        "width": 3840,
+        "height": 2160
+      }
+    },
+    "electron": [
+      {
+        "displayId": "3695899685",
+        "decoded": true,
+        "size": {
+          "width": 64,
+          "height": 36
+        }
+      }
+    ]
+  },
+  "tempFiles": [
+    "fixed.png",
+    "not-a-directory",
+    "shot-1.png",
+    "shot-2.png"
+  ],
+  "limitations": [
+    "Native Save As responses and clipboard/reveal failure cases use controlled adapters.",
+    "Interactive overlay selection, annotations and actual Save As acceptance were not exercised."
+  ]
+}

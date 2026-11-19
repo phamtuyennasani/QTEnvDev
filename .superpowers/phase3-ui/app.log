@@ -1,13 +1,298 @@
 
-(electron) 'console-message' arguments are deprecated and will be removed. Please use Event<WebContentsConsoleMessageEventParams> object instead.
-(node:11112) UnhandledPromiseRejectionWarning: Error: An object could not be cloned.
-    at IpcRendererInternal.send (node:electron/js2c/renderer_init:2:14722)
-    at IpcRendererInternal.<anonymous> (node:electron/js2c/renderer_init:2:14361)
-(Use `electron --trace-warnings ...` to show where the warning was created)
-(node:11112) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 1)
-[intlify] Not found 'tools.envValueErrorTips' key in 'en' locale messages.
-[I18n] Missing English fallback key: tools.envValueErrorTips
-Error: Failed to resolve component: el-descriptions-item
-If this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement.
-    at <anonymous>:5:192
-    at async IpcRendererInternal.<anonymous> (node:electron/js2c/renderer_init:2:14373)
+UI_LOADING
+[vite] connecting...
+[vite] connected.
+reactiveBind proto [object Object]
+reactiveBind key:  init function
+reactiveBind key:  snapshot function
+reactiveBind key:  saveConfig function
+reactiveBind key:  capture function
+reactiveBind key:  receive function
+reactiveBind key:  cancel function
+reactiveBind key:  reconcile function
+reactiveBind key:  dispose function
+reactiveBind proto [object Object]
+reactiveBind key:  init function
+reactiveBind key:  isFavorite function
+reactiveBind key:  mutate function
+reactiveBind key:  toggleFavorite function
+reactiveBind key:  validate function
+reactiveBind key:  addCustom function
+reactiveBind key:  updateCustom function
+reactiveBind key:  removeCustom function
+reactiveBind key:  open function
+reactiveBind key:  attach function
+reactiveBind key:  detach function
+reactiveBind key:  close function
+reactiveBind key:  reload function
+reactiveBind key:  openExternal function
+modules:  [object Object]
+reactiveBind proto [object Object]
+reactiveBind key:  ensure function
+reactiveBind key:  syncAllowedDirs function
+reactiveBind key:  invoke function
+reactiveBind proto [object Object]
+reactiveBind key:  exists function
+reactiveBind key:  getState function
+reactiveBind key:  start function
+reactiveBind key:  stop function
+reactiveBind proto [object Object]
+reactiveBind key:  exists function
+reactiveBind key:  getState function
+reactiveBind key:  start function
+reactiveBind key:  stop function
+reactiveBind proto [object Object]
+reactiveBind key:  isExecuting boolean
+reactiveBind key:  changed function
+reactiveBind key:  resolveItem function
+reactiveBind key:  getItemState function
+reactiveBind key:  getGroupState function
+reactiveBind key:  cardState function
+reactiveBind key:  buildStopQueue function
+reactiveBind key:  stopForHide function
+reactiveBind key:  run function
+reactiveBind proto [object Object]
+reactiveBind key:  projectsFor function
+reactiveBind key:  installedModule function
+reactiveBind key:  installedTarget function
+reactiveBind key:  projectTarget function
+reactiveBind key:  getAdapter function
+reactiveBind key:  moduleLabel function
+reactiveBind key:  ensureSuccess function
+reactiveBind key:  listCandidates function
+reactiveBind proto [object Object]
+reactiveBind key:  config object
+reactiveBind key:  defaultGroup undefined
+reactiveBind key:  normalize function
+reactiveBind key:  hydrate function
+reactiveBind key:  serialize function
+reactiveBind key:  replace function
+reactiveBind key:  init function
+reactiveBind key:  persist function
+reactiveBind key:  isCreationLocked function
+reactiveBind key:  add function
+reactiveBind key:  update function
+reactiveBind key:  remove function
+reactiveBind key:  reorder function
+reactiveBind key:  setDefault function
+reactiveBind key:  find function
+reactiveBind proto [object Object]
+reactiveBind key:  matchesItem function
+reactiveBind key:  allowsMultiple function
+reactiveBind key:  updateSelection function
+reactiveBind key:  toggleSelection function
+reactiveBind key:  normalizeSelection function
+reactiveBind key:  filterValidItems function
+reactiveBind key:  syncSelectedItems function
+reactiveBind key:  warnings function
+reactiveBind proto [object Object]
+reactiveBind key:  runner object
+reactiveBind key:  loading boolean
+reactiveBind key:  busy boolean
+reactiveBind key:  installedModule function
+reactiveBind key:  resolveMember function
+reactiveBind key:  getMemberState function
+reactiveBind key:  isMemberRunning function
+reactiveBind key:  getMemberTitle function
+reactiveBind key:  getMemberModuleLabel function
+reactiveBind key:  getMemberDisplayTitle function
+reactiveBind key:  getMemberPath function
+reactiveBind key:  isGroupRunning function
+reactiveBind key:  isAnyGroupRunning function
+reactiveBind key:  isGroupExecuting function
+reactiveBind key:  isMemberDisabled function
+reactiveBind key:  ensureSources function
+reactiveBind key:  setGroupEnabled function
+reactiveBind key:  setMemberEnabled function
+modules:  [object Object]
+reactiveBind proto [object Object]
+reactiveBind key:  version function
+reactiveBind key:  load function
+reactiveBind key:  changePassword function
+reactiveBind key:  revealDataDirectory function
+reactiveBind proto [object Object]
+reactiveBind key:  download function
+reactiveBind proto [object Object]
+reactiveBind key:  init function
+reactiveBind key:  save function
+reactiveBind key:  imageSelected function
+reactiveBind key:  doProcess function
+reactiveBind key:  getWordWidths function
+reactiveBind key:  selectDir function
+reactiveBind key:  selectSaveDir function
+reactiveBind key:  openOutput function
+reactiveBind proto [object Object]
+reactiveBind key:  connect function
+reactiveBind proto [object Object]
+reactiveBind key:  load function
+reactiveBind key:  reFetch function
+reactiveBind proto [object Object]
+reactiveBind key:  notice function
+reactiveBind key:  entry function
+reactiveBind key:  prepare function
+reactiveBind key:  load function
+reactiveBind key:  search function
+reactiveBind key:  disable function
+reactiveBind key:  install function
+reactiveBind proto [object Object]
+reactiveBind key:  lastPort string
+reactiveBind proto [object Object]
+reactiveBind key:  lastKey string
+reactiveBind proto [object Object]
+reactiveBind key:  load function
+reactiveBind key:  run function
+reactiveBind key:  reveal function
+reactiveBind key:  revealFile function
+reactiveBind key:  open function
+reactiveBind proto [object Object]
+reactiveBind key:  loading boolean
+reactiveBind key:  error string
+reactiveBind key:  fetch function
+reactiveBind proto [object Object]
+reactiveBind key:  generate function
+reactiveBind proto [object Object]
+reactiveBind key:  init function
+reactiveBind key:  initialize function
+reactiveBind key:  event function
+reactiveBind key:  result function
+reactiveBind key:  reconcile function
+reactiveBind key:  saveConfig function
+reactiveBind key:  persist function
+reactiveBind key:  setExcludedHost function
+reactiveBind key:  run function
+reactiveBind key:  cancel function
+reactiveBind key:  dispose function
+reactiveBind proto [object Object]
+reactiveBind key:  list function
+reactiveBind key:  load function
+reactiveBind key:  save function
+reactiveBind key:  reveal function
+UI_LOADED
+ipcSendToMain:  app-sitesucker-status IPC-Key-Bq6r8IAwNzwVBfVnTbxhnSZltnaWuTod
+ipcReceiveFromMain:  app-sitesucker-status IPC-Key-Bq6r8IAwNzwVBfVnTbxhnSZltnaWuTod [object Object]
+UI_OPEN=jwt
+UI_OPEN=json
+JSONStore:  [object Proxy]
+ipcSendToMain:  App-Node-FN IPC-Key-gwhvnppJyDOEIHRD0IHL5PcwLS1Gsv4f nativeTheme,shouldUseDarkColors
+ipcSendToMain:  App-Node-FN IPC-Key-6XiEbsiIyvgftilGedPBoKX1u2Lj9Jyd nativeTheme,shouldUseDarkColors
+ipcReceiveFromMain:  App-Node-FN IPC-Key-gwhvnppJyDOEIHRD0IHL5PcwLS1Gsv4f true
+ipcReceiveFromMain:  App-Node-FN IPC-Key-6XiEbsiIyvgftilGedPBoKX1u2Lj9Jyd true
+EditorCreate config:  [object Object]
+EditorCreate config:  [object Object]
+actions:  [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+UI_OPEN=code-library
+UI_OPEN=regex-tester
+visualizer:  undefined
+visualizer:  [object ShadowRoot]
+UI_OPEN=diff
+ipcSendToMain:  App-Node-FN IPC-Key-EDCBavmUQO30pmlQwMlDLRRtdUYAk3l6 nativeTheme,shouldUseDarkColors
+ipcReceiveFromMain:  App-Node-FN IPC-Key-EDCBavmUQO30pmlQwMlDLRRtdUYAk3l6 true
+EditorCreate config:  [object Object]
+ipcSendToMain:  App-Node-FN IPC-Key-kxoffnUrjpmmtsAszvZN2GbbuYECMrWH nativeTheme,shouldUseDarkColors
+ipcReceiveFromMain:  App-Node-FN IPC-Key-kxoffnUrjpmmtsAszvZN2GbbuYECMrWH true
+EditorCreate config:  [object Object]
+UI_OPEN=markdown
+ipcSendToMain:  App-Node-FN IPC-Key-Gg1Yf0WFgVaGyTfp9JdLzxgNIOUsi3hm nativeTheme,shouldUseDarkColors
+ipcReceiveFromMain:  App-Node-FN IPC-Key-Gg1Yf0WFgVaGyTfp9JdLzxgNIOUsi3hm true
+EditorCreate config:  [object Object]
+UI_OPEN=qrcode
+UI_OPEN=wifi-qrcode
+UI_OPEN=file-info
+reactiveBind proto [object Object]
+reactiveBind key:  inspect function
+UI_OPEN=keycode
+UI_OPEN=cron-parser
+UI_OPEN=timestamp
+UI_OPEN=environment
+timestamp destroyed !!!!!
+ipcSendToMain:  app-fork:tools IPC-Key-0XDZ81fsmRQCw7iAvTxL5mLWNyk8fFfU envPathList
+ipcReceiveFromMain:  app-fork:tools IPC-Key-0XDZ81fsmRQCw7iAvTxL5mLWNyk8fFfU [object Object]
+UI_OPEN=ssl-maker
+reactiveBind proto [object Object]
+reactiveBind key:  runLocal function
+reactiveBind key:  run function
+UI_OPEN=bom-clean
+reactiveBind proto [object Object]
+reactiveBind key:  runLocal function
+reactiveBind key:  run function
+reactiveBind proto [object Object]
+reactiveBind key:  runLocal function
+reactiveBind key:  run function
+UI_OPEN=php-obfuscator
+reactiveBind proto [object Object]
+reactiveBind key:  run function
+reactiveBind key:  reveal function
+watchShowHide show:  true php
+UI_OPEN=playground
+CodePlay:  [object Proxy]
+CodePlay:  [object Proxy]
+CodePlay:  [object Proxy]
+watchShowHide show:  true python
+watchShowHide show:  true node
+watchShowHide show:  true bun
+watchShowHide show:  true deno
+watchShowHide show:  true golang
+watchShowHide show:  true rust
+watchShowHide show:  true java
+watchShowHide show:  true perl
+watchShowHide show:  true ruby
+watchShowHide show:  true erlang
+ipcSendToMain:  App-Node-FN IPC-Key-qrlgfLWNZ59uv272TBwc9omz10hcbcEU nativeTheme,shouldUseDarkColors
+ipcSendToMain:  App-Node-FN IPC-Key-U5n3wFSazQFp9w9nOIBHwj4jdMJJg52k nativeTheme,shouldUseDarkColors
+ipcReceiveFromMain:  App-Node-FN IPC-Key-qrlgfLWNZ59uv272TBwc9omz10hcbcEU true
+ipcReceiveFromMain:  App-Node-FN IPC-Key-U5n3wFSazQFp9w9nOIBHwj4jdMJJg52k true
+EditorCreate config:  [object Object]
+EditorCreate config:  [object Object]
+actions:  [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+UI_OPEN=websocket
+UI_OPEN=process
+UI_OPEN=image-compress
+UI_OPEN=capturer
+ipcSendToMain:  Capturer:Config-Update IPC-Key-vF5WN2t2wd550uoPVgEz5Pw7fWln9ZuU [object Object]
+ipcReceiveFromMain:  Capturer:Config-Update IPC-Key-vF5WN2t2wd550uoPVgEz5Pw7fWln9ZuU [object Object]
+ipcSendToMain:  Capturer:status IPC-Key-20p5telGXgYf5xB8fu6qynbBNU2DEMe7
+ipcReceiveFromMain:  Capturer:status IPC-Key-20p5telGXgYf5xB8fu6qynbBNU2DEMe7 [object Object]
+UI_OPEN=site-sucker
+UI_OPEN=base64
+UI_OPEN=hash
+Autofocus processing was blocked because a document already has a focused element.
+UI_OPEN=url
+UI_OPEN=html
+UI_OPEN=request-time
+UI_OPEN=git-cheatsheet
+UI_OPEN=http-status
+UI_OPEN=url-parse
+UI_OPEN=mime-types
+ipcSendToMain:  App-Node-FN IPC-Key-U9OjaN3tDP0bTIhWXTmurXDuAXzBdJqx mime,types
+ipcReceiveFromMain:  App-Node-FN IPC-Key-U9OjaN3tDP0bTIhWXTmurXDuAXzBdJqx [object Object]
+UI_OPEN=regex-cheatsheet
+UI_OPEN=base64-file
+UI_OPEN=token
+UI_OPEN=encryption
+UI_OPEN=chmod
+UI_OPEN=rsa
+UI_OPEN=mysql-code
+JSONStore:  [object Proxy]
+ipcSendToMain:  App-Node-FN IPC-Key-fYfKiIvj5nl2fWzcVBdSeXHJG5dxzWLo nativeTheme,shouldUseDarkColors
+ipcSendToMain:  App-Node-FN IPC-Key-xTowCgNyQSM2WZsYpER38ie0DBpZ3VgU nativeTheme,shouldUseDarkColors
+ipcReceiveFromMain:  App-Node-FN IPC-Key-fYfKiIvj5nl2fWzcVBdSeXHJG5dxzWLo true
+ipcReceiveFromMain:  App-Node-FN IPC-Key-xTowCgNyQSM2WZsYpER38ie0DBpZ3VgU true
+EditorCreate config:  [object Object]
+EditorCreate config:  [object Object]
+actions:  [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+type 000:  JSON
+ipcSendToMain:  App-Node-FN IPC-Key-nPSlbRPVCxeBbloJh24yRFtY6zgeQUeq fs,readFile,C:/fixture/tmpl/yakpro-po.default.cnf
+ipcReceiveFromMain:  App-Node-FN IPC-Key-nPSlbRPVCxeBbloJh24yRFtY6zgeQUeq
+ipcSendToMain:  App-Node-FN IPC-Key-c3QYO6y9N8SMSftTpaPuuNiImItCForA nativeTheme,shouldUseDarkColors
+ipcReceiveFromMain:  App-Node-FN IPC-Key-c3QYO6y9N8SMSftTpaPuuNiImItCForA true
+EditorCreate config:  [object Object]
+onUnmounted !!!!!!
+JSONStore:  [object Proxy]
+ipcSendToMain:  App-Node-FN IPC-Key-IZjzRUNAv74C4mMXwtUQNoVuyJnbZ1hj nativeTheme,shouldUseDarkColors
+ipcSendToMain:  App-Node-FN IPC-Key-BwwpqAeU84AVOU7ACd9R59UhaPdFApUe nativeTheme,shouldUseDarkColors
+ipcReceiveFromMain:  App-Node-FN IPC-Key-IZjzRUNAv74C4mMXwtUQNoVuyJnbZ1hj true
+ipcReceiveFromMain:  App-Node-FN IPC-Key-BwwpqAeU84AVOU7ACd9R59UhaPdFApUe true
+EditorCreate config:  [object Object]
+EditorCreate config:  [object Object]
+actions:  [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+TOOL_UI_RESULT={"opened":[{"id":"jwt","controls":12,"text":"WORKSPACE / TOOLS\n\nJWT encoder / decoder\n×\nJWT Encode/Decode\nEncode\nAlgorithm:\nHS256\nSecret:\nHeader:\nPayload:\nJWT:\nDecode This Token\nDecode\nAlgorithm:\nHS256\nSec"},{"id":"json","controls":9,"text":"WORKSPACE / TOOLS\n\nStructured data converter\n×\nJSON Parse\ntab-1\nInput Content\nOpen\nJSON"},{"id":"code-library","controls":14,"text":"WORKSPACE / TOOLS\n\nCode library\n×\nCode Library\nerlang\ngolang\njava\njavascript\nperl\nphp\npython\nruby\nrust\ntypescript\nGroup\n\nNo Data\n\nCode\n\nNo Data\n\nNo Data"},{"id":"regex-tester","controls":9,"text":"WORKSPACE / TOOLS\n\nRegex tester\n×\nRegex Tester\nRegex\nRegex to test:\nGlobal Search [g]\nCase-Insensitive Search [i]\nMultiline [m]\nSingle Line [s]\nUnicode [u]\nUnic"},{"id":"diff","controls":9,"text":"WORKSPACE / TOOLS\n\nDiff compare\n×\nDiff Compare\nLoad Sample\nSwap\nClear\nPrevious Diff\nNext Diff\nCopy Result\nOriginal text\nChanged text\nComparison summary\nAdded: 0"},{"id":"markdown","controls":3,"text":"WORKSPACE / TOOLS\n\nMarkdown preview\n×\nMarkdown Preview\ntab-1\n1\nMarkdown Preview"},{"id":"qrcode","controls":10,"text":"WORKSPACE / TOOLS\n\nQR code generator\n×\nQR Code Generator\nData / Text:\nForeground Color:\nBackground Color:\nError Resistance:\nmedium\nDownload QR Code"},{"id":"wifi-qrcode","controls":11,"text":"WORKSPACE / TOOLS\n\nWi-Fi QR code generator\n×\nWiFi QR Code Generator\nEncryption Method\nWPA/WPA2\nSSID:\nHidden SSID\nPassword:\nForeground Color:\nBackground Color:"},{"id":"file-info","controls":1,"text":"WORKSPACE / TOOLS\n\nFile information\n×\nFile Info\nDrag the file here, or click to select the file"},{"id":"keycode","controls":1,"text":"WORKSPACE / TOOLS\n\nKeyboard inspector\n×\nKeycode Info\nPress the key on your keyboard you want to get info about this key"},{"id":"cron-parser","controls":12,"text":"WORKSPACE / TOOLS\n\nCron expression parser\n×\nCron Expression Parser\nCron mode:\nAuto\nLinux 5 fields\nSeconds 6 fields\nAuto-detects 5 or 6 fields\nGenerate\nSchedule:"},{"id":"timestamp","controls":15,"text":"WORKSPACE / TOOLS\n\nTimestamp converter\n×\nTimestamp Conversion\nCurrent Unix Timestamp\n1795054533\nSecond\nSecond"},{"id":"environment","controls":12,"text":"WORKSPACE / TOOLS\n\nSystem environment\n×\nSystem Env\nPATH\nCancel\nSave\nValue\n\t\nActual Path\n\t\nOperation\nC:/fixture/bin\n\t\nC:/fixture/bin\n\t"},{"id":"ssl-maker","controls":7,"text":"WORKSPACE / TOOLS\n\nLocal SSL maker\n×\nSSL Certificate Generator\nGenerate"},{"id":"bom-clean","controls":5,"text":"WORKSPACE / TOOLS\n\nUTF-8 BOM cleaner\n×\nUTF-8 BOM Cleaning\nCleanup\nFile Type\n0 / 0"},{"id":"php-obfuscator","controls":8,"text":"WORKSPACE / TOOLS\n\nPHP obfuscator\n×\nPHP Obfuscator\nGenerate\nObfuscate with PHP version\nAdvanced Settings"},{"id":"playground","controls":9,"text":"WORKSPACE / TOOLS\n\nCode playground\n×\nCode Playground\ntab-1\nSelect\nSelect\nRaw"},{"id":"websocket","controls":19,"text":"WORKSPACE / TOOLS\n\nWebSocket / SSE\n×\nWebSocket / SSE\nProtocol:\nWebSocket\nSSE\nURL:\nConnect\nDisconnected\nBrowser WebSocket connections do not support custom heade"},{"id":"process","controls":8,"text":"WORKSPACE / SYSTEM\n\nProcess control\n\nSearch ports or process commands, inspect the process tree, then confirm a stop.\n\n×\nPort\nProcess name\nClean Select\nClean Al"},{"id":"image-compress","controls":25,"text":"WORKSPACE / FILES\n\nImage compressor\n\nBatch process images with the existing local Sharp pipeline.\n\n×\nAdd images\nAdd folder\nClear\nOverwrite source\nSave folder\nC:"},{"id":"capturer","controls":15,"text":"WORKSPACE / CAPTURE\n\nScreen capturer\n\nCapture a region or window and save it with a deterministic name.\n\n×\nSave folder\nChoose\nFile name pattern\n{index}\n{timesta"},{"id":"site-sucker","controls":23,"text":"WORKSPACE / NETWORK\n\nSite sucker\n\nMirror a site with explicit page, timeout and media limits.\n\n×\nStart URL\nOutput folder\nChoose folder\nProxy\nPage URL must inclu"},{"id":"base64","controls":7,"text":"WORKSPACE / LOCAL UTILITIES\n\nBase64 converter\n\nEncode and decode Unicode text.\n\n×\nOperation\nEncode\nDecode\nURL-safe alphabet\nRun locally\nInput\nProcessed on this "},{"id":"hash","controls":7,"text":"WORKSPACE / LOCAL UTILITIES\n\nHash text\n\nCompute eight hashes with hexadecimal, Base64 or Latin1 output.\n\n×\nAlgorithm\nMD5\nSHA-1\nSHA-224\nSHA-256\nSHA-384\nSHA-512\nS"},{"id":"url","controls":6,"text":"WORKSPACE / LOCAL UTILITIES\n\nURL encode\n\nEncode or decode a URI component.\n\n×\nOperation\nEncode\nDecode\nRun locally\nInput\nProcessed on this device. No data is sen"},{"id":"html","controls":6,"text":"WORKSPACE / LOCAL UTILITIES\n\nEscape HTML\n\nEscape or unescape HTML text characters.\n\n×\nOperation\nEscape\nUnescape\nRun locally\nInput\nProcessed on this device. No d"},{"id":"request-time","controls":3,"text":"NETWORK / REQUEST TIMING\n\nRequest timing\n×\nMeasure\n\nEnter a URL to inspect request timing."},{"id":"git-cheatsheet","controls":2,"text":"WORKSPACE / CODE\n\nGit cheatsheet\n\nBrowse the complete command reference.\n\n×\nReference language\nEnglish\nTiếng Việt\nConfiguration\n\nSet the global config\n\ngit conf"},{"id":"http-status","controls":2,"text":"WORKSPACE / NETWORK\n\nHTTP status codes\n\nSearch standard response codes by number, name or meaning.\n\n×\n1xx informational response\n100\nContinue · HTTP\nWaiting for"},{"id":"url-parse","controls":13,"text":"WORKSPACE / NETWORK\n\nURL parser\n\nInspect URL components and query parameters.\n\n×\nHREF Copy\nhttps://example.com:8443/path?query=value#section\nORIGIN Copy\nhttps:/"},{"id":"mime-types","controls":4,"text":"WORKSPACE / NETWORK\n\nMIME types\n\nLook up a content type by extension or find extensions for a MIME type.\n\n×\nExtension\nType an extension\nMIME type\nType a MIME ty"},{"id":"regex-cheatsheet","controls":1,"text":"WORKSPACE / CODE\n\nRegex cheatsheet\n\nComplete syntax and examples from the local reference.\n\n×\nNormal characters\nExpression\tDescription\n. or [^\\n\\r]\tany characte"},{"id":"base64-file","controls":8,"text":"WORKSPACE / CONVERTER\n\nBase64 file converter\n\nConvert a local file to Base64 or save Base64 data as a file.\n\n×\nFile to Base64\nChoose file\nCopy Base64\nBase64 to "},{"id":"token","controls":9,"text":"WORKSPACE / SECURITY\n\nToken generator\n\nGenerate a cryptographically secure random token locally.\n\n×\nLength\n Uppercase\n Lowercase\n Numbers\n Symbols\nRefresh\nCopy "},{"id":"encryption","controls":12,"text":"WORKSPACE / SECURITY\n\nText encryption\n\nEncrypt and decrypt text locally with a secret key.\n\n×\nEncrypt\nAES\nTripleDES\nRabbit\nRC4\nCopy encrypted\nDecrypt\nAES\nTriple"},{"id":"chmod","controls":11,"text":"WORKSPACE / FILES\n\nChmod calculator\n\nBuild Unix permissions and copy the matching chmod command.\n\n×\nOwner\nGroup\nPublic\nRead (4)\nowner\ngroup\npublic\nWrite (2)\nown"},{"id":"rsa","controls":7,"text":"WORKSPACE / SECURITY\n\nRSA key generator\n\nGenerate a local public/private RSA key pair.\n\n×\nKey size\nGenerate key pair\nPublic key\nCopy\nPrivate key\nCopy\nKeys remai"},{"id":"mysql-code","controls":6,"text":"WORKSPACE / DATABASES\n\nMySQL code maker\n\nConnect to a MySQL server and inspect its available databases.\n\n×\nUser\nPassword\nHost\nPort\nConnect\n\nConnect to load data"}],"warnings":[],"settingsRace":{"imageFolder":"C:/saved-images","mirrorFolder":"C:/saved-mirror"},"jsonConversion":true,"legacySprites":true,"phpConfig":true,"codeLibraryAdd":true,"customWebview":true}

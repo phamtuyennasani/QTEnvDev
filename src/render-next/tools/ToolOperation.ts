@@ -10,11 +10,12 @@ export class ToolOperation {
   done = false
   progress: any
   private operation?: Promise<boolean>
-  constructor(readonly transport: ToolTransport) {}
+  constructor(readonly transport: ToolTransport, readonly observationMilliseconds = 10 * 60 * 1000) {}
   runLocal(action: () => Promise<void>) {
     if (this.operation) return this.operation
-    this.running = true; this.done = false; this.error = ''
-    this.operation = Promise.resolve().then(action).then(() => { this.done = true; return true }).catch((error) => { this.error = String(error); return false }).finally(() => { this.running = false; this.operation = undefined })
+    this.running = true; this.done = false; this.error = ''; this.unknown = false; this.warning = ''
+    const timer = setTimeout(() => { this.unknown = true; this.error = 'No terminal result has arrived. Work may still be running; duplicate execution is blocked.' }, this.observationMilliseconds)
+    this.operation = Promise.resolve().then(action).then(() => { this.done = true; this.error = ''; return true }).catch((error) => { this.error = String(error); return false }).finally(() => { clearTimeout(timer); this.running = false; this.unknown = false; this.operation = undefined })
     return this.operation
   }
   run(command: string, args: unknown[], completed: (data: any) => void, progress?: (data: any) => void) {
@@ -33,6 +34,7 @@ export class ToolOperation {
       if (key) this.transport.off(key)
       this.running = false; this.unknown = false; this.operation = undefined
       if (reply?.code === 0) {
+        this.error = ''
         this.done = true
         try { completed(reply.data) }
         catch (error) { this.warning = 'The operation completed, but updating its view failed: ' + String(error) }
@@ -50,7 +52,7 @@ export class ToolOperation {
         try { progress?.(reply.msg) }
         catch (error) { this.warning = 'Progress could not be displayed: ' + String(error) }
       })
-      if (!settled) timer = setTimeout(() => { this.unknown = true; this.error = 'No terminal result has arrived. Work may still be running; duplicate execution is blocked.' }, 10 * 60 * 1000)
+      if (!settled) timer = setTimeout(() => { this.unknown = true; this.error = 'No terminal result has arrived. Work may still be running; duplicate execution is blocked.' }, this.observationMilliseconds)
     } catch (error) { terminal({ code: 1, msg: error instanceof Error ? error.message : String(error) }) }
     return operation
   }

@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "region": {
+    "width": 2,
+    "height": 2,
+    "pixel": [
+      0,
+      0,
+      255,
+      255
+    ]
+  },
+  "saveRequests": 2,
+  "tests": [
+    "real overlay modules mounted",
+    "full-screen region exports canvas pixels",
+    "duplicate export/native request guarded",
+    "native save result awaited",
+    "empty selection rejected",
+    "write failure surfaced"
+  ],
+  "limitations": [
+    "IPC replies use an isolated fixture.",
+    "Interactive native selection and Save As acceptance were not exercised."
+  ]
+}

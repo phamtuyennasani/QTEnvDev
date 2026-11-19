@@ -36,3 +36,7 @@ package-lock.json
 src/helper-go/rsrc_windows_amd64.syso
 src/helper-go/rsrc_windows_386.syso
 .tmp_video_tools
+.superpowers/capturer-electron/entry.cjs
+.superpowers/capturer-electron/electron-user-data/
+.superpowers/site-sucker-electron/entry.cjs
+.superpowers/site-sucker-electron/electron-user-data/

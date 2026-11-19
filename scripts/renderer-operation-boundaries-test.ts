@@ -17,6 +17,10 @@ for (const file of ['screens/WebsitesScreen.vue', 'websites/WebsiteEditor.vue', 
   assert.doesNotMatch(nextSource(file), /IPC\.send|from ['"]@\/util\/IPC/)
 }
 assert.match(nextSource('screens/DatabasesScreen.vue'), /serviceController\.run/)
+for (const file of ['components/RsaPanel.vue', 'components/MysqlCodePanel.vue']) assert.doesNotMatch(nextSource(file), /IPC\.send|rsaGenerateKeyPair/)
+assert.match(nextSource('state/requestTimingController.ts'), /reactiveBind\(new RequestTimingOperation/)
+assert.match(nextSource('state/rsaController.ts'), /reactiveBind\(new RsaOperation/)
+assert.match(nextSource('state/mysqlCodeController.ts'), /reactiveBind\(new MysqlCodeOperation/)
 const componentsDir = join(root, 'src', 'render', 'components')
 const agentsSource = readFileSync(join(root, 'AGENTS.md'), 'utf-8')
 const packageJson = JSON.parse(readFileSync(join(root, 'package.json'), 'utf-8'))
@@ -448,6 +452,10 @@ for (const name of ['CapturerPanel', 'SiteSuckerPanel', 'ImageCompressPanel']) {
 await import('./pqt-forge-capturer-test')
 await import('./pqt-forge-site-sucker-test')
 await import('./pqt-forge-image-pipeline-test')
+const fileInfoPage = readFileSync(join(componentsDir, 'Tools/FileInfo/Index.vue'), 'utf8')
+assert.match(fileInfoPage, /from ['"]\.\/Controller['"]/)
+assert.doesNotMatch(fileInfoPage, /fs\.(?:stat|md5|sha1|sha256|sha512|sha384)\(/)
+await import('./pqt-forge-file-info-test')
 
 // Homebrew formula mutations are controller/fork owned; only bootstrap retains XTerm.
 const homebrewPage = readFileSync(join(componentsDir, 'VersionManager/brew/index.vue'), 'utf8')

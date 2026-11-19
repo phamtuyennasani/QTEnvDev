@@ -207,10 +207,12 @@
   import { Delete, Edit, Folder, Plus, SetUp, Top } from '@element-plus/icons-vue'
   import CodeLibrary, { CodeLibraryItemType } from './setup'
   import Base from '@/core/Base'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  const AsyncComponentShow = useAsyncComponentShow()
   import { asyncComputed } from '@vueuse/core'
   import { md } from '@/util/NodeFn'
   import GroupContent from './groupContent.vue'
+  import { MessageError } from '@/util/Element'
 
   const props = defineProps<{
     langType: string
@@ -262,16 +264,10 @@
     return await md.render(content)
   })
 
-  let CodeAddVM: any
-  import('./codeAdd.vue').then((res) => {
-    CodeAddVM = res.default
-  })
-
-  const addCode = (item?: any) => {
-    AsyncComponentShow(CodeAddVM, {
-      langType: props.langType,
-      item
-    }).then()
+  const addCode = async (item?: any) => {
+    const snapshot = { langType: props.langType, item: item ? JSON.parse(JSON.stringify(item)) : undefined }
+    try { const { default: component } = await import('./codeAdd.vue'); await AsyncComponentShow(component, snapshot) }
+    catch (error) { MessageError(String(error)) }
   }
 
   const chooseAll = ref<boolean[]>([])
@@ -332,18 +328,16 @@
       .catch(() => {})
   }
 
-  let GroupChangedVM: any
-  import('./groupChange.vue').then((res) => {
-    GroupChangedVM = res.default
-  })
-
-  const doChangeGroups = (item?: any) => {
-    AsyncComponentShow(GroupChangedVM, {
-      langType: props.langType
-    }).then((groupID: string) => {
+  const doChangeGroups = async (item?: any) => {
+    const langType = props.langType
+    const itemID = item?.id
+    const selectedIDs = [...choosedItemID.value]
+    try {
+      const { default: component } = await import('./groupChange.vue')
+      const groupID = await AsyncComponentShow(component, { langType }) as string
       console.log('doChangeGroups groupID: ', groupID)
-      if (!item?.id) {
-        for (const id of choosedItemID.value) {
+      if (!itemID) {
+        for (const id of selectedIDs) {
           const find = CodeLibrary.items.find((f) => f.id === id)
           if (find) {
             find.groupID = groupID
@@ -353,12 +347,12 @@
         choosedItemID.value.splice(0)
         chooseAll.value.splice(0)
       } else {
-        const find = CodeLibrary.items.find((f) => f.id === item.id)
+        const find = CodeLibrary.items.find((f) => f.id === itemID)
         if (find) {
           find.groupID = groupID
         }
       }
-    })
+    } catch (error) { MessageError(String(error)) }
   }
 
   const emptyClick = (e: MouseEvent) => {

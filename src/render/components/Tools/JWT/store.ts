@@ -115,6 +115,7 @@ const store = reactive({
   },
   createToken() {
     this.encodeError = ''
+    this.token = ''
     try {
       if (!isSignableAlgorithm(this.algorithm)) {
         throw new Error(`${this.algorithm} signing is not supported locally`)
@@ -149,7 +150,7 @@ const store = reactive({
         throw new Error(`${this.decodeAlgorithm} verification is not supported locally`)
       }
       const expected = sign(header, payload, this.decodeSecret, this.decodeAlgorithm).split('.')[2]
-      this.signatureValid = expected === parts[2]
+      this.signatureValid = this.decodeAlgorithm !== 'none' && expected === parts[2]
     } catch (error: any) {
       this.decodeError = error?.message ?? 'Invalid JWT'
       this.decodedHeader = ''

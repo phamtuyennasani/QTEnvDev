@@ -1,0 +1,14 @@
+{
+  "operationId": "retry",
+  "state": "completed",
+  "links": [
+    {
+      "url": "http://127.0.0.1:53291/retry",
+      "file": "index.html",
+      "state": "success",
+      "type": "text/html",
+      "size": 53
+    }
+  ],
+  "bytes": 53
+}

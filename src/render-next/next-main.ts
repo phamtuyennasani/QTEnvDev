@@ -8,6 +8,8 @@ import GlobalIPCOn from '@/util/GlobalIPCOn'
 import { AppCustomerModule } from '@/core/Module'
 import { markDataDirectoryReady } from '@/core/DataDirectoryStartup'
 import { RendererLanguage } from '@/core/LanguageService'
+import { SetupStore } from '@/components/Setup/store'
+import { capturerController } from './state/capturerController'
 
 import './styles/app.css'
 import geistUrl from './assets/fonts/geist/Geist[wght].ttf?url'
@@ -39,6 +41,8 @@ const initialize = async (snapshot: any) => {
     const store = AppStore()
     store.envIndex += 1
     await store.initConfig()
+    await SetupStore().init()
+    if (window.QTEnvDevNodeAPI) await capturerController.init()
     AppCustomerModule.init()
     if (!GlobalIPCOn.inited) {
       GlobalIPCOn.inited = true

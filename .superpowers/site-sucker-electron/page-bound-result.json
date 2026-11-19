@@ -1,0 +1,13 @@
+{
+  "operationId": "page-bound",
+  "state": "partial",
+  "links": [
+    {
+      "url": "http://127.0.0.1:53291/large-page",
+      "file": "index.html",
+      "state": "fail",
+      "reason": "ERR_BLOCKED_BY_CLIENT (-20) loading 'http://127.0.0.1:53291/large-page'"
+    }
+  ],
+  "bytes": 0
+}

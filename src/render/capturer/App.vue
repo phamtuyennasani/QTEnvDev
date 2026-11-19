@@ -23,13 +23,14 @@
     <Magnifying />
     <SizeVM />
     <CapturerToolVM />
+    <p v-if="capturerSaveOperation.error" class="capture-save-error" role="alert">{{ capturerSaveOperation.error }}</p>
   </div>
 </template>
 
 <script lang="ts" setup>
   import { computed, onBeforeUnmount, watch, ref } from 'vue'
   import type { ComputedRef } from 'vue'
-  import { CapturerStore } from './store/app'
+  import { CapturerStore, capturerSaveOperation } from './store/app'
   import type { Rect } from './store/app'
   import RectSelector from './RectSelector/selector.vue'
   import Magnifying from './magnifying.vue'
@@ -191,6 +192,18 @@
       border: 2px solid #333333;
       pointer-events: none;
     }
+  }
+
+  .capture-save-error {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    max-width: calc(100vw - 48px);
+    z-index: 10000;
+    padding: 12px 16px;
+    color: #fff;
+    background: #9f2525;
+    border-radius: 6px;
   }
 
   .capturer-shape-canvas {

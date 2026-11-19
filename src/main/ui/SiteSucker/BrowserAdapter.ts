@@ -32,10 +32,10 @@ export class MirrorBrowserAdapter implements MirrorAdapter {
     const aborted = () => stop(new Error('Cancelled'))
     const timer = setTimeout(() => stop(new Error('Page timeout')), config.timeout)
     signal.addEventListener('abort', aborted, { once: true })
-    window.once('closed', () => {
-      this.windows.delete(window)
+    window.once('close', () => {
       if (!closing && !this.deliberateClose) this.onWindowClose()
     })
+    window.once('closed', () => { this.windows.delete(window) })
     try {
       window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
       window.webContents.on('will-attach-webview', (event) => event.preventDefault())
@@ -45,14 +45,14 @@ export class MirrorBrowserAdapter implements MirrorAdapter {
       window.webContents.session.webRequest.onBeforeRequest((details, callback) => {
         this.requests += 1
         let allowed = !signal.aborted && this.requests <= config.maxFiles + config.maxPages
-        const policy = this.policies.get(details.webContentsId ?? -1)
+        const policy = this.policies.get(details.webContentsId ?? -1) ?? (this.policies.size === 1 ? [...this.policies.values()][0] : undefined)
         try { mirrorUrl(details.url); allowed = allowed && Boolean(policy?.(details.url, '')) } catch { allowed = false }
         callback({ cancel: !allowed })
       })
       window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
         const headers = details.responseHeaders || {}
         const type = Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-type')?.[1]?.[0] || ''
-        const policy = this.policies.get(details.webContentsId ?? -1)
+        const policy = this.policies.get(details.webContentsId ?? -1) ?? (this.policies.size === 1 ? [...this.policies.values()][0] : undefined)
         const allowed = !signal.aborted && Boolean(policy?.(details.url, type))
         const length = Number(Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-length')?.[1]?.[0] || 0)
         const max = type.includes('text/html') ? Math.min(config.maxFileSize, 20) : config.maxFileSize
@@ -62,7 +62,6 @@ export class MirrorBrowserAdapter implements MirrorAdapter {
       const sizes = new Map<string, number>()
       const types = new Map<string, string>()
       window.webContents.debugger.attach('1.3')
-      await window.webContents.debugger.sendCommand('Network.enable')
       window.webContents.debugger.on('message', (_event, method: string, params: any) => {
         if (error || signal.aborted) return
         try {
@@ -83,7 +82,12 @@ export class MirrorBrowserAdapter implements MirrorAdapter {
           }
         } catch (cause) { stop(cause instanceof Error ? cause : new Error(String(cause))) }
       })
-      await window.loadURL(url)
+      const navigation = window.loadURL(url)
+      void navigation.catch(() => {})
+      // An about:blank guest on Windows can leave Network.enable pending until
+      // navigation starts. Start navigation synchronously before awaiting CDP.
+      await window.webContents.debugger.sendCommand('Network.enable')
+      await navigation
       if (error) throw error
       const result = await window.webContents.executeJavaScript('({url:location.href,html:document.documentElement.outerHTML})', true) as { url: string; html: string }
       if (error) throw error

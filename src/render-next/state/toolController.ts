@@ -62,7 +62,7 @@ const tools: ToolItem[] = [
   {
     id: 'jwt',
     name: 'JWT inspector',
-    description: 'Decode header and claims. Signature is not verified.',
+    description: 'Create JWTs and verify HMAC signatures with a secret.',
     category: 'Security',
     glyph: 'JWT',
     available: true
@@ -70,7 +70,7 @@ const tools: ToolItem[] = [
   {
     id: 'hash',
     name: 'Hash text',
-    description: 'Compute SHA-1, SHA-256 and SHA-512.',
+    description: 'Compute eight hashes with hexadecimal, Base64 or Latin1 output.',
     category: 'Security',
     glyph: '#',
     available: true

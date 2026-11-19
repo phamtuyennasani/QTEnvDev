@@ -27,7 +27,8 @@
   import IPC from '@/util/IPC'
   import { MessageError } from '@/util/Element'
   import { I18nT } from '@lang/index'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  const AsyncComponentShow = useAsyncComponentShow()
   import { shell, fs } from '@/util/NodeFn'
 
   const list: Ref<string[]> = ref([])
@@ -37,19 +38,16 @@
     list.value = res?.data ?? []
   })
 
-  let EditVM: any
-  import('./edit.vue').then((res) => {
-    EditVM = res.default
-  })
   const toEdit = async (file: string) => {
+    try {
     const exists = await fs.existsSync(file)
     if (!exists) {
       MessageError(I18nT('util.toolFileNotExist'))
       return
     }
-    AsyncComponentShow(EditVM, {
-      file
-    }).then()
+      const { default: component } = await import('./edit.vue')
+      await AsyncComponentShow(component, { file })
+    } catch (error) { MessageError(String(error)) }
   }
 
   const openFile = (file: string) => {

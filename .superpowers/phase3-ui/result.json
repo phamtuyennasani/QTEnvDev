@@ -1,0 +1,204 @@
+{
+  "opened": [
+    {
+      "id": "jwt",
+      "controls": 12,
+      "text": "WORKSPACE / TOOLS\n\nJWT encoder / decoder\n×\nJWT Encode/Decode\nEncode\nAlgorithm:\nHS256\nSecret:\nHeader:\nPayload:\nJWT:\nDecode This Token\nDecode\nAlgorithm:\nHS256\nSec"
+    },
+    {
+      "id": "json",
+      "controls": 9,
+      "text": "WORKSPACE / TOOLS\n\nStructured data converter\n×\nJSON Parse\ntab-1\nInput Content\nOpen\nJSON"
+    },
+    {
+      "id": "code-library",
+      "controls": 14,
+      "text": "WORKSPACE / TOOLS\n\nCode library\n×\nCode Library\nerlang\ngolang\njava\njavascript\nperl\nphp\npython\nruby\nrust\ntypescript\nGroup\n\nNo Data\n\nCode\n\nNo Data\n\nNo Data"
+    },
+    {
+      "id": "regex-tester",
+      "controls": 9,
+      "text": "WORKSPACE / TOOLS\n\nRegex tester\n×\nRegex Tester\nRegex\nRegex to test:\nGlobal Search [g]\nCase-Insensitive Search [i]\nMultiline [m]\nSingle Line [s]\nUnicode [u]\nUnic"
+    },
+    {
+      "id": "diff",
+      "controls": 9,
+      "text": "WORKSPACE / TOOLS\n\nDiff compare\n×\nDiff Compare\nLoad Sample\nSwap\nClear\nPrevious Diff\nNext Diff\nCopy Result\nOriginal text\nChanged text\nComparison summary\nAdded: 0"
+    },
+    {
+      "id": "markdown",
+      "controls": 3,
+      "text": "WORKSPACE / TOOLS\n\nMarkdown preview\n×\nMarkdown Preview\ntab-1\n1\nMarkdown Preview"
+    },
+    {
+      "id": "qrcode",
+      "controls": 10,
+      "text": "WORKSPACE / TOOLS\n\nQR code generator\n×\nQR Code Generator\nData / Text:\nForeground Color:\nBackground Color:\nError Resistance:\nmedium\nDownload QR Code"
+    },
+    {
+      "id": "wifi-qrcode",
+      "controls": 11,
+      "text": "WORKSPACE / TOOLS\n\nWi-Fi QR code generator\n×\nWiFi QR Code Generator\nEncryption Method\nWPA/WPA2\nSSID:\nHidden SSID\nPassword:\nForeground Color:\nBackground Color:"
+    },
+    {
+      "id": "file-info",
+      "controls": 1,
+      "text": "WORKSPACE / TOOLS\n\nFile information\n×\nFile Info\nDrag the file here, or click to select the file"
+    },
+    {
+      "id": "keycode",
+      "controls": 1,
+      "text": "WORKSPACE / TOOLS\n\nKeyboard inspector\n×\nKeycode Info\nPress the key on your keyboard you want to get info about this key"
+    },
+    {
+      "id": "cron-parser",
+      "controls": 12,
+      "text": "WORKSPACE / TOOLS\n\nCron expression parser\n×\nCron Expression Parser\nCron mode:\nAuto\nLinux 5 fields\nSeconds 6 fields\nAuto-detects 5 or 6 fields\nGenerate\nSchedule:"
+    },
+    {
+      "id": "timestamp",
+      "controls": 15,
+      "text": "WORKSPACE / TOOLS\n\nTimestamp converter\n×\nTimestamp Conversion\nCurrent Unix Timestamp\n1795054533\nSecond\nSecond"
+    },
+    {
+      "id": "environment",
+      "controls": 12,
+      "text": "WORKSPACE / TOOLS\n\nSystem environment\n×\nSystem Env\nPATH\nCancel\nSave\nValue\n\t\nActual Path\n\t\nOperation\nC:/fixture/bin\n\t\nC:/fixture/bin\n\t"
+    },
+    {
+      "id": "ssl-maker",
+      "controls": 7,
+      "text": "WORKSPACE / TOOLS\n\nLocal SSL maker\n×\nSSL Certificate Generator\nGenerate"
+    },
+    {
+      "id": "bom-clean",
+      "controls": 5,
+      "text": "WORKSPACE / TOOLS\n\nUTF-8 BOM cleaner\n×\nUTF-8 BOM Cleaning\nCleanup\nFile Type\n0 / 0"
+    },
+    {
+      "id": "php-obfuscator",
+      "controls": 8,
+      "text": "WORKSPACE / TOOLS\n\nPHP obfuscator\n×\nPHP Obfuscator\nGenerate\nObfuscate with PHP version\nAdvanced Settings"
+    },
+    {
+      "id": "playground",
+      "controls": 9,
+      "text": "WORKSPACE / TOOLS\n\nCode playground\n×\nCode Playground\ntab-1\nSelect\nSelect\nRaw"
+    },
+    {
+      "id": "websocket",
+      "controls": 19,
+      "text": "WORKSPACE / TOOLS\n\nWebSocket / SSE\n×\nWebSocket / SSE\nProtocol:\nWebSocket\nSSE\nURL:\nConnect\nDisconnected\nBrowser WebSocket connections do not support custom heade"
+    },
+    {
+      "id": "process",
+      "controls": 8,
+      "text": "WORKSPACE / SYSTEM\n\nProcess control\n\nSearch ports or process commands, inspect the process tree, then confirm a stop.\n\n×\nPort\nProcess name\nClean Select\nClean Al"
+    },
+    {
+      "id": "image-compress",
+      "controls": 25,
+      "text": "WORKSPACE / FILES\n\nImage compressor\n\nBatch process images with the existing local Sharp pipeline.\n\n×\nAdd images\nAdd folder\nClear\nOverwrite source\nSave folder\nC:"
+    },
+    {
+      "id": "capturer",
+      "controls": 15,
+      "text": "WORKSPACE / CAPTURE\n\nScreen capturer\n\nCapture a region or window and save it with a deterministic name.\n\n×\nSave folder\nChoose\nFile name pattern\n{index}\n{timesta"
+    },
+    {
+      "id": "site-sucker",
+      "controls": 23,
+      "text": "WORKSPACE / NETWORK\n\nSite sucker\n\nMirror a site with explicit page, timeout and media limits.\n\n×\nStart URL\nOutput folder\nChoose folder\nProxy\nPage URL must inclu"
+    },
+    {
+      "id": "base64",
+      "controls": 7,
+      "text": "WORKSPACE / LOCAL UTILITIES\n\nBase64 converter\n\nEncode and decode Unicode text.\n\n×\nOperation\nEncode\nDecode\nURL-safe alphabet\nRun locally\nInput\nProcessed on this "
+    },
+    {
+      "id": "hash",
+      "controls": 7,
+      "text": "WORKSPACE / LOCAL UTILITIES\n\nHash text\n\nCompute eight hashes with hexadecimal, Base64 or Latin1 output.\n\n×\nAlgorithm\nMD5\nSHA-1\nSHA-224\nSHA-256\nSHA-384\nSHA-512\nS"
+    },
+    {
+      "id": "url",
+      "controls": 6,
+      "text": "WORKSPACE / LOCAL UTILITIES\n\nURL encode\n\nEncode or decode a URI component.\n\n×\nOperation\nEncode\nDecode\nRun locally\nInput\nProcessed on this device. No data is sen"
+    },
+    {
+      "id": "html",
+      "controls": 6,
+      "text": "WORKSPACE / LOCAL UTILITIES\n\nEscape HTML\n\nEscape or unescape HTML text characters.\n\n×\nOperation\nEscape\nUnescape\nRun locally\nInput\nProcessed on this device. No d"
+    },
+    {
+      "id": "request-time",
+      "controls": 3,
+      "text": "NETWORK / REQUEST TIMING\n\nRequest timing\n×\nMeasure\n\nEnter a URL to inspect request timing."
+    },
+    {
+      "id": "git-cheatsheet",
+      "controls": 2,
+      "text": "WORKSPACE / CODE\n\nGit cheatsheet\n\nBrowse the complete command reference.\n\n×\nReference language\nEnglish\nTiếng Việt\nConfiguration\n\nSet the global config\n\ngit conf"
+    },
+    {
+      "id": "http-status",
+      "controls": 2,
+      "text": "WORKSPACE / NETWORK\n\nHTTP status codes\n\nSearch standard response codes by number, name or meaning.\n\n×\n1xx informational response\n100\nContinue · HTTP\nWaiting for"
+    },
+    {
+      "id": "url-parse",
+      "controls": 13,
+      "text": "WORKSPACE / NETWORK\n\nURL parser\n\nInspect URL components and query parameters.\n\n×\nHREF Copy\nhttps://example.com:8443/path?query=value#section\nORIGIN Copy\nhttps:/"
+    },
+    {
+      "id": "mime-types",
+      "controls": 4,
+      "text": "WORKSPACE / NETWORK\n\nMIME types\n\nLook up a content type by extension or find extensions for a MIME type.\n\n×\nExtension\nType an extension\nMIME type\nType a MIME ty"
+    },
+    {
+      "id": "regex-cheatsheet",
+      "controls": 1,
+      "text": "WORKSPACE / CODE\n\nRegex cheatsheet\n\nComplete syntax and examples from the local reference.\n\n×\nNormal characters\nExpression\tDescription\n. or [^\\n\\r]\tany characte"
+    },
+    {
+      "id": "base64-file",
+      "controls": 8,
+      "text": "WORKSPACE / CONVERTER\n\nBase64 file converter\n\nConvert a local file to Base64 or save Base64 data as a file.\n\n×\nFile to Base64\nChoose file\nCopy Base64\nBase64 to "
+    },
+    {
+      "id": "token",
+      "controls": 9,
+      "text": "WORKSPACE / SECURITY\n\nToken generator\n\nGenerate a cryptographically secure random token locally.\n\n×\nLength\n Uppercase\n Lowercase\n Numbers\n Symbols\nRefresh\nCopy "
+    },
+    {
+      "id": "encryption",
+      "controls": 12,
+      "text": "WORKSPACE / SECURITY\n\nText encryption\n\nEncrypt and decrypt text locally with a secret key.\n\n×\nEncrypt\nAES\nTripleDES\nRabbit\nRC4\nCopy encrypted\nDecrypt\nAES\nTriple"
+    },
+    {
+      "id": "chmod",
+      "controls": 11,
+      "text": "WORKSPACE / FILES\n\nChmod calculator\n\nBuild Unix permissions and copy the matching chmod command.\n\n×\nOwner\nGroup\nPublic\nRead (4)\nowner\ngroup\npublic\nWrite (2)\nown"
+    },
+    {
+      "id": "rsa",
+      "controls": 7,
+      "text": "WORKSPACE / SECURITY\n\nRSA key generator\n\nGenerate a local public/private RSA key pair.\n\n×\nKey size\nGenerate key pair\nPublic key\nCopy\nPrivate key\nCopy\nKeys remai"
+    },
+    {
+      "id": "mysql-code",
+      "controls": 6,
+      "text": "WORKSPACE / DATABASES\n\nMySQL code maker\n\nConnect to a MySQL server and inspect its available databases.\n\n×\nUser\nPassword\nHost\nPort\nConnect\n\nConnect to load data"
+    }
+  ],
+  "warnings": [],
+  "settingsRace": {
+    "imageFolder": "C:/saved-images",
+    "mirrorFolder": "C:/saved-mirror"
+  },
+  "jsonConversion": true,
+  "legacySprites": true,
+  "phpConfig": true,
+  "codeLibraryAdd": true,
+  "customWebview": true
+}

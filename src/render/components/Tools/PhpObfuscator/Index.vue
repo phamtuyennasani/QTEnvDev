@@ -12,6 +12,7 @@
 
     <div class="main-wapper">
       <p v-if="controller.operation.error" class="px-3 py-2 text-red-500" role="alert">{{ controller.operation.error }}</p>
+      <el-button v-if="controller.operation.error" class="mx-3" @click="showLogs">View operation logs</el-button>
       <p v-if="controller.operation.warning" class="px-3 py-2" role="status">{{ controller.operation.warning }}</p>
       <div class="main flex flex-col gap-7 pt-7">
         <el-select
@@ -62,7 +63,8 @@
   import { MessageError } from '@/util/Element'
   import { join } from '@/util/path-browserify'
   import { dialog, fs } from '@/util/NodeFn'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  const AsyncComponentShow = useAsyncComponentShow()
   import { I18nT } from '@lang/index'
   import { FolderOpened } from '@element-plus/icons-vue'
   import controller from './Controller'
@@ -104,6 +106,11 @@
           item.value.config = config
         }
       })
+    })
+  }
+  const showLogs = () => {
+    import('./Logs.vue').then((result) => {
+      AsyncComponentShow(result.default, { content: controller.operation.error })
     })
   }
 

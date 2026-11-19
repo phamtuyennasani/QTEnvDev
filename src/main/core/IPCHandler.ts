@@ -65,6 +65,8 @@ export interface IPCHandlerDependencies {
 export default class IPCHandler extends EventEmitter {
   private deps: IPCHandlerDependencies
   private capturerConfig?: any
+  private capturerEpoch = 0
+  private capturerStarting = false
   private siteSuckerEpoch = 0
   private siteSuckerStarting = false
 
@@ -982,27 +984,41 @@ export default class IPCHandler extends EventEmitter {
   // ===== 屏幕捕获 =====
 
   private handleCapturer(command: string, key: string, args: any[]) {
+    if (this.capturerStarting || ['opening', 'opened', 'saving'].includes(capturerRuntime.peek()?.status().status ?? '')) {
+      this.sendRuntimeError(command, key, new Error('A capture is already starting or active'))
+      return
+    }
+    this.capturerStarting = true
+    const epoch = ++this.capturerEpoch
     this.loadCapturer()
       .then(async (capturer) => {
+        if (epoch !== this.capturerEpoch) throw new Error('Capture start was cancelled')
         const isHide: any = args[0]
         if (isHide && this.deps.mainWindow?.isVisible()) {
           this.deps.mainWindow.setOpacity(0)
           this.deps.mainWindow.hide()
           await new Promise((resolve) => setTimeout(resolve, 150))
         }
-        try { const result = await capturer.initWatchPointWindow(args[1]); this.sendToMainWindow(command, key, { code: 0, data: result }) }
+        try {
+          if (epoch !== this.capturerEpoch) throw new Error('Capture start was cancelled')
+          const result = await capturer.initWatchPointWindow(args[1]); this.sendToMainWindow(command, key, { code: 0, data: result })
+        }
         finally { this.deps.mainWindow?.setOpacity(1) }
       })
       .catch((error) => this.sendRuntimeError(command, key, error))
+      .finally(() => { this.capturerStarting = false })
   }
 
   private handleStopCapturer(command: string, key: string, args: any[]) {
-    const capturer = capturerRuntime.peek()
-    const result = capturer?.stopCapturer(args[0] === 'saving' ? 'saving' : 'cancelled')
-    this.sendToMainWindow(command, key, { code: 0, data: result ?? { id: '', status: 'idle' } })
-    if (capturer?.window) {
-      this.deps.windowManager.sendCommandTo(capturer.window, command, key, true)
-    }
+    this.capturerEpoch += 1
+    // Stop waits for the same lazy load. A stop acknowledgement must not be
+    // followed by a queued start that has not reached the native runtime yet.
+    const runtime = this.capturerStarting ? this.loadCapturer() : Promise.resolve(capturerRuntime.peek())
+    runtime.then((capturer) => {
+      const result = capturer?.stopCapturer(args[0] === 'saving' ? 'saving' : 'cancelled')
+      this.sendToMainWindow(command, key, { code: 0, data: result ?? { id: '', status: 'idle' } })
+      if (capturer?.window) this.deps.windowManager.sendCommandTo(capturer.window, command, key, true)
+    }).catch((error) => this.sendRuntimeError(command, key, error))
   }
 
   private handleGetWindowCapturer(command: string, key: string, args: any[]) {
@@ -1026,18 +1042,25 @@ export default class IPCHandler extends EventEmitter {
 
   private handleSaveImage(command: string, key: string, args: any[]) {
     const capturer = capturerRuntime.peek()
-    if (!capturer) { this.sendRuntimeError(command, key, new Error('Capturer is not initialized')); return }
+    const reply = (result: any) => {
+      this.sendToMainWindow(command, key, result)
+      if (capturer?.window) this.deps.windowManager.sendCommandTo(capturer.window, command, key, result)
+    }
+    if (!capturer) { reply({ code: 1, msg: 'Capturer is not initialized' }); return }
     capturer.saveImage(args[0], args[1]).then((result) => {
-      this.sendToMainWindow(command, key, { code: 0, data: result })
-      if (capturer.window) this.deps.windowManager.sendCommandTo(capturer.window, command, key, true)
-    }).catch((error) => this.sendRuntimeError(command, key, error))
+      reply({ code: 0, data: result })
+    }).catch((error) => reply({ code: 1, msg: error instanceof Error ? error.message : String(error) }))
   }
 
   private handleCapturerConfigUpdate(command: string, key: string, args: any[]) {
+    const previous = this.capturerConfig
     this.capturerConfig = args[0]
     syncCapturerConfig(capturerRuntime, () => this.capturerConfig)
-      .then(() => this.sendToMainWindow(command, key, true))
-      .catch((error) => this.sendRuntimeError(command, key, error))
+      .then(() => {
+        capturerRuntime.peek()?.setCallback((event) => this.sendToMainWindow('App-Capturer-State', 'App-Capturer-State', event))
+        this.sendToMainWindow(command, key, true)
+      })
+      .catch((error) => { if (this.capturerConfig === args[0]) this.capturerConfig = previous; this.sendRuntimeError(command, key, error) })
   }
 
   // ===== NodePty =====

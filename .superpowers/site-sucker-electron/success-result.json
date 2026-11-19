@@ -1,0 +1,42 @@
+{
+  "operationId": "success",
+  "state": "completed",
+  "links": [
+    {
+      "url": "http://127.0.0.1:53291/",
+      "file": "index.html",
+      "state": "success",
+      "type": "text/html",
+      "size": 388
+    },
+    {
+      "url": "http://127.0.0.1:53291/app.css",
+      "file": "assets/b87baf95faac774aa4bc6f0f.css",
+      "state": "success",
+      "type": "text/css",
+      "size": 32
+    },
+    {
+      "url": "http://127.0.0.1:53291/image.png",
+      "file": "assets/9cea547f199344d478ef25af.png",
+      "state": "success",
+      "type": "image/png",
+      "size": 68
+    },
+    {
+      "url": "http://127.0.0.1:53291/second",
+      "file": "pages/024ebb8f30ac2b198011f763.html",
+      "state": "success",
+      "type": "text/html",
+      "size": 50
+    },
+    {
+      "url": "http://127.0.0.1:53291/third",
+      "file": "pages/e823e62a683de854e240b9ea.html",
+      "state": "success",
+      "type": "text/html",
+      "size": 49
+    }
+  ],
+  "bytes": 428
+}

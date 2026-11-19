@@ -1,5 +1,5 @@
 <template>
-  <div class="pipeline-options pqt-established-tool">
+  <div class="pipeline-options pqt-established-tool dark">
     <nav class="option-tabs" aria-label="Image options">
       <button v-for="tab in tabs" :key="tab.id" class="action-button" :class="{ active: active === tab.id }" @click="active = tab.id">{{ tab.label }}</button>
     </nav>
@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import BasicConfig from '@/components/Tools/ImageCompress/BasicConfig.vue'
 import CompressConfig from '@/components/Tools/ImageCompress/CompressConfig.vue'
 import EffectsConfig from '@/components/Tools/ImageCompress/EffectsConfig.vue'
@@ -37,6 +37,7 @@ const active = ref('basic')
 const json = ref(JSON.stringify(snapshotImageConfig(setup), null, 2))
 const error = ref('')
 const readConfig = () => { json.value = JSON.stringify(snapshotImageConfig(setup), null, 2); error.value = '' }
+watch(active, (tab) => { if (tab === 'advanced') readConfig() })
 const applyConfig = () => {
   try { Object.assign(setup, snapshotImageConfig(JSON.parse(json.value))); readConfig() }
   catch (failure) { error.value = failure instanceof Error ? failure.message : String(failure) }

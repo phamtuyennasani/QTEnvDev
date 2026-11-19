@@ -91,7 +91,7 @@
             <el-alert v-if="Store.decodeError" :title="Store.decodeError" type="error" show-icon />
             <el-alert
               v-else
-              :title="Store.signatureValid ? 'Signature verified' : 'Signature invalid'"
+              :title="Store.decodeAlgorithm === 'none' ? 'Unsigned token: no signature to verify' : Store.signatureValid ? 'Signature verified (claims are not validated)' : 'Signature invalid'"
               :type="Store.signatureValid ? 'success' : 'warning'"
               show-icon
             />

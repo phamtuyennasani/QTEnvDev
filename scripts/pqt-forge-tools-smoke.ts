@@ -9,4 +9,4 @@ assert.doesNotMatch(source('state/toolController.ts'), /shell\.openExternal|is r
 assert.match(source('components/ImageCompressPanel.vue'), /ImagePipelineOptions/)
 for (const component of ['BasicConfig', 'CompressConfig', 'EffectsConfig', 'WatermarkConfig', 'TextureConfig']) assert.match(source('components/ImagePipelineOptions.vue'), new RegExp(component))
 assert.match(source('../render/components/Tools/ImageCompress/ImageBatchOperation.ts'), /doCompressTask/)
-console.log('PQT Forge tools smoke passed (native local utility panels, pending network tools labeled).')
+console.log('PQT Forge tools source wiring passed; behavior and runtime acceptance use separate suites.')

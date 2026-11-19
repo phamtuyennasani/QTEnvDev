@@ -269,6 +269,9 @@ export default setup
 
 class ImageBatchProcess extends ImageBatchOperation {
   wordWidths: Record<string, number> = {}
+  settingsReady = false
+  settingsLoading = false
+  settingsError = ''
   private initialized?: Promise<void>
   private storageKey = 'qtenvdev-tools-imagecompress-v2'
   private saves = Promise.resolve()
@@ -278,6 +281,8 @@ class ImageBatchProcess extends ImageBatchOperation {
   }
   init() {
     if (this.initialized) return this.initialized
+    this.settingsLoading = true
+    this.settingsError = ''
     this.initialized = (async () => {
       try {
         const saved = await StorageGetAsync<{ config?: SharpConfig; trialStartTime?: number; saveDir?: string; backupDir?: string; rewrite?: boolean }>(this.storageKey)
@@ -287,7 +292,13 @@ class ImageBatchProcess extends ImageBatchOperation {
         this.saveDir = saved?.saveDir ?? ''
         this.backupDir = saved?.backupDir ?? ''
         this.rewrite = Boolean(saved?.rewrite)
-      } catch (error) { this.warnings.push('Image settings could not be loaded: ' + String(error)) }
+        this.settingsReady = true
+      } catch (error) {
+        this.settingsError = 'Image settings could not be loaded: ' + String(error)
+        this.warnings.push(this.settingsError)
+        this.initialized = undefined
+        return
+      } finally { this.settingsLoading = false }
       if (!this.watching) {
         this.watching = true
         watch(() => [setup, this.saveDir, this.backupDir, this.rewrite], () => this.save(), { deep: true })
@@ -295,12 +306,22 @@ class ImageBatchProcess extends ImageBatchOperation {
     })()
     return this.initialized
   }
-  save() {
+  async save() {
+    await this.init()
+    if (!this.settingsReady) return
     let data: unknown
     try { data = { config: snapshotImageConfig(setup), trialStartTime: this.trialStartTime, saveDir: this.saveDir, backupDir: this.backupDir, rewrite: this.rewrite } }
     catch { return this.saves }
     this.saves = this.saves.then(() => StorageSetAsync(this.storageKey, data)).catch((error) => { this.warnings.push('Image settings could not be saved: ' + String(error)) })
     return this.saves
+  }
+  imageSelected(paths: string[]) {
+    if (!this.settingsReady) { void this.init(); return false }
+    return super.imageSelected(paths)
+  }
+  doProcess() {
+    if (!this.settingsReady) { void this.init(); return false }
+    return super.doProcess()
   }
   getWordWidths(word: string) {
     for (const character of new Set([...word, '.'])) {
@@ -315,6 +336,8 @@ class ImageBatchProcess extends ImageBatchOperation {
     }
   }
   async selectDir(type?: 'file' | 'folder') {
+    await this.init()
+    if (!this.settingsReady) return
     if (this.busy) return
     try {
       const result = await dialog.showOpenDialog({
@@ -325,6 +348,8 @@ class ImageBatchProcess extends ImageBatchOperation {
     } catch (error) { this.error = String(error); MessageError(this.error) }
   }
   async selectSaveDir(type: 'save' | 'backup') {
+    await this.init()
+    if (!this.settingsReady) return
     if (this.busy) return
     try {
       const result = await dialog.showOpenDialog({ properties: ['openDirectory', 'showHiddenFiles', 'createDirectory', 'promptToCreate'] })

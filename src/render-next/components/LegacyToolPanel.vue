@@ -1,6 +1,6 @@
 <template>
   <ForgeDialog :title="surface?.title || 'Tool'" eyebrow="WORKSPACE / TOOLS" wide @close="emit('close')">
-    <div class="pqt-established-tool" :data-tool="tool">
+    <div class="pqt-established-tool dark" :data-tool="tool">
       <p v-if="error" class="forge-alert forge-alert--error">{{ error }} <button class="action-button" @click="load">Retry</button></p>
       <component :is="content" v-else-if="content" />
       <p v-else class="empty-copy">Loading tool…</p>
@@ -28,7 +28,7 @@ const load = async () => {
   error.value = ''
   if (!surface.value) { error.value = 'This tool surface is unavailable.'; return }
   try { const module = await surface.value.load(); if (current === generation) content.value = markRaw(module.default) }
-  catch (failure) { if (current === generation) error.value = failure instanceof Error ? failure.message : String(failure) }
+  catch (failure) { console.error('Tool surface failed to load:', props.tool, failure instanceof Error ? failure.stack : failure); if (current === generation) error.value = failure instanceof Error ? failure.message : String(failure) }
 }
 watch(() => props.tool, load, { immediate: true })
 onBeforeUnmount(() => { generation++ })

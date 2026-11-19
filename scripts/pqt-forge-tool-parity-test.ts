@@ -34,10 +34,11 @@ jwt.algorithm = 'none'
 jwt.createToken()
 jwt.useCreatedToken()
 assert.equal(jwt.token.endsWith('.'), true)
-assert.equal(jwt.signatureValid, true)
+assert.equal(jwt.signatureValid, false)
 jwt.header = '[]'
 jwt.createToken()
 assert.match(jwt.encodeError, /JSON object/)
+assert.equal(jwt.token, '')
 jwt.decodedToken = 'broken'
 jwt.decode()
 assert.equal(jwt.signatureValid, false)

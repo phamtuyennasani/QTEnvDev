@@ -1,0 +1,19 @@
+
+Capture status notification failed: Error: fixture renderer disconnected
+    at Capturer.callback (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:758:13)
+    at Capturer.publish (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:181:22)
+    at Capturer.writeImage (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:617:10)
+    at Capturer.saveImage (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:609:28)
+    at main (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:760:50)
+Capture status notification failed: Error: fixture renderer disconnected
+    at Capturer.callback (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:758:13)
+    at Capturer.publish (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:181:22)
+    at Capturer.writeImage (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:671:12)
+    at async main (W:\FlyEnvLocal\.superpowers\capturer-electron\entry.cjs:760:24)
+[intlify] Not found 'tools.CapturerFailTitle' key in 'en' locale messages.
+[I18n] Missing English fallback key: tools.CapturerFailTitle
+[intlify] Not found 'tools.CapturerFailContent' key in 'en' locale messages.
+[I18n] Missing English fallback key: tools.CapturerFailContent
+[12752:1119/091523.374:ERROR:third_party\webrtc\modules\desktop_capture\win\dxgi_duplicator_controller.cc:536] Failed to capture 1 frames within 500 milliseconds.
+[12752:1119/091523.738:ERROR:third_party\webrtc\modules\desktop_capture\win\screen_capturer_win_directx.cc:166] DxgiDuplicatorController failed to capture desktop, error code Duplication failed
+CAPTURER_ELECTRON_PASS

@@ -1,5 +1,11 @@
 import assert from 'node:assert/strict'
 import { ToolOperation } from '../src/render-next/tools/ToolOperation'
+const schedule = globalThis.setTimeout
+const unschedule = globalThis.clearTimeout
+let observedTimeout: (() => void) | undefined
+let scheduled = 0
+globalThis.setTimeout = ((callback: () => void) => { observedTimeout = callback; scheduled++; return 1 }) as unknown as typeof setTimeout
+globalThis.clearTimeout = (() => undefined) as unknown as typeof clearTimeout
 const callbacks = new Map<string, (key: string, reply: any) => void>()
 const calls: unknown[][] = []; const removed: string[] = []
 const controller = new ToolOperation({
@@ -43,4 +49,16 @@ assert.equal(throwingProgress.running, true)
 assert.match(throwingProgress.warning, /Display failed/)
 retained!('progress', { code: 0 })
 assert.equal(await withProgress, true)
+const beforeSynchronous = scheduled
+await synchronous.run('request', [], () => undefined)
+assert.equal(scheduled, beforeSynchronous, 'a synchronous terminal callback cannot leave a watchdog timer')
+const lateResult = throwingProgress.run('request', [], () => undefined)
+observedTimeout!()
+assert.equal(throwingProgress.unknown, true)
+assert.equal(throwingProgress.run('request', [], () => undefined), lateResult, 'unknown request remains guarded')
+retained!('progress', { code: 0 })
+assert.equal(await lateResult, true)
+assert.equal(throwingProgress.unknown, false)
+globalThis.setTimeout = schedule
+globalThis.clearTimeout = unschedule
 console.log('PQT Forge operation adapters passed: duplicate guard, snapshot, progress retention, success/failure cleanup and retry.')

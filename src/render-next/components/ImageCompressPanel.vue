@@ -1,6 +1,8 @@
 <template>
   <ForgeDialog title="Image compressor" description="Batch process images with the existing local Sharp pipeline." eyebrow="WORKSPACE / FILES" wide @close="emit('close')">
     <div class="image-panel">
+      <p v-if="!batch.settingsReady" class="forge-alert" role="status">{{ batch.settingsError || 'Loading saved image settings…' }} <button v-if="!batch.settingsLoading" class="action-button" @click="batch.init()">Retry</button></p>
+      <fieldset class="image-controls" :disabled="!batch.settingsReady">
       <div class="image-toolbar">
         <button class="action-button" :disabled="batch.busy" @click="batch.selectDir('file')">Add images</button>
         <button class="action-button" :disabled="batch.busy" @click="batch.selectDir('folder')">Add folder</button>
@@ -27,6 +29,7 @@
         <p v-if="!batch.images.length" class="empty-copy">Add one or more images to begin.</p>
       </div>
       <div class="image-toolbar"><button class="primary-button" :disabled="!batch.images.length || batch.busy" @click="batch.doProcess()">{{ batch.processing ? 'Processing…' : 'Compress images' }}</button><button class="action-button" :disabled="!batch.saveDir && !batch.backupDir" @click="batch.openOutput()">Open output folder</button></div>
+      </fieldset>
     </div>
     <template #footer><span class="website-help">Work continues when this dialog closes. The image backend cannot cancel active writes; completed files and individual failures stay visible.</span></template>
   </ForgeDialog>
@@ -46,6 +49,7 @@ onBeforeUnmount(() => batch.save())
 
 <style scoped>
 .image-panel { display: grid; gap: 14px; }
+.image-controls { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .image-toolbar { display: flex; gap: 7px; flex-wrap: wrap; }
 .image-settings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .image-settings label { display: grid; gap: 6px; color: var(--pqt-text-muted); font-size: 11px; }

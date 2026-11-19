@@ -1,0 +1,21 @@
+{
+  "operationId": "bounded",
+  "state": "partial",
+  "links": [
+    {
+      "url": "http://127.0.0.1:53291/large",
+      "file": "index.html",
+      "state": "success",
+      "type": "text/html",
+      "size": 86
+    },
+    {
+      "url": "http://127.0.0.1:53291/large.png",
+      "file": "assets/d91deb78c4964e0bdf195083.png",
+      "state": "fail",
+      "type": "image/png",
+      "reason": "File exceeds 1 MB"
+    }
+  ],
+  "bytes": 1048637
+}

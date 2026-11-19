@@ -140,7 +140,8 @@
   import { reactive, computed } from 'vue'
   import { MessageError, MessageSuccess } from '@/util/Element'
   import { I18nT } from '@lang/index'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  const AsyncComponentShow = useAsyncComponentShow()
   import { Refresh, Plus, Edit, Delete, SortDown, SortUp, SetUp } from '@element-plus/icons-vue'
   import { Setup } from './setup'
   import { shell, clipboard, fs } from '@/util/NodeFn'
@@ -169,16 +170,12 @@
     MessageSuccess(I18nT('base.copySuccess'))
   }
 
-  let EditVM: any
-  import('./edit.win.vue').then((res) => {
-    EditVM = res.default
-  })
-  const toEdit = (p: string, index: number) => {
+  const toEdit = async (p: string, index: number) => {
     if (Setup.updating || Setup.fetchListing) return
-    AsyncComponentShow(EditVM, {
-      item: p,
-      index
-    }).then((res: any) => {
+    const snapshot = { item: p, index }
+    try {
+      const { default: component } = await import('./edit.win.vue')
+      const res: any = await AsyncComponentShow(component, snapshot)
       console.log('res: ', res)
       if (index < 0) {
         Setup.list.unshift(
@@ -199,7 +196,7 @@
           })
         )
       }
-    })
+    } catch (error) { MessageError(String(error)) }
   }
 
   const doDel = (item: any, index: number) => {
