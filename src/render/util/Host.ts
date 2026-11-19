@@ -3,7 +3,7 @@ import { reloadWebServer } from '@/util/Service'
 import type { AppHost } from '@/store/app'
 import { AppStore } from '@/store/app'
 import { I18nT } from '@lang/index'
-import { MessageError, MessageSuccess } from '@/util/Element'
+import { MessageError, MessageSuccess, MessageWarning } from '@/util/Element'
 import { HostStore } from '@/components/Host/store'
 import { shell } from '@/util/NodeFn'
 import { join } from '@/util/path-browserify'
@@ -64,6 +64,10 @@ export const handleHost = (
             IPC.off(key)
             if (res?.data?.host) {
               handleHostEnd(res.data.host, flag === 'add')
+              const warnings = res.data.parked?.warnings
+              if (Array.isArray(warnings) && warnings.length) {
+                MessageWarning(warnings.join('\n'))
+              }
               resolve(true)
             } else if (res?.data?.hostBackFile) {
               MessageError(I18nT('base.hostParseErr'))

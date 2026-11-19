@@ -145,13 +145,14 @@
   import { computed, ref, watch } from 'vue'
   import { type SoftInstalled } from '@/store/brew'
   import { I18nT } from '@lang/index'
-  import { AsyncComponentSetup, AsyncComponentShow } from '@/util/AsyncComponent'
+  import { AsyncComponentSetup, useAsyncComponentShow } from '@/util/AsyncComponent'
   import BrewVM from './Extension/Homebrew/index.vue'
   import LoadedVM from './Extension/Loaded/index.vue'
   import PortsVM from './Extension/Macports/index.vue'
   import { Setup } from '@/components/PHP/Extension/setup'
   import { join } from '@/util/path-browserify'
   import { fs } from '@/util/NodeFn'
+  import { MessageError } from '@/util/Element'
   import { Folder, Memo } from '@element-plus/icons-vue'
   import LocalVM from './Extension/Local/index.vue'
   import LibVM from './Extension/Windows/index.vue'
@@ -171,6 +172,7 @@
   })
 
   const { show, onClosed, onSubmit, closedFn } = AsyncComponentSetup()
+  const showComponent = useAsyncComponentShow()
 
   const {
     lib,
@@ -189,15 +191,20 @@
     return props.version?.flag === 'macports'
   })
   const isHomeBrew = computed(() => {
-    return props.version?.path?.includes(window.Server?.BrewCellar ?? '-----')
+    const cellar = window.Server?.BrewCellar?.replace(/[/\\]+$/, '')
+    return Boolean(
+      cellar && [props.version.bin, props.version.path, props.version.phpBin].some(
+        (path) => path === cellar || path?.startsWith(`${cellar}/`)
+      )
+    )
   })
   const exists = ref(false)
   watch(
     () => props.version?.phpConfig ?? join(props.version?.path, 'bin/php-config'),
     (v) => {
-      fs.existsSync(v).then((res) => {
-        exists.value = res
-      })
+      if (isMacOS.value && !isHomeBrew.value && !isMacPorts.value) {
+        void fs.existsSync(v).then((res) => { exists.value = res }).catch(() => { exists.value = false })
+      }
     },
     {
       immediate: true
@@ -208,15 +215,13 @@
     return !pkconfig || !exists.value
   })
 
-  let ConfVM: any
-  import('./Config.vue').then((res) => {
-    ConfVM = res.default
-  })
-
-  const showIni = () => {
-    AsyncComponentShow(ConfVM, {
-      version: props.version
-    }).then()
+  const showIni = async () => {
+    try {
+      const { default: ConfVM } = await import('./Config.vue')
+      if (show.value) await showComponent(ConfVM, { version: props.version })
+    } catch (error) {
+      MessageError(String(error))
+    }
   }
 
   defineExpose({

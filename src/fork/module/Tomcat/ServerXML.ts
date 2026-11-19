@@ -270,7 +270,7 @@ export const makeTomcatServerXML = (
 }
 
 export const reconcileTomcatBase = async (catalinaBase: string, suppliedHosts?: AppHost[]) => {
-  const hosts = suppliedHosts ?? (await fetchHostList())
+  const hosts = suppliedHosts ?? (await fetchHostList(false))
   const tomcatHosts = hosts.filter((host) => host.type === 'tomcat') as TomcatSiteHost[]
   for (const host of tomcatHosts) {
     if (host.useSSL && host.autoSSL) {

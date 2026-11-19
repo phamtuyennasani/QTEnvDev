@@ -39,9 +39,9 @@ const handleReverseProxy = (host: AppHost, content: string) => {
   return content
 }
 
-export const makeFrankenPHPConf = async (host: AppHost) => {
+export const makeFrankenPHPConf = async (host: AppHost, stage?: (path: string, content: string) => Promise<void>) => {
   const frankenphpvpath = join(global.Server.BaseDir!, 'vhost/frankenphp')
-  await mkdirp(frankenphpvpath)
+  if (!stage) await mkdirp(frankenphpvpath)
   const httpNames: string[] = []
   const httpsNames: string[] = []
   hostAlias(host).forEach((h) => {
@@ -89,7 +89,7 @@ export const makeFrankenPHPConf = async (host: AppHost) => {
   }
 
   const confFile = join(frankenphpvpath, `${fileBase}.conf`)
-  await writeFile(confFile, contentList.join('\n'))
+  await (stage ?? writeFile)(confFile, contentList.join('\n'))
 }
 
 export const updateFrankenPHPConf = async (host: AppHost, old: AppHost) => {
@@ -199,7 +199,7 @@ export const fixVHost = async () => {
   let hostAll: Array<AppHost> = []
   const vhostDir = join(global.Server.BaseDir!, 'vhost/frankenphp')
   try {
-    hostAll = await fetchHostList()
+    hostAll = await fetchHostList(false)
   } catch {}
   hostAll = hostAll.filter((h) => !h.type || h.type === 'php')
   await mkdirp(vhostDir)

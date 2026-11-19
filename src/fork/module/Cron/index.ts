@@ -8,6 +8,7 @@ import { CronRunRecords } from './RunRecords'
 import { CronStorage } from './Storage'
 import { CronSystemScheduler } from './SystemScheduler'
 import {
+  CRON_OUTCOME_UNKNOWN,
   GLOBAL_HOST_ID,
   RUN_HISTORY_LIMIT,
   type CronCommandResult,
@@ -148,6 +149,17 @@ export class Cron extends Base {
     return normalizeHostId(job.hostId ?? hostId)
   }
 
+  private async saveScheduledChanges(data: CronStorageData) {
+    try {
+      await this.storage.save(data)
+    } catch (error) {
+      // Scheduling has already run. A replay could leave two OS tasks or remove a different one.
+      throw Object.assign(new Error(`Could not save task details after updating the scheduler: ${error}`), {
+        code: CRON_OUTCOME_UNKNOWN
+      })
+    }
+  }
+
   addCronJob(
     hostId: number | undefined | null,
     job: Omit<CronJob, 'id' | 'createdAt' | 'updatedAt'>
@@ -170,7 +182,7 @@ export class Cron extends Base {
         const key = storageKey(targetHostId)
         data[key] = data[key] || []
         data[key].push(appliedJob)
-        await this.storage.save(data)
+        await this.saveScheduledChanges(data)
         resolve(appliedJob)
       } catch (error) {
         reject(error)
@@ -213,7 +225,7 @@ export class Cron extends Base {
         data[found.key] = found.jobs
         data[targetKey] = data[targetKey] || []
         data[targetKey].push(appliedJob)
-        await this.storage.save(data)
+        await this.saveScheduledChanges(data)
 
         resolve(appliedJob)
       } catch (error) {
@@ -235,7 +247,7 @@ export class Cron extends Base {
         await this.systemScheduler.remove(jobId)
         found.jobs.splice(found.index, 1)
         data[found.key] = found.jobs
-        await this.storage.save(data)
+        await this.saveScheduledChanges(data)
 
         resolve(true)
       } catch (error) {
@@ -353,7 +365,7 @@ export class Cron extends Base {
         const appliedJob = await this.systemScheduler.apply(job)
         found.jobs[found.index] = appliedJob
         data[found.key] = found.jobs
-        await this.storage.save(data)
+        await this.saveScheduledChanges(data)
 
         resolve(appliedJob)
       } catch (error) {
@@ -381,20 +393,23 @@ export class Cron extends Base {
           found.job.command,
           workDir || found.job.workDir || ''
         )
-        const record = await this.runRecords.append(found.job, result)
-
-        found.jobs[found.index] = {
-          ...found.job,
-          lastRunTime: record.finishedAt,
-          lastOutput: result.output,
-          lastError: result.error,
-          lastExitCode: result.exitCode,
-          updatedAt: record.finishedAt,
-          nextRunTime: computeNextRunTime(found.job.schedule, new Date(record.finishedAt))
+        try {
+          const record = await this.runRecords.append(found.job, result)
+          found.jobs[found.index] = {
+            ...found.job,
+            lastRunTime: record.finishedAt,
+            lastOutput: result.output,
+            lastError: result.error,
+            lastExitCode: result.exitCode,
+            updatedAt: record.finishedAt,
+            nextRunTime: computeNextRunTime(found.job.schedule, new Date(record.finishedAt))
+          }
+          data[found.key] = found.jobs
+          await this.storage.save(data)
+        } catch (error) {
+          resolve({ ...result, historyWarning: `Could not update run history: ${error}` })
+          return
         }
-        data[found.key] = found.jobs
-        await this.storage.save(data)
-
         resolve(result)
       } catch (error) {
         reject(error)

@@ -30,6 +30,7 @@ type MySQLManageType = {
   databaseRaw: MySQLDatabaseItem[]
   databaseSaved: Record<string, MySQLDatabaseSavedItem[]>
   init: (flag: 'mysql' | 'mariadb') => void
+  ready: (flag: 'mysql' | 'mariadb') => Promise<void>
   save: () => void
   passwordChange: (item: ModuleInstalledItem, user: string, password: string) => Promise<boolean>
   fetchDatabase: (item: ModuleInstalledItem) => Promise<MySQLDatabaseItem[]>
@@ -38,6 +39,7 @@ type MySQLManageType = {
 }
 
 const MySQLManageKey = 'qtenvdev-mysql-manage-key'
+let settingsLoad: Promise<void> | undefined
 
 const MySQLManage = reactive<MySQLManageType>({
   userPassword: {},
@@ -48,29 +50,25 @@ const MySQLManage = reactive<MySQLManageType>({
   databaseSaved: {},
   inited: false,
   init(flag: 'mysql' | 'mariadb') {
-    const initInstalledRootPassword = () => {
-      const brewStore = BrewStore()
-      const items = brewStore.module(flag).installed
-      for (const item of items) {
-        item.rootPassword = this.userPassword?.[item.bin]?.root ?? 'root'
-      }
+    void this.ready(flag).catch((error) => console.error('Could not load database settings:', error))
+  },
+  async ready(flag: 'mysql' | 'mariadb') {
+    if (!this.inited) {
+      settingsLoad ??= localForage.getItem<Partial<MySQLManageType>>(MySQLManageKey)
+        .then((saved) => {
+          if (saved) {
+            this.userPassword = saved.userPassword ?? {}
+            this.backupDir = saved.backupDir ?? {}
+            this.databaseSaved = saved.databaseSaved ?? {}
+          }
+          this.inited = true
+        })
+        .finally(() => { settingsLoad = undefined })
+      await settingsLoad
     }
-    if (this.inited) {
-      initInstalledRootPassword()
-      return
+    for (const item of BrewStore().module(flag).installed) {
+      item.rootPassword = this.userPassword[item.bin]?.root ?? 'root'
     }
-    this.inited = true
-    localForage
-      .getItem(MySQLManageKey)
-      .then((res: any) => {
-        if (res) {
-          this.userPassword = reactive(res?.userPassword ?? {})
-          this.backupDir = reactive(res?.backupDir ?? {})
-          this.databaseSaved = reactive(res?.databaseSaved ?? [])
-          initInstalledRootPassword()
-        }
-      })
-      .catch()
   },
   save() {
     const data = JSON.parse(JSON.stringify(this))

@@ -71,7 +71,7 @@ class Caddy extends Base {
     let hostAll: Array<AppHost> = []
     const vhostDir = join(global.Server.BaseDir!, 'vhost/caddy')
     try {
-      hostAll = await fetchHostList()
+      hostAll = await fetchHostList(false)
     } catch {}
     hostAll = hostAll.filter((h) => !h.type || h.type === 'php')
     await mkdirp(vhostDir)

@@ -8,11 +8,9 @@ import { isEqual } from 'lodash-es'
 import { isWindows, pathFixedToUnix } from '@shared/utils'
 
 const handleReverseProxy = (host: AppHost, content: string) => {
-  let x: any = content.match(/(#PWS-REVERSE-PROXY-BEGIN#)([\s\S]*?)(#PWS-REVERSE-PROXY-END#)/g)
-  if (x && x[0]) {
-    x = x[0]
-    content = content.replace(`\n${x}`, '').replace(`${x}`, '')
-  }
+  const generatedProxyBlock =
+    /^[ \t]*#PWS-REVERSE-PROXY-BEGIN#[ \t]*\r?\n[\s\S]*?^[ \t]*#PWS-REVERSE-PROXY-END#[ \t]*(?:\r?\n|$)/gm
+  content = content.replace(generatedProxyBlock, '')
   if (host?.reverseProxy && host?.reverseProxy?.length > 0) {
     const arr = ['#PWS-REVERSE-PROXY-BEGIN#']
     host.reverseProxy.forEach((item) => {
@@ -30,21 +28,31 @@ const handleReverseProxy = (host: AppHost, content: string) => {
     </IfModule>`)
     })
     arr.push('#PWS-REVERSE-PROXY-END#')
-    arr.unshift('</FilesMatch>')
-    const replace = arr.join('\n')
-    content = content.replace('</FilesMatch>', `${replace}\n`)
+    // The SSL template declares separate HTTP and HTTPS virtual hosts.
+    content = content.replace(
+      /^[ \t]*<\/VirtualHost>[ \t]*(\r?\n|$)/gim,
+      (closing, newline: string) => {
+        const separator = newline || '\n'
+        return `${arr.join(separator)}${separator}${closing}`
+      }
+    )
   }
   return content
 }
 
-export const makeApacheConf = async (host: AppHost) => {
+export const makeApacheConf = async (
+  host: AppHost,
+  stage?: (path: string, content: string) => Promise<void>
+) => {
   const apachevpath = join(global.Server.BaseDir!, 'vhost/apache')
   const rewritepath = join(global.Server.BaseDir!, 'vhost/rewrite')
   const logpath = join(global.Server.BaseDir!, 'vhost/logs')
 
-  await mkdirp(apachevpath)
-  await mkdirp(rewritepath)
-  await mkdirp(logpath)
+  if (!stage) {
+    await mkdirp(apachevpath)
+    await mkdirp(rewritepath)
+    await mkdirp(logpath)
+  }
 
   const tmpl = await vhostTmpl()
 
@@ -91,7 +99,7 @@ export const makeApacheConf = async (host: AppHost) => {
 
   atmpl = handleReverseProxy(host, atmpl)
 
-  await writeFile(avhost, atmpl)
+  await (stage ?? writeFile)(avhost, atmpl)
 }
 
 export const updateApacheConf = async (host: AppHost, old: AppHost) => {
@@ -104,18 +112,16 @@ export const updateApacheConf = async (host: AppHost, old: AppHost) => {
   // conf / log files named by host.id (rename-stable) — no move on rename. (#700)
   const fileBase = vhostName(host)
   const apacheConfPath = join(apachevpath, `${fileBase}.conf`)
-  let hasChanged = false
-
   if (!existsSync(apacheConfPath)) {
     await makeApacheConf(host)
   }
 
-  let contentApacheConf = await readFile(apacheConfPath, 'utf-8')
+  const previous = await readFile(apacheConfPath, 'utf-8')
+  let contentApacheConf = previous
 
   const find: Array<string> = []
   const replace: Array<string> = []
   if (host.name !== old.name) {
-    hasChanged = true
     find.push(
       ...[
         `ServerName(.*?)SSL\\.(.*?)\\r\\n`,
@@ -136,7 +142,6 @@ export const updateApacheConf = async (host: AppHost, old: AppHost) => {
   const oldAliasArr = hostAlias(old)
   const newAliasArr = hostAlias(host)
   if (!isEqual(oldAliasArr, newAliasArr)) {
-    hasChanged = true
     const newAlias = newAliasArr.join(' ')
     find.push(`ServerAlias (.*?)\\r\\n`)
     replace.push(`ServerAlias ${newAlias}\r\n`)
@@ -145,7 +150,6 @@ export const updateApacheConf = async (host: AppHost, old: AppHost) => {
   }
 
   if (host.ssl.cert !== old.ssl.cert) {
-    hasChanged = true
     const cert = host.ssl.cert ? pathFixedToUnix(host.ssl.cert) : ''
     find.push(`SSLCertificateFile (.*?)\\r\\n`)
     replace.push(`SSLCertificateFile "${cert}"\r\n`)
@@ -153,7 +157,6 @@ export const updateApacheConf = async (host: AppHost, old: AppHost) => {
     replace.push(`SSLCertificateFile "${cert}"\n`)
   }
   if (host.ssl.key !== old.ssl.key) {
-    hasChanged = true
     const key = host.ssl.key ? pathFixedToUnix(host.ssl.key) : ''
     find.push(`SSLCertificateKeyFile (.*?)\\r\\n`)
     replace.push(`SSLCertificateKeyFile "${key}"\r\n`)
@@ -162,21 +165,18 @@ export const updateApacheConf = async (host: AppHost, old: AppHost) => {
   }
 
   if (host.port.apache !== old.port.apache) {
-    hasChanged = true
     find.push(...[`Listen ${old.port.apache}\nNameVirtualHost *:${old.port.apache}\n`])
     replace.push('')
     find.push(...[`<VirtualHost \\*:${old.port.apache}>`])
     replace.push(...[`<VirtualHost *:${host.port.apache}>`])
   }
   if (host.port.apache_ssl !== old.port.apache_ssl) {
-    hasChanged = true
     find.push(...[`Listen ${old.port.apache_ssl}\nNameVirtualHost *:${old.port.apache_ssl}\n`])
     replace.push('')
     find.push(...[`<VirtualHost \\*:${old.port.apache_ssl}>`])
     replace.push(...[`<VirtualHost *:${host.port.apache_ssl}>`])
   }
   if (host.root !== old.root) {
-    hasChanged = true
     const root = pathFixedToUnix(host.root)
     find.push(`DocumentRoot (.*?)\\r\\n`)
     replace.push(`DocumentRoot "${root}"\r\n`)
@@ -188,7 +188,6 @@ export const updateApacheConf = async (host: AppHost, old: AppHost) => {
     replace.push(`<Directory "${root}">\n`)
   }
   if (host.phpVersion !== old.phpVersion) {
-    hasChanged = true
     if (old.phpVersion) {
       if (isWindows()) {
         find.push(...[`SetHandler(\\s+)"proxy:fcgi://127\.0\.0\.1:90(.*?)"`])
@@ -212,15 +211,12 @@ export const updateApacheConf = async (host: AppHost, old: AppHost) => {
       replace.push(...['##Static Site Apache##'])
     }
   }
-  if (!isEqual(host?.reverseProxy, old?.reverseProxy)) {
-    hasChanged = true
-  }
-  if (hasChanged) {
-    find.forEach((s, i) => {
-      contentApacheConf = contentApacheConf.replace(new RegExp(s, 'g'), replace[i])
-      contentApacheConf = contentApacheConf.replace(s, replace[i])
-    })
-    contentApacheConf = handleReverseProxy(host, contentApacheConf)
+  find.forEach((s, i) => {
+    contentApacheConf = contentApacheConf.replace(new RegExp(s, 'g'), replace[i])
+    contentApacheConf = contentApacheConf.replace(s, replace[i])
+  })
+  contentApacheConf = handleReverseProxy(host, contentApacheConf)
+  if (contentApacheConf !== previous) {
     await writeFile(apacheConfPath, contentApacheConf)
   }
 }

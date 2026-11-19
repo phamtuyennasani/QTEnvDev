@@ -59,7 +59,7 @@ class Nginx extends Base {
   async #handlePhpEnableConf() {
     let host: AppHost[] = []
     try {
-      host = await fetchHostList()
+      host = await fetchHostList(false)
     } catch {}
     host = host.filter((h) => !h.type || h.type === 'php')
     const all = new Set(host.map((h: any) => h.phpVersion).filter((h: number | undefined) => !!h))

@@ -37,5 +37,5 @@ export const packageController = reactiveBind(new PackageController({
   inspect: inspectPackage,
   remove: (item, directory, confirmation) => deleteOperation.remove({ typeFlag: item.typeFlag, version: item.version, path: directory.path, bin: directory.bin }, directory, confirmation, () => {}),
   notice: showNotice,
-  changed: () => window.dispatchEvent(new CustomEvent('pqt-packages-changed'))
+  changed: (flag) => window.dispatchEvent(new CustomEvent('pqt-packages-changed', { detail: flag }))
 }))

@@ -114,30 +114,32 @@ export class Base {
    * 返回 [] 表示该模块不支持/无配置文件。name 是人类可读标识（如 'main' / 'error'）。
    * 只返回 name + path，不返回内容——QTEnvDev 是本地工具，AI 代理自行读文件。
    */
-  getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
+  getConfigFiles(_version?: SoftInstalled, ..._context: unknown[]): Array<{ name: string; path: string }> {
     return []
   }
 
   /** 日志文件清单。各服务模块覆写自己的。 */
-  getLogFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
+  getLogFiles(_version?: SoftInstalled, ..._context: unknown[]): Array<{ name: string; path: string }> {
     return []
   }
 
   /** fork 可调：返回配置文件清单（存在性标记），供 MCP read_config 用 */
   listConfigFiles(
-    version?: SoftInstalled
+    version?: SoftInstalled,
+    ...context: unknown[]
   ): ForkPromise<Array<{ name: string; path: string; exists: boolean }>> {
     return new ForkPromise((resolve) => {
-      resolve(this.getConfigFiles(version).map((f) => ({ ...f, exists: existsSync(f.path) })))
+      resolve(this.getConfigFiles(version, ...context).map((f) => ({ ...f, exists: existsSync(f.path) })))
     })
   }
 
   /** fork 可调：返回日志文件清单（存在性标记），供 MCP read_log 用 */
   listLogFiles(
-    version?: SoftInstalled
+    version?: SoftInstalled,
+    ...context: unknown[]
   ): ForkPromise<Array<{ name: string; path: string; exists: boolean }>> {
     return new ForkPromise((resolve) => {
-      resolve(this.getLogFiles(version).map((f) => ({ ...f, exists: existsSync(f.path) })))
+      resolve(this.getLogFiles(version, ...context).map((f) => ({ ...f, exists: existsSync(f.path) })))
     })
   }
 

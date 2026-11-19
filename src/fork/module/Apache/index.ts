@@ -243,7 +243,7 @@ IncludeOptional "${vhost}"`
   async #handleListenPort(version: SoftInstalled) {
     let host: Array<AppHost> = []
     try {
-      host = await fetchHostList()
+      host = await fetchHostList(false)
     } catch {}
     if (host.length === 0) {
       return

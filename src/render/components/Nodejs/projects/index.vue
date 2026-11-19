@@ -12,18 +12,18 @@
 <script lang="ts" setup>
   import { I18nT } from '@lang/index'
   import { Reading } from '@element-plus/icons-vue'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  import { MessageError } from '@/util/Element'
   import ProjectIndex from '@/components/LanguageProjects/index.vue'
   import type { ProjectItem } from '@/components/LanguageProjects/ProjectItem'
 
-  let PackageVM: any
-  import('./package.vue').then((res) => {
-    PackageVM = res.default
-  })
-
-  const showPackage = (item: ProjectItem) => {
-    AsyncComponentShow(PackageVM, {
-      item
-    }).then()
+  const showDialog = useAsyncComponentShow()
+  const showPackage = async (item: ProjectItem) => {
+    try {
+      const { default: component } = await import('./package.vue')
+      await showDialog(component, { item })
+    } catch (error) {
+      MessageError(String(error))
+    }
   }
 </script>

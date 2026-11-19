@@ -5,7 +5,7 @@ assert.match(source('state/projectController.ts'), /reactiveBind\(new WebsiteCon
 assert.match(source('websites/WebsiteController.ts'), /this\.deps\.write/)
 assert.match(source('websites/WebsiteController.ts'), /WebsiteOutcomeUnknown/)
 assert.match(source('adapters/projectAdapter.ts'), /shell\.openExternal/)
-assert.match(source('adapters/projectAdapter.ts'), /request\('handleHost'/)
+assert.match(source('adapters/projectAdapter.ts'), /request\(\s*'handleHost'/)
 assert.match(source('screens/WebsitesScreen.vue'), /@click="openProject"/)
 assert.doesNotMatch(source('screens/WebsitesScreen.vue'), /IPC\.send|handleHost\(/)
 assert.match(source('websites/WebsiteEditor.vue'), /projectController\.save/)

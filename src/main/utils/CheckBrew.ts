@@ -9,7 +9,7 @@ import { spawnPromiseWithEnv } from '@shared/child-process'
  */
 const checkMacOSBrew = (sendGlobalUpdate: () => void) => {
   const brewBin = isArmArch() ? '/opt/homebrew/bin/brew' : '/usr/local/Homebrew/bin/brew'
-  runBrewChecks([brewBin], sendGlobalUpdate)
+  return runBrewChecks([brewBin], sendGlobalUpdate)
 }
 
 /**
@@ -24,10 +24,6 @@ const checkLinuxBrew = (sendGlobalUpdate: () => void) => {
   runBrewChecks(brewBins, sendGlobalUpdate)
 }
 
-/**
- * Known Homebrew binary locations checked before PATH-dependent commands.
- * Apple Silicon default, Intel default, and legacy Intel path cover all supported macOS layouts.
- */
 const KNOWN_BREW_PATHS = [
   '/opt/homebrew/bin/brew',
   '/usr/local/bin/brew',
@@ -39,72 +35,57 @@ const KNOWN_BREW_PATHS = [
  */
 const runBrewChecks = (brewBins: string[], sendGlobalUpdate: () => void) => {
   const handleBrewCheck = (error?: Error) => {
-    if (!global.Server.BrewBin) {
-      for (const s of brewBins) {
-        if (existsSync(s)) {
-          global.Server.BrewBin = s
-          break
-        }
-      }
-    }
     if (error) {
       global.Server.BrewError = error.toString()
     }
     sendGlobalUpdate()
   }
 
-  executeBrewChecks(handleBrewCheck)
+  return executeBrewChecks(brewBins, handleBrewCheck)
 }
 
 /**
  * 执行 Brew 检查命令
  */
-const executeBrewChecks = (handleBrewCheck: (error?: Error) => void) => {
-  // Resolve Brew binary from known absolute paths first; this avoids failures on fresh
-  // machines where shell-env has not yet added /opt/homebrew/bin to PATH.
-  for (const bin of KNOWN_BREW_PATHS) {
-    if (existsSync(bin)) {
-      global.Server.BrewBin = bin
-      break
+const executeBrewChecks = async (brewBins: string[], handleBrewCheck: (error?: Error) => void) => {
+  try {
+    const known = [global.Server.BrewBin, ...brewBins, ...(isMacOS() ? KNOWN_BREW_PATHS : [])]
+    const bin = known.find((path): path is string => Boolean(path && existsSync(path))) ??
+      (await spawnPromiseWithEnv('which', ['brew'], { shell: false, timeout: 30_000 })).stdout.trim()
+    if (!bin || !existsSync(bin)) throw new Error('Homebrew executable was not found')
+    if (global.Server.BrewBin !== bin) {
+      delete global.Server.BrewHome
+      delete global.Server.BrewCellar
     }
+    global.Server.BrewBin = bin
+    void checkBrewRepo(bin, handleBrewCheck)
+    return await checkBrewCellar(bin, handleBrewCheck)
+  } catch (error) {
+    delete global.Server.BrewBin
+    delete global.Server.BrewHome
+    delete global.Server.BrewCellar
+    handleBrewCheck(error instanceof Error ? error : new Error(String(error)))
+    return undefined
   }
-
-  const resolvePromise = global.Server.BrewBin
-    ? Promise.resolve({ stdout: global.Server.BrewBin })
-    : spawnPromiseWithEnv('which', ['brew'])
-
-  resolvePromise
-    .then((res) => {
-      console.log('which brew: ', res)
-      if (!global.Server.BrewBin) {
-        const whichBin = res.stdout.trim()
-        if (whichBin && existsSync(whichBin)) {
-          global.Server.BrewBin = whichBin
-        }
-      }
-      checkBrewRepo(handleBrewCheck)
-      checkBrewCellar(handleBrewCheck)
-    })
-    .catch((e: Error) => {
-      handleBrewCheck(e)
-      console.log('which brew e: ', e)
-    })
 }
 
 /**
  * 检查 Brew 仓库
  */
-const checkBrewRepo = (handleBrewCheck: (error?: Error) => void) => {
-  spawnPromiseWithEnv('brew', ['--repo'])
+const checkBrewRepo = (bin: string, handleBrewCheck: (error?: Error) => void) => {
+  spawnPromiseWithEnv(bin, ['--repo'], { shell: false, timeout: 30_000 })
     .then((res) => {
+      if (global.Server.BrewBin !== bin) return
       console.log('brew --repo: ', res)
       const dir = res.stdout
       global.Server.BrewHome = dir
       handleBrewCheck()
-      makeRepoSafe(dir)
+      void makeRepoSafe(dir).catch((error) => console.log('brew repo setup err: ', error))
     })
     .catch((e: Error) => {
-      handleBrewCheck(e)
+      if (global.Server.BrewBin !== bin) return
+      delete global.Server.BrewHome
+      handleBrewCheck()
       console.log('brew --repo err: ', e)
     })
 }
@@ -112,25 +93,36 @@ const checkBrewRepo = (handleBrewCheck: (error?: Error) => void) => {
 /**
  * 检查 Brew Cellar
  */
-const checkBrewCellar = (handleBrewCheck: (error?: Error) => void) => {
-  spawnPromiseWithEnv('brew', ['--cellar'])
-    .then((res) => {
-      const dir = res.stdout
-      console.log('brew --cellar: ', res)
-      global.Server.BrewCellar = dir
-      handleBrewCheck()
-    })
-    .catch((e: Error) => {
-      handleBrewCheck(e)
-      console.log('brew --cellar err: ', e)
-    })
+const checkBrewCellar = async (bin: string, handleBrewCheck: (error?: Error) => void) => {
+  try {
+    const { stdout } = await spawnPromiseWithEnv(bin, ['--cellar'], { shell: false, timeout: 30_000 })
+    if (global.Server.BrewBin !== bin) return
+    const dir = stdout.trim()
+    if (!dir) throw new Error('Homebrew did not return its Cellar directory')
+    global.Server.BrewCellar = dir
+    delete global.Server.BrewError
+    handleBrewCheck()
+    return { bin, cellar: dir }
+  } catch (error) {
+    if (global.Server.BrewBin !== bin) return
+    delete global.Server.BrewCellar
+    handleBrewCheck(error instanceof Error ? error : new Error(String(error)))
+    return undefined
+  }
+}
+
+export const refreshMacOSHomebrew = async () => {
+  if (!isMacOS()) throw new Error('Homebrew installation requires macOS')
+  const detected = await checkMacOSBrew(() => {})
+  if (!detected) throw new Error(global.Server.BrewError || 'Homebrew could not be detected')
+  return detected
 }
 
 /**
  * 设置 Git 安全目录
  */
 const makeRepoSafe = (dir: string) => {
-  spawnPromiseWithEnv('git', [
+  return spawnPromiseWithEnv('git', [
     'config',
     '--global',
     '--add',

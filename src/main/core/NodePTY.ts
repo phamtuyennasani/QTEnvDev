@@ -51,7 +51,7 @@ class NodePTY {
           }
           const task = item?.task ?? []
           for (const t of task) {
-            this.completeTask(t, e.exitCode)
+            this.completeTask(t, e.signal ? 128 + e.signal : e.exitCode)
           }
           this.exitPtyByKey(key)
         }
@@ -137,7 +137,7 @@ class NodePTY {
           }
           const task = item?.task ?? []
           for (const t of task) {
-            this.completeTask(t, e.exitCode)
+            this.completeTask(t, e.signal ? 128 + e.signal : e.exitCode)
           }
           this.exitPtyByKey(key)
         }

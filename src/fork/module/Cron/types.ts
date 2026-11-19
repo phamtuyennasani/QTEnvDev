@@ -15,9 +15,11 @@ export interface CronCommandResult {
   error: string
   exitCode: number
   duration: number
+  historyWarning?: string
 }
 
 export type CronTaskScriptExt = 'sh' | 'ps1' | 'cmd'
 
 export const GLOBAL_HOST_ID = 0
 export const RUN_HISTORY_LIMIT = 50
+export const CRON_OUTCOME_UNKNOWN = 'CRON_OUTCOME_UNKNOWN'

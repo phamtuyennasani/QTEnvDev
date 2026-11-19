@@ -45,7 +45,10 @@
           ></label
         >
         <label
-          >Site runtime<select v-model="form.type"
+          >Site runtime<select
+            v-model="form.type"
+            :disabled="Boolean(original)"
+            @change="setRuntime"
             ><option value="php">PHP / static</option
             ><option value="node">Node.js project</option
             ><option value="python">Python project</option
@@ -75,10 +78,15 @@
               placeholder="3000" /></label
           ><label
             >Start command<input v-model="form.startCommand" placeholder="npm run dev" /></label
-          ><label v-if="form.type === 'java'"
-            >Java subtype<input v-model="form.subType" placeholder="springboot" /></label
         ></template>
-        <p class="website-help"
+        <label v-if="!form.type || form.type === 'php'" class="website-toggle">
+          <span>
+            <b>Create websites from subdirectories</b>
+            <small>For example, the blog folder in app.test becomes blog.app.test.</small>
+          </span>
+          <input v-model="includeSubdirectories" type="checkbox" />
+        </label>
+        <p v-else class="website-help"
           >Runtime settings describe the project endpoint. Use its runtime project screen to manage
           the process.</p
         >
@@ -202,12 +210,20 @@
   import { projectController } from '../state/projectController'
   import { cloneHost, newWebsite } from './model'
   import type { WebsiteHost } from './types'
-  const props = defineProps<{ original?: WebsiteHost }>()
+  const props = defineProps<{
+    original?: WebsiteHost
+    scaffold?: { dir: string; rewrite: string }
+  }>()
   const emit = defineEmits<{ close: [] }>()
   const form = ref(props.original ? cloneHost(props.original) : newWebsite())
+  if (!props.original && props.scaffold) {
+    form.value.root = props.scaffold.dir
+    form.value.nginx.rewrite = props.scaffold.rewrite
+  }
   form.value.reverseProxy ||= []
   const tabs = ['General', 'Ports', 'SSL', 'Routing'] as const
   const tab = ref<(typeof tabs)[number]>('General')
+  const includeSubdirectories = ref(false)
   const busy = computed(() => projectController.saving)
   const phpVersions = computed(() => {
     const versions = BrewStore()
@@ -239,7 +255,12 @@
       (item) => item.num === form.value.phpVersion
     )?.version
   }
+  const setRuntime = () => {
+    includeSubdirectories.value = false
+    form.value.subType = form.value.type === 'java' ? 'springboot' : undefined
+  }
   const submit = async () => {
-    if (await projectController.save(form.value, props.original)) emit('close')
+    if (await projectController.save(form.value, props.original, includeSubdirectories.value))
+      emit('close')
   }
 </script>

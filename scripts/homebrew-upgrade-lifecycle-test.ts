@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
 import { loadIsolated } from './helpers/load-isolated'
 import { HomebrewOperationCoordinator } from '../src/main/core/HomebrewOperationCoordinator'
 import { ForkPromise } from '../src/shared/ForkPromise'
+import { isWebsiteForkTransaction, WebsiteForkQueue } from '../src/main/core/WebsiteForkQueue'
 const snapshot: any = {
-  identity: { prefix: '/opt/homebrew', cellar: '/opt/homebrew/Cellar' },
-  affectedRacks: ['/opt/homebrew/Cellar/php'],
+  identity: { prefix: resolve('/opt/homebrew'), cellar: resolve('/opt/homebrew/Cellar') },
+  affectedRacks: [resolve('/opt/homebrew/Cellar/php')],
   eligible: true,
   fingerprint: 'x',
   formula: 'homebrew/core/php'
@@ -53,6 +55,7 @@ const fmMocks: any = {
   './ForkIdleLifecycle': {},
   './ForkItem': {},
   './ForkWorkerPolicy': {},
+  './WebsiteForkQueue': { isWebsiteForkTransaction, WebsiteForkQueue },
   './StopProcessListBridge': {},
   './StopProcessListCache': {},
   '@shared/ForkPromise': { ForkPromise },
@@ -83,7 +86,8 @@ Object.assign(fm, {
     return { operationId: id, action, outcome: 'succeeded', logs: '' }
   }
 })
-const item = { bin: '/opt/homebrew/Cellar/php/8.5.7/sbin/php-fpm' }
+const bin = resolve('/opt/homebrew/Cellar/php/8.5.7/sbin/php-fpm')
+const item = { bin }
 fm.send('php', 'startService', item)
 let prepared = false
 const preparation = fm.homebrew.prepareUpgrade('php', 'php').then((p: any) => {
@@ -101,7 +105,6 @@ assert.equal(preview.targets[0].item.pid, '999')
 assert.equal(preview.targets[0].generation, 11)
 assert.equal(packageRan, false)
 console.log('PASS already-dispatched raw start drained and registered before preview')
-const bin = '/opt/homebrew/Cellar/php/8.5.7/sbin/php-fpm'
 let generation = 1
 const generations = new HomebrewOperationCoordinator({
   inspect: async () => snapshot,

@@ -102,9 +102,14 @@ await assert.rejects(
   selectScopedPhpStop(scope, [child, other], async () => [scope.bin]),
   /descendant/
 )
-assert((await processExecutables(String(process.pid))).length > 0)
+if (process.platform === 'darwin' || process.platform === 'linux') {
+  assert((await processExecutables(String(process.pid))).length > 0)
+  console.log('PASS native read-only executable query')
+} else {
+  await assert.rejects(processExecutables(String(process.pid)), /Cannot verify/)
+}
 console.log(
-  'PASS exact root executable identity: genuine proctitle and descendants, foreign/unknown identity rejected, actual read-only executable query'
+  'PASS exact root executable identity: genuine proctitle and descendants, foreign/unknown identity rejected'
 )
 
 // Opt-in native acceptance uses existing binaries with isolated ini/FPM config,

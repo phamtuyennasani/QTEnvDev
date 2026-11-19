@@ -14,8 +14,7 @@ tty_yellow="$(tty_universal 33)" #黄色
 tty_bold="$(tty_universal 39)" #加黑
 tty_cyan="$(tty_universal 36)" #青色
 tty_reset="$(tty_escape 0)" #去除颜色
-hasBrew=$(which brew)
-if ! [[ "$hasBrew" == "brew not found" ]]; then
+if command -v brew >/dev/null 2>&1; then
     echo -n "${tty_green}
     检测到brew已安装, 安装脚本自动退出${tty_reset}"
     echo "QTEnvDev-Homebrew安装结束"
@@ -67,17 +66,22 @@ echo "--> 脚本开始执行"
 echo "你输入了 $MY_Del_Old ，安装退出, 如果继续运行脚本应该输入Y或者y
 "
 echo "QTEnvDev-Homebrew安装结束"
-exit 0
+exit 125
 ;;
 esac
 
-sudo echo '开始执行'
+sudo echo '开始执行' || exit $?
 case $MY_DOWN_NUM in
 "1")
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   installer=$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) || exit $?
+   /bin/bash -c "$installer"
 ;;
 "2")
-  /bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"
+  installer=$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh) || exit $?
+  /bin/zsh -c "$installer"
 ;;
 esac
+result=$?
 echo "QTEnvDev-Homebrew安装结束"
+[[ "$result" == 125 ]] && exit 1
+exit "$result"

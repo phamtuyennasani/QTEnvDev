@@ -5,7 +5,6 @@ import { I18nT } from '@lang/runtime'
 import type { AppHost, SoftInstalled } from '@shared/app'
 import {
   hostAlias,
-  uuid,
   writeFile,
   readdir,
   remove,
@@ -30,9 +29,10 @@ import {
 import { setDirRole, updateAutoSSL, updateRootRule } from './Host'
 import { TaskAddPhpMyAdminSite, TaskAddRandomSite } from './Task'
 import { fetchHostList, saveHostList } from './HostFile'
+import { exportWebsiteBackup, importWebsiteBackup, previewWebsiteBackup } from './WebsiteBackup'
+import { parkSubdirectories } from './ParkSubdirectories'
 import { validateTomcatSite, type TomcatSiteHost } from '../Tomcat/Site'
 import { appDebugLog, isMacOS, isWindows } from '@shared/utils'
-import { splitHostAliases } from '@shared/siteRuntime'
 import { HostsFileLinux, HostsFileMacOS } from '@shared/PlatFormConst'
 import { windowsSystemDirectory } from '@shared/WindowsSystemPaths'
 import { reconcileSystemHostsBlock } from './SystemHostsBlock'
@@ -55,15 +55,75 @@ export class Host extends Base {
     }
   }
 
-  hostList() {
-    return new ForkPromise(async (resolve) => {
+  hostList(strict = false) {
+    return new ForkPromise(async (resolve, reject) => {
       let host: AppHost[] = []
       try {
-        host = await fetchHostList()
-      } catch {}
+        host = await fetchHostList(false)
+      } catch (error) {
+        if (strict) {
+          reject(error)
+          return
+        }
+      }
       resolve({
         host
       })
+    })
+  }
+
+  websiteBackupExport(file: string) {
+    return new ForkPromise(async (resolve) => resolve(await exportWebsiteBackup(file)))
+  }
+
+  websiteBackupPreview(file: string) {
+    return new ForkPromise(async (resolve) => resolve(await previewWebsiteBackup(file)))
+  }
+
+  websiteBackupImport(file: string, token: string) {
+    return new ForkPromise(async (resolve, _reject, on) => {
+      resolve(await importWebsiteBackup(file, token, on))
+    })
+  }
+
+  reorderHost(id: number, order: number[], action: 'up' | 'down' | 'pin' | 'unpin') {
+    return new ForkPromise(async (resolve, reject) => {
+      try {
+        const host = await fetchHostList()
+        if (
+          !Array.isArray(order) ||
+          host.length !== order.length ||
+          host.some((item, index) => item.id !== order[index])
+        ) {
+          throw new Error('The saved website order changed. Refresh the list.')
+        }
+        const index = host.findIndex((item) => item.id === id)
+        if (index < 0) throw new Error('The selected website was not found.')
+        const selected = host[index]
+        if (action === 'pin' || action === 'unpin') {
+          selected.isTop = action === 'pin'
+          host.splice(index, 1)
+          const insert = selected.isTop ? 0 : host.findIndex((item) => !item.isTop)
+          host.splice(insert < 0 ? host.length : insert, 0, selected)
+        } else if (action === 'up' || action === 'down') {
+          const step = action === 'up' ? -1 : 1
+          let neighbor = index + step
+          while (host[neighbor] && Boolean(host[neighbor].isTop) !== Boolean(selected.isTop)) {
+            neighbor += step
+          }
+          if (!host[neighbor]) {
+            resolve({ host })
+            return
+          }
+          ;[host[index], host[neighbor]] = [host[neighbor], host[index]]
+        } else {
+          throw new Error('Invalid website order action.')
+        }
+        await saveHostList(host)
+        resolve({ host })
+      } catch (error) {
+        reject(error)
+      }
     })
   }
 
@@ -77,16 +137,48 @@ export class Host extends Base {
         return
       }
 
+      let parked: Awaited<ReturnType<typeof parkSubdirectories>> | undefined
+      const removeParkedFiles = async (site: AppHost) => {
+        const base = global.Server.BaseDir!
+        const configPaths = ['nginx', 'apache', 'caddy', 'frankenphp', 'rewrite'].map((server) =>
+          join(base, 'vhost', server, site.id + '.conf')
+        )
+        const results = await Promise.allSettled(
+          [...configPaths, join(base, 'CA', String(site.id))].map((file) => remove(file))
+        )
+        const errors = results.flatMap((result) =>
+          result.status === 'rejected' ? [String(result.reason)] : []
+        )
+        if (errors.length) throw new Error(errors.join('\n'))
+      }
       const writeHostFile = async () => {
         try {
           await saveHostList(hostList)
         } catch (e) {
-          appDebugLog('[handleHost][writeHostFile][error]', `${e}`).catch()
-          reject(e)
+          const cleanup = await Promise.allSettled((parked?.added ?? []).map(removeParkedFiles))
+          const cleanupErrors = cleanup.flatMap((result) =>
+            result.status === 'rejected' ? [String(result.reason)] : []
+          )
+          if (cleanupErrors.length) {
+            reject(
+              Object.assign(
+                new Error(
+                  'The host list could not be saved and some new configuration files remain. ' +
+                    cleanupErrors.join(' '),
+                  { cause: e }
+                ),
+                { code: 'WEBSITE_WRITE_OUTCOME_UNKNOWN' }
+              )
+            )
+          } else {
+            appDebugLog('[handleHost][writeHostFile][error]', String(e)).catch()
+            reject(e)
+          }
           return
         }
         resolve({
-          host: hostList
+          host: hostList,
+          ...(parked && { parked: { count: parked.added.length, warnings: parked.warnings } })
         })
       }
 
@@ -94,61 +186,16 @@ export class Host extends Base {
         return !['java', 'node', 'go', 'python', 'tomcat'].includes(host?.type ?? '')
       }
 
-      const doPark = () => {
-        console.log('doPark !!!')
-        return new ForkPromise(async (resolve) => {
-          if (!park || !host || !host.root) {
-            resolve(0)
-            return
-          }
-          const root = host.root
-          const subDir = await readdir(root)
-          if (subDir.length === 0) {
-            resolve(0)
-            return
-          }
-          const arrs: Array<AppHost> = []
-          for (const d of subDir) {
-            const item = JSON.parse(JSON.stringify(host))
-            item.nginx.rewrite = ''
-            item.ssl.cert = ''
-            item.ssl.key = ''
-            item.id = uuid(13)
-            const hostName = item.name.split('.')
-            hostName.unshift(d)
-            item.root = join(root, d)
-            item.name = hostName.join('.')
-            const find = hostList.find((h) => h.name === item.name)
-            if (find) {
-              continue
-            }
-            const aliasArr = splitHostAliases(item.alias)
-            item.alias = aliasArr
-              .map((a: string) => {
-                const arr = a.trim().split('.')
-                arr.unshift(d)
-                return arr.join('.')
-              })
-              .join('\n')
-            arrs.push(item)
-          }
-          if (arrs.length === 0) {
-            resolve(0)
-            return
-          }
-          const all: Array<ForkPromise<any>> = []
-          arrs.forEach((a) => {
-            all.push(this._addVhost(a, false))
-          })
-          Promise.all(all)
-            .then(() => {
-              hostList.unshift(...arrs)
-              resolve(1)
-            })
-            .catch(() => {
-              resolve(0)
-            })
-        })
+      const doPark = async (parent: AppHost) => {
+        parked = await parkSubdirectories(
+          parent,
+          hostList,
+          (item) => this._addVhost(item, false),
+          removeParkedFiles
+        )
+        const index = hostList.findIndex((item) => !item.isTop)
+        hostList.splice(index < 0 ? hostList.length : index, 0, ...parked.added)
+        return parked
       }
 
       // License check removed
@@ -201,14 +248,32 @@ export class Host extends Base {
 
       let index: number
       switch (flag) {
+        case 'park': {
+          const current = hostList.find((item) => item.id === host.id)
+          if (!current || JSON.stringify(current) !== JSON.stringify(old)) {
+            reject(new Error('The website changed. Refresh the list before adding sites.'))
+            break
+          }
+          if (current.type && current.type !== 'php') {
+            reject(new Error('Subdirectory sites require a PHP or static website.'))
+            break
+          }
+          const result = await doPark(current)
+          if (result.added.length) {
+            await writeHostFile()
+          } else {
+            resolve({ host: hostList, parked: { count: 0, warnings: result.warnings } })
+          }
+          break
+        }
         case 'add':
           {
             if (isMakeConf()) {
               await this._addVhost(host)
-              await doPark()
             }
             const topList = hostList.filter((h) => !!h?.isTop)
             hostList.splice(topList.length, 0, host)
+            if (park && (!host.type || host.type === 'php')) await doPark(host)
             await writeHostFile()
           }
           break
@@ -250,7 +315,6 @@ export class Host extends Base {
             } else {
               await this._editVhost(host, old)
             }
-            await doPark()
           } else if (host.type !== 'tomcat') {
             if (old?.name) {
               await this._delVhost(old!)
@@ -260,6 +324,7 @@ export class Host extends Base {
           if (index >= 0) {
             hostList[index] = host
           }
+          if (park && (!host.type || host.type === 'php')) await doPark(host)
           await writeHostFile()
           break
       }

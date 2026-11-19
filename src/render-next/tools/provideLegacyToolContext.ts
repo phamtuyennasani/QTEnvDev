@@ -5,10 +5,11 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import VueSvg from '@/components/VueSvgIcon/use.vue'
 import { I18nT } from '@lang/index'
 import Base from '@/core/Base'
+import PoperFix from '@/core/directive/PoperFix'
 import { acquireLegacySvgSprite } from './legacySvgSprite'
 import '../styles/legacy-tools.scss'
 
-export function provideLegacyToolContext() {
+export function provideLegacyToolContext(options?: { poperFix?: boolean; detachedClass?: string }) {
   let releaseSprite: (() => void) | undefined
   onMounted(() => { releaseSprite = acquireLegacySvgSprite(document) })
   onBeforeUnmount(() => { releaseSprite?.() })
@@ -18,7 +19,16 @@ export function provideLegacyToolContext() {
   for (const [name, component] of Object.entries(ElementPlus)) if (/^El[A-Z]/.test(name) && component && (typeof component === 'object' || typeof component === 'function')) Object.assign(components, { [name]: component })
   const config = Object.create(parentContext.config) as App['config']
   Object.defineProperty(config, 'globalProperties', { value: { ...parentContext.config.globalProperties, $t: I18nT, markRaw, toRaw }, writable: true, enumerable: true })
-  const context = { ...parentContext, components, directives: { ...parentContext.directives, loading: ElementPlus.ElLoading.directive }, config, asyncComponentHostClass: 'pqt-established-tool pqt-established-detached-tool dark', acquireAsyncComponentHost: () => acquireLegacySvgSprite(document) }
+  const context = { ...parentContext, components, directives: { ...parentContext.directives, loading: ElementPlus.ElLoading.directive }, config, asyncComponentHostClass: 'pqt-established-tool pqt-established-detached-tool dark' + (options?.detachedClass ? ' ' + options.detachedClass : ''), acquireAsyncComponentHost: () => acquireLegacySvgSprite(document) }
+  if (options?.poperFix) {
+    const scopedApp = {
+      directive(name: string, directive: import('vue').Directive) {
+        Object.assign(context.directives, { [name]: directive })
+        return scopedApp
+      }
+    }
+    PoperFix(scopedApp as unknown as App)
+  }
   Base.init({ config: context.config } as unknown as App)
   instance.appContext = context
 }

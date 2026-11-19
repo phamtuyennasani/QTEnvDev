@@ -4,12 +4,14 @@ export type Workspace = 'overview' | 'websites' | 'services' | 'runtimes' | 'dat
 
 export const nextAppState = reactive({
   workspace: 'overview' as Workspace,
-  operation: 'All systems operational',
+  operation: 'Workspace ready',
   toast: '',
-  dialog: undefined as { title: string; message: string; progress?: number } | undefined
+  dialog: undefined as { title: string; message: string; progress?: number } | undefined,
+  cronWebsite: undefined as { id: number; name: string; root: string } | undefined
 })
 
-export const navigateNext = (workspace: Workspace) => {
+export const navigateNext = (workspace: Workspace, cronWebsite?: { id: number; name: string; root: string }) => {
+  nextAppState.cronWebsite = workspace === 'cron' ? cronWebsite : undefined
   nextAppState.workspace = workspace
 }
 

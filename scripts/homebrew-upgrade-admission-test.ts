@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
 import { HomebrewOperationCoordinator } from '../src/main/core/HomebrewOperationCoordinator'
 import type { BrewFormulaSnapshot } from '../src/fork/module/Brew/UpgradeTypes'
 let running = [
   {
     module: 'php',
     item: {
-      bin: '/opt/homebrew/Cellar/php/8.5.7/bin/php',
-      path: '/opt/homebrew/Cellar/php/8.5.7',
+      bin: resolve('/opt/homebrew/Cellar/php/8.5.7/bin/php'),
+      path: resolve('/opt/homebrew/Cellar/php/8.5.7'),
       version: '8.5.7',
       enable: true,
       run: true,
@@ -19,15 +20,15 @@ let running = [
 ]
 const snapshot = {
   identity: {
-    bin: '/opt/homebrew/bin/brew',
-    prefix: '/opt/homebrew',
-    cellar: '/opt/homebrew/Cellar',
+    bin: resolve('/opt/homebrew/bin/brew'),
+    prefix: resolve('/opt/homebrew'),
+    cellar: resolve('/opt/homebrew/Cellar'),
     arch: 'arm64'
   },
   formula: 'homebrew/core/php',
   fingerprint: 'v1',
-  affectedRacks: ['/opt/homebrew/Cellar/php'],
-  kegs: ['/opt/homebrew/Cellar/php/8.5.7'],
+  affectedRacks: [resolve('/opt/homebrew/Cellar/php')],
+  kegs: [resolve('/opt/homebrew/Cellar/php/8.5.7')],
   eligible: true
 } as BrewFormulaSnapshot
 let executed = 0
@@ -53,7 +54,7 @@ await assert.rejects(c.beginUpgrade(p.previewId), /changed/)
 const p2 = await c.prepareUpgrade('php', 'homebrew/core/php')
 const accepted = await c.beginUpgrade(p2.previewId)
 assert.throws(() => c.assertStart('php', running[0].item), /Homebrew/)
-assert.doesNotThrow(() => c.assertStart('php', { bin: '/another/Cellar/php/8.5.7/bin/php' }))
+assert.doesNotThrow(() => c.assertStart('php', { bin: resolve('/another/Cellar/php/8.5.7/bin/php') }))
 assert.throws(() => c.assertStart('php', {}), /Homebrew/)
 await assert.rejects(c.beginUpgrade(p2.previewId))
 assert.equal((await c.execute(accepted.operationId)).outcome, 'failed')
@@ -115,7 +116,7 @@ const uncertain = new HomebrewOperationCoordinator({
   running: () => [
     {
       module: 'php',
-      item: { ...previewItem(), bin: '/opt/homebrew/opt/nonexistent-qtenvdev-fixture/sbin/php-fpm' }
+      item: { ...previewItem(), bin: resolve('/opt/homebrew/opt/nonexistent-qtenvdev-fixture/sbin/php-fpm') }
     }
   ],
   run: async () => {
@@ -230,7 +231,7 @@ for (const action of ['install', 'uninstall'] as const) {
   assert.doesNotThrow(() => owner.assertStart('php', services[0].item))
   wait = false
   services = [
-    { module: 'php', item: { bin: '/another/Cellar/php/8.5/bin/php', pid: '456' } },
+    { module: 'php', item: { bin: resolve('/another/Cellar/php/8.5/bin/php'), pid: '456' } },
     { module: 'dns', item: {} },
     { module: 'ftp-srv', item: {} }
   ]

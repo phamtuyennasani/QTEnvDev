@@ -1,13 +1,145 @@
 import { reactive } from 'vue'
 import type { CronJob } from '@shared/app'
-import IPC from '@/util/IPC'
+import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
+import { validatePortableCronExpression } from '@shared/CronExpression'
+import { CRON_OUTCOME_UNKNOWN, type CronCommandResult } from '../../fork/module/Cron/types'
 import { showNotice } from './app'
-const state=reactive({jobs:[] as CronJob[],loading:false,busy:false,error:''})
-const request=(method:string,...args:unknown[])=>new Promise<any>((resolve,reject)=>{IPC.send('app-fork:cron',method,...args).then((key:string,res:any)=>{IPC.off(key);if(res?.code===0)resolve(res.data);else reject(new Error(res?.msg??`${method} failed`))})})
-const load=async()=>{state.loading=true;state.error='';try{state.jobs.splice(0,state.jobs.length,...(await request('getCronJobs') as CronJob[]));return true}catch(e){state.error=e instanceof Error?e.message:String(e);showNotice(state.error);return false}finally{state.loading=false}}
-const mutate=async(fn:()=>Promise<any>)=>{if(state.busy)return false;state.busy=true;try{await fn();await load();return true}catch(e){state.error=e instanceof Error?e.message:String(e);showNotice(state.error);return false}finally{state.busy=false}}
-const toggle=(job:CronJob)=>mutate(()=>request('toggleCronJob',job.hostId??0,job.id,!job.enabled))
-const run=(job:CronJob)=>mutate(()=>request('runJobNow',job.hostId??0,job.id,job.workDir??''))
-const remove=(job:CronJob)=>mutate(()=>request('deleteCronJob',job.hostId??0,job.id))
-const save=(draft:Partial<CronJob>, existing?:CronJob)=>{const schedule=String(draft.schedule??'').trim();if(schedule.split(/\s+/).length!==5){state.error='Schedule must contain five cron fields.';showNotice(state.error);return Promise.resolve(false)}if(!draft.name?.trim()||!draft.command?.trim()){state.error='Name and command are required.';showNotice(state.error);return Promise.resolve(false)}if(draft.scope==='host'&&!draft.hostId){state.error='Choose a website before saving a website task.';showNotice(state.error);return Promise.resolve(false)}return mutate(()=>existing?request('updateCronJob',existing.hostId??0,existing.id,{...draft,schedule}):request('addCronJob',draft.hostId??0,{...draft,schedule}))}
-export const cronController={state,load,toggle,run,remove,save}
+type Outcome = {
+  status: 'running' | 'succeeded' | 'partial' | 'failed' | 'unknown'
+  message: string
+  command?: CronCommandResult
+}
+
+const state = reactive({
+  jobs: [] as CronJob[],
+  outcomes: {} as Record<string, Outcome>,
+  loading: false,
+  busy: false,
+  unknown: false,
+  error: ''
+})
+let loadFlight: Promise<boolean> | undefined
+const request = (method: string, args: unknown[] = []) =>
+  forkTerminalRequest('app-fork:cron', [method, ...args], 'The scheduler did not return a result.', 120_000)
+const errorText = (error: unknown) => error instanceof Error ? error.message : String(error)
+const taskKey = (job: CronJob) => JSON.stringify([job.hostId ?? 0, job.id])
+const isCommandResult = (data: unknown): data is CronCommandResult => {
+  if (!data || typeof data !== 'object') return false
+  const result = data as Partial<CronCommandResult>
+  return Number.isInteger(result.exitCode) && typeof result.output === 'string' && typeof result.error === 'string'
+}
+const refresh = async () => {
+  state.loading = true
+  state.error = ''
+  try {
+    const result = await request('getCronJobs')
+    if (result.code !== 0 || !Array.isArray(result.data)) {
+      throw new Error(result.msg || 'The scheduler did not return its task list.')
+    }
+    state.jobs = result.data
+    return true
+  } catch (error) {
+    state.error = errorText(error)
+    return false
+  } finally {
+    state.loading = false
+  }
+}
+const load = (fromMutation = false) => {
+  if (state.busy && !fromMutation) return Promise.resolve(false)
+  loadFlight ??= refresh().finally(() => { loadFlight = undefined })
+  return loadFlight
+}
+const mutate = async (key: string, method: string, args: unknown[]) => {
+  if (state.busy || state.loading || state.unknown) return false
+  state.busy = true
+  state.error = ''
+  state.outcomes[key] = { status: 'running', message: 'Waiting for scheduler…' }
+  const finishUnknown = (message: string) => {
+    state.unknown = true
+    state.outcomes[key] = { status: 'unknown', message }
+    state.error = message + ' Check the task before reopening the app to retry.'
+    return false
+  }
+  try {
+    let result
+    try {
+      result = await request(method, args)
+    } catch (error) {
+      return finishUnknown(errorText(error))
+    }
+    if (result.errorCode === CRON_OUTCOME_UNKNOWN) {
+      return finishUnknown(result.msg || 'The scheduler result could not be verified.')
+    }
+    if (result.code !== 0) {
+      state.outcomes[key] = { status: 'failed', message: result.msg || 'The scheduler rejected the operation.' }
+      state.error = state.outcomes[key].message
+      return false
+    }
+    const data = result.data
+    const wasRun = method === 'runJobNow'
+    const deleted = method === 'deleteCronJob'
+    if (wasRun ? !isCommandResult(data) : deleted ? data !== true : typeof data?.id !== 'string') {
+      return finishUnknown('The scheduler did not return the operation result.')
+    }
+    const command: CronCommandResult | undefined = wasRun ? data : undefined
+    const failed = Boolean(command && command.exitCode !== 0)
+    const partial = Boolean(command?.historyWarning || data?.systemError)
+    const message = command
+      ? ['Command exited with code ' + command.exitCode + '.', command.historyWarning].filter(Boolean).join(' ')
+      : data?.systemError
+        ? 'Task saved, but schedule registration failed. ' + data.systemError
+        : deleted ? 'Task deleted.' : 'Task saved.'
+    const outcome: Outcome = {
+      status: failed ? 'failed' : partial ? 'partial' : 'succeeded',
+      message,
+      command
+    }
+    state.outcomes[key] = outcome
+    if (deleted) {
+      state.jobs = state.jobs.filter((job) => taskKey(job) !== key)
+    } else if (!wasRun) {
+      const newKey = taskKey(data)
+      state.outcomes[newKey] = outcome
+      const existingIndex = state.jobs.findIndex((job) => [key, newKey].includes(taskKey(job)))
+      if (existingIndex < 0) state.jobs.unshift(data)
+      else state.jobs.splice(existingIndex, 1, data)
+    }
+    if (!await load(true) && state.error) showNotice(outcome.message + ' Task list refresh failed.')
+    return !failed
+  } finally {
+    state.busy = false
+  }
+}
+const toggle = (job: CronJob) => mutate(taskKey(job), 'toggleCronJob', [job.hostId ?? 0, job.id, !job.enabled])
+const run = (job: CronJob) => mutate(taskKey(job), 'runJobNow', [job.hostId ?? 0, job.id, job.workDir ?? ''])
+const remove = (job: CronJob) => mutate(taskKey(job), 'deleteCronJob', [job.hostId ?? 0, job.id])
+const save = (draft: Partial<CronJob>, existing?: CronJob) => {
+  const schedule = String(draft.schedule ?? '').trim()
+  const validation = validatePortableCronExpression(schedule)
+  let error = ''
+  if (!validation.valid) error = validation.error || 'The schedule is invalid.'
+  else if (!draft.name?.trim() || !draft.command?.trim()) error = 'Name and command are required.'
+  else if (draft.scope === 'host' && (!Number.isSafeInteger(draft.hostId) || !draft.hostId || draft.hostId < 1)) {
+    error = 'Choose a website before saving a website task.'
+  }
+  if (error) {
+    state.error = error
+    return Promise.resolve(false)
+  }
+  const snapshot = {
+    ...draft,
+    name: draft.name?.trim(),
+    schedule,
+    hostId: draft.scope === 'host' ? draft.hostId : undefined,
+    enabled: draft.enabled ?? existing?.enabled ?? true
+  }
+  return existing
+    ? mutate(taskKey(existing), 'updateCronJob', [existing.hostId ?? 0, existing.id, snapshot])
+    : mutate('new', 'addCronJob', [snapshot.hostId ?? 0, snapshot])
+}
+export const cronController = {
+  state, load, toggle, run, remove, save, taskKey,
+  clearError: () => { state.error = '' },
+  outcome: (job: CronJob) => state.outcomes[taskKey(job)]
+}

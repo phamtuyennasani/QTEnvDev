@@ -8,6 +8,8 @@ import { join } from '@/util/path-browserify'
 import { shell, fs, exec } from '@/util/NodeFn'
 import { PHPSetup } from '@/components/PHP/store'
 import windowsExtensions from './Windows/controller'
+import IPC from '@/util/IPC'
+import { extensionRequest } from './Request'
 
 export const ExtensionSetup = reactive<{
   dir: Partial<Record<string, string>>
@@ -107,8 +109,18 @@ export const Setup = (version: SoftInstalled) => {
       })
       ExtensionSetup.dirFile[version.bin] = reactive(all)
     }
-    if (ExtensionSetup.dir?.[version.bin]) {
-      fetchFile(ExtensionSetup.dir[version.bin]!)
+    const recordError = (error: unknown) => {
+      ExtensionSetup.dirError[version.bin] = String(error)
+    }
+    if (window.Server.isWindows) {
+      void extensionRequest<string>(IPC, 'fetchExtensionDir', [version])
+        .then((dir) => {
+          ExtensionSetup.dir[version.bin] = dir
+          delete ExtensionSetup.dirError[version.bin]
+        })
+        .catch(recordError)
+    } else if (ExtensionSetup.dir?.[version.bin]) {
+      void fetchFile(ExtensionSetup.dir[version.bin]!).catch(recordError)
     } else {
       if (version?.version) {
         const pkconfig = version?.phpConfig ?? join(version?.path, 'bin/php-config')
@@ -119,11 +131,9 @@ export const Setup = (version: SoftInstalled) => {
             const dir = res.stdout.trim()
             ExtensionSetup.dir[version.bin] = dir
             delete ExtensionSetup.dirError?.[version.bin]
-            fetchFile(dir)
+            return fetchFile(dir)
           })
-          .catch((err) => {
-            ExtensionSetup.dirError[version.bin] = `${err}`
-          })
+          .catch(recordError)
       }
     }
   }

@@ -33,9 +33,9 @@ const handleReverseProxy = (host: AppHost, content: string) => {
   return content
 }
 
-export const makeCaddyConf = async (host: AppHost) => {
+export const makeCaddyConf = async (host: AppHost, stage?: (path: string, content: string) => Promise<void>) => {
   const caddyvpath = join(global.Server.BaseDir!, 'vhost/caddy')
-  await mkdirp(caddyvpath)
+  if (!stage) await mkdirp(caddyvpath)
   const httpNames: string[] = []
   const httpsNames: string[] = []
   hostAlias(host).forEach((h) => {
@@ -93,7 +93,7 @@ export const makeCaddyConf = async (host: AppHost) => {
   }
 
   const confFile = join(caddyvpath, `${fileBase}.conf`)
-  await writeFile(confFile, contentList.join('\n'))
+  await (stage ?? writeFile)(confFile, contentList.join('\n'))
 }
 
 export const updateCaddyConf = async (host: AppHost, old: AppHost) => {

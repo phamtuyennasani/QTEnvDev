@@ -37,7 +37,7 @@ import {
 import ServiceVersionManager from './ServiceVersionManager'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { CheckBrewOrPort } from '../utils/CheckBrew'
+import { CheckBrewOrPort, refreshMacOSHomebrew } from '../utils/CheckBrew'
 import type { LanguageCoordinator } from './LanguageCoordinator'
 import {
   capturerRuntime,
@@ -597,6 +597,11 @@ export default class IPCHandler extends EventEmitter {
       // Brew 检查
       case 'app-check-brewport':
         this.handleCheckBrewPort(command, key)
+        break
+      case 'app-refresh-macos-homebrew':
+        refreshMacOSHomebrew()
+          .then((data) => this.sendToMainWindow(command, key, { code: 0, data }))
+          .catch((error) => this.sendRuntimeError(command, key, error))
         break
 
       // HTTP 服务

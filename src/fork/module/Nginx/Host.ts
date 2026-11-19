@@ -92,8 +92,11 @@ rewrite /wp-admin$ $scheme://$host$uri/ permanent;`
   }
 }
 
-export const makeNginxConf = async (host: AppHost) => {
-  if (host?.phpVersion) {
+export const makeNginxConf = async (
+  host: AppHost,
+  stage?: (path: string, content: string) => Promise<void>
+) => {
+  if (host?.phpVersion && !stage) {
     await handlePhpEnableConf(host?.phpVersion)
   }
 
@@ -101,9 +104,11 @@ export const makeNginxConf = async (host: AppHost) => {
   const rewritepath = join(global.Server.BaseDir!, 'vhost/rewrite')
   const logpath = join(global.Server.BaseDir!, 'vhost/logs')
 
-  await mkdirp(nginxvpath)
-  await mkdirp(rewritepath)
-  await mkdirp(logpath)
+  if (!stage) {
+    await mkdirp(nginxvpath)
+    await mkdirp(rewritepath)
+    await mkdirp(logpath)
+  }
 
   const tmpl = await vhostTmpl()
 
@@ -137,10 +142,10 @@ export const makeNginxConf = async (host: AppHost) => {
     ntmpl = ntmpl.replace(/include enable-php\.conf;/g, '##Static Site Nginx##')
   }
 
-  await writeFile(nvhost, handleReverseProxy(host, ntmpl))
+  await (stage ?? writeFile)(nvhost, handleReverseProxy(host, ntmpl))
 
   const rewrite = host?.nginx?.rewrite?.trim() ?? ''
-  await writeFile(join(rewritepath, `${fileBase}.conf`), rewrite)
+  await (stage ?? writeFile)(join(rewritepath, `${fileBase}.conf`), rewrite)
 }
 
 const handlePhpEnableConf = async (v: number) => {

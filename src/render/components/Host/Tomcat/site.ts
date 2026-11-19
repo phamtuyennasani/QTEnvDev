@@ -38,6 +38,7 @@ export const createTomcatSiteConfig = (): TomcatSiteFormConfig => ({
 export const cloneTomcatSiteHost = (host: Partial<TomcatSiteFormHost>): TomcatSiteFormHost => {
   const item = JSON.parse(JSON.stringify(host ?? {}))
   return {
+    ...item,
     id: item.id ?? Date.now(),
     type: 'tomcat',
     name: item.name ?? '',
@@ -50,6 +51,7 @@ export const cloneTomcatSiteHost = (host: Partial<TomcatSiteFormHost>): TomcatSi
     mark: item.mark ?? '',
     envFile: item.envFile ?? '',
     tomcat: {
+      ...item.tomcat,
       contexts: item.tomcat?.contexts ?? [],
       rewrite: item.tomcat?.rewrite ?? { enabled: false, content: '' }
     }

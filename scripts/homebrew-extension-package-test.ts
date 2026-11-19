@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
+import { posix } from 'node:path'
 import { loadIsolated } from './helpers/load-isolated'
 import { HomebrewOperationCoordinator } from '../src/main/core/HomebrewOperationCoordinator'
 const { copyHomebrewExtension } = await loadIsolated(
   'src/render/components/PHP/Extension/Homebrew/ExtensionPackage.ts',
-  { '@/util/path-browserify': await import('node:path') }
+  { '@/util/path-browserify': posix }
 )
 const copied: string[][] = []
 const result = { identity: { prefix: '/brew', cellar: '/brew/Cellar' } }
@@ -77,7 +78,7 @@ const { Setup } = await loadIsolated(
     '@lang/index': { I18nT: (key: string) => key },
     '@/core/Base': {},
     '@/components/PHP/Extension/setup': { ExtensionSetup: domain },
-    '@/util/path-browserify': await import('node:path'),
+    '@/util/path-browserify': posix,
     '@/util/NodeFn': {
       fs: {
         ...files,

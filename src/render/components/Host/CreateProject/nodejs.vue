@@ -53,7 +53,8 @@
   import { ProjectSetup } from '@/components/Host/CreateProject/project'
   import Projects from './version_nodejs'
   import { Search } from '@element-plus/icons-vue'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  import { MessageError } from '@/util/Element'
   import { shell } from '@/util/NodeFn'
 
   const list = computed(() => {
@@ -111,21 +112,16 @@
     shell.openExternal(url)
   }
 
-  let CreateVM: any
-  if (window.Server.isWindows) {
-    import('./nodejsCreate.win.vue').then((res) => {
-      CreateVM = res.default
-    })
-  } else {
-    import('./nodejsCreate.vue').then((res) => {
-      CreateVM = res.default
-    })
-  }
-
-  const toCreate = (item: any) => {
-    console.log('toCreate: ', item)
-    AsyncComponentShow(CreateVM, {
-      type: item.name
-    }).then()
+  const showDialog = useAsyncComponentShow()
+  const toCreate = async (item: { name: string }) => {
+    const type = item.name
+    try {
+      const { default: component } = window.Server.isWindows
+        ? await import('./nodejsCreate.win.vue')
+        : await import('./nodejsCreate.vue')
+      await showDialog(component, { type })
+    } catch (error) {
+      MessageError(String(error))
+    }
   }
 </script>

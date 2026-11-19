@@ -6,20 +6,30 @@
 
 <script lang="ts" setup>
   import Create from '@/components/Host/CreateProject/php.vue'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  import { MessageError } from '@/util/Element'
 
-  let EditVM: any
-  import('@/components/Host/Edit.vue').then((res) => {
-    EditVM = res.default
-  })
-  const onMakeHost = (res: any) => {
-    AsyncComponentShow(EditVM, {
+  const props = defineProps<{ websiteEditor?: 'parent' }>()
+  const emit = defineEmits<{ scaffoldWebsite: [project: { dir: string; rewrite: string }] }>()
+  const showDialog = useAsyncComponentShow()
+  const onMakeHost = async (res: { dir: string; rewrite: string }) => {
+    if (props.websiteEditor === 'parent') {
+      emit('scaffoldWebsite', res)
+      return
+    }
+    const snapshot = {
       edit: {
         root: res.dir,
         nginx: {
           rewrite: res.rewrite
         }
       }
-    }).then()
+    }
+    try {
+      const { default: component } = await import('@/components/Host/Edit.vue')
+      await showDialog(component, snapshot)
+    } catch (error) {
+      MessageError(String(error))
+    }
   }
 </script>

@@ -1,37 +1,81 @@
 import { reactiveBind } from '@/util/Index'
 import { shell } from '@/util/NodeFn'
 import { MySQLManage, type MySQLDatabaseItem } from '@/components/Mysql/Manage/manage'
+import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
 import { currentServiceVersion } from '../adapters/serviceAdapter'
 import { showNotice } from './app'
 
 export type DatabaseConnection = { name: string; version?: string; bin?: string; host: string; port?: number; user: string; password: string; dataDirectory?: string }
-const defaultPorts: Record<string, number> = { MySQL: 3306, MariaDB: 3306, PostgreSQL: 5432, Redis: 6379, MongoDB: 27017, ClickHouse: 8123, Neo4j: 7687, Elasticsearch: 9200, Qdrant: 6333 }
 class DatabaseToolsController {
   connection?: DatabaseConnection
   databases: MySQLDatabaseItem[] = []
   loading = false
   saving = false
   error = ''
-  private flight?: Promise<boolean>
+  private flight?: { name: string; request: Promise<boolean> }
   private version(name: string) { return currentServiceVersion(name) }
   async load(name: string): Promise<boolean> {
-    if (this.flight) return this.flight
-    this.loading = true; this.error = ''
-    const flight = Promise.resolve().then(async () => {
+    if (this.flight?.name === name) return this.flight.request
+    this.loading = true
+    this.error = ''
+    this.connection = undefined
+    this.databases = []
+    const request = Promise.resolve().then(async () => {
       const item: any = this.version(name)
       const isMysql = name === 'MySQL' || name === 'MariaDB'
-      if (isMysql) MySQLManage.init(name === 'MySQL' ? 'mysql' : 'mariadb')
-      this.connection = { name, version: item?.version, bin: item?.bin, host: '127.0.0.1', port: defaultPorts[name], user: isMysql ? 'root' : '—', password: isMysql ? (item?.rootPassword || 'root') : '—', dataDirectory: item?.dataDir || item?.dataPath }
-      if (isMysql && item) this.databases = await MySQLManage.fetchDatabase(item)
-      else this.databases = []
+      const flag = name === 'MySQL' ? 'mysql' : 'mariadb'
+      if (isMysql) await MySQLManage.ready(flag)
+      if (this.flight?.request !== request) return false
+      const connection: DatabaseConnection = {
+        name, version: item?.version, bin: item?.bin, host: isMysql && item ? 'localhost' : '—',
+        port: Number.isInteger(item?.port) && item.port > 0 ? item.port : undefined,
+        user: isMysql && item ? 'root' : '—',
+        password: isMysql && item ? (MySQLManage.userPassword[item.bin]?.root ?? '—') : '—',
+        dataDirectory: item?.dataDir || item?.dataPath
+      }
+      this.connection = connection
+      if (isMysql && item?.run) {
+        const result = await forkTerminalRequest(
+          'app-fork:' + flag,
+          ['getDatabasesWithUsers', JSON.parse(JSON.stringify(item))],
+          'The database query timed out.',
+          60_000,
+          undefined,
+          true
+        )
+        if (this.flight?.request !== request) return false
+        if (result.code !== 0 || !Array.isArray(result.data?.list)) {
+          throw new Error(result.msg || 'The database did not return its databases and users.')
+        }
+        this.databases = result.data.list
+        const details = result.data.connection
+        if (Number.isInteger(details?.port) && details.port > 0 && details.port <= 65535) {
+          this.connection.port = details.port
+        }
+        if (typeof details?.dataDirectory === 'string' && details.dataDirectory) {
+          this.connection.dataDirectory = details.dataDirectory
+        }
+      }
       return true
-    }).catch((error) => { this.error = error instanceof Error ? error.message : String(error); showNotice(this.error); return false }).finally(() => { this.loading = false; this.flight = undefined })
-    this.flight = flight; return flight
+    }).catch((error) => {
+      if (this.flight?.request === request) {
+        this.error = error instanceof Error ? error.message : String(error)
+        showNotice(this.error)
+      }
+      return false
+    }).finally(() => {
+      if (this.flight?.request === request) {
+        this.loading = false
+        this.flight = undefined
+      }
+    })
+    this.flight = { name, request }
+    return request
   }
   async changePassword(password: string): Promise<boolean> {
-    const connection = this.connection; if (!connection || !connection.bin || !password || (connection.name !== 'MySQL' && connection.name !== 'MariaDB')) return false
+    const connection = this.connection; if (this.saving || this.loading || !connection || !connection.bin || !password || (connection.name !== 'MySQL' && connection.name !== 'MariaDB')) return false
     this.saving = true; this.error = ''
-    try { const item: any = this.version(connection.name); if (!item) throw new Error('No installed database version is selected.'); const ok = await MySQLManage.passwordChange(item, connection.user, password); if (!ok) throw new Error('The database password was not changed.'); connection.password = password; showNotice('Database credentials updated.'); return true }
+    try { const item = this.version(connection.name); if (item?.bin !== connection.bin) throw new Error('The selected database version changed. Refresh its details.'); const ok = await MySQLManage.passwordChange(item, connection.user, password); if (!ok) throw new Error('The database password was not changed.'); connection.password = password; showNotice('Database credentials updated.'); return true }
     catch (error) { this.error = error instanceof Error ? error.message : String(error); showNotice(this.error); return false }
     finally { this.saving = false }
   }

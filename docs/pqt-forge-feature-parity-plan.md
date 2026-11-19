@@ -4,6 +4,8 @@ Updated: 2026-11-19
 
 This document tracks the migration from the legacy renderer (src/render) to the independent renderer in src/render-next. A screen listed in the sidebar is not, by itself, evidence of parity. Each workflow must use a real domain adapter or clearly report that it is unavailable or incomplete.
 
+See [the current parity audit](pqt-forge-parity-audit.md) for verified changes, open gaps and platform acceptance limits.
+
 ## Status vocabulary
 
 - Complete: the new screen and its domain flow are connected; runtime acceptance may still be required.
@@ -21,16 +23,18 @@ This document tracks the migration from the legacy renderer (src/render) to the 
 
 ## Phase 1 — websites and project workflows
 
-- [x] Complete host list and CRUD parity: sorting, templates, QR, vhost/rewrite, logs, and SSL state.
-- [x] Complete PHP, Node.js, Python, and Go project workflows with saved project discovery, real start/stop lifecycle actions, ports, commands, folder/config/log access; Java/Tomcat hosts use the dedicated Tomcat editor and lifecycle path.
+- [x] Migrate website list and CRUD, saved order and pins, templates, links and QR, vhost and rewrite files, log preview and clear, TLS settings, subdirectory websites, system hosts controls, and website backup import and export.
+- [x] Connect PHP, Node.js, Python and Go saved projects and scaffolding to the existing lifecycle, port and command editors, folders, configuration and logs. Java/Tomcat websites use the dedicated editor and backend.
 - [x] Keep unsupported project types unchanged until their structure is understood by the new editor.
-- [x] Verify project ports, start commands, SSL/proxy changes, and post-save server restart behavior through the website controller and language-project lifecycle contracts.
+- [x] Verify ports, commands, TLS, proxy changes and post-save lifecycle behavior through the website and project controllers. Run native server fixtures with generated configurations.
+
+The Windows Electron fixture exercises Websites with isolated IPC, including scoped Cron navigation, a Laravel scaffold draft, legacy-compatible backup, alias links, hosts shortcuts and subdirectory websites. Separate Windows runtime fixtures served requests with Nginx, Apache with PHP-CGI, and Tomcat 9. They use temporary configuration, explicit loopback ports and an isolated test certificate. These runs verify generated server files and their behavior after a restart. Platform acceptance for OS hosts changes, system trust, Caddy and FrankenPHP runtime, and macOS and Linux service execution remains open.
 
 ## Phase 2 — services, runtimes, packages, and databases
 
-- [x] Audit every legacy provider for online packages, installed versions, current version, install/update/remove, timeout, and failure reporting. Provider-specific update semantics are recorded in src/render-next/packages/capabilities.ts; native upgrade is used where available, version replacement is explicit for catalog providers, and unsupported native upgrades remain visible instead of being guessed.
-- [x] Add module-specific configuration, bounded log tail/clear, and companion-service behavior for the migrated service-file and lifecycle paths.
-- [x] Migrate database admin tools, credentials, ports, and data-directory workflows for the supported database panels; unsupported module-specific fields remain explicit.
+- [ ] Finish comparison and migration for online packages, installed and current versions, install/update/remove, timeout and failure reporting. Package Library exposes Homebrew formulae, install/uninstall, macOS bootstrap and the existing macOS PHP upgrade flow. Generic MacPorts, SDKMAN and dedicated version managers still differ. Live macOS Homebrew execution remains to be verified.
+- [ ] Add module-specific configuration, bounded log tail/clear, and companion-service behavior for the migrated service-file and lifecycle paths.
+- [ ] Migrate database admin tools, credentials, ports, and data-directory workflows for the supported database panels; unsupported module-specific fields remain explicit.
 - [x] Preserve completed side effects when a refresh fails; package mutations retain terminal success and report refresh warnings, while unknown outcomes block replay.
 
 ## Phase 3 — toolbox parity
@@ -54,6 +58,12 @@ Relevant checks:
 - yarn test:pqt-forge-domain-adapters
 - yarn test:pqt-forge-tools
 - yarn test:pqt-forge-websites
+- yarn test:pqt-forge-website-controller
+- yarn test:pqt-forge-website-backup
+- yarn test:pqt-forge-websites-ui
+- yarn test:pqt-forge-cron
+- yarn test:pqt-forge-homebrew-ui
+- yarn test:pqt-forge-php-extensions-ui
 - yarn test:startup-group-runner
 - yarn test:pqt-forge-project-workflows
 - yarn test:pqt-forge-phase3
@@ -61,5 +71,7 @@ Relevant checks:
 - yarn test:pqt-forge-native-tools
 
 The build smoke test verifies dist/render/next.html; it does not prove interactive UI parity.
+
+The opt-in Windows server checks take paths to existing binaries. Run yarn test:pqt-forge-native-apache with paths to httpd.exe, php-cgi.exe and openssl.exe. Run yarn test:pqt-forge-native-nginx with paths to nginx.exe and openssl.exe. Run yarn test:pqt-forge-native-tomcat with paths to java.exe, the Tomcat distribution directory and openssl.exe. Quote any argument that contains spaces.
 
 

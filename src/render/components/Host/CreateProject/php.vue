@@ -53,7 +53,8 @@
   import { ProjectSetup } from '@/components/Host/CreateProject/project'
   import Projects from './version'
   import { Search } from '@element-plus/icons-vue'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+  import { MessageError } from '@/util/Element'
   import { shell } from '@/util/NodeFn'
 
   const emit = defineEmits(['onMakeHost'])
@@ -113,23 +114,17 @@
     shell.openExternal(url)
   }
 
-  let CreateVM: any
-  if (window.Server.isWindows) {
-    import('./phpCreate.win.vue').then((res) => {
-      CreateVM = res.default
-    })
-  } else {
-    import('./phpCreate.vue').then((res) => {
-      CreateVM = res.default
-    })
-  }
-
-  const toCreate = (item: any) => {
-    console.log('toCreate: ', item)
-    AsyncComponentShow(CreateVM, {
-      type: item.name
-    }).then((res) => {
-      emit('onMakeHost', res)
-    })
+  const showDialog = useAsyncComponentShow()
+  const toCreate = async (item: { name: string }) => {
+    const type = item.name
+    try {
+      const { default: component } = window.Server.isWindows
+        ? await import('./phpCreate.win.vue')
+        : await import('./phpCreate.vue')
+      const result = await showDialog(component, { type })
+      emit('onMakeHost', result)
+    } catch (error) {
+      MessageError(String(error))
+    }
   }
 </script>

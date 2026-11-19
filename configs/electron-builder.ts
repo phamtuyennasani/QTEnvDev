@@ -86,7 +86,12 @@ const conf: Configuration = {
       arch: [currentArch]
       // arch: ['arm64']
     },
-    asarUnpack: ['**/*.node', '**/node_modules/sharp/**/*', '**/node_modules/@img/**/*'],
+    asarUnpack: [
+      '**/*.node',
+      '**/node_modules/sharp/**/*',
+      '**/node_modules/@img/**/*',
+      'dist/electron/static/sh/brew-install*.sh'
+    ],
     extendInfo: {
       'Icon file': 'icon.icns',
       CFBundleDisplayName: 'QTEnvDev',

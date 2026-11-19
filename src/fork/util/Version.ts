@@ -338,7 +338,9 @@ const fetchBrewCellarDirs = async () => {
 
 const fetchActiveBrewCellarDirs = async () => {
   try {
-    const res = await spawnPromiseWithEnv('brew', ['--cellar'])
+    const res = await spawnPromiseWithEnv(global.Server.BrewBin || 'brew', ['--cellar'], {
+      shell: false
+    })
     const dirs = res.stdout
       .split('\n')
       .map((dir) => normalizeExistingDir(dir))
@@ -535,9 +537,11 @@ export const brewInfoJson = async (names: string[], options?: { tapAware?: boole
     return cellarDirs
   }
   const fetchInfo = async (formulaNames: string[]) => {
-    const command = ['brew', 'info', ...formulaNames, '--json', '--formula'].join(' ')
-    console.log('brewinfo doRun: ', command)
-    const res = await execPromiseWithEnv(command)
+    const res = await spawnPromiseWithEnv(
+      global.Server.BrewBin || 'brew',
+      ['info', ...formulaNames, '--json', '--formula'],
+      { shell: false }
+    )
     const arr = JSON.parse(res.stdout)
     for (const item of arr) {
       const formulaKey = `${item?.tap ?? ''}:${item?.full_name ?? item?.name ?? ''}`
@@ -583,7 +587,10 @@ export const brewSearch = async (
   handleContent?: (content: string) => string
 ) => {
   try {
-    const res = await execPromiseWithEnv(command)
+    const bin = global.Server.BrewBin
+    // Callers pass a fixed brew search command and its quoted formula pattern.
+    const executable = bin ? `'${bin.replace(/'/g, `'"'"'`)}'` : 'brew'
+    const res = await execPromiseWithEnv(command.replace(/^brew\b/, () => executable))
     let content: any = res.stdout
     console.log('brewinfo content: ', content)
     if (handleContent) {

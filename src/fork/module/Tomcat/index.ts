@@ -279,10 +279,12 @@ class Tomcat extends Base {
     return new ForkPromise(async (resolve, reject, on) => {
       let before: AppHost[] = []
       let baseSnapshot: Awaited<ReturnType<typeof snapshotTomcatBase>> | undefined
+      let writingHosts = false
       try {
         before = await fetchHostList()
         await this._initDefaultDir(version, catalinaBase).on(on)
         baseSnapshot = await snapshotTomcatBase(catalinaBase)
+        writingHosts = true
         const result: any = await Host.handleHost(host, flag, old)
         const hostList: AppHost[] = result.host
         await reconcileTomcatBase(catalinaBase, hostList)
@@ -297,12 +299,16 @@ class Tomcat extends Base {
         resolve({ host: hostList })
       } catch (error) {
         try {
-          await saveHostList(before)
+          if (writingHosts) await saveHostList(before)
           if (baseSnapshot) {
             await restoreTomcatBase(catalinaBase, baseSnapshot)
           }
         } catch (rollbackError) {
           console.error('Tomcat site rollback failed', rollbackError)
+          reject(Object.assign(new Error('The Tomcat website change could not be rolled back completely.'), {
+            code: 'TOMCAT_SITE_OUTCOME_UNKNOWN'
+          }))
+          return
         }
         reject(error)
       }

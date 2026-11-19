@@ -8,8 +8,7 @@ fi
 tty_universal() { tty_escape "0;$1"; } # Normal display
 tty_green="$(tty_universal 32)" # Green
 tty_reset="$(tty_escape 0)" # Remove color
-hasBrew=$(which brew)
-if ! [[ "$hasBrew" == "brew not found" ]]; then
+if command -v brew >/dev/null 2>&1; then
     echo -n "${tty_green}
     Detects that brew is installed, and the installer script exits automatically.${tty_reset}"
     echo "QTEnvDev-End of Homebrew installation"
@@ -33,9 +32,13 @@ echo "--> Script execution begins"
 *)
 echo "You typed $MY_Del_Old and the installation exited. if you continue to run the script you should type Y or y"
 echo "QTEnvDev-End of Homebrew installation"
-exit 0
+exit 125
 ;;
 esac
 
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+installer=$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) || exit $?
+/bin/bash -c "$installer"
+result=$?
 echo "QTEnvDev-End of Homebrew installation"
+[[ "$result" == 125 ]] && exit 1
+exit "$result"

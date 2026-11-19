@@ -70,9 +70,10 @@ class Brew extends Base {
   addTap(name: string) {
     return new ForkPromise(async (resolve, reject) => {
       try {
-        const stdout = (await spawnPromiseWithEnv('brew', ['tap'])).stdout
-        if (!stdout.includes(name)) {
-          await spawnPromiseWithEnv('brew', ['tap', name])
+        const bin = global.Server.BrewBin || 'brew'
+        const stdout = (await spawnPromiseWithEnv(bin, ['tap'], { shell: false })).stdout
+        if (!stdout.split(/\r?\n/).some((tap) => tap.trim() === name)) {
+          await spawnPromiseWithEnv(bin, ['tap', name], { shell: false })
           resolve(2)
         } else {
           resolve(1)

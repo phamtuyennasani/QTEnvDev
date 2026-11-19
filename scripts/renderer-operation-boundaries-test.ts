@@ -13,9 +13,18 @@ const nextSource = (file: string) => readFileSync(join(root, 'src/render-next', 
 assert.match(nextSource('state/projectController.ts'), /reactiveBind\(new WebsiteController/)
 assert.match(nextSource('websites/WebsiteController.ts'), /private mutation\?: Promise<boolean>/)
 assert.match(nextSource('websites/WebsiteController.ts'), /WebsiteOutcomeUnknown/)
-for (const file of ['screens/WebsitesScreen.vue', 'websites/WebsiteEditor.vue', 'screens/DatabasesScreen.vue']) {
+for (const file of [
+  'screens/WebsitesScreen.vue', 'websites/WebsiteEditor.vue', 'websites/TomcatWebsiteEditor.vue',
+  'screens/DatabasesScreen.vue', 'screens/CronScreen.vue', 'components/HomebrewPackagePanel.vue'
+]) {
   assert.doesNotMatch(nextSource(file), /IPC\.send|from ['"]@\/util\/IPC/)
 }
+assert.match(nextSource('components/HomebrewPackagePanel.vue'), /homebrewPackages as controller/)
+assert.match(nextSource('components/HomebrewPackagePanel.vue'), /homebrewBootstrap as bootstrap/)
+assert.match(nextSource('state/homebrewBootstrapController.ts'), /reactiveBind\(new HomebrewBootstrapController\(\)\)/)
+assert.match(nextSource('screens/CronScreen.vue'), /cronController as controller/)
+assert.match(nextSource('state/cronController.ts'), /forkTerminalRequest\(/)
+assert.match(nextSource('websites/TomcatWebsiteEditor.vue'), /projectController\.save\(/)
 assert.match(nextSource('screens/DatabasesScreen.vue'), /serviceController\.run/)
 for (const file of ['components/RsaPanel.vue', 'components/MysqlCodePanel.vue']) assert.doesNotMatch(nextSource(file), /IPC\.send|rsaGenerateKeyPair/)
 assert.match(nextSource('state/requestTimingController.ts'), /reactiveBind\(new RequestTimingOperation/)

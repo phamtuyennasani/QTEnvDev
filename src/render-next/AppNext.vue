@@ -12,7 +12,7 @@
       </aside>
       <main class="main"><OverviewScreen v-if="nextAppState.workspace === 'overview'" /><WebsitesScreen v-else-if="nextAppState.workspace === 'websites'" /><ServicesScreen v-else-if="nextAppState.workspace === 'services'" /><RuntimesScreen v-else-if="nextAppState.workspace === 'runtimes'" /><DatabasesScreen v-else-if="nextAppState.workspace === 'databases'" /><StartupGroupsScreen v-else-if="nextAppState.workspace === 'startup-groups'" /><ToolsScreen v-else-if="nextAppState.workspace === 'tools'" /><LogsScreen v-else-if="nextAppState.workspace === 'logs'" /><CronScreen v-else-if="nextAppState.workspace === 'cron'" /><SettingsScreen v-else-if="nextAppState.workspace === 'settings'" /></main>
     </div>
-    <footer class="statusbar"><span><i class="status-dot status-dot--running"></i>{{ nextAppState.operation }}</span><span class="mono">PQT FORGE / 1.0.0</span></footer>
+    <footer class="statusbar"><span>{{ nextAppState.operation }}</span><span class="mono">PQT FORGE / 1.0.0</span></footer>
     <NoticeRail />
     <TaskDialog />
     <CommandPalette ref="commandPalette" />
@@ -36,6 +36,9 @@ import NoticeRail from './components/NoticeRail.vue'
 import TaskDialog from './components/TaskDialog.vue'
 import { nextAppState, navigateNext, closeTask, type Workspace } from './state/app'
 import { startLogListener } from './state/logController'
+import { serviceController } from './state/serviceController'
+import { databaseController } from './state/databaseController'
+import { runtimeController } from './state/runtimeController'
 import IPC from '@/util/IPC'
 const windowCommand = (command: 'Application:APP-Minimize' | 'Application:APP-Maximize' | 'Application:APP-Close') => IPC.send(command)
 
@@ -53,7 +56,17 @@ const onShortcut = (event: KeyboardEvent) => {
 }
 onMounted(() => window.addEventListener('keydown', onShortcut))
 onMounted(() => startLogListener())
-onUnmounted(() => window.removeEventListener('keydown', onShortcut))
+const refreshPackages = () => {
+  const workspace = nextAppState.workspace
+  if (workspace === 'services' || workspace === 'overview') void serviceController.refresh()
+  if (workspace === 'databases') void databaseController.refresh()
+  if (workspace === 'runtimes') void runtimeController.refresh()
+}
+onMounted(() => window.addEventListener('pqt-packages-changed', refreshPackages))
+onUnmounted(() => {
+  window.removeEventListener('keydown', onShortcut)
+  window.removeEventListener('pqt-packages-changed', refreshPackages)
+})
 const navigation: { id: Workspace; label: string; icon: string; shortcut?: string }[] = [{ id: 'overview', label: 'Overview', icon: '⌂', shortcut: '1' }, { id: 'websites', label: 'Websites', icon: '⌁' }, { id: 'services', label: 'Services', icon: '◉' }, { id: 'runtimes', label: 'Runtimes', icon: '⌘' }, { id: 'databases', label: 'Databases', icon: '◈' }, { id: 'startup-groups', label: 'Startup groups', icon: '▶' }, { id: 'tools', label: 'Tools', icon: '✦' }, { id: 'logs', label: 'Logs', icon: '≋' }, { id: 'cron', label: 'Scheduled tasks', icon: '◷' }]
 </script>
 <style src="./styles/app.css"></style>

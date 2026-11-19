@@ -1256,7 +1256,11 @@ sql-mode=NO_ENGINE_SUBSTITUTION`
           databases,
           dbPrivileges,
           globalUsers,
-          allUsers
+          allUsers,
+          connection: {
+            port,
+            dataDirectory: typeof config?.mysqld?.datadir === 'string' ? config.mysqld.datadir : undefined
+          }
         })
       } finally {
         await connection.end()

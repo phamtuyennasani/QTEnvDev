@@ -13,6 +13,15 @@ interface XTermType {
 
 type ResolveFn = (...args: any) => void
 
+export class TerminalExitError extends Error {
+  constructor(
+    message: string,
+    readonly exitCode?: number
+  ) {
+    super(message)
+  }
+}
+
 export class XTerm implements XTermType {
   xterm: Terminal | undefined
   dom: HTMLElement | undefined
@@ -23,98 +32,101 @@ export class XTerm implements XTermType {
   resized = false
   private resolve: ResolveFn | undefined = undefined
   private executionKey?: string
+  private initialization?: Promise<void>
+  private mountToken?: object
 
   constructor() {}
 
-  mount(dom: HTMLElement) {
-    this.dom = dom
-    return new Promise((resolve, reject) => {
-      const doMount = async () => {
-        console.log('doMount: ', dom)
-        const appStore = AppStore()
-        const theme: { [k: string]: string } = {}
-        let appTheme = ''
-        if (!appStore?.config?.setup?.theme || appStore?.config?.setup?.theme === 'system') {
-          const isDark = await nativeTheme.shouldUseDarkColors()
-          appTheme = isDark ? 'dark' : 'light'
-        } else {
-          appTheme = appStore?.config?.setup?.theme
+  initialize(): Promise<void> {
+    if (this.ptyKey) return Promise.resolve()
+    if (this.initialization) return this.initialization
+    this.initialization = new Promise<void>((resolve, reject) => {
+      IPC.send('NodePty:init').then((key: string, res: any) => {
+        if (res?.code === 200) return
+        IPC.off(key)
+        if (res?.code !== 0 || !res?.data) {
+          reject(new Error(res?.msg ?? 'Failed to initialize terminal'))
+          return
         }
-        if (appTheme === 'light') {
-          theme.background = '#ffffff'
-          theme.foreground = '#334455'
-          theme.selectionBackground = '#a0cfff'
-          theme.cursor = '#666666'
-        } else {
-          theme.background = '#282b3d'
-          theme.foreground = '#cfd3dc'
-          theme.selectionBackground = '#606266'
-          theme.cursor = '#dddddd'
-        }
-        this.xterm = new Terminal({
-          fontSize: 14,
-          fontFamily: appStore.config.setup?.codeFont || 'Menlo, Monaco, "Courier New", monospace',
-          letterSpacing: 0, // 消除字体渲染差异
-          lineHeight: 1.2, // 统一行高
-
-          // 其他
-          allowTransparency: false, // 禁用透明避免差异
-
-          cursorBlink: true,
-          allowProposedApi: true,
-          cursorWidth: 8,
-          cursorStyle: 'bar',
-          logLevel: 'off',
-          theme: theme
+        this.ptyKey = res.data
+        IPC.on(`NodePty:data:${this.ptyKey}`).then((_key: string, data: string) => {
+          this.write(data)
+          this.xterm?.focus?.()
         })
-
-        let webglAddon: WebglAddon | undefined
-        try {
-          webglAddon = new WebglAddon()
-          this.xterm.loadAddon(webglAddon)
-        } catch {}
-        webglAddon?.onContextLoss?.(() => {
-          webglAddon?.dispose?.()
-        })
-
-        const fitaddon = new FitAddon()
-        this.xterm.loadAddon(fitaddon)
-        this.xterm.open(dom)
-        fitaddon.fit()
-        const cols = this.xterm.cols
-        const rows = this.xterm.rows
-        IPC.send('NodePty:resize', this.ptyKey, { cols, rows }).then((key: string) => IPC.off(key))
-        this.fitaddon = fitaddon
-        this.initEvent()
-        this.xterm.focus()
-        this.initLog()
-        this.xterm?.write('\x1b[?25h')
-        resolve(true)
-      }
-
-      if (!this.ptyKey) {
-        IPC.send('NodePty:init').then((key: string, res: any) => {
-          if (res?.code === 200) return
-          IPC.off(key)
-          if (res?.code !== 0 || !res?.data) {
-            reject(new Error(res?.msg ?? 'Failed to initialize terminal'))
-            return
-          }
-          this.ptyKey = res?.data ?? ''
-          /**
-           * Receive node-pty data
-           */
-          IPC.on(`NodePty:data:${this.ptyKey}`).then((key: string, data: string) => {
-            this.write(data)
-            this.xterm?.focus?.()
-          })
-
-          doMount().catch(reject)
-        })
-      } else {
-        doMount().catch(reject)
-      }
+        resolve()
+      })
+    }).finally(() => {
+      this.initialization = undefined
     })
+    return this.initialization
+  }
+
+  async mount(dom: HTMLElement) {
+    this.unmounted()
+    this.dom = dom
+    const mountToken = {}
+    this.mountToken = mountToken
+    await this.initialize()
+    const appStore = AppStore()
+    const theme: { [k: string]: string } = {}
+    let appTheme = ''
+    if (!appStore?.config?.setup?.theme || appStore?.config?.setup?.theme === 'system') {
+      const isDark = await nativeTheme.shouldUseDarkColors()
+      appTheme = isDark ? 'dark' : 'light'
+    } else {
+      appTheme = appStore?.config?.setup?.theme
+    }
+    if (this.mountToken !== mountToken) return
+    if (appTheme === 'light') {
+      theme.background = '#ffffff'
+      theme.foreground = '#334455'
+      theme.selectionBackground = '#a0cfff'
+      theme.cursor = '#666666'
+    } else {
+      theme.background = '#282b3d'
+      theme.foreground = '#cfd3dc'
+      theme.selectionBackground = '#606266'
+      theme.cursor = '#dddddd'
+    }
+    this.xterm = new Terminal({
+      fontSize: 14,
+      fontFamily: appStore.config.setup?.codeFont || 'Menlo, Monaco, "Courier New", monospace',
+      letterSpacing: 0, // 消除字体渲染差异
+      lineHeight: 1.2, // 统一行高
+
+      // 其他
+      allowTransparency: false, // 禁用透明避免差异
+
+      cursorBlink: true,
+      allowProposedApi: true,
+      cursorWidth: 8,
+      cursorStyle: 'bar',
+      logLevel: 'off',
+      theme: theme
+    })
+
+    let webglAddon: WebglAddon | undefined
+    try {
+      webglAddon = new WebglAddon()
+      this.xterm.loadAddon(webglAddon)
+    } catch {}
+    webglAddon?.onContextLoss?.(() => {
+      webglAddon?.dispose?.()
+    })
+
+    const fitaddon = new FitAddon()
+    this.xterm.loadAddon(fitaddon)
+    this.xterm.open(dom)
+    fitaddon.fit()
+    const cols = this.xterm.cols
+    const rows = this.xterm.rows
+    IPC.send('NodePty:resize', this.ptyKey, { cols, rows }).then((key: string) => IPC.off(key))
+    this.fitaddon = fitaddon
+    this.initEvent()
+    this.xterm.focus()
+    this.initLog()
+    this.xterm?.write('\x1b[?25h')
+    return true
   }
 
   initEvent() {
@@ -201,14 +213,13 @@ export class XTerm implements XTermType {
 
   destroy() {
     this.releaseExecution()
-    if (this.ptyKey) {
-      IPC.off(`NodePty:data:${this.ptyKey}`)
-    }
+    this.releaseProcessOutput()
     this.unmounted()
     this.cleanLog()
   }
 
   unmounted() {
+    this.mountToken = undefined
     window.removeEventListener('resize', this.onWindowResit)
     try {
       this.fitaddon?.dispose()
@@ -221,12 +232,21 @@ export class XTerm implements XTermType {
     this.dom = undefined
   }
 
+  releaseProcessOutput() {
+    if (this.ptyKey) IPC.off(`NodePty:data:${this.ptyKey}`)
+  }
+
   stop() {
-    this.end = true
-    this.releaseExecution()
-    return new Promise((resolve) => {
-      IPC.send('NodePty:stop', this.ptyKey).then((key: string) => {
+    return new Promise((resolve, reject) => {
+      IPC.send('NodePty:stop', this.ptyKey).then((key: string, res: any) => {
+        if (res?.code === 200) return
         IPC.off(key)
+        if (res?.code === 1) {
+          reject(new Error(res?.msg ?? 'Failed to stop terminal'))
+          return
+        }
+        this.end = true
+        this.releaseExecution()
         this?.resolve?.(true)
         this.resolve = undefined
         resolve(true)
@@ -270,6 +290,15 @@ export class XTerm implements XTermType {
         if (this.executionKey === key) this.executionKey = undefined
         this.end = true
         this.resolve = undefined
+        if (reportExitCode && (res?.code !== 0 || res?.data?.exitCode !== 0)) {
+          reject(
+            new TerminalExitError(
+              res?.msg ?? 'The terminal did not confirm success',
+              res?.data?.exitCode
+            )
+          )
+          return
+        }
         if (res?.code === 1) {
           reject(new Error(res?.msg ?? 'Failed to execute terminal command'))
           return

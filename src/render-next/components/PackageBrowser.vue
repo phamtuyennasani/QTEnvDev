@@ -4,7 +4,23 @@
     <div v-if="open" class="package-overlay" @keydown.esc.stop.prevent="close" @click.self="close">
       <section ref="dialog" class="package-dialog" role="dialog" aria-modal="true" aria-labelledby="package-title" tabindex="-1" @keydown.tab="trapFocus">
         <header class="package-dialog-header"><div><p class="eyebrow">WORKSPACE / PACKAGES</p><h2 id="package-title">Package library</h2><p>Download, install and manage local versions.</p></div><button class="package-close" aria-label="Close package library" @click="close">×</button></header>
-        <div class="package-toolbar"><label>Package<select :value="selectedFlag" @change="selectPackage(($event.target as HTMLSelectElement).value)"><optgroup v-for="group in groups" :key="group" :label="group"><option v-for="item in modules.filter((item) => item.group === group)" :key="item.flag" :value="item.flag">{{ item.label }}</option></optgroup></select></label><label class="package-search"><span>Search</span><input v-model="query" placeholder="Version or channel" /></label><button class="action-button" :disabled="catalog.loading" @click="reload(true)">{{ catalog.loading ? 'Refreshing…' : 'Refresh' }}</button></div>
+        <div class="package-toolbar">
+          <label>Package<select :value="selectedFlag" @change="selectPackage(($event.target as HTMLSelectElement).value)">
+            <optgroup v-for="group in groups" :key="group" :label="group">
+              <option v-for="item in modules.filter((item) => item.group === group)" :key="item.flag" :value="item.flag">{{ item.label }}</option>
+            </optgroup>
+          </select></label>
+          <label class="package-search"><span>Search</span><input v-model="query" :placeholder="usingHomebrew ? 'Formula or version' : 'Version or channel'" /></label>
+          <button class="action-button" :disabled="loading || (usingHomebrew && !homebrewPackages.available)" @click="reload(true)">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
+        </div>
+        <div v-if="hasHomebrew" class="package-tabs" role="group" aria-label="Package source">
+          <button :class="{ active: source === 'direct' }" :aria-pressed="source === 'direct'" @click="source = 'direct'">Direct download</button>
+          <button :class="{ active: source === 'brew' }" :aria-pressed="source === 'brew'" @click="source = 'brew'">Homebrew</button>
+        </div>
+        <div v-if="usingHomebrew" class="package-table">
+          <HomebrewPackagePanel :key="selectedFlag" :flag="selectedFlag" :query="query" :direct-busy="directBusy" />
+        </div>
+        <template v-else>
         <div class="package-tabs"><button :class="{ active: tab === 'available' }" @click="tab = 'available'">Available <span>{{ catalog.loading && !catalog.versions.length ? '…' : catalog.versions.length }}</span></button><button :class="{ active: tab === 'installed' }" @click="tab = 'installed'">Installed <span>{{ catalog.loading && !catalog.installed.length ? '…' : catalog.installed.length }}</span></button></div>
         <div v-if="catalog.error" class="package-alert package-alert--error" role="alert">{{ catalog.error }} <button class="text-button" :disabled="catalog.loading" @click="reload(true)">Try again</button></div>
         <p v-if="catalog.warning" class="package-alert" role="status">{{ catalog.warning }}</p>
@@ -15,6 +31,7 @@
           <div v-for="pkg in rows" :key="packageKey(pkg)" class="package-row"><div class="package-version"><b>{{ pkg.version }}</b><small>{{ tab === 'installed' ? pkg.bin : (pkg.channel || 'stable') }}<span v-if="pkg.downloaded"> · download cached</span></small></div><span class="package-tag">{{ pkg.installed ? 'Installed' : 'Available' }}</span><button v-if="pkg.installed" class="action-button" :disabled="busy" @click="askRemove(pkg)">Remove</button><button v-else class="action-button action-button--primary" :disabled="busy" @click="packageController.install(pkg)">{{ isActive(pkg) ? 'Installing…' : 'Install' }}</button></div>
         </div>
         <footer class="package-footer"><span>{{ provider?.label }} · {{ rows.length }} versions shown</span><span>Downloads continue when you close this window.</span></footer>
+        </template>
         <div v-if="pending" class="package-confirm-overlay" @keydown.esc.stop.prevent="pending = undefined"><section class="package-confirm-card" role="alertdialog" aria-labelledby="remove-title" aria-describedby="remove-description"><p class="eyebrow">PERMANENT REMOVAL</p><h3 id="remove-title">Remove {{ pending.version }}?</h3><p id="remove-description">The running version will be stopped. Its entire managed directory will be deleted. Back up any configuration and data in this directory first.</p><code>{{ directory?.path || pending.path || pending.appDir || pending.bin }}</code><p v-if="inspecting">Checking directory ownership…</p><p v-if="removeError" class="package-error" role="alert">{{ removeError }}</p><template v-if="directory"><label for="remove-phrase">Type <b>{{ FORCE_DELETE_CONFIRMATION }}</b> to confirm</label><input id="remove-phrase" v-model="confirmation" autocomplete="off" @keyup.enter="confirmRemove" /></template><div class="detail-actions"><button class="action-button" @click="pending = undefined">Cancel</button><button v-if="directory" class="action-button action-button--danger" :disabled="confirmation !== FORCE_DELETE_CONFIRMATION || busy" @click="confirmRemove">Remove permanently</button></div></section></div>
       </section>
     </div>
@@ -27,24 +44,51 @@ import { packageController } from '../state/packageController'
 import { packageModules, packageModule } from '../packages/catalog'
 import { packageKey, packageError, type PackageVersion } from '../packages/types'
 import { inspectPackage } from '../adapters/packageAdapter'
+import { supportsHomebrew } from '../packages/homebrewSources'
+import { homebrewPackages } from '../state/homebrewPackagesController'
+import { homebrewBootstrap } from '../state/homebrewBootstrapController'
+import HomebrewPackagePanel from './HomebrewPackagePanel.vue'
 const props = defineProps<{ flag?: string; title?: string }>()
 defineExpose({ show: () => { open.value = true } })
 const modules = packageModules
 const groups = ['Runtimes', 'Services', 'Databases', 'Utilities'] as const
 const open = ref(false); const selectedFlag = ref(props.flag || 'php'); const query = ref(''); const tab = ref<'available' | 'installed'>('available')
+const source = ref<'direct' | 'brew'>('direct')
 const dialog = ref<HTMLElement>(); let previousFocus: HTMLElement | null = null
 const pending = ref<PackageVersion>(); const directory = ref<ManagedVersionDirectory>(); const confirmation = ref(''); const inspecting = ref(false); const removeError = ref(''); let inspectionSequence = 0
 const catalog = computed(() => packageController.catalog(selectedFlag.value))
 const provider = computed(() => packageModule(selectedFlag.value))
 const operation = computed(() => packageController.operation)
-const busy = computed(() => operation.value?.status === 'running' || operation.value?.status === 'unknown')
+const directBusy = computed(() => operation.value?.status === 'running' || operation.value?.status === 'unknown')
+const busy = computed(() => directBusy.value || homebrewPackages.busy)
+const hasHomebrew = computed(() => supportsHomebrew(selectedFlag.value, window.Server))
+const usingHomebrew = computed(() => hasHomebrew.value && source.value === 'brew')
+const loading = computed(() => usingHomebrew.value ? homebrewPackages.catalog(selectedFlag.value).loading : catalog.value.loading)
 const active = computed(() => operation.value?.typeFlag === (props.flag || selectedFlag.value) && operation.value?.status === 'running')
 const rows = computed(() => (tab.value === 'installed' ? catalog.value.installed : catalog.value.versions).filter((item) => (item.version + ' ' + (item.channel || '')).toLowerCase().includes(query.value.toLowerCase())))
 const isActive = (item: PackageVersion) => operation.value?.key === packageKey(item) && operation.value?.status === 'running'
-const reload = (fresh = false) => packageController.load(selectedFlag.value, fresh)
-const selectPackage = (flag: string) => { query.value = ''; tab.value = 'available'; selectedFlag.value = flag; void packageController.load(flag, true) }
-watch(open, async (value) => { if (value) { previousFocus = document.activeElement as HTMLElement; if (props.flag) selectedFlag.value = props.flag; void reload(); await nextTick(); dialog.value?.focus() } else { pending.value = undefined; previousFocus?.focus() } })
-watch(selectedFlag, () => { query.value = ''; pending.value = undefined; if (open.value) void reload(true) })
+const reload = (fresh = false) => usingHomebrew.value
+  ? homebrewPackages.load(selectedFlag.value)
+  : packageController.load(selectedFlag.value, fresh)
+const selectPackage = (flag: string) => { tab.value = 'available'; selectedFlag.value = flag }
+watch(open, async (value) => {
+  if (value) {
+    previousFocus = document.activeElement as HTMLElement
+    if (props.flag) selectedFlag.value = props.flag
+    if (hasHomebrew.value && (homebrewPackages.operationFlag === selectedFlag.value || homebrewBootstrap.busy)) {
+      source.value = 'brew'
+    }
+    await nextTick()
+    dialog.value?.focus()
+  } else {
+    pending.value = undefined
+    previousFocus?.focus()
+  }
+})
+watch([open, selectedFlag, usingHomebrew, () => usingHomebrew.value && homebrewPackages.available], ([visible]) => {
+  if (visible) void reload()
+})
+watch([selectedFlag, source], () => { query.value = ''; pending.value = undefined })
 watch(pending, () => { inspectionSequence += 1 })
 const close = () => { open.value = false }
 const askRemove = async (item: PackageVersion) => {
@@ -65,7 +109,7 @@ onBeforeUnmount(() => { inspectionSequence += 1 })
 .package-dialog-header h2 { margin: 0; font-size: 20px; }
 .package-dialog-header p:not(.eyebrow) { margin: 7px 0 0; color: var(--pqt-text-muted); font-size: 12px; }
 .package-close { flex: 0 0 30px; height: 30px; border: 1px solid var(--pqt-border); border-radius: 7px; color: var(--pqt-text-muted); background: transparent; font-size: 22px; cursor: pointer;display:flex;align-items:center;justify-content:center }
-.package-dialog > *:not(.package-dialog-header):not(.package-footer) { flex-shrink: 0; }
+.package-dialog > *:not(.package-table) { flex-shrink: 0; }
 .package-toolbar { display: grid; grid-template-columns: 150px 1fr auto; gap: 10px; padding: 14px 22px 10px; }
 .package-toolbar label { display: grid; gap: 6px; color: var(--pqt-text-muted); font-size: 10px; }
 .package-toolbar select, .package-search input { min-width: 0; padding: 9px 10px; border: 1px solid var(--pqt-border-strong); border-radius: 7px; color: var(--pqt-text); background: var(--pqt-canvas); font: 11px var(--pqt-font-mono); }

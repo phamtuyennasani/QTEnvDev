@@ -1,0 +1,17 @@
+# Website backup operation contract
+
+- **View:** WebsiteBackupPanel owns no operation; it renders the singleton and emits close.
+- **Renderer owner:** module-local WebsiteBackupController snapshots the file-picker result, preview token, and confirmed import request; duplicate calls return its current flight. The WebsiteController exclusive lane serializes backup with CRUD/order/park.
+- **Fork owner:** Host backup helpers perform bounded JSON/sidecar reads, validate every identifier and known asset kind before deriving paths, stage generated/missing configs, refuse collisions, then commit new files and atomically replace host.json last. No shell, scheduler mutation, certificate generation, project writes or OS hosts writes occur inside the required transaction.
+- **Start:** explicit export, choose-import, or confirm-import command. Import is additive; it never removes or silently overwrites live records or files. Legacy JSON-array backups and known name-based sidecars are supported. New JSON bundles embed id-indexed configs. Source directories, logs and TLS private keys are excluded.
+- **Progress:** declared code 200 notifications only. Terminal: code 0 result or code 1 error. Observer timeout marks unknown, keeps the listener/exclusive lane, and blocks replay until late terminal. Backend rollback uncertainty permanently blocks the website mutation lane for investigation.
+- **Commit:** all input validation and required staging completes before live writes. Existing host/config bytes remain untouched on malformed input. Added assets are rolled back on a failed host-list commit. Rollback failure reports explicit unknown outcome and affected paths. No silent partial success.
+- **Supplementary:** authoritative list reconciliation, system hosts synchronization, and existing lifecycle restart calls run after successful import. Failure warns and never negates committed records. Tomcat generates server.xml during its existing restart/start reconciliation; a stopped runtime generates it on its next start.
+- **Tests:** temporary-directory roundtrip including legacy string IDs, malformed/traversal input, missing config generation, collision refusal, stale preview, required failure rollback and unknown rollback, immutable snapshots, duplicate/progress/unknown/late-terminal ownership, and Electron panel smoke with isolated transport.
+- **Constraints:** no new Pinia store or shared config, no shared lifecycle changes. `docs/skills/qtenvdev-failure-boundaries/SKILL.md` was absent; AGENTS failure policy applies.
+
+## Shared website writes
+
+The main process queues website transactions across fork workers. It holds each transaction through progress and releases it on a declared final reply. The same queue covers import, export, regular site writes, reordering, preset site creation, system hosts synchronization with its first run migration, and Tomcat site saves including rollback. Reviews and host list reads stay read only. Confirm checks the preview against the latest saved state after entering the queue.
+
+If a mutation worker exits before replying, the active write returns an unknown result, and the queue rejects pending and later website transactions in that application session. A declared rollback failure has the same effect. A declared failure with successful rollback allows the next request. A worker exit during export does not affect installed sites. The queue checks shutdown before dispatching pending requests. Tests exercise cross-module ordering, progress, declared errors, worker exit, and shutdown admission.

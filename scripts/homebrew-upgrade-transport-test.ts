@@ -13,13 +13,7 @@ async function renderer() {
   const removed: string[] = []
   const notices: { message: string }[] = []
   let refreshes = 0
-  const loaded = await loadIsolated('src/render/components/VersionManager/brew/Controller.ts', {
-    'element-plus': {
-      ElMessage: (notice: { message: string }) => {
-        notices.push(notice)
-      }
-    },
-    '@lang/index': { I18nT: (key: string) => key },
+  const transport = await loadIsolated('src/render/util/ForkTerminalRequest.ts', {
     '@/util/IPC': {
       send: (_channel: string, action: string, ...args: unknown[]) => {
         const request: (typeof requests)[number] = {
@@ -38,7 +32,16 @@ async function renderer() {
       off: (key: string) => {
         removed.push(key)
       }
+    }
+  })
+  const loaded = await loadIsolated('src/render/components/VersionManager/brew/Controller.ts', {
+    'element-plus': {
+      ElMessage: (notice: { message: string }) => {
+        notices.push(notice)
+      }
     },
+    '@lang/index': { I18nT: (key: string) => key },
+    '@/util/ForkTerminalRequest': transport,
     '@/util/Index': { reactiveBind: (value: unknown) => value },
     '@/store/brew': {
       BrewStore: () => {

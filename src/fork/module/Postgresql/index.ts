@@ -149,17 +149,17 @@ class Manager extends Base {
 
   init() {}
 
-  getConfigFiles(version?: SoftInstalled) {
+  getConfigFiles(version?: SoftInstalled, dataDirectory?: string) {
     const versionTop = version?.version?.split('.')?.shift() ?? ''
     if (!versionTop) return []
-    const dbPath = join(global.Server.PostgreSqlDir!, `postgresql${versionTop}`)
+    const dbPath = dataDirectory ?? join(global.Server.PostgreSqlDir!, `postgresql${versionTop}`)
     return [{ name: 'main', path: join(dbPath, 'postgresql.conf') }]
   }
 
-  getLogFiles(version?: SoftInstalled) {
+  getLogFiles(version?: SoftInstalled, dataDirectory?: string) {
     const versionTop = version?.version?.split('.')?.shift() ?? ''
     if (!versionTop) return []
-    const dbPath = join(global.Server.PostgreSqlDir!, `postgresql${versionTop}`)
+    const dbPath = dataDirectory ?? join(global.Server.PostgreSqlDir!, `postgresql${versionTop}`)
     const paths = this.pgAdminPaths()
     return [
       { name: 'log', path: join(dbPath, 'pg.log') },

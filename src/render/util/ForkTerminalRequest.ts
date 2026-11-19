@@ -16,12 +16,13 @@ export function forkTerminalRequest(
   args: any[],
   timeoutMessage: string,
   timeoutMs = 360_000,
-  onProgress?: (info: any) => void
+  onProgress?: (info: any) => void,
+  sensitive = false
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     let request: ReturnType<typeof IPC.send>
     try {
-      request = IPC.send(command, ...args)
+      request = sensitive ? IPC.sendSensitive(command, ...args) : IPC.send(command, ...args)
     } catch (error) {
       reject(error)
       return

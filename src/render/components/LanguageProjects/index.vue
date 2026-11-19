@@ -24,7 +24,7 @@
             </template>
             <template v-else>
               <slot name="header-actions" />
-              <el-button type="primary" :icon="FolderAdd" @click.stop="project.addProject()">
+              <el-button type="primary" :icon="FolderAdd" :disabled="!project.fetched" @click.stop="project.addProject(showDialog)">
                 {{ I18nT('common.action.add') }}
               </el-button>
             </template>
@@ -265,13 +265,13 @@
               :show-arrow="false"
             >
               <ul v-poper-fix class="host-list-menu">
-                <li @click.stop="project.action(scope.row, scope.$index, 'open')">
+                <li @click.stop="project.action(scope.row, scope.$index, 'open', showDialog)">
                   <yb-icon :svg="import('@/svg/folder.svg?raw')" width="13" height="13" />
                   <span class="ml-3">{{ I18nT('base.open') }}</span>
                 </li>
                 <li
                   v-if="!props.hideDefaultEdit"
-                  @click.stop="project.action(scope.row, scope.$index, 'edit')"
+                  @click.stop="project.action(scope.row, scope.$index, 'edit', showDialog)"
                 >
                   <yb-icon :svg="import('@/svg/edit.svg?raw')" width="13" height="13" />
                   <span class="ml-3">{{ I18nT('common.action.edit') }}</span>
@@ -312,13 +312,13 @@
                   <yb-icon :svg="import('@/svg/dirPath.svg?raw')" width="13" height="13" />
                   <span class="ml-3">{{ I18nT('nodejs.copyDirPath') }}</span>
                 </li>
-                <li @click.stop="project.action(scope.row, scope.$index, 'log')">
+                <li @click.stop="project.action(scope.row, scope.$index, 'log', showDialog)">
                   <yb-icon :svg="import('@/svg/log.svg?raw')" width="13" height="13" />
                   <span class="ml-3">{{ I18nT('base.log') }}</span>
                 </li>
                 <li
                   v-if="scope.row.configPath.length > 0"
-                  @click.stop="project.action(scope.row, scope.$index, 'config')"
+                  @click.stop="project.action(scope.row, scope.$index, 'config', showDialog)"
                 >
                   <yb-icon :svg="import('@/svg/config.svg?raw')" width="13" height="13" />
                   <span class="ml-3">{{ I18nT('base.configFile') }}</span>
@@ -364,7 +364,7 @@
                   <yb-icon :svg="import('@/svg/sort.svg?raw')" width="13" height="13" />
                   <span class="ml-3">{{ I18nT('host.sort') }}</span>
                 </li>
-                <li @click.stop="project.delProject(scope.$index)">
+                <li @click.stop="project.delProject(project.project.indexOf(scope.row))">
                   <yb-icon :svg="import('@/svg/trash.svg?raw')" width="13" height="13" />
                   <span class="ml-3">{{ I18nT('common.action.delete') }}</span>
                 </li>
@@ -394,7 +394,7 @@
   import { ProjectSetup } from './setup'
   import { FolderAdd, Lock } from '@element-plus/icons-vue'
   import { BrewStore } from '@/store/brew'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
   import { isEqual } from 'lodash-es'
   import { Project } from '@/util/Project'
   import type { AllAppModule } from '@/core/type'
@@ -455,6 +455,7 @@
   }
 
   const project = ProjectSetup(props.typeFlag)
+  const showDialog = useAsyncComponentShow()
   const projectPorts = computed(
     () => new Map(project.project.map((item) => [item.id, inspectProjectPorts(item)]))
   )
@@ -494,35 +495,29 @@
     return ''
   }
 
-  let SortVM: any
-  import('./sort.vue').then((res) => {
-    SortVM = res.default
-  })
-
-  const showSort = (event: MouseEvent, id: string) => {
+  const showSort = async (event: MouseEvent, id: string) => {
     let dom: HTMLElement = event.target as any
     while (dom.tagName.toUpperCase() !== 'LI' && dom.parentElement && dom.parentElement !== dom) {
       dom = dom.parentElement
     }
     const rect = dom.getBoundingClientRect()
-    AsyncComponentShow(SortVM, {
-      id: id,
-      rect,
-      typeFlag: props.typeFlag
-    }).then()
+    const snapshot = { id, rect, typeFlag: props.typeFlag }
+    try {
+      const { default: component } = await import('./sort.vue')
+      await showDialog(component, snapshot)
+    } catch (error) { MessageError(String(error)) }
   }
 
-  let ConfigVM: any
-  import('./config.vue').then((res) => {
-    ConfigVM = res.default
-  })
-
-  const showConfig = (item: ProjectItem) => {
-    AsyncComponentShow(ConfigVM, {
+  const showConfig = async (item: ProjectItem) => {
+    const snapshot = {
       file: join(item.path, '.qtenvdev'),
       fileExt: 'ps1',
       typeFlag: props.typeFlag
-    }).then()
+    }
+    try {
+      const { default: component } = await import('./config.vue')
+      await showDialog(component, snapshot)
+    } catch (error) { MessageError(String(error)) }
   }
 
   const tbodyDblClick = (e: MouseEvent) => {
@@ -592,38 +587,14 @@
       if (!isEqual(quickEdit.value, quickEditBack)) {
         const item = JSON.parse(JSON.stringify(quickEdit.value))
         cancelQuickEdit()
-        nextTick().then(() => {
-          const findNode = binVersions.value.find((n) => n.bin === item.binBin)
-          const find = project.project.find((p) => p.path === item.path)
-          if (find) {
-            item.binVersion = findNode?.version ?? ''
-            item.binPath = findNode?.path ?? ''
-            item.binBin = findNode?.bin ?? ''
-
-            const nodeChanged = find.binBin !== item.binBin
-            const needRestart =
-              (find.binBin !== item.binBin || find.projectPort !== item.projectPort) &&
-              find.state?.isRun
-
-            find.binBin = item.binBin
-            find.binPath = item.binPath
-            find.binVersion = item.binVersion
-            find.projectPort = item.projectPort
-            find.comment = item.comment
-
-            project.prepareProject(find)
-            project.saveProject()
-
-            if (needRestart) {
-              find
-                .stop()
-                .then(() => find.start())
-                .catch()
-            }
-            if (nodeChanged || ['roadrunner', 'swoole-cli'].includes(props.typeFlag)) {
-              project.setDirEnv(find).then().catch()
-            }
-          }
+        const selectedRuntime = binVersions.value.find((runtime) => runtime.bin === item.binBin)
+        const current = project.project.find((row) => row.id === item.id)
+        if (current) void project.quickEdit(current, {
+          binBin: selectedRuntime?.bin ?? item.binBin,
+          binPath: selectedRuntime?.path ?? item.binPath,
+          binVersion: selectedRuntime?.version ?? item.binVersion,
+          projectPort: item.projectPort,
+          comment: item.comment
         })
       } else {
         cancelQuickEdit()
@@ -635,14 +606,14 @@
     document.addEventListener('click', docClick)
     nextTick().then(() => {
       const list: HTMLElement = nodeProjectList?.value?.$el as any
-      const tbody = list.querySelector('tbody')
+      const tbody = list?.querySelector('tbody')
       tbody?.addEventListener('dblclick', tbodyDblClick)
     })
   })
   onBeforeUnmount(() => {
     document.removeEventListener('click', docClick)
     const list: HTMLElement = nodeProjectList?.value?.$el as any
-    const tbody = list.querySelector('tbody')
+    const tbody = list?.querySelector('tbody')
     tbody?.removeEventListener('dblclick', tbodyDblClick)
   })
 </script>

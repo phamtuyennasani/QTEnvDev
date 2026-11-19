@@ -27,6 +27,7 @@ import { StopProcessListBridge } from './StopProcessListBridge'
 import { StopProcessListCache } from './StopProcessListCache'
 import type { WindowsPrivilegeBridge } from './WindowsPrivilegeBridge'
 import type { WindowsPrivilegeSnapshot } from '@shared/WindowsPrivilege'
+import { isWebsiteForkTransaction, WebsiteForkQueue } from './WebsiteForkQueue'
 import { ForkPromise } from '@shared/ForkPromise'
 import { logServiceStopBoundary } from '@shared/ServiceStopDiagnostics'
 import { logWindowsPath } from '@shared/WindowsPathDiagnostics'
@@ -195,6 +196,7 @@ export class ForkManager {
   >()
   private readonly rawLifecycleRequests = new Set<Promise<void>>()
   private readonly serviceLifecycleRequests = new Set<Promise<void>>()
+  private readonly websiteForkQueue = new WebsiteForkQueue()
 
   constructor(file: string) {
     this.file = file
@@ -403,7 +405,28 @@ export class ForkManager {
       }
       return track(this.sendDedicatedService(this.dnsFork, module, args))
     }
-    const fn = param.shift()
+    if (isWebsiteForkTransaction(module, param[0])) {
+      return track(this.websiteForkQueue.run(async (progress) => {
+        if (isServiceLifecycleContextExpired() ||
+          (this.serviceLifecycleClosing && !hasServiceLifecyclePermit())) {
+          throw new Error('Application is shutting down')
+        }
+        const worker = this.selectGenericFork(module, param[0], selectionStarted)
+        const reply: any = await worker.send(...args).on(progress)
+        if (reply.outcome === 'unknown' && param[0] !== 'websiteBackupExport') {
+          return {
+            code: 1,
+            errorCode: module === 'tomcat' ? 'TOMCAT_SITE_OUTCOME_UNKNOWN' : 'WEBSITE_WRITE_OUTCOME_UNKNOWN',
+            msg: 'The website operation lost its worker before reporting its result. Check the saved configuration before retrying.'
+          }
+        }
+        return reply
+      }))
+    }
+    return track(this.selectGenericFork(module, param[0], selectionStarted).send(...args))
+  }
+
+  private selectGenericFork(module: string, fn: string, selectionStarted: number) {
     /**
      * Find a thread with no tasks.
      * The first generic item is always the three-minute primary. Every additional generic item
@@ -450,7 +473,7 @@ export class ForkManager {
         durationMs: performanceDiagnosticElapsed(selectionStarted)
       })
     }
-    return track(find.send(...args))
+    return find
   }
 
   /** 关闭全部原始请求入口，已受理操作仍可凭异步许可完成。 */

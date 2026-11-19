@@ -3,6 +3,8 @@ import type { AppHost } from '@shared/app'
 import { existsSync } from 'fs'
 import { readFile, writeFile } from '../../Fn'
 import { createRequire } from 'node:module'
+import { rename, rm, writeFile as writeNativeFile } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 const require = createRequire(import.meta.url)
 
 const NodeRSA = require('node-rsa')
@@ -31,7 +33,7 @@ z5MAQJ18Womv0CVnMZoDkn80JVA2qnOwsD/K6GSkFxJJ
 -----END RSA PRIVATE KEY-----
 `
 
-export const fetchHostList = async () => {
+export const fetchHostList = async (migratePlaintext = true) => {
   const hostfile = join(global.Server.BaseDir!, 'host.json')
   let hostList: Array<AppHost> = []
   if (existsSync(hostfile)) {
@@ -39,12 +41,11 @@ export const fetchHostList = async () => {
     if (content.length === 0) {
       return hostList
     }
-    console.log('fetchHostList content: ', content.startsWith('['), content.endsWith(']'))
     if (content.startsWith('[') && content.endsWith(']')) {
-      const key = new NodeRSA(RSAPrivateKey)
-      const c = key.encryptPrivate(content, 'base64')
-      console.log('fetchHostList ccc: ', c)
-      await writeFile(hostfile, c)
+      if (migratePlaintext) {
+        const key = new NodeRSA(RSAPrivateKey)
+        await writeFile(hostfile, key.encryptPrivate(content, 'base64'))
+      }
     } else {
       const key = new NodeRSA(RSAPublickKey)
       try {
@@ -53,9 +54,10 @@ export const fetchHostList = async () => {
     }
     try {
       hostList = JSON.parse(content)
+      if (!Array.isArray(hostList)) throw new Error('Saved website data is not a list.')
     } catch (e) {
       console.log(e)
-      if (content.length > 0) {
+      if (content.length > 0 && migratePlaintext) {
         const hostBackFile = join(global.Server.BaseDir!, 'host.back.json')
         await writeFile(hostBackFile, content)
       }
@@ -65,9 +67,9 @@ export const fetchHostList = async () => {
   return hostList
 }
 
-export const saveHostList = async (list: any) => {
+export const saveHostList = async (list: AppHost[]) => {
   const hostfile = join(global.Server.BaseDir!, 'host.json')
-  list.forEach((h: any) => {
+  list.forEach((h) => {
     if (!h.type) {
       h.type = 'php'
     }
@@ -75,5 +77,11 @@ export const saveHostList = async (list: any) => {
   let content = JSON.stringify(list)
   const key = new NodeRSA(RSAPrivateKey)
   content = key.encryptPrivate(content, 'base64')
-  await writeFile(hostfile, content)
+  const temporary = hostfile + '.' + randomUUID() + '.tmp'
+  try {
+    await writeNativeFile(temporary, content, { flag: 'wx', mode: 0o600 })
+    await rename(temporary, hostfile)
+  } finally {
+    await rm(temporary, { force: true }).catch(() => undefined)
+  }
 }

@@ -237,6 +237,112 @@ assert.equal(requests.length, 2)
 assert.deepEqual(requests[1].args, ['stopService', '12000', 'nodejs'])
 assert.equal(runningProject.state.isRun, false)
 
+const projectSource = transpileTypeScript(
+  source('src/render/components/LanguageProjects/Project.ts')
+)
+  .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
+  .replace(/\bexport\s+/g, '')
+const projectStorage = new Map<string, unknown>()
+const projectMessages: string[] = []
+let readProjectStorage = async (key: string) => projectStorage.get(key)
+Object.assign(context, {
+  localForage: {
+    getItem: (key: string) => readProjectStorage(key),
+    setItem: async (key: string, value: unknown) => {
+      projectStorage.set(key, JSON.parse(JSON.stringify(value)))
+    }
+  },
+  reactiveBind: (value: unknown) => value,
+  MessageError: (message: string) => projectMessages.push(message)
+})
+runInContext(projectSource + '\nthis.Project = Project;', context)
+const sourceProject = new context.Project('node')
+const storageKey = 'qtenvdev-node-projects'
+projectStorage.set(storageKey, [{ ...project, id: 'live', isService: true }])
+await sourceProject.fetchProject()
+const live = sourceProject.project[0]
+await live.start(false, false, false)
+projectStorage.set(storageKey, [])
+await sourceProject.fetchProject()
+assert.equal(
+  sourceProject.project[0],
+  live,
+  'refresh keeps the owner of a live PID even if a stale read omits it'
+)
+assert.equal(sourceProject.project[0].state.pid, '12000')
+await live.stop(false, false)
+projectStorage.set(storageKey, [{ ...project, id: 'live', comment: 'from storage' }])
+await sourceProject.fetchProject()
+assert.equal(sourceProject.project[0], live, 'refresh also preserves handles to stopped rows')
+assert.equal(live.comment, 'from storage')
+let finishRead!: (value: unknown) => void
+readProjectStorage = () =>
+  new Promise((resolve) => {
+    finishRead = resolve
+  })
+const staleRead = sourceProject.fetchProject()
+await Promise.resolve()
+live.comment = 'newer edit'
+await sourceProject.saveProject()
+finishRead([{ ...project, id: 'live', comment: 'stale read' }])
+await staleRead
+assert.equal(live.comment, 'newer edit')
+assert.equal('_state' in (projectStorage.get(storageKey) as object[])[0], false)
+
+// A full edit must wait for persistence and environment setup before restarting.
+for (const failedStep of [undefined, 'stop', 'save', 'environment'] as const) {
+  const editProject = new context.Project('node')
+  const editSteps: string[] = []
+  const item = new context.ProjectItem({ ...project, id: 'edit', runCommand: 'node old.mjs' })
+  item.state.isRun = true
+  item.state.pid = '12000'
+  editProject.project = [item]
+  editProject.projectEditComponent = async () => ({ default: {} })
+  item.stop = async () => {
+    editSteps.push('stop')
+    if (failedStep === 'stop') return false
+    item.state.isRun = false
+    item.state.pid = ''
+    return true
+  }
+  editProject.saveProject = async () => {
+    assert.equal(item.runCommand, 'node new.mjs')
+    assert.equal(item.state.pid, '')
+    editSteps.push('save')
+    return failedStep !== 'save'
+  }
+  let finishEnvironment!: (ready: boolean) => void
+  editProject.setDirEnv = () => {
+    editSteps.push('environment')
+    return new Promise<boolean>((resolve) => {
+      finishEnvironment = resolve
+    })
+  }
+  item.start = async () => {
+    editSteps.push('restart')
+    return true
+  }
+  const operation = editProject.action(item, 0, 'edit', async () => ({
+    ...item,
+    runCommand: 'node new.mjs',
+    projectPort: 4100
+  }))
+  if (failedStep === 'stop' || failedStep === 'save') {
+    await operation
+    assert.deepEqual(editSteps, failedStep === 'stop' ? ['stop'] : ['stop', 'save'])
+    assert.equal(item.projectPort, failedStep === 'stop' ? project.projectPort : 4100)
+  } else {
+    await new Promise<void>((resolve) => setImmediate(resolve))
+    assert.deepEqual(editSteps, ['stop', 'save', 'environment'])
+    finishEnvironment(!failedStep)
+    await operation
+    assert.deepEqual(
+      editSteps,
+      failedStep ? ['stop', 'save', 'environment'] : ['stop', 'save', 'environment', 'restart']
+    )
+  }
+}
+
 // Execute the real form and quick-edit handlers with refs and persistence stubbed.
 // These checks cover the guard ordering without claiming to mount Vue/Element Plus.
 const editSource = source('src/render/components/LanguageProjects/ProjectEdit.vue')
@@ -332,7 +438,7 @@ const quickHandler = transpileTypeScript(
     .join('\n') +
     '\nObject.assign(this, { tbodyDblClick, onQuickEditPortInput, cancelQuickEdit, docClick });'
 )
-const quickContext = (primary: unknown, extras: unknown, active = false) => {
+const quickContext = (primary: unknown, extras: unknown, active = false, stopSucceeds = true) => {
   const operations: string[] = []
   const saved = {
     ...validFormProject,
@@ -343,7 +449,7 @@ const quickContext = (primary: unknown, extras: unknown, active = false) => {
     state: { isRun: active, running: false },
     stop: () => {
       operations.push('stop')
-      return Promise.resolve(true)
+      return Promise.resolve(stopSucceeds)
     },
     start: () => {
       operations.push('start')
@@ -358,7 +464,15 @@ const quickContext = (primary: unknown, extras: unknown, active = false) => {
     contains: () => false,
     querySelector: () => ({ getAttribute: () => saved.id })
   }
-  const context = createContext({
+  const projectModel = new context.Project('node')
+  projectModel.project = [saved]
+  projectModel.prepareProject = () => {}
+  projectModel.saveProject = () => {
+    writes.push(JSON.parse(JSON.stringify(saved)))
+    return Promise.resolve(true)
+  }
+  projectModel.setDirEnv = () => Promise.resolve(true)
+  const quickViewContext = createContext({
     console: { log: () => {} },
     quickEdit: { value: undefined },
     quickEditBack: undefined,
@@ -375,24 +489,18 @@ const quickContext = (primary: unknown, extras: unknown, active = false) => {
     nextTick: () => Promise.resolve(),
     binVersions: { value: [] },
     props: { typeFlag: 'nodejs' },
-    project: {
-      project: [saved],
-      prepareProject: () => {},
-      saveProject: () => writes.push(JSON.parse(JSON.stringify(saved))),
-      setDirEnv: () => Promise.resolve()
-    }
+    project: projectModel
   })
-  runInContext(quickHandler, context)
-  context.tbodyDblClick({ target: row })
+  runInContext(quickHandler, quickViewContext)
+  quickViewContext.tbodyDblClick({ target: row })
   const editPort = (input: string) => {
-    context.quickEditPortInput.value = input
-    context.onQuickEditPortInput()
+    quickViewContext.quickEditPortInput.value = input
+    quickViewContext.onQuickEditPortInput()
   }
-  return { context, saved, original, writes, operations, messages, editPort }
+  return { context: quickViewContext, saved, original, writes, operations, messages, editPort }
 }
 const flushQuickEdit = async () => {
-  await Promise.resolve()
-  await Promise.resolve()
+  await new Promise<void>((resolve) => setImmediate(resolve))
 }
 
 // A/B: Entering and leaving either a valid or corrupt active project is a no-op.
@@ -444,6 +552,13 @@ assert.equal(typeof quickValid.saved.projectPort, 'number')
 assert.deepEqual(quickValid.saved.additionalProjectPorts, [4000, 5000])
 assert.equal(quickValid.writes.length, 1)
 assert.deepEqual(quickValid.operations, ['stop', 'start'])
+const failedStop = quickContext(3000, [4000], true, false)
+failedStop.editPort('3001')
+failedStop.context.docClick()
+await flushQuickEdit()
+assert.deepEqual(failedStop.operations, ['stop'])
+assert.equal(failedStop.writes.length, 0)
+assert.equal(failedStop.saved.projectPort, 3000)
 const quickComment = quickContext(3000, [4000, 5000], true)
 quickComment.context.quickEdit.value.comment = 'Only the comment changed'
 quickComment.context.docClick()

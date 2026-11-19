@@ -1,8 +1,9 @@
 import type { AllAppModule } from '@/core/type'
+import type { SoftInstalled } from '@shared/app'
 import { BrewStore } from '@/store/brew'
 import { registerLifecycle } from './lifecycleAdapter'
 
-export const serviceModuleFlags: Record<string, AllAppModule> = { Apache: 'apache', Nginx: 'nginx', Caddy: 'caddy', PHP: 'php', 'PHP-FPM': 'php-fpm', MySQL: 'mysql', MariaDB: 'mariadb', PostgreSQL: 'postgresql', Redis: 'redis', MongoDB: 'mongodb', ClickHouse: 'clickhouse', Elasticsearch: 'elasticsearch', RabbitMQ: 'rabbitmq', Memcached: 'memcached', Mailpit: 'mailpit', Minio: 'minio', Qdrant: 'qdrant', Typesense: 'typesense', Meilisearch: 'meilisearch', Neo4j: 'neo4j', Consul: 'consul', Podman: 'podman', Cloudflared: 'cloudflared', 'Cloudflare Tunnel': 'cloudflare-tunnel', 'Pure-FTPd': 'pure-ftpd', 'FTP Server': 'ftp-srv', 'HTTP Serve': 'httpserver', RoadRunner: 'roadrunner', FrankenPHP: 'frankenphp', N8N: 'n8n' }
+export const serviceModuleFlags: Record<string, AllAppModule> = { Apache: 'apache', Nginx: 'nginx', Caddy: 'caddy', Tomcat: 'tomcat', PHP: 'php', 'PHP-FPM': 'php-fpm', MySQL: 'mysql', MariaDB: 'mariadb', PostgreSQL: 'postgresql', Redis: 'redis', MongoDB: 'mongodb', ClickHouse: 'clickhouse', Elasticsearch: 'elasticsearch', RabbitMQ: 'rabbitmq', Memcached: 'memcached', Mailpit: 'mailpit', Minio: 'minio', Qdrant: 'qdrant', Typesense: 'typesense', Meilisearch: 'meilisearch', Neo4j: 'neo4j', Consul: 'consul', Podman: 'podman', Cloudflared: 'cloudflared', 'Cloudflare Tunnel': 'cloudflare-tunnel', 'Pure-FTPd': 'pure-ftpd', 'FTP Server': 'ftp-srv', 'HTTP Serve': 'httpserver', RoadRunner: 'roadrunner', FrankenPHP: 'frankenphp', N8N: 'n8n' }
 
 type Lifecycle = 'start' | 'stop' | 'restart'
 export type AdapterResult = { connected: boolean; result: string | boolean }
@@ -13,6 +14,20 @@ export function currentServiceVersion(name: string) {
     const module = BrewStore().module(flag === 'php-fpm' ? 'php' : flag)
     return BrewStore().currentVersion(flag) ?? module.installed.find((item) => item.run) ?? module.installed[0]
   } catch { return undefined }
+}
+
+export async function serviceFileContext(flag: AllAppModule, version?: SoftInstalled): Promise<unknown[]> {
+  if (!version?.version) return []
+  if (flag === 'tomcat') {
+    const { TomcatSetup, tomcatCatalinaBase } = await import('@/components/Tomcat/setup')
+    await TomcatSetup.init()
+    return [tomcatCatalinaBase(version)]
+  }
+  if (flag === 'postgresql') {
+    const { postgreSqlDataDirectory } = await import('@/components/PostgreSql/lifecycle')
+    return [await postgreSqlDataDirectory({ version: version.version, bin: version.bin })]
+  }
+  return []
 }
 
 /**

@@ -38,10 +38,10 @@ const refresh = async () => {
   await Promise.all(services.map(async (service) => {
     if (service.state === 'busy') return
     const snapshot = await readServiceSnapshot(service.name)
-    if (!snapshot.connected) { service.state = snapshot.reason === 'unavailable' ? 'unavailable' : 'unknown'; service.version = '—'; service.uptime = undefined; return }
+    if (!snapshot.connected) { service.state = snapshot.reason === 'unavailable' ? 'unavailable' : 'unknown'; service.version = '—'; service.uptime = undefined; service.port = undefined; return }
     service.state = !snapshot.installed ? 'not-installed' : snapshot.running ? 'running' : 'stopped'
-    if (snapshot.version) service.version = snapshot.version
-    if (snapshot.port) service.port = snapshot.port
+    service.version = snapshot.version || '—'
+    service.port = snapshot.port
   }))
 }
 export const serviceController = { services, selected, runningCount: computed(() => services.filter((service) => service.state === 'running').length), select(service: ServiceItem) { selected.service = service }, run, runGroup, refresh }

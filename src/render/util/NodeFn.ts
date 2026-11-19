@@ -253,6 +253,7 @@ const strictReadFileRequest = createIPCCall<[string, boolean], string | FileIPCF
   'fs',
   'readFile'
 )
+const readLogTailRequest = createIPCCall<[string], string | FileIPCFailure>('fs', 'readLogTail')
 
 const inspectVersionDirectory = createIPCCall<
   [VersionDeleteTarget],
@@ -293,6 +294,11 @@ export const fs = {
   // 重写文件前使用严格读取，防止读取拒绝/缺失被空字符串替代而丢失既有内容。
   async readFileStrict(path: string): Promise<string> {
     const response = await strictReadFileRequest(path, true)
+    if (typeof response !== 'string') return throwFileIPCFailure(response)
+    return response
+  },
+  async readLogTail(path: string): Promise<string> {
+    const response = await readLogTailRequest(path)
     if (typeof response !== 'string') return throwFileIPCFailure(response)
     return response
   },

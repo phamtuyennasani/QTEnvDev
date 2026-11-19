@@ -1,41 +1,37 @@
 import { ElMessage } from 'element-plus'
 import { I18nT } from '@lang/index'
-import IPC from '@/util/IPC'
 import { reactiveBind } from '@/util/Index'
 import { BrewStore } from '@/store/brew'
 import { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
 import type { AllAppModule } from '@/core/type'
 import { HomebrewUpgradeController } from './UpgradeController'
 import type { BrewPackageResult } from '@fork/module/Brew/UpgradeTypes'
+import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
 
 export const brewRequest = (
   action: string,
   args: unknown[],
   progress?: (data: string) => void
-): Promise<any> =>
-  new Promise((resolve, reject) => {
-    const request = IPC.send('app-fork:brew', action, ...args)
-    let settled = false
-    request.then((key: string, info: any) => {
-      if (settled) return
-      if (info?.code === 200) {
-        progress?.(String(info.msg ?? ''))
-        return
-      }
-      settled = true
-      IPC.off(key)
-      if (info?.code === 0) resolve(info.data)
-      else if (['executeUpgrade', 'packageOperation'].includes(action))
-        resolve({
-          operationId: '',
-          action: action === 'executeUpgrade' ? 'upgrade' : args[0],
-          outcome: info?.outcome === 'unknown' ? 'unknown' : 'failed',
-          error: info?.msg,
-          logs: ''
-        })
-      else reject(new Error(info?.msg || I18nT('base.fail')))
-    })
+): Promise<any> => {
+  const mutation = ['executeUpgrade', 'packageOperation'].includes(action)
+  return forkTerminalRequest(
+    'app-fork:brew',
+    [action, ...args],
+    'Homebrew did not return a result.',
+    mutation ? 30 * 60_000 : 6 * 60_000,
+    (info) => progress?.(String(info.msg ?? ''))
+  ).then((info) => {
+    if (info.code === 0) return info.data
+    if (!mutation) throw new Error(info.msg || I18nT('base.fail'))
+    return {
+      operationId: '',
+      action: action === 'executeUpgrade' ? 'upgrade' : args[0],
+      outcome: info.outcome === 'unknown' ? 'unknown' : 'failed',
+      error: info.msg,
+      logs: ''
+    }
   })
+}
 
 export const homebrewUpgrade = reactiveBind(
   new HomebrewUpgradeController({

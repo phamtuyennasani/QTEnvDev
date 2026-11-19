@@ -4,6 +4,7 @@ import { EventEmitter } from 'node:events'
 import { runInNewContext } from 'node:vm'
 import { build } from 'esbuild'
 import { ForkPromise } from '../src/shared/ForkPromise'
+import { isWebsiteForkTransaction, WebsiteForkQueue } from '../src/main/core/WebsiteForkQueue'
 
 const replies: any[][] = []
 const requests: { args: any[]; promise: ForkPromise<any>; progress: (info: any) => void }[] = []
@@ -45,6 +46,7 @@ const mocks: Record<string, any> = {
   './ServiceProcess': { statusOf: () => ({ revision: 1 }), onStatusChange() {} },
   './core/ServiceVersionManager': { onMcpNotify() {} },
   './core/ForkManager': { ForkManager },
+  './WebsiteForkQueue': { isWebsiteForkTransaction, WebsiteForkQueue },
   './core/WindowsPrivilegeBridge': { WindowsPrivilegeBridge: class {} },
   './utils/AppRuntimePath': { getElectronResourcePath: (file: string) => file }
 }

@@ -76,6 +76,9 @@ export class Project {
   search = ''
   flagType: AllAppModule = 'golang'
   private fetchProjectPromise?: Promise<void>
+  private pendingSave = Promise.resolve()
+  private revision = 0
+  private edits = new Map<string, Promise<void>>()
 
   constructor(flagType: AllAppModule) {
     this.flagType = flagType
@@ -176,83 +179,147 @@ export class Project {
     return import('./ProjectEdit.vue')
   }
 
-  action(item: ProjectItem, index: number, action: 'open' | 'edit' | 'log' | 'config') {
+  private commitEdit(item: ProjectItem, draft: Partial<ProjectItem>, fullEdit: boolean) {
+    const id = item.id
+    const pending = this.edits.get(id)
+    if (pending) return pending
+    const { _state, isSorting, ...snapshot } = JSON.parse(JSON.stringify(draft))
+    const operation = Promise.resolve()
+      .then(async () => {
+        if (!this.project.includes(item) || item.state.running) return
+        const runtimeChanged = item.binBin !== snapshot.binBin
+        const restart =
+          item.state.isRun &&
+          (fullEdit || runtimeChanged || item.projectPort !== snapshot.projectPort)
+        if (restart && !(await item.stop())) return
+
+        Object.assign(item, snapshot)
+        this.prepareProject(item)
+        if (!(await this.saveProject())) return
+        if (
+          fullEdit ||
+          runtimeChanged ||
+          this.flagType === 'roadrunner' ||
+          this.flagType === 'swoole-cli'
+        ) {
+          if (!(await this.setDirEnv(item))) {
+            MessageError(I18nT('base.fail'))
+            return
+          }
+        }
+        if (restart) await item.start()
+      })
+      .catch((error) => {
+        MessageError(String(error))
+      })
+      .finally(() => {
+        this.edits.delete(id)
+      })
+    this.edits.set(id, operation)
+    return operation
+  }
+
+  quickEdit(
+    item: ProjectItem,
+    draft: Pick<ProjectItem, 'binBin' | 'binPath' | 'binVersion' | 'projectPort' | 'comment'>
+  ) {
+    return this.commitEdit(item, draft, false)
+  }
+
+  action(
+    item: ProjectItem,
+    index: number,
+    action: 'open' | 'edit' | 'log' | 'config',
+    showDialog: typeof AsyncComponentShow = AsyncComponentShow
+  ) {
     switch (action) {
       case 'open':
         shell.openPath(item.path).catch()
         break
       case 'edit':
-        this.projectEditComponent().then((res) => {
-          AsyncComponentShow(res.default, {
-            isEdit: true,
-            edit: item,
-            typeFlag: this.flagType
-          }).then((res: ProjectItem) => {
-            if (res) {
-              console.log('action: ', item)
-              const isRun = item?.state?.isRun
-              item
-                .stop()
-                .then((stopped) => {
-                  // stop 失败时旧服务仍可能使用原配置；不要覆盖配置或再启动第二个实例。
-                  if (stopped !== true) {
-                    MessageError(typeof stopped === 'string' ? stopped : I18nT('base.fail'))
-                    return
-                  }
-                  const state = JSON.parse(JSON.stringify(item.state))
-                  Object.assign(item, res)
-                  Object.assign(item.state, state)
-                  this.prepareProject(item)
-                  this.saveProject()
-                  this.setDirEnv(item).catch()
-                  if (isRun) {
-                    item.start().catch()
-                  }
-                })
-                .catch()
-            }
+        return this.projectEditComponent()
+          .then(({ default: component }) =>
+            showDialog(component, {
+              isEdit: true,
+              edit: item,
+              typeFlag: this.flagType
+            })
+          )
+          .then((draft: ProjectItem | undefined) =>
+            draft ? this.commitEdit(item, draft, true) : undefined
+          )
+          .catch((error) => {
+            MessageError(String(error))
           })
-        })
-        break
       case 'log':
         import('./LogViewer.vue').then((res) => {
-          AsyncComponentShow(res.default, {
+          showDialog(res.default, {
             item
           }).catch()
         })
         break
       case 'config':
         import('./ConfigViewer.vue').then((res) => {
-          AsyncComponentShow(res.default, {
+          showDialog(res.default, {
             item
           }).catch()
         })
         break
     }
+    return undefined
   }
 
   saveProject() {
-    localForage
-      .setItem(`qtenvdev-${this.flagType}-projects`, JSON.parse(JSON.stringify(this.project)))
-      .then()
-      .catch()
+    this.revision++
+    const snapshot = this.project.map((item) => {
+      const { _state, isSorting, ...saved } = JSON.parse(JSON.stringify(item))
+      return saved
+    })
+    const saved = this.pendingSave
+      .then(async () => {
+        await localForage.setItem(`qtenvdev-${this.flagType}-projects`, snapshot)
+        return true
+      })
+      .catch((error) => {
+        MessageError(String(error))
+        return false
+      })
+    this.pendingSave = saved.then(() => {})
+    return saved
   }
   fetchProject(): Promise<void> {
     if (this.fetching) {
       return this.fetchProjectPromise ?? Promise.resolve()
     }
     this.fetching = true
-    this.fetchProjectPromise = localForage
-      .getItem(`qtenvdev-${this.flagType}-projects`)
-      .then((res: ProjectItem[]) => {
+    const revision = this.revision
+    this.fetchProjectPromise = this.pendingSave
+      .then(() => localForage.getItem<ProjectItem[]>(`qtenvdev-${this.flagType}-projects`))
+      .then((res) => {
+        if (revision !== this.revision) return
         if (res) {
-          this.project.splice(0)
+          if (!Array.isArray(res)) throw new Error('Invalid saved project list')
+          const existing = new Map(this.project.map((item) => [item.id, item]))
+          const rows: ProjectItem[] = []
           let needSave = false
           for (const i of res) {
-            const item = reactiveBind(new ProjectItem({ ...i, typeFlag: this.flagType }))
+            const current = existing.get(i.id)
+            existing.delete(i.id)
+            if (current?.state.running || current?.state.isRun) {
+              rows.push(current)
+              continue
+            }
+            const incoming = new ProjectItem({ ...i, typeFlag: this.flagType })
+            const item = current ?? reactiveBind(incoming)
+            if (current) Object.assign(current, { ...incoming, _state: current.state })
             needSave = this.prepareProject(item) || needSave
-            this.project.push(item)
+            rows.push(item)
           }
+          // The live process still needs its original owner even if storage no longer lists it.
+          rows.push(
+            ...[...existing.values()].filter((item) => item.state.running || item.state.isRun)
+          )
+          this.project.splice(0, this.project.length, ...rows)
           if (needSave) {
             this.saveProject()
           }
@@ -268,7 +335,7 @@ export class Project {
       })
     return this.fetchProjectPromise
   }
-  addProject() {
+  addProject(showDialog: typeof AsyncComponentShow = AsyncComponentShow) {
     const setupStore = SetupStore()
     const isLock = !setupStore.isActive && this.project.length > 2
     if (isLock) {
@@ -276,7 +343,7 @@ export class Project {
       return
     }
     this.projectEditComponent().then((res) => {
-      AsyncComponentShow(res.default, {
+      showDialog(res.default, {
         isEdit: false,
         edit: {},
         typeFlag: this.flagType
@@ -317,12 +384,13 @@ export class Project {
     return localForage.setItem('qtenvdev-projects-dirs', JSON.parse(JSON.stringify(this.allDirs)))
   }
   delProject(index: number) {
+    const item = this.project[index]
+    if (!item) return
     Base._Confirm(I18nT('base.delAlertContent'), undefined, {
       customClass: 'confirm-del',
       type: 'warning'
     })
       .then(() => {
-        const item = this.project[index]
         item
           .stop()
           .then((stopped) => {
