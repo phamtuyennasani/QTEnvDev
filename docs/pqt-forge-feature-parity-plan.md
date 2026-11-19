@@ -69,6 +69,9 @@ Relevant checks:
 - yarn test:pqt-forge-phase3
 - yarn test:pqt-forge-tool-ui
 - yarn test:pqt-forge-native-tools
+- yarn test:pqt-forge-native-apache
+- yarn test:pqt-forge-native-nginx
+- yarn test:pqt-forge-native-tomcat
 
 The build smoke test verifies dist/render/next.html; it does not prove interactive UI parity.
 
