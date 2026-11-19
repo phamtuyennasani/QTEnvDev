@@ -12,30 +12,34 @@ export class DbGatePanel {
   readonly nodeAvailable = computed(() => !!BrewStore().currentVersion('node')?.bin)
   private installNotice: { close: () => void } | undefined
 
-  open = () => {
-    if (this.opening.value) return
-
-    const node = BrewStore().currentVersion('node')
-    if (!node?.bin) {
-      MessageError(
-        I18nT('base.serviceRequiresRuntime', {
-          service: 'DbGate',
-          runtime: 'NodeJS',
-          module: 'NodeJS'
-        })
-      )
-      return
-    }
-
+  open = async () => {
+    if (this.opening.value) return false
     this.opening.value = true
     try {
+      const brew = BrewStore()
+      if (!(await brew.module('node').fetchInstalled(true, { fresh: true }))) {
+        throw new Error(I18nT('base.serviceRuntimeFetchFailed', { service: 'DbGate', runtime: 'NodeJS' }))
+      }
+      const node = brew.currentVersion('node')
+      if (!node?.bin) {
+        throw new Error(
+          I18nT('base.serviceRequiresRuntime', { service: 'DbGate', runtime: 'NodeJS', module: 'NodeJS' })
+        )
+      }
+      if (!brew.module('mongodb').installed.some((item) => item.run)) {
+        throw new Error(
+          I18nT('base.serviceRequiresRunningService', { service: 'DbGate', dependency: 'MongoDB' })
+        )
+      }
       const selectedNode = JSON.parse(JSON.stringify(node))
       IPC.sendSensitive('app-fork:mongodb', 'openDbGate', selectedNode).then(
         (key: string, res: any) => this.handleResponse(key, res)
       )
+      return true
     } catch (error) {
       this.complete()
       MessageError(error instanceof Error ? error.message : 'DbGate failed to start')
+      return false
     }
   }
 

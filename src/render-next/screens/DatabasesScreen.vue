@@ -67,7 +67,12 @@ const loadRedisConfiguration = () => redisConfigurationFiles(selectedDatabase.va
 const onlyFile = ref<string>()
 const openFiles = (kind: 'config' | 'log', file?: string) => { fileKind.value = kind; onlyFile.value = file; filesOpen.value = true }
 const adminController = databaseAdminController
-const adminTools = computed(() => selectedDatabase.value ? adminController.actions.filter((tool) => tool.database === selectedDatabase.value?.name) : [])
+const adminTools = computed(() => {
+  const database = selectedDatabase.value
+  return database?.state === 'running'
+    ? adminController.actions.filter((tool) => tool.database === database.name)
+    : []
+})
 const run = async (action: 'Start' | 'Stop' | 'Restart') => { if (service.value) { await serviceController.run(service.value, action); await databaseController.refresh() } }
 onMounted(() => { void databaseController.refresh() })
 </script>

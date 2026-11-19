@@ -9,6 +9,7 @@ import { AppStore, type AppHost } from '@/store/app'
 import { BrewStore } from '@/store/brew'
 import neo4jController from '@/components/Neo4j/controller'
 import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
+import { databaseController } from './databaseController'
 
 export type DatabaseAdminTool = 'pgadmin' | 'redis-commander' | 'dbgate' | 'ch-ui' | 'phpmyadmin' | 'neo4j-browser'
 export type DatabaseAdminAction = { id: DatabaseAdminTool; label: string; database: string }
@@ -26,12 +27,17 @@ type DatabaseEngine = 'mysql' | 'mariadb'
 const opening = reactive(new Set<DatabaseAdminTool>())
 const phpMyAdminStatus = reactive({ progress: undefined as number | undefined, message: '' })
 const open = async (id: DatabaseAdminTool, engine?: DatabaseEngine, version?: ModuleInstalledItem) => {
-  if (opening.has(id)) return false
+  if (isOpening(id)) return false
+  if (id !== 'phpmyadmin') {
+    const action = actions.find((entry) => entry.id === id)
+    const database = databaseController.databases.find((entry) => entry.name === action?.database)
+    if (database?.state !== 'running') return false
+  }
   opening.add(id)
   try {
     if (id === 'pgadmin') await pgAdminPanel.open()
     else if (id === 'redis-commander') await redisCommanderPanel.open()
-    else if (id === 'dbgate') dbGatePanel.open()
+    else if (id === 'dbgate') return await dbGatePanel.open()
     else if (id === 'ch-ui') chUiPanel.open()
     else if (id === 'neo4j-browser') await neo4jController.openBrowser()
     else {
@@ -45,20 +51,16 @@ const open = async (id: DatabaseAdminTool, engine?: DatabaseEngine, version?: Mo
     return false
   } finally { opening.delete(id); if (id === 'phpmyadmin') phpMyAdminStatus.progress = undefined }
 }
-export const databaseAdminController = {
-  actions,
-  open,
-  phpMyAdminStatus,
-  isOpening: (id: DatabaseAdminTool) => {
-    if (opening.has(id)) return true
-    if (id === 'pgadmin') return pgAdminPanel.opening.value
-    if (id === 'redis-commander') return redisCommanderPanel.opening.value
-    if (id === 'dbgate') return dbGatePanel.opening.value
-    if (id === 'ch-ui') return chUiPanel.opening.value
-    if (id === 'neo4j-browser') return neo4jController.opening.value
-    return opening.has(id)
-  }
+function isOpening(id: DatabaseAdminTool) {
+  if (opening.has(id)) return true
+  if (id === 'pgadmin') return pgAdminPanel.opening.value
+  if (id === 'redis-commander') return redisCommanderPanel.opening.value
+  if (id === 'dbgate') return dbGatePanel.opening.value
+  if (id === 'ch-ui') return chUiPanel.opening.value
+  if (id === 'neo4j-browser') return neo4jController.opening.value
+  return false
 }
+export const databaseAdminController = { actions, open, phpMyAdminStatus, isOpening }
 const setupTimeout = 'phpMyAdmin site setup did not report a result. Its site will be checked before retrying.'
 let siteSetupUnknown = false
 
