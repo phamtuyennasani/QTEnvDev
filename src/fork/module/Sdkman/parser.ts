@@ -48,3 +48,21 @@ export function parseSdkmanJavaOutput(stdout: string): SdkmanJavaItem[] {
 
   return items
 }
+
+export function parseSdkmanVersionOutput(stdout: string, flag: 'maven' | 'gradle') {
+  const rows = []
+  for (const line of stdout.replace(ANSI_ESCAPE_PATTERN, '').split(/\r?\n/)) {
+    if (!/^[\s>*+]*\d/.test(line)) continue
+    for (const match of line.matchAll(/(?:^|\s)([>*+ ]*)(\d+(?:\.\d+)+[A-Za-z0-9._+-]*)(?=\s|$)/g)) {
+      const [, markers, version] = match
+      rows.push({
+        name: flag + '-' + version,
+        version,
+        identifier: version,
+        installed: /[>*+]/.test(markers),
+        flag: 'sdkman'
+      })
+    }
+  }
+  return rows
+}
