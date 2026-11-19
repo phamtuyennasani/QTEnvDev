@@ -39,10 +39,10 @@ class Apache extends Base {
 
   getConfigFiles(version?: SoftInstalled) {
     if (!version?.bin) return []
-    const path = isWindows()
-      ? join(global.Server.ApacheDir!, `${version.version}.conf`)
-      : join(global.Server.ApacheDir!, `common/conf/${md5(version.bin)}.conf`)
-    return [{ name: 'main', path }]
+    const stem = isWindows()
+      ? join(global.Server.ApacheDir!, `${version.version}`)
+      : join(global.Server.ApacheDir!, `common/conf/${md5(version.bin)}`)
+    return [{ name: 'main', path: `${stem}.conf`, defaultPath: `${stem}.default.conf` }]
   }
 
   getLogFiles(version?: SoftInstalled) {

@@ -44,7 +44,13 @@ async function prepare(target: RedisTarget): Promise<ServiceFile[]> {
       throw error
     }
   }
-  return [{ name: file.name, path: file.path, exists: true, kind: 'config' }]
+  return [{
+    name: file.name,
+    path: file.path,
+    exists: true,
+    kind: 'config',
+    defaultPath: typeof file.defaultPath === 'string' ? file.defaultPath : undefined
+  }]
 }
 
 export async function redisConfigurationFiles(version: string) {

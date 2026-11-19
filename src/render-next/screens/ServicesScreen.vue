@@ -41,7 +41,7 @@
             class="action-button"
             :disabled="serviceDashboardController.isOpening(dashboard.flag)"
             @click="serviceDashboardController.open(dashboard.flag)"
-          >{{ dashboard.label }}</button>
+          >{{ serviceDashboardController.openingLabel(dashboard.flag) ?? dashboard.label }}</button>
         </div>
         <ServiceDirectory
           v-if="directoryFlag"

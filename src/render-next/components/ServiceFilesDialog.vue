@@ -6,6 +6,35 @@
         <p v-if="controller.loading" class="empty-copy">Loading file list…</p>
         <template v-else-if="controller.selected">
           <div class="service-file-toolbar"><code>{{ controller.selected.path }}</code><button class="action-button" @click="controller.reveal()">Reveal</button><button class="action-button" @click="controller.readSelected()">Refresh</button><slot name="file-actions" :file="controller.selected" /></div>
+          <div v-if="kind === 'config' && !$slots['file-actions']" class="config-file-actions">
+            <button
+              v-if="controller.selected.defaultPath"
+              class="action-button"
+              :disabled="!controller.canEdit || controller.openingExternal"
+              @click="controller.transferConfiguration('default')"
+            >Load default</button>
+            <button
+              class="action-button"
+              :disabled="!controller.canEdit || controller.openingExternal"
+              @click="controller.transferConfiguration('import')"
+            >Import file</button>
+            <button
+              class="action-button"
+              :disabled="!controller.canEdit || controller.openingExternal"
+              @click="controller.transferConfiguration('export')"
+            >Save a copy</button>
+            <select v-model="editor" class="action-button" aria-label="External editor">
+              <option value="VSCode">Visual Studio Code</option>
+              <option value="PhpStorm">PhpStorm</option>
+              <option value="WebStorm">WebStorm</option>
+              <option value="Sublime">Sublime Text</option>
+            </select>
+            <button
+              class="action-button"
+              :disabled="controller.selected.exists === false || controller.saving || controller.openingExternal || !!controller.configurationAction"
+              @click="controller.openExternal(controller.selected, editor)"
+            >Open in editor</button>
+          </div>
           <small v-if="kind === 'log'" class="website-help">Showing up to the latest 200 KB.</small>
           <small v-else-if="controller.selected.readOnly" class="website-help">Use the website editor to change this generated file.</small>
           <slot v-if="kind === 'config'" name="configuration" :content="controller.content" :readOnly="!controller.canEdit" :update="updateContent">
@@ -27,7 +56,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { SoftInstalled } from '@shared/app'
 import ForgeDialog from './ForgeDialog.vue'
-import { serviceFilesController, type ServiceFilesController, type ServiceFile } from '../state/serviceFilesController'
+import { serviceFilesController, type ServiceFilesController, type ServiceFile, type ServiceFileEditor } from '../state/serviceFilesController'
 const props = defineProps<{
   name: string
   version?: string | SoftInstalled
@@ -41,6 +70,7 @@ const props = defineProps<{
 const controller = props.owner ?? serviceFilesController
 const emit = defineEmits<{ 'update:modelValue': [boolean] }>()
 const pendingClear = ref<string>()
+const editor = ref<ServiceFileEditor>('VSCode')
 const open = computed(() => props.modelValue)
 const title = computed(() => `${props.name} ${props.kind === 'config' ? 'configuration' : props.onlyFile === 'slow' ? 'slow query log' : 'logs'}`)
 const description = computed(() => props.kind === 'config' ? 'Choose a configuration file.' : 'Choose a log file to read or reveal.')
@@ -63,3 +93,16 @@ watch(() => props.modelValue, (visible, previous) => {
 }, { immediate: true })
 onBeforeUnmount(() => { if (props.modelValue) controller.clear() })
 </script>
+
+<style scoped>
+.config-file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.config-file-actions select {
+  background: var(--pqt-field);
+}
+</style>

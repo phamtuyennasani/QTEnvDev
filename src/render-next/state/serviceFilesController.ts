@@ -1,12 +1,15 @@
 import { reactive } from 'vue'
 import IPC from '@/util/IPC'
-import { fs, shell } from '@/util/NodeFn'
+import { dialog, fs, shell } from '@/util/NodeFn'
 import { Project } from '@/util/Project'
 import { packageError } from '../packages/types'
 import { serviceModuleFlags, currentServiceVersion, serviceFileContext } from '../adapters/serviceAdapter'
+import { showNotice } from './app'
 
-export type ServiceFile = { name: string; path: string; exists?: boolean; kind: 'config' | 'log'; readOnly?: boolean }
+export type ServiceFile = { name: string; path: string; exists?: boolean; kind: 'config' | 'log'; readOnly?: boolean; defaultPath?: string }
 export type ServiceFileEditor = 'VSCode' | 'PhpStorm' | 'WebStorm' | 'Sublime'
+type ConfigurationAction = 'import' | 'default' | 'export'
+const maxConfigurationImportBytes = 5 * 1024 * 1024
 type Reply = { code?: number; data?: unknown; msg?: unknown }
 const request = (flag: string, method: string, version: unknown, ...context: unknown[]) => new Promise<unknown>((resolve, reject) => {
   const sent = IPC.send('app-fork:' + flag, method, version, ...context)
@@ -29,13 +32,14 @@ export class ServiceFilesController {
   saving = false
   openingExternal = false
   restoring = false
+  configurationAction?: ConfigurationAction
   error = ''
   warning = ''
   private generation = 0
   private readGeneration = 0
   get canEdit() {
     return this.selected?.kind === 'config' && !this.selected.readOnly &&
-      !this.saving && !this.restoring && this.loadedContent !== undefined
+      !this.saving && !this.restoring && !this.configurationAction && this.loadedContent !== undefined
   }
   get canSave() {
     return this.canEdit && this.content !== this.loadedContent
@@ -74,14 +78,15 @@ export class ServiceFilesController {
         if (!snapshot) throw new Error('Select an installed PHP version first.')
         const path = await request(flag, 'getIniPath', snapshot)
         if (typeof path !== 'string' || !path) throw new Error('PHP did not report its configuration file.')
-        data = [{ name: 'php.ini', path }]
+        const candidate = `${path}.default`
+        data = [{ name: 'php.ini', path, defaultPath: await fs.existsSync(candidate) ? candidate : undefined }]
       } else {
         const context = await serviceFileContext(flag, snapshot)
         data = await request(flag, kind === 'config' ? 'listConfigFiles' : 'listLogFiles', snapshot, ...context)
       }
       if (generation !== this.generation) return false
       const list = Array.isArray(data) ? data : []
-      this.files = list.filter((item): item is { name: string; path: string; exists?: boolean } => Boolean(item && typeof item.name === 'string' && typeof item.path === 'string')).map((item) => ({ ...item, kind }))
+      this.files = list.filter((item): item is Omit<ServiceFile, 'kind'> => Boolean(item && typeof item.name === 'string' && typeof item.path === 'string')).map((item) => ({ ...item, kind }))
       if (onlyName) this.files = this.files.filter((item) => item.name === onlyName)
       this.selected = this.files.find((item) => item.exists !== false) || this.files[0]
       if (this.selected) await this.readSelected(generation)
@@ -153,8 +158,65 @@ export class ServiceFilesController {
   }
   async reveal(file = this.selected) { if (!file) return; try { await shell.showItemInFolder(file.path) } catch (error) { this.error = packageError(error) } }
 
+  async transferConfiguration(action: ConfigurationAction) {
+    const file = this.selected
+    if (!file || !this.canEdit || this.openingExternal) return false
+    const generation = this.generation
+    const read = this.readGeneration
+    const draft = this.content
+    const current = () => generation === this.generation && read === this.readGeneration && this.selected === file
+    this.configurationAction = action
+    this.error = ''
+    try {
+      if (action === 'export') {
+        const activeFiles = this.files.flatMap(({ path, defaultPath }) => defaultPath ? [path, defaultPath] : [path])
+        if (!activeFiles.includes(file.path)) activeFiles.push(file.path)
+        const filename = file.path.split(/[\\/]/).at(-1) || file.name
+        const result = await dialog.showSaveDialog({
+          defaultPath: `copy-${filename}`,
+          properties: ['createDirectory', 'showOverwriteConfirmation']
+        })
+        if (result.canceled || !result.filePath) return false
+        const canonical = async (path: string) => {
+          const target = await fs.realpath(path)
+          return globalThis.window?.Server?.isWindows ? target.replaceAll('\\', '/').toLowerCase() : target
+        }
+        const destination = await canonical(result.filePath)
+        const sources = await Promise.all(activeFiles.map(canonical))
+        if (sources.includes(destination)) throw new Error('Choose a separate path, or use Save configuration.')
+        await fs.writeFile(result.filePath, draft)
+        showNotice('Configuration copy saved.')
+        return true
+      }
+
+      let source = file.defaultPath
+      if (action === 'import') {
+        const result = await dialog.showOpenDialog({
+          title: 'Import configuration',
+          properties: ['openFile', 'showHiddenFiles']
+        })
+        if (result.canceled) return false
+        source = result.filePaths[0]
+      }
+      if (!source || !current()) return false
+      const info = (await fs.stat(source)) as unknown as { size: number; isFile: boolean } | null
+      if (!info?.isFile) throw new Error('Select a regular configuration file.')
+      if (info.size > maxConfigurationImportBytes) throw new Error('Configuration imports are limited to 5 MiB.')
+      const replacement = await fs.readFileStrict(source)
+      if (!current() || this.content !== draft) return false
+      this.content = replacement
+      return true
+    } catch (error) {
+      if (current()) this.error = packageError(error)
+      else if (action === 'export') showNotice(packageError(error))
+      return false
+    } finally {
+      this.configurationAction = undefined
+    }
+  }
+
   async openExternal(file: ServiceFile, editor: ServiceFileEditor) {
-    if (this.openingExternal || this.saving || this.restoring || file.kind !== 'config' || this.selected !== file) return false
+    if (this.openingExternal || this.saving || this.restoring || this.configurationAction || file.kind !== 'config' || this.selected !== file) return false
     const { path } = file
     const generation = this.generation
     const current = () => generation === this.generation && this.selected === file

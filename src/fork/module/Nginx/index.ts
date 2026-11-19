@@ -45,11 +45,12 @@ class Nginx extends Base {
   }
 
   getConfigFiles() {
-    return [{ name: 'main', path: join(global.Server.NginxDir!, 'common/conf/nginx.conf') }]
+    const directory = isWindows() ? 'conf' : 'common/conf'
+    return [{ name: 'main', path: join(global.Server.NginxDir!, directory, 'nginx.conf') }]
   }
 
   getLogFiles() {
-    const dir = join(global.Server.NginxDir!, 'common/logs')
+    const dir = join(global.Server.NginxDir!, isWindows() ? 'logs' : 'common/logs')
     return [
       { name: 'error', path: join(dir, 'error.log') },
       { name: 'access', path: join(dir, 'access.log') }

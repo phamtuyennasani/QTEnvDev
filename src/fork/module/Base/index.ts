@@ -114,7 +114,7 @@ export class Base {
    * 返回 [] 表示该模块不支持/无配置文件。name 是人类可读标识（如 'main' / 'error'）。
    * 只返回 name + path，不返回内容——QTEnvDev 是本地工具，AI 代理自行读文件。
    */
-  getConfigFiles(_version?: SoftInstalled, ..._context: unknown[]): Array<{ name: string; path: string }> {
+  getConfigFiles(_version?: SoftInstalled, ..._context: unknown[]): Array<{ name: string; path: string; defaultPath?: string }> {
     return []
   }
 
@@ -127,9 +127,16 @@ export class Base {
   listConfigFiles(
     version?: SoftInstalled,
     ...context: unknown[]
-  ): ForkPromise<Array<{ name: string; path: string; exists: boolean }>> {
+  ): ForkPromise<Array<{ name: string; path: string; exists: boolean; defaultPath?: string }>> {
     return new ForkPromise((resolve) => {
-      resolve(this.getConfigFiles(version, ...context).map((f) => ({ ...f, exists: existsSync(f.path) })))
+      resolve(this.getConfigFiles(version, ...context).map((file) => {
+        const candidate = file.defaultPath ?? `${file.path}.default`
+        return {
+          ...file,
+          exists: existsSync(file.path),
+          defaultPath: existsSync(candidate) ? candidate : undefined
+        }
+      }))
     })
   }
 

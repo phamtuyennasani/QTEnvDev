@@ -51,7 +51,11 @@ class Redis extends Base {
   getConfigFiles(version?: SoftInstalled) {
     const v = version?.version?.split('.')?.[0] ?? ''
     if (!v) return []
-    return [{ name: 'main', path: join(global.Server.RedisDir!, `redis-${v}.conf`) }]
+    return [{
+      name: 'main',
+      path: join(global.Server.RedisDir!, `redis-${v}.conf`),
+      defaultPath: join(global.Server.RedisDir!, `redis-${v}-default.conf`)
+    }]
   }
 
   async databaseConnectionEndpoint(version: SoftInstalled) {

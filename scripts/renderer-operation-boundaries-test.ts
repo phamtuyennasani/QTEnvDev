@@ -17,7 +17,8 @@ for (const file of [
   'screens/WebsitesScreen.vue', 'websites/WebsiteEditor.vue', 'websites/TomcatWebsiteEditor.vue',
   'websites/WebsiteFilesDialog.vue', 'components/ServiceFilesDialog.vue',
   'websites/NginxRewriteField.vue', 'components/LanguageProjectManager.vue',
-  'screens/DatabasesScreen.vue', 'screens/CronScreen.vue', 'components/HomebrewPackagePanel.vue',
+  'screens/DatabasesScreen.vue', 'screens/ServicesScreen.vue', 'serviceDirectories/ServiceDirectory.vue',
+  'screens/CronScreen.vue', 'components/HomebrewPackagePanel.vue',
   'screens/HttpServeScreen.vue', 'components/SdkmanPackagePanel.vue', 'components/MacPortsPackagePanel.vue',
   'custom-modules/CustomModulesSettings.vue', 'components/VhostTemplatePanel.vue'
 ]) {
@@ -35,6 +36,8 @@ assert.match(nextSource('state/cronController.ts'), /forkTerminalRequest\(/)
 assert.match(nextSource('websites/TomcatWebsiteEditor.vue'), /projectController\.save\(/)
 assert.match(nextSource('websites/WebsiteFilesDialog.vue'), /websiteFileController\.openExternal\(/)
 assert.match(nextSource('state/serviceFilesController.ts'), /Project\.openPath\(/)
+assert.match(nextSource('serviceDirectories/ServiceDirectory.vue'), /serviceDirectoryController as controller/)
+assert.match(nextSource('serviceDirectories/controller.ts'), /reactiveBind\(new ServiceDirectoryController\(\)\)/)
 assert.match(nextSource('components/VhostTemplatePanel.vue'), /vhostTemplateController as controller/)
 assert.match(nextSource('websites/rewriteTemplatesController.ts'), /forkTerminalRequest\(/)
 assert.match(nextSource('components/LanguageProjectManager.vue'), /projectWorkflowController\.openInEditor\(/)
@@ -67,7 +70,6 @@ const walk = (dir: string): string[] => {
 
 const legacyDirectIpcIndexPages = [
   'Aside/Index.vue',
-  'Temporal/Index.vue',
   'Tools/SiteSucker/Index.vue',
   'Tools/SystenEnv/Index.vue'
 ]
@@ -492,9 +494,20 @@ await import('./pqt-forge-image-pipeline-test')
 await import('./pqt-forge-custom-modules-test')
 await import('./pqt-forge-homebrew-mirrors-test')
 await import('./pqt-forge-cron-controller-test')
+assert.doesNotMatch(nextSource('components/SdkmanPackagePanel.vue'), /IPC\.send|new XTerm/)
+await import('./pqt-forge-sdkman-test')
 await import('./pqt-forge-git-environment-test')
 await import('./pqt-forge-mysql-companion-test')
 await import('./pqt-forge-postgresql-directory-test')
+assert.match(
+  readFileSync(join(root, 'src/render/components/Temporal/Index.vue'), 'utf8'),
+  /import temporalUiController from '.\/UiController'/
+)
+assert.match(
+  nextSource('serviceDashboards/controller.ts'),
+  /return temporalUiController\.open\(showNotice\)/
+)
+await import('./pqt-forge-temporal-dashboard-test')
 await import('./pqt-forge-database-details-test')
 const fileInfoPage = readFileSync(join(componentsDir, 'Tools/FileInfo/Index.vue'), 'utf8')
 assert.match(fileInfoPage, /from ['"]\.\/Controller['"]/)

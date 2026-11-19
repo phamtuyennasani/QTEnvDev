@@ -90,7 +90,16 @@ try {
         if (channel === 'app-fork:tomcat') {
           window.tomcatRequests.push(args)
           if (action === 'startService') return respond(0, { 'APP-Service-Start-PID': '4852' })
-          if (action === 'listConfigFiles' || action === 'listLogFiles') return respond(0, [])
+          if (action === 'listConfigFiles') return respond(0, [{
+            name: 'server.xml', path: args[2] + '/conf/server.xml', exists: true,
+            defaultPath: args[2] + '/conf/server.xml.default'
+          }])
+          if (action === 'listLogFiles') return respond(0, [])
+        }
+        if (channel === 'App-Node-FN' && action === 'fs' && args[2]?.startsWith('/new/tomcat/conf/')) {
+          const contents = args[2].endsWith('.default') ? '<Server port="8005" />' : '<Server port="8006" />'
+          const result = args[1] === 'stat' ? { size: contents.length, isFile: true } : contents
+          return queueMicrotask(() => receive({}, channel, key, result))
         }
         if (channel === 'app-fork:mongodb' && action === 'openDbGate') {
           window.dbGateRequests.push(args[1])
@@ -325,6 +334,19 @@ try {
       await wait(() => window.tomcatRequests.some(([cmd, version, base]) =>
         cmd === action && version.version === '9.0.106' && base === '/new/tomcat'
       ), 'Tomcat ' + label + ' uses saved base')
+      if (action === 'listConfigFiles') {
+        const draft = () => document.querySelector('[role=dialog] textarea')
+        await wait(() => draft()?.value.includes('8006'), 'saved Tomcat configuration loaded')
+        await click('Load default', '[role=dialog] button')
+        await wait(() => draft()?.value.includes('8005') &&
+          !exact('Save configuration', '[role=dialog] button')?.disabled,
+          'Tomcat default replaces the draft and can be saved')
+        if (!exact('Import file', '[role=dialog] button') ||
+            !exact('Save a copy', '[role=dialog] button') ||
+            !exact('Open in editor', '[role=dialog] button')) {
+          throw new Error('Tomcat configuration actions are missing')
+        }
+      }
       await click('Close', '[role=dialog] button')
     }
     await click('Start')
