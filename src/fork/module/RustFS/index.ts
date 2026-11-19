@@ -39,7 +39,7 @@ class RustFS extends Base {
       }
       const iniFile = join(baseDir, 'rustfs.conf')
       if (!existsSync(iniFile)) {
-        await writeFile(iniFile, '')
+        await writeFile(iniFile, '', { flag: 'a' })
       }
       resolve(iniFile)
     })

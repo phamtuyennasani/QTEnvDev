@@ -47,9 +47,21 @@ class MeiliSearch extends Base {
         })
         const tmplFile = join(global.Server.Static!, 'tmpl/meilisearch.toml')
         const content = await readFile(tmplFile, 'utf-8')
-        await writeFile(iniFile, content)
+        try {
+          await writeFile(iniFile, content, { flag: 'wx' })
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+          resolve(iniFile)
+          return
+        }
         const defaultIniFile = join(baseDir, 'meilisearch.default.toml')
-        await writeFile(defaultIniFile, content)
+        try {
+          await writeFile(defaultIniFile, content, { flag: 'wx' })
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
+            on({ 'APP-On-Log': AppLog('error', String(error)) })
+          }
+        }
         on({
           'APP-On-Log': AppLog('info', I18nT('appLog.confInitSuccess', { file: iniFile }))
         })
@@ -211,11 +223,17 @@ class MeiliSearch extends Base {
     })
   }
 
-  getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
+  getConfigFiles(_version?: SoftInstalled) {
     const baseDir = join(global.Server.BaseDir!, 'meilisearch')
+    const savedDefault = join(baseDir, 'meilisearch.default.toml')
     return [
-      { name: 'MeiliSearch config', path: join(baseDir, 'meilisearch.toml') },
-      { name: 'MeiliSearch default config', path: join(baseDir, 'meilisearch.default.toml') }
+      {
+        name: 'MeiliSearch config',
+        path: join(baseDir, 'meilisearch.toml'),
+        defaultPath: existsSync(savedDefault)
+          ? savedDefault
+          : join(global.Server.Static!, 'tmpl/meilisearch.toml')
+      }
     ]
   }
 

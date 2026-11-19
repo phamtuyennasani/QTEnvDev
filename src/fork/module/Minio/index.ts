@@ -41,7 +41,7 @@ class Minio extends Base {
       }
       const iniFile = join(baseDir, 'minio.conf')
       if (!existsSync(iniFile)) {
-        await writeFile(iniFile, '')
+        await writeFile(iniFile, '', { flag: 'a' })
       }
       resolve(iniFile)
     })

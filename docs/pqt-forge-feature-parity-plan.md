@@ -27,15 +27,19 @@ See [the current parity audit](pqt-forge-parity-audit.md) for verified changes, 
 - [x] Connect PHP, Node.js, Python and Go saved projects and scaffolding to the existing lifecycle, port and command editors, folders, configuration and logs. Python and Go saved projects offer PyCharm and GoLand shortcuts. Java/Tomcat websites use the dedicated editor and backend.
 - [x] Keep unsupported project types unchanged until their structure is understood by the new editor.
 - [x] Verify ports, commands, TLS, proxy changes and post-save lifecycle behavior through the website and project controllers. Run native server fixtures with generated configurations.
+- [x] Show project settings for direct Node.js, Python, Go, and Spring Boot records. Keep web server and TLS settings on records served by a web server. Require an existing file when clearing logs.
 
 The Windows Electron fixture exercises Websites with isolated IPC, including the bundled and custom rewrite picker, vhost template import and export, failed template reads, missing config recovery, external editor choices, scoped and system tasks, CA file and command shortcuts, a Laravel scaffold draft, backup, alias links, hosts shortcuts and subdirectory websites. Windows runtime fixtures passed with Nginx 1.28.0, Apache 2.4.66 with PHP-CGI 8.3.30, Tomcat 9.0.106, Caddy 2.11.9, and FrankenPHP 1.13.5 with PHP 8.5.12. They use temporary configuration, loopback requests and certificate trust scoped to the fixture. The Caddy and FrankenPHP fixture also verifies that HTTPS switches to the updated reverse proxy destination. System hosts writes, OS trust changes, launching each installed editor and native macOS and Linux execution remain open.
 
 ## Phase 2 — services, runtimes, packages, and databases
 
-- [ ] Finish comparison and migration for online packages, installed and current versions, and provider-specific actions. Package Library exposes Homebrew, MacPorts and SDKMAN. Runtimes exposes Node.js and Go managers, Git diagnostics and installation, and Composer. Live provider execution on macOS and Linux remains open.
-- [ ] Finish module-specific configuration, bounded log tail and clear, and companion-service behavior. Services includes HTTP Serve, DNS Server, FTP Accounts, Podman and Cloudflare Tunnel.
-- [ ] Finish database admin tools, credentials, ports and data-directory workflows. Databases exposes MySQL/MariaDB Create and Backup, MySQL instance groups, phpMyAdmin and slow logs, plus editable PostgreSQL data directories.
+- [x] Compare and connect online packages, installed versions and PATH selection. Package Library exposes direct links, Flutter channels, Homebrew, MacPorts and SDKMAN. Runtimes exposes Node.js and Go managers, Git diagnostics, Composer, language projects, and Flutter and Android workflows.
+- [x] Connect module configuration and file actions, bounded log tail and clear, saved service directories, dashboards and companion services. Services includes HTTP Serve, DNS Server, FTP Accounts, Podman, Cloudflare Tunnel and n8n administration.
+- [x] Expose common settings and raw editing for Apache, Nginx, Mailpit, n8n, MinIO, Meilisearch and RustFS. Configuration dialogs can save and restart a confirmed running installation while retaining a separate save action.
+- [x] Connect database admin tools, selected-version credentials and configured endpoints, and data-directory workflows. Databases includes MySQL/MariaDB Create and Backup, MySQL instance groups, phpMyAdmin and slow logs, PostgreSQL data directories and pgvector, and Neo4j Java selection.
 - [x] Preserve completed side effects when a refresh fails; package mutations retain terminal success and report refresh warnings, while unknown outcomes block replay.
+
+Native acceptance remains open for additional macOS and Linux service and provider combinations, live third-party integrations, and platform actions listed in the audit. Fixture results are recorded by workflow.
 
 ## Phase 3 — toolbox parity
 
@@ -54,6 +58,7 @@ Relevant checks:
 - yarn typecheck
 - yarn test:pqt-forge-next
 - yarn test:pqt-forge-next:build
+- yarn test:pqt-forge-packaging
 - yarn test:renderer-operation-boundaries
 - yarn test:pqt-forge-domain-adapters
 - yarn test:pqt-forge-tools
@@ -61,6 +66,10 @@ Relevant checks:
 - yarn test:pqt-forge-website-controller
 - yarn test:pqt-forge-website-backup
 - yarn test:pqt-forge-websites-ui
+- yarn test:pqt-forge-phase2
+- yarn test:pqt-forge-service-files
+- yarn test:pqt-forge-services-ui
+- yarn test:pqt-forge-parity-audit
 - yarn test:pqt-forge-cron
 - yarn test:pqt-forge-homebrew-ui
 - yarn test:pqt-forge-php-extensions-ui

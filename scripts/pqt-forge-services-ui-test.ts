@@ -46,6 +46,11 @@ try {
     const composerVersions = [{ version: '2.8.6', num: 28, path: '/fixture/composer', bin: '/fixture/composer/composer', enable: true }]
     const redisVersion = { version: '7.4.1', num: 74, path: '/fixture/redis', bin: '/fixture/redis/redis-server', enable: true }
     const consulVersion = { version: '1.21.3', num: 121, path: '/fixture/consul-app', bin: '/fixture/consul-app/consul', enable: true }
+    const meiliVersion = { version: '1.12.0', num: 112, path: '/fixture/meilisearch-app', bin: '/fixture/meilisearch-app/meilisearch', enable: true }
+    const meiliPath = '/fixture/meilisearch/meilisearch.toml'
+    const meiliDefaultPath = '/fixture/meilisearch/meilisearch.default.toml'
+    let meiliConfig
+    window.meiliWrites = 0
     const tomcatVersions = ['9.0.106', '10.1.46'].map((version, num) => ({
       version, num, path: '/fixture/tomcat-' + version,
       bin: '/fixture/tomcat-' + version + '/bin/startup.sh', enable: true
@@ -74,6 +79,7 @@ try {
     let redisConfig = ''
     window.redisConfigInitializations = []
     window.redisConfigWrites = []
+    window.redisRequests = []
     window.QTEnvDevNodeAPI = {
       ipcReceiveFromMain(listener) { receive = listener },
       ipcSendToMain(channel, key, ...args) {
@@ -90,6 +96,7 @@ try {
               : flag === 'composer' ? composerVersions
               : flag === 'redis' ? [redisVersion]
               : flag === 'consul' ? [consulVersion]
+              : flag === 'meilisearch' ? [meiliVersion]
               : flag === 'tomcat' ? tomcatVersions
               : flag === 'mongodb' ? [mongoVersion]
               : flag === 'neo4j' ? [neo4jVersion]
@@ -101,6 +108,25 @@ try {
         if (channel === 'app-fork:neo4j' && action === 'startService') {
           window.neo4jStarts.push(args.slice(1))
           return respond(0, { 'APP-Service-Start-PID': '4352' })
+        }
+        if (channel === 'app-fork:meilisearch' && action === 'listConfigFiles') {
+          return respond(0, [{ name: 'MeiliSearch config', path: meiliPath, exists: meiliConfig !== undefined, defaultPath: meiliDefaultPath }])
+        }
+        if (channel === 'app-fork:meilisearch' && action === 'initConfig') {
+          meiliConfig = 'http_addr = "127.0.0.1:7700" # kept\\n'
+          return respond(0, meiliPath)
+        }
+        if (channel === 'App-Node-FN' && action === 'fs' && [meiliPath, meiliDefaultPath].includes(args[2])) {
+          const content = args[2] === meiliDefaultPath ? 'http_addr = "localhost:7700"\\n' : meiliConfig
+          if (args[1] === 'writeFile') {
+            if (args[2] === meiliDefaultPath) errors.push('The shipped default was opened for writing')
+            meiliConfig = args[3]
+            window.meiliWrites++
+          }
+          const result = args[1] === 'writeFile' ? true
+            : content === undefined ? { code: 1, errorCode: 'ENOENT', msg: 'File does not exist' }
+            : args[1] === 'stat' ? { size: content.length, isFile: true } : content
+          return queueMicrotask(() => receive({}, channel, key, result))
         }
         const configFlag = channel.split(':')[1]
         const configs = databaseConfig[configFlag]
@@ -170,7 +196,12 @@ try {
           return
         }
         if (channel === 'app-fork:redis' && action === 'listConfigFiles') {
+          window.redisRequests.push([action, args[1]?.bin])
           return respond(0, [{ name: 'main', path: redisConfigPath, exists: Boolean(redisConfig) }])
+        }
+        if (channel === 'app-fork:redis' && (action === 'startService' || action === 'stopService')) {
+          window.redisRequests.push([action, args[1]?.bin, redisConfig])
+          return respond(0, action === 'startService' ? { 'APP-Service-Start-PID': '4353' } : undefined)
         }
         if (channel === 'app-fork:redis' && action === 'initConf') {
           window.redisConfigInitializations.push(args[1])
@@ -376,6 +407,21 @@ try {
     await wait(() => !exact('Open Consul UI')?.disabled, 'Consul dashboard terminal result')
     await click('Stop')
     await wait(() => !exact('Open Consul UI') && !exact('Change directory')?.disabled, 'Consul stopped')
+    await wait(() => serviceRow('Meilisearch')?.querySelector('.state-label')?.textContent === 'Stopped', 'installed Meilisearch')
+    serviceRow('Meilisearch').click()
+    await click('Configuration')
+    await click('Initialize configuration', '[role=dialog] button')
+    const meiliAddress = () => document.querySelector('input[aria-label="http_addr value"]')
+    await wait(() => meiliAddress()?.value === '127.0.0.1:7700' && !meiliAddress().disabled, 'Meilisearch common settings after initialization')
+    meiliAddress().value = '127.0.0.1:7710'
+    meiliAddress().dispatchEvent(new Event('change', { bubbles: true }))
+    await click('Raw file', '[role=dialog] button')
+    const meiliDraft = () => document.querySelector('[role=dialog] textarea')?.value
+    await wait(() => meiliDraft() === 'http_addr = "127.0.0.1:7710" # kept\\n', 'Meilisearch common edit preserves raw comments')
+    await click('Load default', '[role=dialog] button')
+    await wait(() => meiliDraft() === 'http_addr = "localhost:7700"\\n', 'Meilisearch default loaded into the draft')
+    if (window.meiliWrites !== 0) throw new Error('Meilisearch defaults were saved without confirmation')
+    await click('Close', '[role=dialog] button')
     serviceRow('Tomcat').click()
     await wait(() => has('CATALINA_BASE') && has('/legacy/tomcat-a'), 'existing Tomcat base per binary')
     const chooseTomcat = async (path, beforeFinish) => {
@@ -461,6 +507,7 @@ try {
     window.finishRedisConfig()
     const redisPort = () => document.querySelector('input[aria-label="Port value"]')
     await wait(() => redisPort()?.value === '6379' && !redisPort().disabled, 'Redis common settings after reopening')
+    if (exact('Save and restart', '[role=dialog] button')) throw new Error('Stopped Redis exposes Save and restart')
     if (window.redisConfigInitializations.length !== 1 || window.redisConfigInitializations[0].bin !== '/fixture/redis/redis-server') {
       throw new Error('Redis initialization did not target the selected version exactly once')
     }
@@ -473,6 +520,27 @@ try {
     if (window.redisConfigWrites[0] !== '# Redis\\nport 6381\\n# keep this setting\\nappendonly yes\\n') throw new Error('Redis common edit changed an unrelated setting')
     await wait(() => !exact('Save configuration', '[role=dialog] button'), 'Redis configuration dialog closed')
     if (exact('Open Redis Commander')) throw new Error('Stopped Redis exposes its admin panel')
+    await click('Start')
+    await wait(() => window.redisRequests.some(([action]) => action === 'startService') && exact('Stop') && !exact('Stop').disabled, 'Redis running')
+    window.redisRequests.length = 0
+    await click('Configuration')
+    await wait(() => redisPort()?.value === '6381' && !redisPort().disabled, 'saved configuration for running Redis')
+    redisPort().value = '6382'
+    redisPort().dispatchEvent(new Event('input', { bubbles: true }))
+    await click('Save and restart', '[role=dialog] button')
+    await wait(() => document.querySelector('[role=dialog] [role=status]')?.textContent.includes('Configuration saved. Redis restarted.'), 'Redis config saved and restarted')
+    const expectedRedisBin = '/fixture/redis/redis-server'
+    const editedRedisConfig = '# Redis\\nport 6382\\n# keep this setting\\nappendonly yes\\n'
+    const restartRequests = window.redisRequests.filter(([action]) => action !== 'listConfigFiles')
+    if (window.redisRequests[0]?.[0] !== 'listConfigFiles' ||
+      window.redisRequests.some(([, bin]) => bin !== expectedRedisBin) ||
+      JSON.stringify(restartRequests) !== JSON.stringify([
+      ['stopService', expectedRedisBin, editedRedisConfig],
+      ['startService', expectedRedisBin, editedRedisConfig]
+    ])) throw new Error('Redis did not list and restart the same installation after saving the draft: ' + JSON.stringify(window.redisRequests))
+    await click('Close', '[role=dialog] button')
+    await click('Stop')
+    await wait(() => exact('Start'), 'Redis stopped after configuration test')
     const databaseRow = name => [...document.querySelectorAll('.database-item')].find(row => row.querySelector('b')?.textContent === name)
     for (const [name, flag, path, contents] of [
       ['Neo4j', 'neo4j', '/fixture/neo4j-app/bin/neo4j', 'server.directories.data=data'],
@@ -658,7 +726,7 @@ try {
   })
   assert.equal(result.code, 0, result.output)
   console.log(
-    'Services Electron UI passed: installed versions, module visibility, Redis and database configuration, Neo4j Java binding, database admin gates, tunnel lifecycle, HTTP Serve, Podman, runtime managers, Git diagnostics and Composer.'
+    'Services Electron UI passed: installed versions, module visibility, Redis save and restart, database configuration, Neo4j Java binding, database admin gates, tunnel lifecycle, HTTP Serve, Podman, runtime managers, Git diagnostics and Composer.'
   )
 } finally {
   await vite.close()
