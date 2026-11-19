@@ -65,6 +65,32 @@ const hostList = (data: any): WebsiteHost[] => {
     throw new Error('The backend did not return an authoritative host list.')
   return data.host
 }
+
+const generatedVhostFiles = [
+  ['Nginx', 'nginx'],
+  ['Apache', 'apache'],
+  ['Caddy', 'caddy'],
+  ['FrankenPHP', 'frankenphp'],
+  ['Rewrite', 'rewrite']
+] as const
+
+export async function restoreProjectConfig(id: number, path: string): Promise<'created' | 'exists'> {
+  if (!(await ensureDataDirectoryReady())) {
+    throw new Error('The application data directory is not ready.')
+  }
+  const directory = join(window.Server.BaseDir!, 'vhost')
+  const file = generatedVhostFiles.find(([, kind]) => path === join(directory, kind, `${id}.conf`))
+  if (!file) throw new Error('This file cannot be recreated from the saved website settings.')
+  const [, kind] = file
+  try {
+    const result = await request('restoreConfig', [id, kind], true)
+    if (result === 'created' || result === 'exists') return result
+  } catch (error) {
+    if (!(error instanceof WebsiteOutcomeUnknown)) throw error
+  }
+  throw new Error('The configuration file result could not be verified. Refresh its contents.')
+}
+
 export const websiteDependencies: WebsiteDependencies = {
   ready: () => Boolean(window.QTEnvDevNodeAPI && window.Server?.BaseDir),
   async list() {
@@ -242,13 +268,10 @@ export const websiteDependencies: WebsiteDependencies = {
       return files
     }
     const directory = join(window.Server.BaseDir!, 'vhost')
-    return [
-      ['Nginx', 'nginx'],
-      ['Apache', 'apache'],
-      ['Caddy', 'caddy'],
-      ['FrankenPHP', 'frankenphp'],
-      ['Rewrite', 'rewrite']
-    ].map(([label, section]) => ({ label, path: join(directory, section, id + '.conf') }))
+    return generatedVhostFiles.map(([label, section]) => ({
+      label,
+      path: join(directory, section, `${id}.conf`)
+    }))
   },
   async afterFileSave(path) {
     const section = basename(dirname(path))

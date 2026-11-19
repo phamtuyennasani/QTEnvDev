@@ -6,6 +6,7 @@ import type { AppHost } from '../src/shared/app'
 import { fetchHostList, saveHostList } from '../src/fork/module/Host/HostFile'
 import * as NginxRewriteTemplates from '../src/fork/module/Host/NginxRewriteTemplates'
 import { parkSubdirectories } from '../src/fork/module/Host/ParkSubdirectories'
+import * as RestoreConfig from '../src/fork/module/Host/RestoreConfig'
 import * as Transaction from '../src/fork/module/Host/Transaction'
 import {
   exportWebsiteBackup,
@@ -78,6 +79,7 @@ async function verifyRegularWrites() {
       './WebsiteBackup': {},
       './NginxRewriteTemplates': NginxRewriteTemplates,
       './ParkSubdirectories': { parkSubdirectories },
+      './RestoreConfig': RestoreConfig,
       '../Tomcat/Site': {},
       '@shared/utils': { isWindows: () => false, isMacOS: () => false },
       '@shared/PlatFormConst': {},
@@ -158,6 +160,56 @@ async function verifyRegularWrites() {
     (await fetchHostList(false)).map((item) => item.name),
     ['good.transaction.localhost', live.name, other.name]
   )
+
+  const nginx = siteFile('nginx', live.id)
+  const rewrite = siteFile('rewrite', live.id)
+  const customRewrite = Buffer.from('\uFEFF# Local rewrite\r\n', 'utf8')
+  await writeFile(rewrite, customRewrite)
+  await unlink(nginx)
+  assert.equal(await host.restoreConfig(live.id, 'nginx'), 'created')
+  assert.match(await readFile(nginx, 'utf8'), /transaction\.localhost/)
+  assert.deepEqual(await readFile(rewrite), customRewrite)
+  assert.equal(await host.restoreConfig(live.id, 'rewrite'), 'exists')
+  assert.deepEqual(await readFile(rewrite), customRewrite)
+
+  const customVhost = '# Locally modified Nginx configuration\r\n'
+  await writeFile(nginx, customVhost)
+  await unlink(rewrite)
+  assert.equal(await host.restoreConfig(live.id, 'rewrite'), 'created')
+  assert.equal(await readFile(rewrite, 'utf8'), live.nginx.rewrite)
+  assert.equal(await host.restoreConfig(live.id, 'nginx'), 'exists')
+  assert.equal(await readFile(nginx, 'utf8'), customVhost)
+
+  for (const kind of ['apache', 'caddy', 'frankenphp']) {
+    const path = siteFile(kind, live.id)
+    await unlink(path)
+    assert.equal(await host.restoreConfig(live.id, kind), 'created')
+    assert.match(await readFile(path, 'utf8'), /transaction\.localhost/)
+  }
+
+  await unlink(nginx)
+  const attempts = await Promise.all([
+    RestoreConfig.restoreWebsiteConfig(base, live, 'nginx'),
+    RestoreConfig.restoreWebsiteConfig(base, live, 'nginx')
+  ])
+  assert.deepEqual(attempts.sort(), ['created', 'exists'])
+  assert.match(await readFile(nginx, 'utf8'), /transaction\.localhost/)
+  assert.ok(!(await readdir(join(base, 'vhost', 'nginx'))).some((name) => name.endsWith('.tmp')))
+
+  await mkdir(siteFile('nginx', other.id))
+  await assert.rejects(Promise.resolve(host.restoreConfig(other.id, 'nginx')), /not a regular file/)
+  await assert.rejects(Promise.resolve(host.restoreConfig(99999, 'nginx')), /saved PHP or static/)
+  await assert.rejects(Promise.resolve(host.restoreConfig('../escape', 'nginx')), /Invalid website/)
+  await assert.rejects(Promise.resolve(host.restoreConfig(live.id, 'logs')), /Invalid website/)
+
+  const legacy = record('Aa70c8Cj5miL3', 'legacy.restore.localhost')
+  await file(hostFile, [...(await fetchHostList(false)), legacy])
+  assert.equal(await host.restoreConfig(legacy.id, 'nginx'), 'created')
+  assert.match(
+    await readFile(configPath('nginx', String(legacy.id)), 'utf8'),
+    /legacy\.restore\.localhost/
+  )
+  await assertAbsent(configPath('rewrite', String(legacy.id)))
 }
 
 try {
@@ -416,6 +468,7 @@ function managerFixture() {
   return { manager, dispatched }
 }
 const flush = () => new Promise<void>((resolve) => setImmediate(resolve))
+assert.ok(isWebsiteForkTransaction('host', 'restoreConfig'))
 const { manager, dispatched } = managerFixture()
 const updates: string[] = []
 const importRequest = manager
@@ -481,5 +534,5 @@ assert.match((await nextWrite).msg, /previous website write/)
 assert.equal(partialPark.dispatched.length, 1)
 
 console.log(
-  'Website backup roundtrip, regular write rollback, partial parking, and cross-worker admission passed.'
+  'Website backup, missing configuration restoration, regular write rollback, partial parking, and cross-worker admission passed.'
 )

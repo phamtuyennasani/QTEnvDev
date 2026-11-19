@@ -5,6 +5,7 @@ const hostTransactions = new Set([
   'websiteBackupExport',
   'reorderHost',
   'handleHost',
+  'restoreConfig',
   'addRandomSite',
   'addPhpMyAdminSite',
   'writeHosts'

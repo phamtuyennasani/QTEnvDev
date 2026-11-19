@@ -57,6 +57,8 @@ try {
 let finishFirst!: (value: string) => void
 const first = new Promise<string>((resolve) => { finishFirst = resolve })
 let contents = 'original'
+const missingFile = () => Object.assign(new Error('Fixture file is missing'), { code: 'ENOENT' })
+let missingRead: string | Error = missingFile()
 const writes: Array<[string, string]> = []
 const launches: Array<[string, string]> = []
 let finishLaunch!: (result: string | true) => void
@@ -65,7 +67,17 @@ const { ServiceFilesController } = await loadIsolated('src/render-next/state/ser
   '@/util/NodeFn': {
     fs: {
       existsSync: async (file: string) => file !== '/missing',
-      readFileStrict: async (file: string) => file === '/first' ? first : contents,
+      readFileStrict: async (file: string) => {
+        if (file === '/first') return first
+        if (file === '/denied') {
+          throw Object.assign(new Error('Fixture access denied'), { code: 'EACCES' })
+        }
+        if (file === '/missing') {
+          if (missingRead instanceof Error) throw missingRead
+          return missingRead
+        }
+        return contents
+      },
       writeFile: async (file: string, data: string) => { writes.push([file, data]); contents = data }
     },
     shell: {}
@@ -119,4 +131,62 @@ finishLaunch('Editor not installed')
 assert.equal(await pendingLaunch, false)
 assert.equal(editor.error, '')
 assert.equal(editor.openingExternal, false)
-console.log('Service files passed: bounded native tail, external editor argument and lifecycle, stale read, external edit protection, committed write warning and closed dialog.')
+
+await editor.select({ name: 'No access', path: '/denied', kind: 'config' })
+assert.equal(editor.canRestore, false)
+assert.match(editor.error, /Fixture access denied/)
+await editor.select({ name: 'Read only', path: '/missing', kind: 'config', readOnly: true })
+assert.equal(editor.canRestore, false)
+
+const missing = { name: 'Missing vhost', path: '/missing', kind: 'config' as const }
+await editor.select(missing)
+assert.equal(editor.canRestore, true)
+assert.equal(editor.canSave, false)
+assert.equal(
+  await editor.restoreSelected(async () => { throw new Error('Result unknown. Refresh.') }),
+  false
+)
+assert.equal(editor.canRestore, false, 'a new strict read must precede a retry')
+await editor.readSelected()
+assert.equal(editor.canRestore, true)
+
+let finishRestore!: () => void
+const pendingRestore = editor.restoreSelected((file: { path: string }) => {
+  assert.equal(file.path, missing.path)
+  return new Promise((resolve) => {
+    finishRestore = () => {
+      missingRead = 'recreated vhost'
+      resolve('created')
+    }
+  })
+})
+assert.equal(editor.restoring, true)
+assert.equal(await editor.restoreSelected(() => assert.fail('duplicate restore reached the callback')), false)
+await editor.select({ name: 'Another vhost', path: '/second', kind: 'config' })
+finishRestore()
+assert.equal(await pendingRestore, true)
+assert.equal(editor.content, 'saved')
+assert.equal(editor.warning, '')
+assert.equal(editor.restoring, false)
+
+missingRead = missingFile()
+await editor.select(missing)
+assert.equal(await editor.restoreSelected(async () => {
+  missingRead = Object.assign(new Error('Preview denied'), { code: 'EACCES' })
+  return 'created'
+}), true)
+assert.equal(editor.warning, 'Configuration created.')
+assert.match(editor.error, /Preview denied/)
+
+missingRead = missingFile()
+await editor.select(missing)
+const closing = editor.restoreSelected(() => new Promise((resolve) => {
+  finishRestore = () => resolve('exists')
+}))
+editor.clear()
+finishRestore()
+assert.equal(await closing, true)
+assert.equal(editor.selected, undefined)
+assert.equal(editor.warning, '')
+assert.equal(editor.restoring, false)
+console.log('Service files passed: bounded native tail, external editor lifecycle, stale reads, edit conflicts, and missing configuration restoration.')

@@ -10,6 +10,20 @@
   >
     <template v-if="kind === 'config'" #file-actions="{ file }">
       <div class="website-external-editor">
+        <button
+          v-if="
+            (!project.host.type || project.host.type === 'php') && websiteFileController.canRestore
+          "
+          type="button"
+          class="action-button"
+          :disabled="
+            websiteFileController.saving ||
+            websiteFileController.openingExternal ||
+            websiteFileController.restoring
+          "
+          @click="restoreConfig"
+          >{{ websiteFileController.restoring ? 'Creating…' : 'Create missing file' }}</button
+        >
         <select v-model="editor" class="action-button" aria-label="External editor">
           <option value="VSCode">Visual Studio Code</option>
           <option value="PhpStorm">PhpStorm</option>
@@ -22,7 +36,8 @@
           :disabled="
             file.exists === false ||
             websiteFileController.openingExternal ||
-            websiteFileController.saving
+            websiteFileController.saving ||
+            websiteFileController.restoring
           "
           @click="websiteFileController.openExternal(file, editor)"
           >Open in editor</button
@@ -42,6 +57,7 @@
 <script setup lang="ts">
   import { ref } from 'vue'
   import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
+  import { restoreProjectConfig } from '../adapters/projectAdapter'
   import { projectController, type ProjectItem } from '../state/projectController'
   import type { ServiceFile, ServiceFileEditor } from '../state/serviceFilesController'
 
@@ -55,6 +71,10 @@
     return items.map(({ label, ...file }) => ({ ...file, kind: props.kind, name: label }))
   }
   const reloadServer = (file: ServiceFile) => projectController.afterFileSave(file.path)
+  const restoreConfig = () => {
+    const { id } = props.project
+    return websiteFileController.restoreSelected((file) => restoreProjectConfig(id, file.path))
+  }
 </script>
 
 <style scoped>

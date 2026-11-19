@@ -29,7 +29,8 @@ import { reconcileSystemHostsBlock } from './SystemHostsBlock'
 import { syncUnixHosts } from './UnixHosts'
 import { timeOperation, timeOperationSync } from '@shared/OperationTiming'
 import { launchWindowsDnsRefresh } from '@shared/WindowsDnsRefresh'
-import { removeWebsiteFiles, snapshotWebsiteFiles, websitePaths } from './Transaction'
+import { isWebsiteFileId, removeWebsiteFiles, snapshotWebsiteFiles, websitePaths } from './Transaction'
+import { isWebsiteConfigKind, restoreWebsiteConfig } from './RestoreConfig'
 
 const isVhost = (host: AppHost) =>
   !['java', 'node', 'go', 'python', 'tomcat'].includes(host.type ?? '')
@@ -327,6 +328,17 @@ export class Host extends Base {
         ...(uncertainPaths.length && { outcome: 'unknown' }),
         ...(warnings.length && { warnings })
       })
+    })
+  }
+
+  restoreConfig(id: unknown, kind: unknown) {
+    return new ForkPromise(async (resolve) => {
+      if (!isWebsiteFileId(id) || !isWebsiteConfigKind(kind)) {
+        throw new Error('Invalid website or configuration type.')
+      }
+      const host = (await fetchHostList(false)).find((item) => item.id === id)
+      if (!host || !isVhost(host)) throw new Error('The saved PHP or static website was not found.')
+      resolve(await restoreWebsiteConfig(global.Server.BaseDir!, host, kind))
     })
   }
 

@@ -24,19 +24,24 @@ export class ServiceFilesController {
   selected?: ServiceFile
   content = ''
   private loadedContent?: string
+  private missing = false
   loading = false
   saving = false
   openingExternal = false
+  restoring = false
   error = ''
   warning = ''
   private generation = 0
   private readGeneration = 0
   get canEdit() {
     return this.selected?.kind === 'config' && !this.selected.readOnly &&
-      !this.saving && this.loadedContent !== undefined
+      !this.saving && !this.restoring && this.loadedContent !== undefined
   }
   get canSave() {
     return this.canEdit && this.content !== this.loadedContent
+  }
+  get canRestore() {
+    return this.selected?.kind === 'config' && !this.selected.readOnly && this.missing
   }
 
   async openProvided(provider: () => Promise<ServiceFile[]>) {
@@ -98,12 +103,19 @@ export class ServiceFilesController {
     const read = ++this.readGeneration
     const current = () => generation === this.generation && read === this.readGeneration
     this.loadedContent = undefined
+    this.missing = false
+    this.error = ''
     try {
       const raw = await (file.kind === 'log' ? fs.readLogTail(file.path) : fs.readFileStrict(file.path))
       if (!current()) return
       this.content = raw
       if (file.kind === 'config') this.loadedContent = raw
-    } catch (error) { if (current()) this.error = packageError(error) }
+    } catch (error) {
+      if (current()) {
+        this.missing = (error as NodeJS.ErrnoException)?.code === 'ENOENT'
+        this.error = packageError(error)
+      }
+    }
   }
   async save(afterSave?: (file: ServiceFile) => Promise<string[]>) {
     const file = this.selected
@@ -142,7 +154,7 @@ export class ServiceFilesController {
   async reveal(file = this.selected) { if (!file) return; try { await shell.showItemInFolder(file.path) } catch (error) { this.error = packageError(error) } }
 
   async openExternal(file: ServiceFile, editor: ServiceFileEditor) {
-    if (this.openingExternal || this.saving || file.kind !== 'config' || this.selected !== file) return false
+    if (this.openingExternal || this.saving || this.restoring || file.kind !== 'config' || this.selected !== file) return false
     const { path } = file
     const generation = this.generation
     const current = () => generation === this.generation && this.selected === file
@@ -164,6 +176,38 @@ export class ServiceFilesController {
     }
   }
 
-  clear() { this.generation++; this.files = []; this.selected = undefined; this.content = ''; this.loadedContent = undefined; this.error = ''; this.warning = ''; this.loading = false }
+  async restoreSelected(create: (file: ServiceFile) => Promise<'created' | 'exists'>) {
+    const file = this.selected
+    if (!file || !this.canRestore || this.saving || this.openingExternal || this.restoring) {
+      return false
+    }
+    const generation = this.generation
+    const current = () => generation === this.generation && this.selected === file
+    this.restoring = true
+    this.error = ''
+    this.warning = ''
+    let result: 'created' | 'exists'
+    try {
+      result = await create(file)
+    } catch (error) {
+      if (this.selected?.path === file.path) {
+        // A read begun before the terminal reply cannot establish that a retry is needed.
+        this.readGeneration++
+        this.missing = false
+      }
+      if (current()) this.error = packageError(error)
+      return false
+    } finally {
+      this.restoring = false
+    }
+    if (current()) {
+      this.warning =
+        result === 'created' ? 'Configuration created.' : 'The configuration already exists.'
+      await this.readSelected(generation)
+    }
+    return true
+  }
+
+  clear() { this.generation++; this.files = []; this.selected = undefined; this.content = ''; this.loadedContent = undefined; this.missing = false; this.error = ''; this.warning = ''; this.loading = false }
 }
 export const serviceFilesController = reactive(new ServiceFilesController())

@@ -17,14 +17,14 @@ const reserved = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i
 const isSafeBasename = (value: string) =>
   safeBasename.test(value) && !value.endsWith('.') && !reserved.test(value)
 
+export const isWebsiteFileId = (id: unknown) =>
+  typeof id === 'number'
+    ? Number.isSafeInteger(id) && id > 0
+    : typeof id === 'string' && /^[A-Za-z0-9]{1,64}$/.test(id) && isSafeBasename(id)
+
 export function websitePaths(base: string, id: number, legacyName?: string) {
   const key = String(id)
-  if (
-    (typeof id === 'number'
-      ? !Number.isSafeInteger(id) || id <= 0
-      : typeof id !== 'string' || !/^[A-Za-z0-9]{1,64}$/.test(key)) ||
-    !isSafeBasename(key)
-  ) {
+  if (!isWebsiteFileId(id)) {
     throw new Error('The website identifier cannot be used as a file name.')
   }
   const names = new Set([key])

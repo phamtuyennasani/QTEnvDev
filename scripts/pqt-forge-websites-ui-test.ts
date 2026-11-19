@@ -109,6 +109,16 @@ const bootstrap = String.raw`
       }
       if (channel === 'app-fork:host') {
         if (method === 'hostList') return success(snapshot())
+        if (method === 'restoreConfig') {
+          if (first !== 1 || second !== 'nginx' || websiteFiles[vhost] !== undefined) {
+            return failure('The repair received the wrong website or file type.')
+          }
+          window.finishWebsiteRepair = () => {
+            websiteFiles[vhost] = 'server { listen 8080; }\n'
+            success('created')
+          }
+          return reply({ code: 200 })
+        }
         if (method === 'listNginxRewriteTemplates') {
           if (first === 'bundled') return success(['wordpress.conf'])
           window.finishUserTemplateCatalog = () => success(['custom.conf', 'slow.conf'])
@@ -352,6 +362,18 @@ const checks = String.raw`(async () => {
   await click('Save configuration')
   await wait(() => modal()?.innerText.includes('Configuration saved.'), 'generated configuration saved')
   assert(websiteFiles[vhost] === updated && websiteRestarts.join(',') === 'nginx', 'Vhost should reload only its running server')
+
+  const rewriteBefore = websiteFiles[rewrite]
+  delete websiteFiles[vhost]
+  await click('Refresh')
+  await wait(() => button('Create missing file'), 'creation action for missing generated Nginx configuration')
+  await click('Create missing file')
+  await wait(() => window.finishWebsiteRepair && button('Creating…')?.disabled, 'creation waits for the terminal reply')
+  finishWebsiteRepair()
+  await wait(() => editor.value.includes('listen 8080') && modal()?.innerText.includes('Configuration created.'), 'created file appears in the editor')
+  assert(requests('app-fork:host', 'restoreConfig').length === 1, 'Creation dispatches once for the selected file')
+  assert(!button('Create missing file'), 'A present configuration does not offer creation')
+  assert(websiteFiles[rewrite] === rewriteBefore && websiteRestarts.join(',') === 'nginx', 'Creating a file preserves the rewrite and does not restart the server')
   await click('Close')
 
   await click('Vhost templates')
