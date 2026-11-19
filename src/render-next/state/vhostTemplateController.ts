@@ -1,35 +1,140 @@
 import { reactiveBind } from '@/util/Index'
-import { fs, shell } from '@/util/NodeFn'
+import { dialog, fs, shell } from '@/util/NodeFn'
 import { join } from '@/util/path-browserify'
+import { websiteError } from '../websites/types'
 import { showNotice } from './app'
 
-export type VhostTemplateKey = 'nginx' | 'nginxSSL' | 'apache' | 'apacheSSL' | 'caddy' | 'caddySSL' | 'frankenphp' | 'frankenphpSSL'
-export type VhostTemplate = { key: VhostTemplateKey; label: string; custom: string; fallback: string }
-const definitions: Array<[VhostTemplateKey, string, string, string]> = [
-  ['nginx', 'Nginx HTTP', 'nginx.vhost', 'nginx.vhost'], ['nginxSSL', 'Nginx HTTPS', 'nginxSSL.vhost', 'nginxSSL.vhost'],
-  ['apache', 'Apache HTTP', 'apache.vhost', 'apache.vhost'], ['apacheSSL', 'Apache HTTPS', 'apacheSSL.vhost', 'apacheSSL.vhost'],
-  ['caddy', 'Caddy HTTP', 'caddy.vhost', 'CaddyfileVhost'], ['caddySSL', 'Caddy HTTPS', 'caddySSL.vhost', 'CaddyfileVhostSSL'],
-  ['frankenphp', 'FrankenPHP HTTP', 'frankenphp.vhost', 'FrankenphpVhost'], ['frankenphpSSL', 'FrankenPHP HTTPS', 'frankenphpSSL.vhost', 'FrankenphpVhostSSL']
-]
-class VhostTemplateController {
-  templates: VhostTemplate[] = []; selected: VhostTemplateKey = 'nginx'; content = ''; loading = false; saving = false; error = ''
-  private loadFlight?: Promise<boolean>; private saveFlight?: Promise<boolean>
-  private list(): VhostTemplate[] { const base = String(window.Server?.BaseDir || ''); const staticRoot = String(window.Server?.Static || ''); return definitions.map(([key, label, customName, fallbackName]) => ({ key, label, custom: join(base, 'VhostTemplate', customName), fallback: join(staticRoot, 'tmpl', fallbackName) })) }
-  async load(key: VhostTemplateKey = this.selected): Promise<boolean> {
-    if (this.loadFlight) return this.loadFlight
-    this.templates = this.list(); this.selected = key; this.loading = true; this.error = ''
-    const template = this.templates.find((item) => item.key === key)
-    const flight = Promise.resolve().then(async () => { if (!template) throw new Error('Unknown vhost template.'); const source = await fs.existsSync(template.custom) ? template.custom : template.fallback; this.content = await fs.readFile(source); return true }).catch((error) => { this.error = error instanceof Error ? error.message : String(error); showNotice(this.error); return false }).finally(() => { this.loading = false; this.loadFlight = undefined })
-    this.loadFlight = flight; return flight
+const definitions = {
+  nginx: ['Nginx HTTP', 'nginx.vhost'],
+  nginxSSL: ['Nginx HTTPS', 'nginxSSL.vhost'],
+  apache: ['Apache HTTP', 'apache.vhost'],
+  apacheSSL: ['Apache HTTPS', 'apacheSSL.vhost'],
+  caddy: ['Caddy HTTP', 'CaddyfileVhost'],
+  caddySSL: ['Caddy HTTPS', 'CaddyfileVhostSSL'],
+  frankenphp: ['FrankenPHP HTTP', 'FrankenphpVhost'],
+  frankenphpSSL: ['FrankenPHP HTTPS', 'FrankenphpVhostSSL']
+} as const
+
+export type VhostTemplateKey = keyof typeof definitions
+export const vhostTemplateOptions = (Object.keys(definitions) as VhostTemplateKey[]).map((key) => ({
+  key,
+  label: definitions[key][0]
+}))
+
+export type VhostTemplateSnapshot = Readonly<{
+  key: VhostTemplateKey
+  source: string
+  content: string
+}>
+
+function pathsFor(key: VhostTemplateKey) {
+  const { BaseDir, Static } = window.Server ?? {}
+  if (!BaseDir || !Static) throw new Error('The application data directory is not ready.')
+  const directory = join(BaseDir, 'VhostTemplate')
+  return {
+    directory,
+    custom: join(directory, key + '.vhost'),
+    fallback: join(Static, 'tmpl', definitions[key][1])
   }
-  async save(): Promise<boolean> {
-    if (this.saveFlight || this.loading) return false
-    const template = this.templates.find((item) => item.key === this.selected)
-    if (!template) { this.error = 'Select a vhost template first.'; return false }
-    this.saving = true; this.error = ''
-    const flight = Promise.resolve().then(async () => { await fs.mkdirp(join(String(window.Server.BaseDir), 'VhostTemplate')); await fs.writeFile(template.custom, this.content); showNotice(template.label + ' template saved.'); return true }).catch((error) => { this.error = error instanceof Error ? error.message : String(error); showNotice(this.error); return false }).finally(() => { this.saving = false; this.saveFlight = undefined })
-    this.saveFlight = flight; return flight
-  }
-  async reveal(): Promise<void> { const template = this.templates.find((item) => item.key === this.selected); if (template) await shell.showItemInFolder(template.custom).catch((error) => { this.error = error instanceof Error ? error.message : String(error); showNotice(this.error) }) }
 }
+
+async function readTemplate(
+  key: VhostTemplateKey,
+  { custom, fallback }: ReturnType<typeof pathsFor>
+): Promise<VhostTemplateSnapshot> {
+  try {
+    return { key, source: custom, content: await fs.readFileStrict(custom) }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code !== 'ENOENT') throw error
+  }
+  return { key, source: fallback, content: await fs.readFileStrict(fallback) }
+}
+
+class VhostTemplateController {
+  saving = false
+  importing = false
+  exporting = false
+
+  get busy() {
+    return this.saving || this.importing || this.exporting
+  }
+
+  async load(key: VhostTemplateKey): Promise<VhostTemplateSnapshot> {
+    return readTemplate(key, pathsFor(key))
+  }
+
+  async loadDefault(key: VhostTemplateKey): Promise<string> {
+    return fs.readFileStrict(pathsFor(key).fallback)
+  }
+
+  async importDraft(): Promise<string | undefined> {
+    if (this.busy) return undefined
+    this.importing = true
+    try {
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: 'Import vhost template',
+        properties: ['openFile', 'showHiddenFiles']
+      })
+      const path = filePaths?.[0]
+      if (canceled || !path) return undefined
+      const info = (await fs.stat(path)) as unknown as { size: number; isFile: boolean } | null
+      if (!info?.isFile) throw new Error('Select a regular template file.')
+      if (info.size > 5 * 1024 * 1024) throw new Error('Template files are limited to 5 MiB.')
+      return await fs.readFileStrict(path)
+    } finally {
+      this.importing = false
+    }
+  }
+
+  async exportDraft(key: VhostTemplateKey, draft: string): Promise<void> {
+    if (this.busy) return
+    this.exporting = true
+    try {
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        defaultPath: key + '-custom.vhost',
+        properties: ['createDirectory', 'showOverwriteConfirmation']
+      })
+      if (canceled || !filePath) return
+      await fs.writeFile(filePath, draft)
+    } catch (error) {
+      showNotice(websiteError(error))
+      return
+    } finally {
+      this.exporting = false
+    }
+    showNotice('Template copy saved.')
+  }
+
+  async save(snapshot: VhostTemplateSnapshot, content: string): Promise<string | undefined> {
+    if (this.busy) return 'A template file operation is already running.'
+    const { key, source, content: baseline } = snapshot
+    this.saving = true
+    try {
+      const paths = pathsFor(key)
+      const current = await readTemplate(key, paths)
+      if (current.source !== source || current.content !== baseline) {
+        return 'This template changed on disk. Reload it before saving.'
+      }
+      await fs.mkdirp(paths.directory)
+      await fs.writeFile(paths.custom, content)
+    } catch (error) {
+      const message = websiteError(error)
+      showNotice(message)
+      return message
+    } finally {
+      this.saving = false
+    }
+    showNotice(definitions[key][0] + ' template saved.')
+    return undefined
+  }
+
+  async reveal(source: string): Promise<void> {
+    try {
+      await shell.showItemInFolder(source)
+    } catch (error) {
+      showNotice(websiteError(error))
+    }
+  }
+}
+
 export const vhostTemplateController = reactiveBind(new VhostTemplateController())

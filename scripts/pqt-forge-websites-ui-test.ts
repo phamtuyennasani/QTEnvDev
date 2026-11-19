@@ -39,7 +39,7 @@ const server = await createServer({
 })
 
 const bootstrap = String.raw`
-  window.Server = { isWindows: true, DataDirectoryReady: true, BaseDir: 'C:/fixture/', AppDir: 'C:/fixture/' }
+  window.Server = { isWindows: true, DataDirectoryReady: true, BaseDir: 'C:/fixture/', AppDir: 'C:/fixture/', Static: 'C:/fixture-static/' }
   window.websiteErrors = []
   window.websiteRequests = []
   window.websiteTerminalCommands = []
@@ -51,6 +51,8 @@ const bootstrap = String.raw`
   window.websiteFiles = {
     [vhost]: 'server { listen 8080; }\n',
     [rewrite]: 'try_files $uri /index.php;\n',
+    'C:/fixture-static/tmpl/nginx.vhost': '# Bundled Nginx template',
+    'C:/fixture-import/custom.vhost': '# Imported template',
     'C:/fixture/app.hosts.txt': '127.0.0.1     alpha.fixture.test\n127.0.0.1     alias.fixture.test',
     [tomcatConf + 'server.xml']: '<Server port="8005" />',
     [tomcatConf + 'Catalina/java.fixture.test/rewrite.config']: 'RewriteRule ^/old /new [L]',
@@ -173,22 +175,38 @@ const bootstrap = String.raw`
       if (channel === 'App-Node-FN') {
         if (method === 'shell' && first === 'openPath') return reply('')
         if (method === 'dialog' && first === 'showSaveDialog') {
+          if (second?.defaultPath === 'nginx-custom.vhost') {
+            return reply({ canceled: false, filePath: 'C:/fixture-export/nginx-custom.vhost' })
+          }
           return reply({ canceled: false, filePath: 'C:/fixture-export/website-backup.json' })
         }
         if (method === 'dialog' && first === 'showOpenDialog') {
+          if (second?.title === 'Import vhost template') {
+            return reply(templateImportCancelled
+              ? { canceled: true, filePaths: [] }
+              : { canceled: false, filePaths: ['C:/fixture-import/custom.vhost'] })
+          }
           return reply({ canceled: false, filePaths: [second?.filters?.[0]?.name === 'Website backup' ? 'C:/fixture-export/website-backup.json' : 'C:/fixture/laravel'] })
         }
         if (method === 'fs') {
           if (first === 'existsSync') return reply(second in websiteFiles || second === 'C:/fixture/webapps' || second === 'C:/fixture/vhost/logs')
-          if (first === 'stat') return reply({ isDirectory: second === 'C:/fixture/webapps' })
+          if (first === 'stat') {
+            if (second === 'C:/fixture-import/custom.vhost') return reply({ size: 19, isFile: true })
+            return reply({ isDirectory: second === 'C:/fixture/webapps' })
+          }
           if (first === 'subdir') return reply(second === 'C:/fixture/webapps' ? ['ROOT', 'console'] : [])
           if (first === 'readdir') {
             if (second === 'C:/fixture/webapps') return reply(['console.war', 'api.war', 'README.txt'])
             return reply(['java.fixture.test-tomcat_access_log.2026-11-19.log', 'java.fixture.test-tomcat_access_log.2026-11-19.log.bak', 'another-tomcat_access_log.log'])
           }
-          if (first === 'readFile' || first === 'readLogTail') return reply(websiteFiles[second] ?? { code: 1, msg: 'Fixture file missing' })
+          if (first === 'readFile' || first === 'readLogTail') {
+            if (second === 'C:/fixture/VhostTemplate/apache.vhost') {
+              return reply({ code: 1, msg: 'Fixture template access denied', errorCode: 'EACCES' })
+            }
+            return reply(websiteFiles[second] ?? { code: 1, msg: 'Fixture file missing', errorCode: 'ENOENT' })
+          }
           if (first === 'writeFile') {
-            if (second !== vhost) return reply({ code: 1, msg: 'Unexpected fixture write path' })
+            if (second !== vhost && second !== 'C:/fixture/VhostTemplate/nginx.vhost' && second !== 'C:/fixture-export/nginx-custom.vhost') return reply({ code: 1, msg: 'Unexpected fixture write path' })
             websiteFiles[second] = third
             return reply(true)
           }
@@ -335,6 +353,43 @@ const checks = String.raw`(async () => {
   await wait(() => modal()?.innerText.includes('Configuration saved.'), 'generated configuration saved')
   assert(websiteFiles[vhost] === updated && websiteRestarts.join(',') === 'nginx', 'Vhost should reload only its running server')
   await click('Close')
+
+  await click('Vhost templates')
+  window.templateImportCancelled = true
+  const templateContent = () => modal()?.querySelector('textarea[aria-label="Template content"]')
+  const templateSelect = modal().querySelector('select')
+  const selectTemplate = (key) => {
+    templateSelect.value = key
+    templateSelect.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+  await wait(() => templateContent()?.value === '# Bundled Nginx template', 'load bundled vhost template')
+  input(templateContent(), '# Unsaved Nginx template')
+  selectTemplate('apache')
+  await wait(() => modal()?.querySelector('[role=alert]')?.textContent.includes('template access denied'), 'failed Apache template read')
+  assert(templateContent().value === '' && button('Save template').disabled, 'A failed template load must not expose another template draft for saving')
+  selectTemplate('nginx')
+  await wait(() => templateContent()?.value === '# Bundled Nginx template', 'recover by selecting an available template')
+  input(templateContent(), '# Saved Nginx template')
+  await click('Save template')
+  await wait(() => !modal(), 'close after saving a template')
+  assert(websiteFiles['C:/fixture/VhostTemplate/nginx.vhost'] === '# Saved Nginx template', 'Save the selected vhost template as a custom override')
+  await click('Vhost templates')
+  await wait(() => templateContent()?.value === '# Saved Nginx template', 'load the saved override')
+  await click('Import file')
+  await wait(() => !button('Import file').disabled, 'cancel the template picker')
+  assert(templateContent().value === '# Saved Nginx template', 'Cancelling import must preserve the current draft')
+  window.templateImportCancelled = false
+  await click('Import file')
+  await wait(() => templateContent()?.value === '# Imported template', 'load the selected file into the draft')
+  await click('Export draft')
+  await wait(() => websiteFiles['C:/fixture-export/nginx-custom.vhost'] === '# Imported template', 'export the current draft')
+  assert(websiteFiles['C:/fixture/VhostTemplate/nginx.vhost'] === '# Saved Nginx template', 'Import and export must preserve the active template')
+  await click('Load bundled default')
+  await wait(() => templateContent()?.value === '# Bundled Nginx template', 'put the bundled default in the draft')
+  assert(websiteFiles['C:/fixture/VhostTemplate/nginx.vhost'] === '# Saved Nginx template', 'Loading the default must leave the saved override intact')
+  await click('Save template')
+  await wait(() => !modal(), 'save the bundled default')
+  assert(websiteFiles['C:/fixture/VhostTemplate/nginx.vhost'] === '# Bundled Nginx template', 'The user can save the loaded default')
 
   await click('Configure')
   await click('SSL')
