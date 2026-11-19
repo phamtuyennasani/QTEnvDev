@@ -30,6 +30,7 @@ import { RedisCommanderRuntime, type RedisCommanderOpenResult } from './RedisCom
 
 class Redis extends Base {
   private _redisCommanderRuntime?: RedisCommanderRuntime
+  private configInitializations = new Map<string, ForkPromise<string>>()
 
   constructor() {
     super()
@@ -74,7 +75,7 @@ class Redis extends Base {
   }
 
   initConf(version: SoftInstalled) {
-    return new ForkPromise((resolve, reject) => {
+    return new ForkPromise((resolve, reject, on) => {
       if (!existsSync(version?.bin)) {
         reject(new Error(I18nT('fork.binNotFound')))
         return
@@ -83,13 +84,19 @@ class Redis extends Base {
         reject(new Error(I18nT('fork.versionNotFound')))
         return
       }
-      this._initConf(version).then(resolve)
+      this._initConf(version).on(on).then(resolve, reject)
     })
   }
   _initConf(version: SoftInstalled): ForkPromise<string> {
-    return new ForkPromise(async (resolve, reject, on) => {
-      const v = version?.version?.split('.')?.[0] ?? ''
-      const confFile = join(global.Server.RedisDir!, `redis-${v}.conf`)
+    const v = version?.version?.split('.')?.[0] ?? ''
+    const confFile = join(global.Server.RedisDir!, `redis-${v}.conf`)
+    const pending = this.configInitializations.get(confFile)
+    if (pending) {
+      return new ForkPromise((resolve, reject) => {
+        pending.then(resolve, reject)
+      })
+    }
+    const operation = new ForkPromise<string>(async (resolve, reject, on) => {
       if (!existsSync(confFile)) {
         on({
           'APP-On-Log': AppLog('info', I18nT('appLog.confInit'))
@@ -105,15 +112,21 @@ class Redis extends Base {
           .replace(/#PID_PATH#/g, pathFixedToUnix(join(global.Server.RedisDir!, 'redis.pid')))
           .replace(/#LOG_PATH#/g, pathFixedToUnix(join(global.Server.RedisDir!, `redis-${v}.log`)))
           .replace(/#DB_PATH#/g, pathFixedToUnix(dbDir))
-        await writeFile(confFile, content)
         const defaultFile = join(global.Server.RedisDir!, `redis-${v}-default.conf`)
         await writeFile(defaultFile, content)
+        await writeFile(confFile, content)
         on({
           'APP-On-Log': AppLog('info', I18nT('appLog.confInitSuccess', { file: confFile }))
         })
       }
       resolve(confFile)
     })
+    this.configInitializations.set(confFile, operation)
+    const cleanup = () => {
+      this.configInitializations.delete(confFile)
+    }
+    void operation.then(cleanup, cleanup)
+    return operation
   }
 
   /** Commander 独立登记时只回收面板，不能用其 Node bin 去停止 Redis。 */

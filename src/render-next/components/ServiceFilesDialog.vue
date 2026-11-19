@@ -8,7 +8,9 @@
           <div class="service-file-toolbar"><code>{{ controller.selected.path }}</code><button class="action-button" @click="controller.reveal()">Reveal</button><button class="action-button" @click="controller.readSelected()">Refresh</button></div>
           <small v-if="kind === 'log'" class="website-help">Showing up to the latest 200 KB.</small>
           <small v-else-if="controller.selected.readOnly" class="website-help">Use the website editor to change this generated file.</small>
-          <textarea v-if="kind === 'config'" v-model="controller.content" :readonly="controller.selected.readOnly || controller.saving" spellcheck="false" />
+          <slot v-if="kind === 'config'" name="configuration" :content="controller.content" :readOnly="!controller.canEdit" :update="updateContent">
+            <textarea v-model="controller.content" :readonly="!controller.canEdit" spellcheck="false" />
+          </slot>
           <pre v-else class="service-log-preview">{{ controller.content || 'This log is empty.' }}</pre>
         </template>
         <p v-if="controller.error" class="forge-alert forge-alert--error" role="alert">{{ controller.error }}</p>
@@ -42,6 +44,7 @@ const open = computed(() => props.modelValue)
 const title = computed(() => `${props.name} ${props.kind === 'config' ? 'configuration' : props.onlyFile === 'slow' ? 'slow query log' : 'logs'}`)
 const description = computed(() => props.kind === 'config' ? 'Choose a configuration file.' : 'Choose a log file to read or reveal.')
 const close = () => emit('update:modelValue', false)
+const updateContent = (content: string) => { if (controller.canEdit) controller.content = content }
 const save = async () => { if (await controller.save(props.afterSave) && !props.afterSave) close() }
 const clearLog = async () => {
   const path = pendingClear.value

@@ -28,9 +28,12 @@ export class ServiceFilesController {
   warning = ''
   private generation = 0
   private readGeneration = 0
-  get canSave() {
+  get canEdit() {
     return this.selected?.kind === 'config' && !this.selected.readOnly &&
-      !this.saving && this.loadedContent !== undefined && this.content !== this.loadedContent
+      !this.saving && this.loadedContent !== undefined
+  }
+  get canSave() {
+    return this.canEdit && this.content !== this.loadedContent
   }
 
   async openProvided(provider: () => Promise<ServiceFile[]>) {

@@ -26,6 +26,7 @@
   import { uuid } from '@/util/Index'
   import { join } from '@/util/path-browserify'
   import { fs } from '@/util/NodeFn'
+  import { redisCommonFields } from './commonConfig'
 
   const appStore = AppStore()
   const conf = ref()
@@ -53,56 +54,12 @@
     return join(window.Server.RedisDir!, `redis-${vm.value}-default.conf`)
   })
 
-  const names: CommonSetItem[] = [
-    {
-      name: 'port',
-      value: '6379',
-      enable: true,
-      tips() {
-        return I18nT('common.label.port')
-      }
-    },
-    {
-      name: 'timeout',
-      value: '0',
-      enable: true,
-      tips() {
-        return I18nT('redis.timeout')
-      }
-    },
-    {
-      name: 'maxclients',
-      value: '10000',
-      enable: true,
-      tips() {
-        return I18nT('mysql.max_connections')
-      }
-    },
-    {
-      name: 'databases',
-      value: '16',
-      enable: true,
-      tips() {
-        return I18nT('redis.databases')
-      }
-    },
-    {
-      name: 'requirepass',
-      value: '',
-      enable: true,
-      tips() {
-        return I18nT('redis.requirepass')
-      }
-    },
-    {
-      name: 'maxmemory',
-      value: '0',
-      enable: true,
-      tips() {
-        return I18nT('redis.maxmemory')
-      }
-    }
-  ]
+  const names: CommonSetItem[] = redisCommonFields.map((field) => ({
+    name: field.name,
+    value: field.defaultValue,
+    enable: true,
+    tips: () => I18nT(field.help)
+  }))
   let editConfig = ''
   let watcher: any
 
@@ -152,7 +109,6 @@
               v
             }
           }) ?? []
-        console.log('getCommonSetting: ', matchs, item.name)
         const find = matchs?.find((m) => m.k === item.name)
         let value = find?.v ?? item.value
         if (item.isString) {
@@ -171,7 +127,6 @@
   }
 
   const onTypeChange = (type: 'default' | 'common', config: string) => {
-    console.log('onTypeChange: ', type, config)
     if (editConfig !== config || commonSetting.value.length === 0) {
       editConfig = config
       getCommonSetting()

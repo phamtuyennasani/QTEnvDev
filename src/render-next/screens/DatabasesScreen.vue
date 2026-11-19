@@ -18,7 +18,19 @@
         <PackageBrowser v-if="selectedFlag" ref="packageBrowser" :key="selectedFlag" :flag="selectedFlag" :title="selectedDatabase.name" />
       </article>
     </div>
-    <ServiceFilesDialog v-if="selectedDatabase" v-model="filesOpen" :name="selectedDatabase.name" :version="selectedDatabase.version" :kind="fileKind" :only-file="onlyFile" />
+    <ServiceFilesDialog
+      v-if="selectedDatabase"
+      v-model="filesOpen"
+      :name="selectedDatabase.name"
+      :version="selectedDatabase.version"
+      :kind="fileKind"
+      :only-file="onlyFile"
+      :provider="redisConfiguration ? loadRedisConfiguration : undefined"
+    >
+      <template v-if="redisConfiguration" #configuration="{ content, readOnly, update }">
+        <RedisCommonConfiguration :content="content" :read-only="readOnly" @update="update" />
+      </template>
+    </ServiceFilesDialog>
     <MySQLGroupsPanel v-if="groupsOpen" @close="groupsOpen = false" />
   </section>
 </template>
@@ -31,6 +43,8 @@ import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
 import { databaseAdminController } from '../state/databaseAdminController'
 import DatabaseToolsPanel from '../components/DatabaseToolsPanel.vue'
 import { databaseManageController } from '../state/databaseManageController'
+import RedisCommonConfiguration from '../redis/CommonConfiguration.vue'
+import { redisConfigurationFiles } from '../redis/configuration'
 const packageBrowser = ref<InstanceType<typeof PackageBrowser>>()
 const visibleDatabases = databaseController.visibleDatabases
 const selectedDatabase = computed(() => {
@@ -48,6 +62,8 @@ const PostgreSqlDataDirectory = defineAsyncComponent(() => import('@/components/
 const groupsAvailable = computed(() => Boolean(window.QTEnvDevNodeAPI && window.Server?.DataDirectoryReady && window.Server.MysqlDir))
 const groupsOpen = ref(false)
 const filesOpen = ref(false); const fileKind = ref<'config' | 'log'>('log')
+const redisConfiguration = computed(() => selectedFlag.value === 'redis' && fileKind.value === 'config')
+const loadRedisConfiguration = () => redisConfigurationFiles(selectedDatabase.value?.version ?? '')
 const onlyFile = ref<string>()
 const openFiles = (kind: 'config' | 'log', file?: string) => { fileKind.value = kind; onlyFile.value = file; filesOpen.value = true }
 const adminController = databaseAdminController

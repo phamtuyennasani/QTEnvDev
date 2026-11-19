@@ -24,10 +24,17 @@ type SaveDialogCompatOptions = Omit<Electron.SaveDialogOptions, 'properties'> & 
 }
 
 // 工厂函数
-const createIPCCall = <T extends any[], R>(namespace: string, method: string): IPCMethod<T, R> => {
+const createIPCCall = <T extends any[], R>(
+  namespace: string,
+  method: string,
+  sensitive = false
+): IPCMethod<T, R> => {
   return (...args: T): Promise<R> =>
     new Promise((resolve) => {
-      IPC.send(`App-Node-FN`, namespace, method, ...args).then((key: string, res: R) => {
+      const request = sensitive
+        ? IPC.sendSensitive('App-Node-FN', namespace, method, ...args)
+        : IPC.send('App-Node-FN', namespace, method, ...args)
+      request.then((key: string, res: R) => {
         IPC.off(key)
         resolve(res)
       })
@@ -247,11 +254,13 @@ const throwFileIPCFailure = (response: FileIPCFailure): never => {
 }
 const writeFileRequest = createIPCCall<[string, string], boolean | FileIPCFailure>(
   'fs',
-  'writeFile'
+  'writeFile',
+  true
 )
 const strictReadFileRequest = createIPCCall<[string, boolean], string | FileIPCFailure>(
   'fs',
-  'readFile'
+  'readFile',
+  true
 )
 const readLogTailRequest = createIPCCall<[string], string | FileIPCFailure>('fs', 'readLogTail')
 
