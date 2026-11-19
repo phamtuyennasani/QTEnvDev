@@ -31,6 +31,7 @@ window.pathWrites = []
 window.scans = []
 window.flutterCommands = []
 window.flutterCreates = []
+window.flutterEdits = []
 window.doctorRequests = 0
 let receive
 window.QTEnvDevNodeAPI = {
@@ -66,6 +67,11 @@ window.QTEnvDevNodeAPI = {
       flutterCreates.push(args)
       send({ code: 200, msg: 'Creating Flutter project' })
       window.finishFlutterCreate = () => reply({ ok: true, projectPath: '/fixture/python-custom/flutter_fixture' })
+    } else if (action === 'flutterReadProjectConfig') {
+      reply({ ok: true, projectName: 'flutter_fixture', orgName: 'com.example' })
+    } else if (action === 'flutterApplyProjectConfig') {
+      flutterEdits.push(args)
+      reply({ ok: true })
     } else if (action === 'dialog' && args[0] === 'showOpenDialog') {
       send({ canceled: false, filePaths: [folder] })
     } else {
@@ -167,8 +173,25 @@ const checks = String.raw`(async () => {
     throw new Error('Flutter create did not snapshot the selected name and output folder')
   }
   finishFlutterCreate()
-  await wait(() => [...document.querySelectorAll('.flutter-projects [data-project-id]')].some((item) =>
+  const created = await wait(() => [...document.querySelectorAll('.flutter-projects [data-project-id]')].find((item) =>
     item.textContent.includes('/fixture/python-custom/flutter_fixture')), 'created Flutter project in saved list')
+  await wait(() => !document.querySelector('.host-edit-drawer input[placeholder="my_flutter_app"]'), 'create drawer closed')
+  const actions = created.closest('tr').querySelector('button[aria-label="Action"]')
+  if (!actions) throw new Error('Could not find the Flutter project actions button')
+  actions.dispatchEvent(new MouseEvent('mouseenter'))
+  actions.focus()
+  const edit = await wait(() => [...document.querySelectorAll('.host-list-menu li')]
+    .find((item) => item.textContent.trim() === 'Edit (Flutter)'), 'Flutter edit action')
+  edit.click()
+  const projectName = await wait(() => [...document.querySelectorAll('input[placeholder="my_flutter_app"]')]
+    .find((item) => item.value === 'flutter_fixture'), 'Flutter project settings hydrated')
+  projectName.value = 'flutter_renamed'
+  projectName.dispatchEvent(new Event('input', { bubbles: true }))
+  await click('Save', '.host-edit-drawer button')
+  await wait(() => flutterEdits.length === 1, 'Flutter project settings applied')
+  if (flutterEdits[0][0] !== '/fixture/python-custom/flutter_fixture' || flutterEdits[0][1].projectName !== 'flutter_renamed') {
+    throw new Error('Flutter settings were written to the wrong project or with the wrong form values')
+  }
 })()`
 
 try {
