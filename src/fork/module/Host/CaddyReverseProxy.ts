@@ -11,15 +11,18 @@ export function updateCaddyReverseProxy(
   handler: 'file_server' | 'php_server'
 ) {
   const withoutProxy = content.replace(generatedBlock, '')
-  if (!host.reverseProxy?.length) return withoutProxy
+  const proxies = host.reverseProxy
+  if (!proxies?.length) return withoutProxy
 
   const eol = withoutProxy.includes('\r\n') ? '\r\n' : '\n'
   const handlerLine = new RegExp(`^([ \\t]*)${handler}(?=[ \\t\\r\\n{]|$)`, 'gm')
   return withoutProxy.replace(handlerLine, (match, indent: string) => {
     const lines = [begin]
-    for (const { path, url } of host.reverseProxy!) {
+    for (const { path, url } of proxies) {
+      // A plain website route is a prefix, while Caddy treats it as an exact matcher.
+      const matcher = path.includes('*') ? path : `${path}*`
       lines.push(
-        `reverse_proxy ${path} {`,
+        `reverse_proxy ${matcher} {`,
         `    to ${url}`,
         '    header_up X-Real-IP {remote}',
         '    header_up X-Forwarded-For {remote}',

@@ -234,7 +234,7 @@ try {
         [engine]: httpPort,
         [`${engine}_ssl`]: tlsPort
       },
-      reverseProxy: [{ path: '/api/*', url: `http://${loopback}:${upstreamPort}` }]
+      reverseProxy: [{ path: '/api/', url: `http://${loopback}:${upstreamPort}` }]
     }
     const vhostPath = join(workspace, 'vhost', engine, `${host.id}.conf`)
     await engines[engine].make(host)
@@ -301,6 +301,18 @@ try {
     assert.match(
       await readFile(join(workspace, 'vhost', 'logs', `${host.id}.${engine}.log`), 'utf8'),
       /\/moved\/ping/
+    )
+    await stopServer?.()
+    const fallback = { ...noProxy, reverseProxy: [{ ...host.reverseProxy![0], path: '/' }] }
+    await engines[engine].edit(fallback, noProxy)
+    await launch(engine, fallback, staticDir)
+    assert.equal(
+      (await get(editedHttpPort, editedName, '/unhandled/nested')).body,
+      'http upstream /unhandled/nested'
+    )
+    assert.equal(
+      (await get(editedTlsPort, editedAlias, '/unhandled/nested', editedCa)).body,
+      'https upstream /unhandled/nested'
     )
     await stopServer?.()
     console.log(
