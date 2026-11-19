@@ -639,6 +639,9 @@ export default class IPCHandler extends EventEmitter {
       case 'app-sitesucker-run':
         this.handleSiteSuckerRun(command, key, args)
         break
+      case 'app-sitesucker-stop':
+        this.handleSiteSuckerStop(command, key)
+        break
       case 'app-sitesucker-setup':
         this.handleSiteSuckerSetup(command, key)
         break
@@ -1068,6 +1071,11 @@ export default class IPCHandler extends EventEmitter {
         this.sendToMainWindow(command, key, true)
       })
       .catch((error) => this.sendRuntimeError(command, key, error))
+  }
+
+  private handleSiteSuckerStop(command: string, key: string) {
+    siteSuckerRuntime.peek()?.destroy()
+    this.sendToMainWindow(command, key, { code: 0, data: true })
   }
 
   private handleSiteSuckerSetup(command: string, key: string) {

@@ -32,6 +32,8 @@ export type ToolItem = {
     | 'php-obfuscator'
     | 'mysql-code'
     | 'cron-parser'
+    | 'capturer'
+    | 'site-sucker'
   name: string
   description: string
   category: ToolCategory
@@ -39,6 +41,8 @@ export type ToolItem = {
   available: boolean
 }
 const tools: ToolItem[] = [
+  { id: 'capturer', name: 'Screen capturer', description: 'Capture windows and regions with naming rules.', category: 'Files', glyph: 'CAP', available: true },
+  { id: 'site-sucker', name: 'Site sucker', description: 'Mirror a site with bounded pages and media sizes.', category: 'Network', glyph: 'WEB', available: true },
   {
     id: 'json',
     name: 'JSON formatter',

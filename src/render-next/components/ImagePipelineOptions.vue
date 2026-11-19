@@ -1,0 +1,6 @@
+<template><div class="options"><label>Format<select v-model="setup.format"><option value="none">Keep source</option><option v-for="format in formats" :key="format" :value="format">{{ format.toUpperCase() }}</option></select></label><label>Width<input v-model.number="setup.width" type="number" min="1" placeholder="Original" /></label><label>Height<input v-model.number="setup.height" type="number" min="1" placeholder="Original" /></label><label>JPEG quality<input v-model.number="setup.jpeg.quality" type="number" min="1" max="100" /></label><label>WebP quality<input v-model.number="setup.webp.quality" type="number" min="1" max="100" /></label><label>Metadata<input v-model="setup.withMetadata" type="checkbox" /></label><label>Grayscale<input v-model="setup.grayscale" type="checkbox" /></label></div></template>
+<script setup lang="ts">
+import setup from '@/components/Tools/ImageCompress/setup'
+const formats = ['jpeg', 'png', 'webp', 'avif', 'gif', 'tiff', 'heif']
+</script>
+<style scoped>.options{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.options label{display:grid;gap:6px;color:var(--pqt-text-muted);font-size:11px}.options input,.options select{padding:9px;color:var(--pqt-text);background:var(--pqt-canvas);border:1px solid var(--pqt-border);border-radius:7px}</style>

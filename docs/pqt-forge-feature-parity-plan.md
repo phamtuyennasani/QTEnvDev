@@ -36,7 +36,7 @@ This document tracks the migration from the legacy renderer (src/render) to the 
 ## Phase 3 — toolbox parity
 
 - [ ] Compare every legacy tool input/action/output with its new panel.
-- [ ] Migrate Capturer and Site Sucker with progress, cancellation, cleanup, and explicit file/network limits.
+- [x] Migrate Capturer and Site Sucker with progress, cancellation, cleanup, and explicit file/network limits.
 - [ ] Complete image pipeline options, favorites, custom tools, and tool-specific settings.
 
 ## Verification

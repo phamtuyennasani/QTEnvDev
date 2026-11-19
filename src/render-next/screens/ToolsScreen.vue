@@ -18,6 +18,7 @@
           >{{ category }}</button
         ></div
       ></div
+      ><div class="tool-library-actions"><button class="action-button" :class="{ active: favoritesOnly }" @click="favoritesOnly = !favoritesOnly">{{ favoritesOnly ? 'All tools' : 'Favorites' }}</button><button class="action-button" :class="{ active: customOnly }" @click="customOnly = !customOnly">{{ customOnly ? 'Built-in tools' : 'Custom tools' }}</button></div
     >
     <div class="tool-grid"
       ><button
@@ -27,12 +28,14 @@
         :disabled="!tool.available"
         @click="launch(tool)"
         ><span class="tool-glyph">{{ tool.glyph }}</span
+        ><span class="tool-favorite" @click.stop="toolLibrary.toggleFavorite(tool.id)">{{ toolLibrary.isFavorite(tool.id) ? '★' : '☆' }}</span
         ><span class="tool-card-copy"
           ><b>{{ tool.name }}</b
           ><small>{{ tool.description }}</small
           ><em>{{ tool.available ? tool.category : 'Pending migration' }}</em></span
         ><span class="tool-arrow">{{ tool.available ? '↗' : '—' }}</span></button
       ><p v-if="!filteredTools.length" class="empty-copy">No tools match this search.</p></div
+    ><div v-if="customOnly" class="custom-tools-panel"><div class="custom-tools-form"><input v-model="customLabel" placeholder="Custom tool label" /><input v-model="customComponent" placeholder="Component or URL" /><button class="primary-button" :disabled="!customLabel.trim() || !customComponent.trim()" @click="addCustom">Add custom tool</button></div><article v-for="item in toolLibrary.custom" :key="item.id" class="custom-tool-row"><span><b>{{ item.label }}</b><small>{{ item.component }}</small></span><button class="text-button" @click="toolLibrary.removeCustom(item.id)">Remove</button></article><p v-if="!toolLibrary.custom.length" class="empty-copy">No custom tools saved.</p></div
     >
     <LocalToolPanel
       v-if="
@@ -67,6 +70,7 @@
           'php-obfuscator',
           'mysql-code',
           'cron-parser'
+          ,'capturer','site-sucker'
         ].includes(selectedTool.id)
       "
       :key="selectedTool.id"
@@ -126,6 +130,8 @@
     />
     <MysqlCodePanel v-if="selectedTool?.id === 'mysql-code'" @close="selectedTool = undefined" />
     <CronParserPanel v-if="selectedTool?.id === 'cron-parser'" @close="selectedTool = undefined" />
+    <CapturerPanel v-if="selectedTool?.id === 'capturer'" @close="selectedTool = undefined" />
+    <SiteSuckerPanel v-if="selectedTool?.id === 'site-sucker'" @close="selectedTool = undefined" />
   </section>
 </template>
 <script setup lang="ts">
@@ -161,17 +167,33 @@
   import PhpObfuscatorPanel from '../components/PhpObfuscatorPanel.vue'
   import MysqlCodePanel from '../components/MysqlCodePanel.vue'
   import CronParserPanel from '../components/CronParserPanel.vue'
+  import CapturerPanel from '../components/CapturerPanel.vue'
+  import SiteSuckerPanel from '../components/SiteSuckerPanel.vue'
+  import { toolLibraryController as toolLibrary } from '../state/toolLibraryController'
+  import { onMounted } from 'vue'
   const query = ref('')
+  const favoritesOnly = ref(false)
+  const customOnly = ref(false)
+  const customLabel = ref('')
+  const customComponent = ref('')
   const selectedCategory = ref('All')
   const selectedTool = ref<ToolItem>()
   const availableCount = toolController.tools.filter((tool) => tool.available).length
   const filteredTools = computed(() =>
     toolController.tools.filter(
       (tool) =>
+        !customOnly.value &&
+        (!favoritesOnly.value || toolLibrary.isFavorite(tool.id)) &&
         (selectedCategory.value === 'All' || selectedCategory.value === tool.category) &&
         (tool.name + ' ' + tool.description).toLowerCase().includes(query.value.toLowerCase())
     )
   )
+  const addCustom = async () => {
+    await toolLibrary.addCustom(customLabel.value, customComponent.value)
+    customLabel.value = ''
+    customComponent.value = ''
+  }
+  onMounted(() => toolLibrary.init())
   const launch = (tool: ToolItem) => {
     if (tool.available) selectedTool.value = tool
   }
