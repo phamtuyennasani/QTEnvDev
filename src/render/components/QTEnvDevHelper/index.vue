@@ -12,9 +12,7 @@
   >
     <template #default>
       <p v-if="isLinux" class="mb-3">{{ I18nT('setup.linuxHelperScope') }}</p>
-      <div class="main-wapper h-full">
-        <div ref="xterm" class="h-full overflow-hidden"> </div>
-      </div>
+      <div ref="xterm" class="helper-terminal"></div>
     </template>
     <template #footer>
       <div class="dialog-footer">
@@ -60,3 +58,11 @@
     onClosed
   })
 </script>
+
+<style scoped>
+  .helper-terminal {
+    height: min(420px, 50vh);
+    min-height: 160px;
+    overflow: hidden;
+  }
+</style>

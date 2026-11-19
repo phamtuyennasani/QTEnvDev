@@ -9,9 +9,9 @@
     </el-tooltip>
   </div>
   <div class="main reset-pass">
-    <el-button :loading="fixing" :disabled="fixing" @click.stop="QTEnvDevHelperFix.doFix()">{{
-      I18nT('setup.qtenvdevHelperBtn')
-    }}</el-button>
+    <el-button :loading="fixing" :disabled="fixing" @click.stop="QTEnvDevHelperFix.doFix(showDialog)">
+      {{ I18nT('setup.qtenvdevHelperBtn') }}
+    </el-button>
   </div>
 </template>
 
@@ -20,9 +20,9 @@
   import { I18nT } from '@lang/index'
   import { QTEnvDevHelperFix } from '@/components/Setup/QTEnvDevHelper/setup'
   import { QTEnvDevHelperSetup } from '@/components/QTEnvDevHelper/setup'
-  import HelperStore from '@/store/helper'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
+
   const isLinux = window.Server.isLinux
-  const fixing = computed(
-    () => QTEnvDevHelperFix.fixing || QTEnvDevHelperSetup.loading || HelperStore.isInstalling()
-  )
+  const showDialog = useAsyncComponentShow()
+  const fixing = computed(() => QTEnvDevHelperFix.busy || QTEnvDevHelperSetup.show)
 </script>

@@ -14,7 +14,7 @@ class QTEnvDevHelperController {
   execXTerm?: XTerm
   private installation?: Promise<boolean>
 
-  async open(): Promise<void> {
+  async open(showDialog = AsyncComponentShow): Promise<void> {
     if (this.show || HelperStore.show || HelperStore.isInstalling()) return
     this.show = true
     if (!this.loading) {
@@ -27,7 +27,7 @@ class QTEnvDevHelperController {
     try {
       const component = await import('@/components/QTEnvDevHelper/index.vue')
       // The dialog only closes; it does not submit an installation result.
-      AsyncComponentShow(component.default).catch(fail)
+      showDialog(component.default).catch(fail)
     } catch (error) {
       fail(error)
     }
