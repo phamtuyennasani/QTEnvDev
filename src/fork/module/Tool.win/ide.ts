@@ -1,69 +1,78 @@
-import { execPromiseWithEnv, existsSync } from '../../Fn'
+import { execPromiseWithEnv } from '../../Fn'
 import { ForkPromise } from '@shared/ForkPromise'
+import { resolveWindowsSystemExecutable } from '@shared/WindowsSystemPaths'
+import { execFile } from 'node:child_process'
+import { readdir } from 'node:fs/promises'
 import { win32 } from 'node:path'
-import { launchEditor, launchFirstEditor, windowsEditorCandidates } from '../Tool/openEditor'
+import { promisify } from 'node:util'
+import { launchFirstEditor, windowsEditorCandidates } from '../Tool/openEditor'
 
-const findIdePath = async (ideName: string) => {
+const execFileAsync = promisify(execFile)
+const fullWindowsPath = (path: string) =>
+  win32.isAbsolute(path) && win32.parse(path).root.length > 1
+
+async function registryQuery(key: string, args: string[]) {
   try {
-    // 定义所有可能的注册表路径
-    const registryPaths = [
-      `HKLM\\SOFTWARE\\JetBrains\\${ideName}`,
-      `HKLM\\SOFTWARE\\WOW6432Node\\JetBrains\\${ideName}`,
-      `HKCU\\SOFTWARE\\JetBrains\\${ideName}`
-    ]
-
-    for (const regPath of registryPaths) {
-      try {
-        // 使用 /s 参数查询所有子项和值
-        const { stdout } = await execPromiseWithEnv(`reg query "${regPath}" /s`)
-        const lines = stdout.split('\n').map((line: string) => line.trim())
-
-        let basePath = null
-
-        for (const line of lines) {
-          if (line.includes('InstallPath') || line.includes('(Default)')) {
-            const pathMatch = line.match(/(InstallPath|\(Default\))\s+REG_SZ\s+(.+)/i)
-            if (pathMatch) {
-              basePath = pathMatch[2].trim()
-              break // 找到路径后退出循环
-            }
-          }
-        }
-
-        if (basePath) {
-          return formatExePath(basePath, ideName)
-        }
-      } catch {}
-    }
-
-    return null
-  } catch (error) {
-    console.error(`Error finding IDE path: ${error}`)
-    return null
+    const { stdout } = await execFileAsync(
+      resolveWindowsSystemExecutable('reg.exe'),
+      ['query', key, ...args],
+      { windowsHide: true, timeout: 8_000 }
+    )
+    return stdout
+  } catch {
+    // The key may be absent or unreadable. Other installation locations still apply.
+    return ''
   }
 }
 
-const findToolboxIdePath = async (ideName: string) => {
-  try {
-    // 尝试获取 Toolbox 安装目录
-    const { stdout } = await execPromiseWithEnv(
-      `reg query "HKCU\\SOFTWARE\\JetBrains\\Toolbox" /v "InstallDir"`
-    )
-    const match = stdout.match(/InstallDir\s+REG_SZ\s+(.+)/i)
-    if (!match) return null
+function* registryPaths(stdout: string, valuePattern: RegExp) {
+  for (const line of stdout.split(/\r?\n/)) {
+    const path = line
+      .trim()
+      .match(valuePattern)?.[1]
+      ?.trim()
+      .replace(/^"(.*)"$/, '$1')
+    if (path && fullWindowsPath(path)) yield path
+  }
+}
 
-    const toolboxPath = match[1].trim()
-    const appsPath = `${toolboxPath}\\apps\\${ideName}\\ch-0`
+async function* jetBrainsEditorCandidates(ideName: string) {
+  const registryKeys = [
+    `HKLM\\SOFTWARE\\JetBrains\\${ideName}`,
+    `HKLM\\SOFTWARE\\WOW6432Node\\JetBrains\\${ideName}`,
+    `HKCU\\SOFTWARE\\JetBrains\\${ideName}`
+  ]
+  for (const key of registryKeys) {
+    const stdout = await registryQuery(key, ['/s'])
+    for (const path of registryPaths(stdout, /^(?:InstallPath|\(Default\))\s+REG_SZ\s+(.+)$/i)) {
+      yield formatExePath(path, ideName)
+    }
+  }
 
-    // 获取最新版本目录（按修改时间倒序）
-    const { stdout: dirs } = await execPromiseWithEnv(`dir "${appsPath}" /AD /B /O-N`)
-    const latestVersionDir = dirs.split('\r\n')[0].trim()
-    if (!latestVersionDir) return null
+  if (ideName === 'PyCharm' || ideName === 'GoLand') {
+    const local = process.env.LOCALAPPDATA
+    if (local && fullWindowsPath(local)) {
+      const names = ideName === 'PyCharm' ? ['PyCharm', 'PyCharm Community Edition'] : ['GoLand']
+      for (const name of names) yield formatExePath(win32.join(local, 'Programs', name), ideName)
+    }
+  }
 
-    return formatExePath(`${appsPath}\\${latestVersionDir}`, ideName)
-  } catch (error) {
-    console.error(`Error finding Toolbox IDE path: ${error}`)
-    return null
+  const stdout = await registryQuery('HKCU\\SOFTWARE\\JetBrains\\Toolbox', ['/v', 'InstallDir'])
+  for (const path of registryPaths(stdout, /^InstallDir\s+REG_SZ\s+(.+)$/i)) {
+    const names = ideName === 'PyCharm' ? ['PyCharm', 'PyCharm-P', 'PyCharm-C'] : [ideName]
+    for (const name of names) {
+      const appsPath = win32.join(path, 'apps', name, 'ch-0')
+      let versions
+      try {
+        versions = await readdir(appsPath, { withFileTypes: true })
+      } catch {
+        continue
+      }
+      const dirs = versions.filter((entry) => entry.isDirectory()).map(({ name }) => name)
+      for (const version of dirs.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))) {
+        yield formatExePath(win32.join(appsPath, version), ideName)
+      }
+    }
   }
 }
 
@@ -84,27 +93,16 @@ const formatExePath = (basePath: string, ideName: string) => {
 
   const normalizedName = ideName.toLowerCase()
   const exeName = exeMap[normalizedName] || `${normalizedName}64.exe`
-  const exePath = `${basePath}\\bin\\${exeName}`
-
-  if (existsSync(exePath)) {
-    return exePath
-  }
-  return null
+  return win32.join(basePath, 'bin', exeName)
 }
 
 const openWithIde = async (ideName: string, folderPath: string) => {
   try {
-    let idePath = await findIdePath(ideName)
-    if (!idePath) {
-      idePath = await findToolboxIdePath(ideName)
-    }
-
-    if (!idePath) {
+    if (!(await launchFirstEditor(jetBrainsEditorCandidates(ideName), folderPath))) {
       console.error(`${ideName} not found`)
       return false
     }
 
-    await launchEditor(idePath, folderPath)
     console.log(`Opened ${folderPath} with ${ideName}`)
     return true
   } catch (error) {
@@ -187,6 +185,9 @@ export function openPathByApp(
       'RustRover'
     ]
     if (JetBrains.includes(app)) {
+      if ((app === 'PyCharm' || app === 'GoLand') && !fullWindowsPath(dir)) {
+        return reject(new Error('An absolute file path is required.'))
+      }
       const res = await openWithIde(app, dir)
       if (res) {
         return resolve(true)

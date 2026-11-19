@@ -2,10 +2,15 @@ import { execFile, spawn } from 'node:child_process'
 import { isAbsolute, win32 } from 'node:path'
 
 const editors = {
-  VSCode: { macOS: 'Visual Studio Code', linux: ['code'] },
-  PhpStorm: { macOS: 'PhpStorm', linux: ['phpstorm'] },
-  WebStorm: { macOS: 'WebStorm', linux: ['webstorm'] },
-  Sublime: { macOS: 'Sublime Text', linux: ['subl', 'sublime_text'] }
+  VSCode: { macOS: ['Visual Studio Code'], linux: ['code'] },
+  PhpStorm: { macOS: ['PhpStorm'], linux: ['phpstorm'] },
+  WebStorm: { macOS: ['WebStorm'], linux: ['webstorm'] },
+  Sublime: { macOS: ['Sublime Text'], linux: ['subl', 'sublime_text'] },
+  PyCharm: {
+    macOS: ['PyCharm', 'PyCharm CE'],
+    linux: ['pycharm', 'pycharm-professional', 'pycharm-community']
+  },
+  GoLand: { macOS: ['GoLand'], linux: ['goland'] }
 }
 
 export type ExternalEditor = keyof typeof editors
@@ -29,8 +34,11 @@ export function launchEditor(executable: string, path: string) {
   })
 }
 
-export async function launchFirstEditor(candidates: string[], path: string) {
-  for (const executable of candidates) {
+export async function launchFirstEditor(
+  candidates: Iterable<string> | AsyncIterable<string>,
+  path: string
+) {
+  for await (const executable of candidates) {
     try {
       await launchEditor(executable, path)
       return true
@@ -43,17 +51,18 @@ export async function launchFirstEditor(candidates: string[], path: string) {
 
 export async function openUnixEditor(path: string, editor: ExternalEditor, macOS: boolean) {
   if (!isAbsolute(path)) throw new Error('An absolute file path is required.')
+  const selected = editors[editor]
   if (macOS) {
-    await new Promise<void>((resolve, reject) => {
-      execFile('/usr/bin/open', ['-a', editors[editor].macOS, path], (error) => {
-        if (error) reject(new Error(`${editors[editor].macOS} could not open the file.`))
-        else resolve()
+    for (const app of selected.macOS) {
+      const opened = await new Promise<boolean>((resolve) => {
+        execFile('/usr/bin/open', ['-a', app, path], (error) => resolve(!error))
       })
-    })
-    return true
+      if (opened) return true
+    }
+    throw new Error(`${selected.macOS[0]} could not open the file.`)
   }
-  if (await launchFirstEditor(editors[editor].linux, path)) return true
-  throw new Error(`${editors[editor].macOS} was not found on PATH.`)
+  if (await launchFirstEditor(selected.linux, path)) return true
+  throw new Error(`${selected.macOS[0]} was not found on PATH.`)
 }
 
 export function windowsEditorCandidates(editor: 'VSCode' | 'Sublime', env = process.env) {
