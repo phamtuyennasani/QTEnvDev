@@ -26,6 +26,9 @@ const system = reactive({
   result: ''
 })
 const histories = reactive<Record<string, { records: CronRunRecord[]; loading: boolean; error: string }>>({})
+const draftRun = reactive<{ editorId?: number; outcome?: Outcome }>({})
+let lastEditorId = 0
+const newEditorId = () => ++lastEditorId
 let loadFlight: Promise<boolean> | undefined
 const request = (method: string, args: unknown[] = []) =>
   forkTerminalRequest('app-fork:cron', [method, ...args], 'The scheduler did not return a result.', 120_000)
@@ -35,6 +38,37 @@ const isCommandResult = (data: unknown): data is CronCommandResult => {
   if (!data || typeof data !== 'object') return false
   const result = data as Partial<CronCommandResult>
   return Number.isInteger(result.exitCode) && typeof result.output === 'string' && typeof result.error === 'string'
+}
+const testCommand = async (editorId: number, command: string, workDir: string) => {
+  if (state.busy || state.loading || state.unknown || system.loading || !command.trim()) return
+  state.busy = true
+  draftRun.editorId = editorId
+  draftRun.outcome = { status: 'running', message: 'Running the command…' }
+  const unknown = (message: string): Outcome => {
+    state.unknown = true
+    return { status: 'unknown', message }
+  }
+  try {
+    const reply = await request('runCommand', [workDir, command])
+    if (reply.errorCode === CRON_OUTCOME_UNKNOWN) {
+      draftRun.outcome = unknown(reply.msg || 'The test run could not be verified.')
+    } else if (reply.code !== 0) {
+      draftRun.outcome = { status: 'failed', message: reply.msg || 'Could not test the command.' }
+    } else if (!isCommandResult(reply.data)) {
+      draftRun.outcome = unknown('The scheduler did not report the result of the test run.')
+    } else {
+      draftRun.outcome = {
+        status: reply.data.exitCode === 0 ? 'succeeded' : 'failed',
+        message: 'Test command exited with code ' + reply.data.exitCode + '.',
+        command: reply.data
+      }
+    }
+  } catch (error) {
+    draftRun.outcome = unknown(errorText(error))
+  } finally {
+    state.busy = false
+  }
+  showNotice(draftRun.outcome.message)
 }
 const refresh = async () => {
   state.loading = true
@@ -232,6 +266,7 @@ const save = (draft: Partial<CronJob>, existing?: CronJob) => {
 export const cronController = {
   state, load, toggle, run, remove, save, taskKey,
   system, loadSystem, isCurrentSystemTask, removeSystem, historyFor, loadHistory,
+  draftRun, newEditorId, testCommand,
   clearError: () => { state.error = '' },
   outcome: (job: CronJob) => state.outcomes[taskKey(job)]
 }

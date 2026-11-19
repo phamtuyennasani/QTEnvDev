@@ -111,6 +111,15 @@
         <label>Schedule<input v-model="form.schedule" placeholder="* * * * *" /></label>
         <label>Command<input v-model="form.command" /></label>
         <label>Working directory<input v-model="form.workDir" /></label>
+        <label>Description<input v-model="form.description" /></label>
+        <label class="cron-enabled"><input v-model="form.enabled" type="checkbox" /> Enabled</label>
+      </div>
+      <div class="cron-test">
+        <button class="action-button" :disabled="blocked || !form.command.trim()" @click="testCommand">Test command now</button>
+        <div v-if="draftResult" role="status">
+          <p>{{ draftResult.message }}</p>
+          <pre v-if="draftResult.command">{{ [draftResult.command.output, draftResult.command.error].filter(Boolean).join('\n') || '(No output)' }}</pre>
+        </div>
       </div>
       <p v-if="controller.state.error" class="forge-alert forge-alert--error" role="alert">{{ controller.state.error }}</p>
       <template #footer>
@@ -140,6 +149,8 @@ const jobs = computed(() => website.value
   ? controller.state.jobs.filter((job) => job.hostId === website.value?.id)
   : controller.state.jobs)
 const editorOpen = ref(false)
+const editorId = ref(0)
+const draftResult = computed(() => controller.draftRun.editorId === editorId.value ? controller.draftRun.outcome : undefined)
 const tab = ref('app')
 const historyJob = ref<CronJob>()
 const history = computed(() => historyJob.value ? controller.historyFor(historyJob.value) : undefined)
@@ -154,19 +165,24 @@ const form = reactive<{
   schedule: string
   command: string
   workDir: string
+  description: string
+  enabled: boolean
   scope: 'global' | 'host'
   hostId?: number
-}>({ name: '', schedule: '', command: '', workDir: '', scope: 'global' })
+}>({ name: '', schedule: '', command: '', workDir: '', description: '', enabled: true, scope: 'global' })
 const blocked = computed(() => controller.state.busy || controller.state.unknown || controller.state.loading || controller.system.loading)
 const missingHost = computed(() => !!form.hostId && !hosts.value.some((host) => host.id === form.hostId))
 
 const openEditor = (job?: CronJob) => {
   controller.clearError()
+  editorId.value = controller.newEditorId()
   editing.value = job
   form.name = job?.name ?? ''
   form.schedule = job?.schedule ?? ''
   form.command = job?.command ?? ''
   form.workDir = job ? job.workDir ?? '' : website.value?.root ?? ''
+  form.description = job?.description ?? ''
+  form.enabled = job?.enabled ?? true
   form.hostId = job ? job.hostId : website.value?.id
   form.scope = job?.scope ?? (form.hostId ? 'host' : 'global')
   editorOpen.value = true
@@ -182,8 +198,11 @@ const runOutput = (job: CronJob) => {
     .filter(Boolean)
     .join('\n')
 }
+const workDir = () => form.workDir.trim() || (form.scope === 'host' ? hosts.value.find((host) => host.id === form.hostId)?.root ?? '' : '')
+const testCommand = () => void controller.testCommand(editorId.value, form.command, workDir())
 const save = async () => {
-  if (await controller.save({ ...form }, editing.value)) editorOpen.value = false
+  const id = editorId.value
+  if (await controller.save({ ...form, workDir: workDir() }, editing.value) && editorId.value === id) editorOpen.value = false
 }
 const confirmRemove = async () => {
   if (pendingDelete.value && await controller.remove(pendingDelete.value)) pendingDelete.value = undefined
@@ -203,4 +222,7 @@ onMounted(() => {
 .cron-history-record { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--pqt-border); }
 .cron-history-record small { display: block; margin-top: 5px; }
 .cron-history-record pre { max-height: 180px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cron-form .cron-enabled { display: flex; align-items: center; gap: 8px; }
+.cron-test { margin-top: 16px; }
+.cron-test pre { max-height: 160px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>

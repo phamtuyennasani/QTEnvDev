@@ -40,6 +40,7 @@
       <label class="switch-line"><span>Enable HTTPS</span><input v-model="item.useSSL" type="checkbox" /></label>
       <template v-if="item.useSSL">
         <label class="switch-line"><span>Managed certificate</span><input v-model="item.autoSSL" type="checkbox" /></label>
+        <LocalCertificateHelp v-if="item.autoSSL" />
         <div v-if="!item.autoSSL" class="form-grid">
           <label>Certificate<div class="path-row"><input v-model.trim="item.ssl.cert" /><button class="action-button" @click="chooseSSL('cert')">Browse</button></div></label>
           <label>Private key<div class="path-row"><input v-model.trim="item.ssl.key" /><button class="action-button" @click="chooseSSL('key')">Browse</button></div></label>
@@ -60,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import LocalCertificateHelp from './LocalCertificateHelp.vue'
 import { onBeforeUnmount, reactive, ref } from 'vue'
 import ForgeDialog from '../components/ForgeDialog.vue'
 import { projectController } from '../state/projectController'

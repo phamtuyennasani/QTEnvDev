@@ -59,6 +59,7 @@ const bootstrap = String.raw`
     { id: 'beta', name: 'Beta task', scope: 'host', hostId: 2, schedule: '0 0 * * *', command: 'fixture-beta', enabled: true },
     { id: 'global', name: 'Global task', scope: 'global', schedule: '0 0 * * *', command: 'fixture-global', enabled: true }
   ]
+  let systemTaskExists = true
   let receive
   let reorderIndex = 0
   const orderResponses = [
@@ -77,6 +78,13 @@ const bootstrap = String.raw`
       const [method, first, second, third, fourth, fifth] = args
       if (channel === 'app-fork:cron') {
         if (method === 'getCronJobs') return success(cronJobs)
+        if (method === 'runCommand' && first === 'C:/fixture/beta' && second === 'fixture-test') return success({ exitCode: 0, duration: 1, output: 'Draft command passed', error: '' })
+        if (method === 'listRunRecords' && first === 'beta' && second === 20) return success([{ id: 'run1', jobId: 'beta', startedAt: 1, finishedAt: 20, duration: 19, exitCode: 4, error: 'Beta fixture output' }])
+        if (method === 'listSystemTasks') return success(systemTaskExists ? [{ id: 'fixture-task', name: 'Fixture scheduler task', fullName: 'Fixture scheduler task', platform: 'windows', schedule: 'Daily' }] : [])
+        if (method === 'deleteSystemTask' && first === 'fixture-task' && systemTaskExists) {
+          systemTaskExists = false
+          return success(true)
+        }
         return failure('Unexpected scheduler mutation: ' + method)
       }
       if (channel === 'app-fork:version' && method === 'allInstalledVersions') {
@@ -201,6 +209,7 @@ const mount = String.raw`
   const app = createApp({
     render: () => h('main', [
       h('button', { onClick: () => navigateNext('websites') }, 'Websites'),
+      h('p', { role: 'status' }, nextAppState.toast),
       h(nextAppState.workspace === 'cron' ? CronScreen : WebsitesScreen)
     ])
   }).use(pinia)
@@ -273,6 +282,21 @@ const checks = String.raw`(async () => {
   assert(websiteFiles[vhost] === updated && websiteRestarts.join(',') === 'nginx', 'Vhost should reload only its running server')
   await click('Close')
 
+  await click('Configure')
+  await click('SSL')
+  field('Enable HTTPS').click()
+  await wait(() => modal()?.querySelector('.local-certificate-help summary'), 'automatic certificate help')
+  modal().querySelector('.local-certificate-help summary').click()
+  await click('Copy PowerShell command')
+  await wait(() => document.querySelector('#app [role=status]')?.textContent.includes('local CA certificate is unavailable'), 'missing local certificate')
+  const publicCertificate = 'C:/fixture/CA/QTEnvDev-Root-CA.crt'
+  websiteFiles[publicCertificate] = 'public fixture certificate'
+  await click('Show root certificate')
+  await wait(() => requests('App-Node-FN', 'shell').some((entry) => entry[2] === 'showItemInFolder' && entry[3] === publicCertificate), 'show public root certificate')
+  await click('Copy PowerShell command')
+  await wait(() => requests('App-Node-FN', 'clipboard').some((entry) => entry[2] === 'writeText' && entry[3] === "certutil.exe -addstore Root 'C:\\fixture\\CA\\QTEnvDev-Root-CA.crt'"), 'copy the exact root certificate command')
+  await click('Close')
+
   await click('New Tomcat website')
   await wait(() => modal()?.querySelector('h2')?.textContent === 'New Tomcat website', 'dedicated Tomcat create dialog')
   input(field('Hostname'), 'java.fixture.test')
@@ -334,10 +358,24 @@ const checks = String.raw`(async () => {
   const taskSelects = modal().querySelectorAll('select')
   assert(taskSelects[0].value === 'host' && taskSelects[1].value === '2', 'New task must select the originating website')
   assert(field('Working directory').value === 'C:/fixture/beta', 'New task must use the originating website root')
+  input(field('Command'), 'fixture-test')
+  await click('Test command now')
+  await wait(() => modal()?.innerText.includes('Draft command passed'), 'draft command result')
+  assert(requests('app-fork:cron', 'runCommand').length === 1 && !requests('app-fork:cron', 'addCronJob').length, 'A draft run must not save the task')
   await click('Cancel')
+  await click('Run history')
+  await wait(() => modal()?.innerText.includes('Beta fixture output'), 'website task run history')
+  await click('Close dialog')
   await click('Show all tasks')
   await wait(() => taskNames() === 'Alpha task,Beta task,Global task' && !document.body.innerText.includes('Website: beta.fixture.test'), 'cleared task scope')
-  assert(websiteRequests.filter((entry) => entry[0] === 'app-fork:cron').every((entry) => entry[1] === 'getCronJobs'), 'Task navigation should only read jobs')
+  await click('System scheduler')
+  await wait(() => taskNames() === 'Fixture scheduler task', 'system scheduler fixture row')
+  await click('Delete')
+  await wait(() => modal()?.innerText.includes('Fixture scheduler task'), 'exact system task confirmation')
+  assert(!requests('app-fork:cron', 'deleteSystemTask').length, 'Opening the dialog must not delete the task')
+  await click('Delete system task')
+  await wait(() => !modal() && document.body.innerText.includes('System task removed.') && !taskNames(), 'system task deletion')
+  assert(requests('app-fork:cron', 'deleteSystemTask').length === 1, 'Confirm must delete the selected task once')
   await click('Websites')
 
   await click('Manage projects')
@@ -444,7 +482,7 @@ setTimeout(() => app.exit(2), 90000)
     child.once('close', (code) => done({ code, output }))
   })
   assert.equal(outcome.code, 0, outcome.output)
-  console.log('Windows Websites Electron UI passed: ordering, vhost editing, Tomcat, scoped tasks, scaffold prefill, backup, links, hosts, and park.')
+  console.log('Windows Websites Electron UI passed for website management, local CA controls, scoped and system tasks, scaffold prefill, and backup.')
 } finally {
   await server.close()
   await rm(fixturePath, { force: true })

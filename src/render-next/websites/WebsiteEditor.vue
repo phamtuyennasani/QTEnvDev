@@ -147,7 +147,7 @@
                 ></div
               ></label
             ></template
-          ><p class="website-help"
+          ><LocalCertificateHelp v-if="form.autoSSL" /><p class="website-help"
             >Certificate issuance or system hosts changes may request system permissions. HTTP and
             HTTPS ports can be changed in Ports.</p
           ></template
@@ -204,6 +204,7 @@
   </ForgeDialog>
 </template>
 <script setup lang="ts">
+  import LocalCertificateHelp from './LocalCertificateHelp.vue'
   import { computed, ref } from 'vue'
   import { BrewStore } from '@/store/brew'
   import ForgeDialog from '../components/ForgeDialog.vue'

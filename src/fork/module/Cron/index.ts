@@ -431,9 +431,12 @@ export class Cron extends Base {
   }
 
   runCommand(workDir: string, command: string): ForkPromise<CronCommandResult> {
-    return new ForkPromise(async (resolve) => {
-      const result = await executeCronCommand(command, workDir)
-      resolve(result)
+    return new ForkPromise(async (resolve, reject) => {
+      try {
+        resolve(await executeCronCommand(command, workDir))
+      } catch (error) {
+        reject(error)
+      }
     })
   }
 

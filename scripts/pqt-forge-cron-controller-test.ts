@@ -108,11 +108,27 @@ assert.equal(await controller.removeSystem(currentTask), false)
 assert.equal(await controller.removeSystem(controller.system.tasks[0]), false)
 assert.equal(replies.length, 0)
 
+const editorId = controller.newEditorId()
+const draft = controller.testCommand(editorId, 'echo fixture', 'C:/fixture')
+await controller.testCommand(editorId, 'do not run twice', '')
+assert.equal(await controller.toggle(job), false)
+assert.equal(replies.length, 1)
+const testRequest = replies.shift()!
+assert.deepEqual(Array.from(testRequest.args), ['runCommand', 'C:/fixture', 'echo fixture'])
+testRequest.finish({ code: 0, data: { exitCode: 8, duration: 20, output: 'partial output', error: 'failed' } })
+await draft
+assert.equal(controller.draftRun.editorId, editorId)
+assert.equal(controller.draftRun.outcome.status, 'failed')
+assert.equal(controller.draftRun.outcome.command.output, 'partial output')
+assert.match(notices.at(-1) ?? '', /code 8/)
+assert.equal(replies.length, 0)
+
 const unsure = controller.remove(job)
 replies.shift()!.finish({ code: 1, errorCode: CRON_OUTCOME_UNKNOWN, msg: 'Task details were not saved.' })
 assert.equal(await unsure, false)
 assert.equal(controller.outcome(job).status, 'unknown')
 assert.equal(await controller.remove(job), false)
+await controller.testCommand(controller.newEditorId(), 'do not run after unknown result', '')
 assert.equal(replies.length, 0)
 
 let readFailure: { code: number; stderr: string } | undefined = { code: 1, stderr: 'crontab: Permission denied' }
