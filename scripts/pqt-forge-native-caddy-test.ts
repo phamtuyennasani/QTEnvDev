@@ -26,7 +26,6 @@ const workspace = await mkdtemp(join(temp, 'pqt caddy sites-'))
 const oldServer = global.Server
 const run = promisify(execFile)
 const loopback = '127.0.0.1'
-const quote = (path: string) => JSON.stringify(path.replaceAll('\\', '/'))
 const options = {
   cwd: workspace,
   windowsHide: true,
@@ -224,6 +223,7 @@ try {
       ssl: originalCert,
       envFile: '',
       url: '',
+      nginx: { rewrite: '' },
       port: {
         nginx: 80,
         nginx_ssl: 443,
