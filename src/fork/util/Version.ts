@@ -612,28 +612,22 @@ export const portSearch = async (
   filter: (f: string) => boolean,
   isInstalled: (name: string, version?: string) => boolean
 ) => {
-  try {
-    let arr = []
-    const info = await spawnPromiseWithEnv('port', ['search', '--name', '--line', '--regex', reg])
-    arr = info.stdout
-      .split('\n')
-      .filter(filter)
-      .map((m: string) => {
-        const a = m.split('\t').filter((f) => f.trim().length > 0)
-        const name = a.shift() ?? ''
-        const version = a.shift() ?? ''
-        const installed = isInstalled(name, version)
-        return {
-          name,
-          version,
-          installed,
-          flag: 'port'
-        }
-      })
-    arr.sort((a, b) => compareVersions(versionFixed(b.version), versionFixed(a.version)))
-    return arr
-  } catch (e) {
-    console.log('portSearch err: ', e)
+  // Legacy callers wrap their fixed search regexes for the shell.
+  const pattern = reg.startsWith('"') && reg.endsWith('"') ? reg.slice(1, -1) : reg
+  const { stdout } = await spawnPromiseWithEnv(
+    global.Server.MacPorts || 'port',
+    ['search', '--name', '--line', '--regex', pattern],
+    { shell: false, timeout: COMMAND_LOOKUP_TIMEOUT_MS }
+  )
+  const rows = []
+  for (const line of stdout.split('\n').filter(filter)) {
+    const [name, version] = line.split('\t')
+    if (!name || !version) continue
+    try {
+      rows.push({ name, version, installed: isInstalled(name, version), flag: 'port' })
+    } catch (error) {
+      console.warn('Could not verify MacPorts entry', name, error)
+    }
   }
-  return []
+  return rows.sort((a, b) => compareVersions(versionFixed(b.version), versionFixed(a.version)))
 }

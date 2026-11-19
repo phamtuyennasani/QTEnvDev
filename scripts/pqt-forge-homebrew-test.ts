@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import { reactive } from 'vue'
+import { compareVersions } from '../src/shared/compare-versions'
 import * as sources from '../src/render-next/packages/homebrewSources'
+import { macportsModules, supportsMacPorts } from '../src/render-next/packages/macportsSources'
+import { packageModules } from '../src/render-next/packages/catalog'
 import * as transport from '../src/render-next/packages/transport'
 import * as types from '../src/render-next/packages/types'
 import * as conflicts from '../src/render/components/VersionManager/brew/FormulaConflict'
@@ -100,12 +103,20 @@ assert.deepEqual(published, ['php'])
 
 const bin = '/opt/homebrew/bin/brew'
 const providerServer: Record<string, string> = { BrewError: 'Previous discovery failed' }
+const portBin = '/opt/MacPorts/bin/port'
 const calls: Array<[string, ...string[]]> = []
 let cellar = '/opt/homebrew/Cellar'
-const spawn = async (command: string, args: string[]) => {
+let portSearchFailure = false
+const spawn = async (command: string, args: string[], options?: { shell?: boolean }) => {
   calls.push([command, ...args])
   if (command === 'git') throw new Error('Supplementary repository setup failed')
   if (command === 'which' && args[0] === 'port') throw new Error('MacPorts absent')
+  if (command === portBin) {
+    assert.deepEqual(Array.from(args), ['search', '--name', '--line', '--regex', '^php\\d*$'])
+    assert.equal(options?.shell, false)
+    if (portSearchFailure) throw new Error('MacPorts catalog unavailable')
+    return { stdout: 'php81\t8.1\tPHP\nphp82\t8.2\tPHP\nphp85\t8.5\tPHP' }
+  }
   assert.equal(command, bin, 'Homebrew queries must use the detected executable')
   if (args[0] === '--repo') return { stdout: '/opt/homebrew' }
   if (args[0] === '--cellar') return { stdout: cellar }
@@ -150,7 +161,7 @@ const { default: brewModule } = await loadIsolated('src/fork/module/Brew/index.t
 assert.equal(await brewModule.addTap('typesense/homebrew-tap'), 2)
 assert.deepEqual(calls.at(-1), [bin, 'tap', 'typesense/homebrew-tap'])
 
-const { brewInfoJson, brewSearch } = await loadIsolated('src/fork/util/Version.ts', {
+const { brewInfoJson, brewSearch, portSearch } = await loadIsolated('src/fork/util/Version.ts', {
   '../Fn': {
     spawnPromiseWithEnv: spawn,
     execPromiseWithEnv: async (command: string) => {
@@ -158,13 +169,30 @@ const { brewInfoJson, brewSearch } = await loadIsolated('src/fork/util/Version.t
       return { stdout: 'typesense/tap/typesense-server' }
     }
   },
-  '@shared/compare-versions': {},
+  '@shared/compare-versions': { compareVersions },
   '@shared/utils': {},
   './BinVersionCache': {},
   './BrewFormula': {}
-}, globals)
+}, { ...globals, console: { log() {}, warn() {} } })
 const names = await brewSearch([], 'brew search -q --formula "/typesense-server$/"')
 const rows = await brewInfoJson(names)
 assert.equal(rows[0].version, '30')
 assert.deepEqual(calls.at(-1), [bin, 'info', 'typesense/tap/typesense-server', '--json', '--formula'])
 console.log('PQT Forge Homebrew passed: routing, progress, duplicate guard, committed success, refresh failure, and executable identity for discovery, tap, and catalog.')
+
+assert.equal(supportsMacPorts('php', { isMacOS: false }), false)
+assert.equal(supportsMacPorts('neo4j', { isMacOS: true }), false)
+assert.equal(supportsMacPorts('php', { isMacOS: true }), true)
+assert(macportsModules.every((flag) => packageModules.some((item) => item.flag === flag)))
+Object.assign(providerServer, { MacPorts: portBin })
+const search = () => portSearch('"^php\\d*$"', (line: string) => line.includes('PHP'), (name: string) => {
+  if (name === 'php82') throw new Error('Could not verify this entry')
+  return name === 'php85'
+})
+assert.deepEqual(JSON.parse(JSON.stringify(await search())), [
+  { name: 'php85', version: '8.5', installed: true, flag: 'port' },
+  { name: 'php81', version: '8.1', installed: false, flag: 'port' }
+])
+portSearchFailure = true
+await assert.rejects(search(), /MacPorts catalog unavailable/)
+console.log('PQT Forge MacPorts passed: supported package flags, detected executable, candidate skips and catalog errors.')
