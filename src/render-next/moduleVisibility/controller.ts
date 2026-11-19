@@ -35,8 +35,11 @@ async function stopInstalledService(flag: AllAppModule) {
     const { stopMysqlCompanions } = await import('@/components/Mysql/serviceLifecycle')
     const results = await Promise.allSettled([module.stop(), stopMysqlCompanions()])
     const errors = results.flatMap((result) =>
-      result.status === 'rejected' ? [String(result.reason)]
-        : result.value === true ? [] : [String(result.value)]
+      result.status === 'rejected'
+        ? [String(result.reason)]
+        : result.value === true
+          ? []
+          : [String(result.value)]
     )
     if (errors.length) throw new Error(errors.join('\n'))
     return
