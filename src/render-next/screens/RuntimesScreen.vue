@@ -26,7 +26,7 @@
               ><small>{{ runtime.family }}</small></span
             ></span
           ><code>{{ runtime.version }}</code
-          ><span class="runtime-projects">{{ runtime.projects }}</span
+          ><span class="runtime-projects">{{ runtime.projects ?? '—' }}</span
           ><span class="state-label">{{
             runtime.state === 'active' ? 'Installed' : 'Available'
           }}</span></button
@@ -45,11 +45,13 @@
           ><div
             ><span>Install path</span><code>{{ selectedRuntime.path }}</code></div
           ><div
-            ><span>Assigned projects</span><b>{{ selectedRuntime.projects }}</b></div
+            ><span>Assigned projects</span><b>{{ selectedRuntime.projects ?? '—' }}</b></div
           ></div
         ><div v-if="selectedFlag" class="detail-actions">
           <button class="action-button" @click="versionsOpen = true"
             >Installed versions</button
+          ><button v-if="projectKind" class="action-button" @click="managedLanguage = projectKind"
+            >Manage projects</button
           > </div
         ><div v-if="selectedRuntime.name === 'PHP'" class="runtime-tools"
           ><div class="php-projects"
@@ -122,6 +124,8 @@
           class="action-button"
           @click="workflow = 'gvm'"
           >Go Version Manager</button
+        ><button v-if="selectedFlag === 'flutter'" class="action-button" @click="flutterToolsOpen = true"
+          >Flutter tools</button
         ><PackageBrowser
           v-if="selectedFlag"
           ref="packageBrowser"
@@ -130,6 +134,15 @@
           :title="selectedRuntime.name" /></article></div
     ><RuntimeWorkflowDialog v-if="workflow" :workflow="workflow" @close="workflow = undefined" />
     <GitEnvironmentDialog v-if="gitOpen && gitVisible" @close="gitOpen = false" />
+    <LanguageProjectManager
+      v-if="managedLanguage"
+      :initial-language="managedLanguage"
+      eyebrow="RUNTIMES / PROJECTS"
+      @close="managedLanguage = undefined"
+      @scaffold-website="openScaffoldWebsite"
+    />
+    <WebsiteEditor v-if="websiteScaffold" :scaffold="websiteScaffold" @close="websiteScaffold = undefined" />
+    <FlutterToolsDialog v-if="flutterToolsOpen" @close="flutterToolsOpen = false" />
     <InstalledVersionsDialog
       v-if="versionsOpen && selectedFlag && selectedRuntime"
       :key="selectedFlag"
@@ -155,6 +168,7 @@
   import { phpController } from '../state/phpController'
   import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
   import { runtimeModuleFlags } from '../adapters/runtimeAdapter'
+  import { isWorkflowKind, projectWorkflowController, type WorkflowKind } from '../state/projectWorkflowController'
   const RuntimeWorkflowDialog = defineAsyncComponent(
     () => import('../components/RuntimeWorkflowDialog.vue')
   )
@@ -164,9 +178,14 @@
   const ComposerVersionsDialog = defineAsyncComponent(
     () => import('../components/ComposerVersionsDialog.vue')
   )
+  const LanguageProjectManager = defineAsyncComponent(
+    () => import('../components/LanguageProjectManager.vue')
+  )
+  const WebsiteEditor = defineAsyncComponent(() => import('../websites/WebsiteEditor.vue'))
   const InstalledVersionsDialog = defineAsyncComponent(
     () => import('../serviceVersions/InstalledVersionsDialog.vue')
   )
+  const FlutterToolsDialog = defineAsyncComponent(() => import('../components/FlutterToolsDialog.vue'))
   const gitVisible = computed(() => isBuiltinModuleVisible('git'))
   const gitOpen = ref(false)
   const workflow = ref<'node' | 'npm' | 'gvm'>()
@@ -174,6 +193,7 @@
   const packageBrowser = ref<InstanceType<typeof PackageBrowser>>()
   const composerOpen = ref(false)
   const versionsOpen = ref(false)
+  const flutterToolsOpen = ref(false)
   const openComposerPackages = async () => {
     composerOpen.value = false
     await nextTick()
@@ -192,10 +212,21 @@
   const selectedFlag = computed(() =>
     selectedRuntime.value ? runtimeModuleFlags[selectedRuntime.value.name] : undefined
   )
+  const projectKind = computed(() => {
+    const flag = selectedFlag.value
+    return isWorkflowKind(flag) ? flag : undefined
+  })
+  const managedLanguage = ref<WorkflowKind>()
+  const websiteScaffold = ref<{ dir: string; rewrite: string }>()
+  const openScaffoldWebsite = (project: { dir: string; rewrite: string }) => {
+    managedLanguage.value = undefined
+    websiteScaffold.value = project
+  }
   const php = phpController
   const phpVersion = computed(() => php.current())
   onMounted(() => {
     runtimeController.refresh().catch()
     phpProjectsController.load().catch()
+    void projectWorkflowController.load()
   })
 </script>

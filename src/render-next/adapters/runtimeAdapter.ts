@@ -18,6 +18,8 @@ export const runtimeModuleFlags: Record<string, AllAppModule> = {
   Perl: 'perl',
   Zig: 'zig',
   Flutter: 'flutter',
+  'Swoole CLI': 'swoole-cli',
+  RoadRunner: 'roadrunner',
   Gradle: 'gradle'
 }
 

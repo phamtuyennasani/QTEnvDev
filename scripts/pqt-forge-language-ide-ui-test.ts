@@ -42,10 +42,9 @@ const document = String.raw`<!doctype html><div id="app"></div><script>
   }
 </script><script type="module">
   import { createApp, h } from 'vue'
-  import { createPinia } from 'pinia'
+  import { createPinia, setActivePinia } from 'pinia'
   import localForage from 'localforage'
   import { applyLanguagePayload } from '../lang/runtime'
-  import LanguageProjectManager from './components/LanguageProjectManager.vue'
   import { nextAppState } from './state/app'
   import './styles/app.css'
   import './styles/websites.css'
@@ -54,9 +53,15 @@ const document = String.raw`<!doctype html><div id="app"></div><script>
     messages[path.split('/').pop().replace('.json', '')] = await load()
   }
   applyLanguagePayload({ locale: 'en', fallbackLocale: 'en', messages, fallbackMessages: messages })
+  const pinia = createPinia()
+  setActivePinia(pinia)
+  const { default: LanguageProjectManager } = await import('./components/LanguageProjectManager.vue')
   const records = {
     python: { id: 'python-fixture', path: 'C:/fixture/Python & examples', comment: 'Fixture Python' },
     golang: { id: 'go-fixture', path: 'C:/fixture/Go examples', comment: 'Fixture Go' }
+  }
+  for (const kind of ['java', 'rust', 'ruby', 'dotnet', 'deno', 'bun', 'erlang', 'perl', 'zig', 'swoole-cli', 'roadrunner']) {
+    records[kind] = { id: kind + '-fixture', path: 'C:/fixture/Project ' + kind, comment: 'Fixture ' + kind }
   }
   for (const [flag, record] of Object.entries(records)) {
     await localForage.setItem('qtenvdev-' + flag + '-projects', [record])
@@ -67,7 +72,7 @@ const document = String.raw`<!doctype html><div id="app"></div><script>
       h(LanguageProjectManager, { initialLanguage: 'python' }),
       h('output', { id: 'fixture-notice' }, nextAppState.toast)
     ]
-  }).use(createPinia())
+  }).use(pinia)
   app.config.errorHandler = (error) => errors.push(error.stack || String(error))
   app.mount('#app')
 </script>`
@@ -117,6 +122,33 @@ const checks = String.raw`(async () => {
   }
   window.finishLaunch()
   await wait(() => !go.disabled, 'GoLand terminal success')
+
+  const editors = [
+    ['java', 'IntelliJ IDEA', 'IntelliJ'],
+    ['rust', 'RustRover', 'RustRover'],
+    ['ruby', 'RubyMine', 'RubyMine'],
+    ['dotnet', 'VS Code', 'VSCode']
+  ]
+  for (const [kind, label, application] of editors) {
+    select(kind)
+    const button = await openMenu(kind, label)
+    const index = opens.length
+    button.click()
+    await wait(() => opens.length === index + 1 && button.disabled, label + ' launch')
+    if (opens[index][0] !== fixtureRecords[kind].path || opens[index][1] !== application) {
+      throw new Error(label + ' did not receive the selected project')
+    }
+    window.finishLaunch()
+    await wait(() => !button.disabled, label + ' terminal success')
+  }
+  for (const kind of ['deno', 'bun', 'erlang', 'perl', 'zig', 'swoole-cli', 'roadrunner']) {
+    select(kind)
+    await wait(() => action(fixtureRecords[kind].id), kind + ' saved project')
+    if ([...document.querySelectorAll('.project-manager-controls button')].some((button) =>
+      button.textContent.includes('Create from template'))) {
+      throw new Error(kind + ' displayed a template action without a template')
+    }
+  }
 })()`
 
 try {
@@ -160,7 +192,7 @@ try {
   })
   assert.equal(result.code, 0, result.output)
   console.log(
-    'Language project IDE UI passed (PyCharm, GoLand, exact saved paths and terminal outcomes).'
+    'Language project UI passed (saved runtime projects, IDE paths and terminal outcomes).'
   )
 } finally {
   await server.close()

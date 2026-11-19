@@ -4,15 +4,21 @@ import { Project } from './Project'
 export type { ProjectItem } from './ProjectItem'
 
 const ProjectSetups: Partial<Record<AllAppModule, Project>> = {}
+const directoryInitializations = new Set<AllAppModule>()
 
-export const ProjectSetup = (typeFlag: AllAppModule): Project => {
-  if (!ProjectSetups?.[typeFlag]) {
-    console.log('ProjectSetup not found !!!', typeFlag)
-    const p = reactiveBind(new Project(typeFlag))
-    ProjectSetups[typeFlag] = p
-    p.initDirs()
-    p.fetchProject()
+export const ProjectSetup = (
+  typeFlag: AllAppModule,
+  { initializeDirectories = true } = {}
+): Project => {
+  let project = ProjectSetups[typeFlag]
+  if (!project) {
+    project = reactiveBind(new Project(typeFlag))
+    ProjectSetups[typeFlag] = project
+    void project.fetchProject()
   }
-  console.log('ProjectSetup found !!!', typeFlag)
-  return ProjectSetups[typeFlag]!
+  if (initializeDirectories && !directoryInitializations.has(typeFlag)) {
+    directoryInitializations.add(typeFlag)
+    void project.initDirs()
+  }
+  return project
 }

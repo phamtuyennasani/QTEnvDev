@@ -19,6 +19,7 @@ const server = await createServer({
 const setup = String.raw`
 window.Server = { isLinux: true, DataDirectoryReady: true, BaseDir: '/fixture/', AppDir: '/fixture/' }
 window.errors = []
+window.addEventListener('error', (event) => errors.push(event.error?.stack || event.message))
 window.addEventListener('unhandledrejection', (event) => errors.push(String(event.reason)))
 const python = (version, path) => ({
   typeFlag: 'python', version, path, num: Number(version.split('.').slice(0, 2).join('')),
@@ -28,6 +29,9 @@ const pythonVersions = [python('3.12.9', '/fixture/python312'), python('3.13.2',
 const folder = '/fixture/python-custom'
 window.pathWrites = []
 window.scans = []
+window.flutterCommands = []
+window.flutterCreates = []
+window.doctorRequests = 0
 let receive
 window.QTEnvDevNodeAPI = {
   ipcReceiveFromMain(fn) { receive = fn },
@@ -45,6 +49,23 @@ window.QTEnvDevNodeAPI = {
     } else if (action === 'updatePATH') {
       pathWrites.push(args)
       finishPathWrite = () => reply({ appPath: [args[0].path], allPath: [args[0].path + '/bin'] })
+    } else if (action === 'flutterSdkInfo') {
+      reply({ flutterVersion: '3.35.1', dartVersion: '3.9.0', channel: 'stable', flutterBin: '/fixture/flutter/bin/flutter', searchDirs: [] })
+    } else if (action === 'flutterDoctor') {
+      doctorRequests += 1
+      window.finishDoctor = () => reply({ flutterBin: '/fixture/flutter/bin/flutter', items: [{ status: 'ok', title: 'Flutter doctor fixture' }], summary: { total: 1, ok: 1, warning: 0, error: 0 } })
+    } else if (action === 'androidReadiness') {
+      reply({ env: { ANDROID_HOME: '/fixture/android/sdk' }, checks: [{ key: 'sdk', label: 'Android SDK', ok: true, value: '/fixture/android/sdk', hint: '' }], summary: { passed: 1, total: 1 } })
+    } else if (action === 'androidDevices') {
+      reply({ adbPath: '/fixture/android/sdk/platform-tools/adb', devices: [{ id: 'flutter-emulator-fixture', status: 'device', meta: 'test' }], summary: { total: 1, online: 1 } })
+    } else if (action === 'flutterAdvancedAction') {
+      flutterCommands.push(args[0])
+      send({ code: 200, msg: 'Running Flutter command' })
+      window.finishFlutterCommand = () => reply({ ok: true, message: 'Flutter command fixture finished' })
+    } else if (action === 'flutterCreateProject') {
+      flutterCreates.push(args)
+      send({ code: 200, msg: 'Creating Flutter project' })
+      window.finishFlutterCreate = () => reply({ ok: true, projectPath: '/fixture/python-custom/flutter_fixture' })
     } else if (action === 'dialog' && args[0] === 'showOpenDialog') {
       send({ canceled: false, filePaths: [folder] })
     } else {
@@ -103,6 +124,51 @@ const checks = String.raw`(async () => {
   closeVersions()
   await showVersions()
   if (!row('3.14.0')) throw new Error('Discovered custom Python disappeared after reopening')
+  closeVersions()
+
+  const java = await wait(() => [...document.querySelectorAll('.runtime-item')].find((row) =>
+    row.querySelector('b')?.textContent === 'Java' && row.querySelector('.runtime-projects')?.textContent === '1'
+  ), 'Java saved project count')
+  java.click()
+  ;(await wait(() => [...document.querySelectorAll('.runtime-detail-panel button')]
+    .find((button) => button.textContent.trim() === 'Manage projects'), 'Runtime project launcher')).click()
+  await wait(() => document.querySelector('.project-manager-controls select')?.value === 'java', 'Java project manager')
+  await wait(() => document.querySelector('[data-project-id="java-project"]'), 'Java project from existing storage')
+  closeVersions()
+
+  const button = (label, selector = 'button') => [...document.querySelectorAll(selector)]
+    .find((item) => item.textContent.trim() === label && !item.disabled)
+  const click = async (label, selector) => (await wait(() => button(label, selector), label)).click()
+  const flutter = await wait(() => [...document.querySelectorAll('.runtime-item')]
+    .find((item) => item.querySelector('b')?.textContent === 'Flutter'), 'Flutter row')
+  flutter.click()
+  await click('Flutter tools')
+  await wait(() => document.querySelector('.flutter-general')?.textContent.includes('3.35.1'), 'Flutter SDK details')
+  await click('List channels')
+  await wait(() => flutterCommands.length === 1 && document.querySelector('.flutter-general .is-loading'), 'Flutter command in progress')
+  await click('Android', '.flutter-tool-tabs button')
+  await wait(() => document.querySelector('.flutter-tool-surface')?.textContent.includes('flutter-emulator-fixture'), 'detected Android device')
+  if (doctorRequests !== 1) throw new Error('Switching Flutter tabs duplicated the pending doctor request')
+  finishDoctor()
+  finishFlutterCommand()
+  await click('General', '.flutter-tool-tabs button')
+  await wait(() => document.querySelector('.flutter-general pre')?.textContent.includes('Flutter command fixture finished'), 'Flutter command output after switching tabs')
+  if (flutterCommands[0] !== 'channel-list') throw new Error('Flutter command did not use the intended action')
+  closeVersions()
+  await click('Manage projects', '.runtime-detail-panel button')
+  await click('New Project', '.flutter-projects button')
+  const name = await wait(() => document.querySelector('input[placeholder="my_flutter_app"]'), 'Flutter create project form')
+  name.value = 'flutter_fixture'
+  name.dispatchEvent(new Event('input', { bubbles: true }))
+  document.querySelector('.host-edit-drawer .icon-block').click()
+  await click('Create', '.host-edit-drawer button')
+  await wait(() => flutterCreates.length === 1 && document.querySelector('.host-edit-drawer .is-loading'), 'Flutter create progress')
+  if (flutterCreates[0][0] !== 'flutter_fixture' || flutterCreates[0][1] !== '/fixture/python-custom') {
+    throw new Error('Flutter create did not snapshot the selected name and output folder')
+  }
+  finishFlutterCreate()
+  await wait(() => [...document.querySelectorAll('.flutter-projects [data-project-id]')].some((item) =>
+    item.textContent.includes('/fixture/python-custom/flutter_fixture')), 'created Flutter project in saved list')
 })()`
 
 try {
@@ -111,8 +177,8 @@ try {
     `<!doctype html><div id="app"></div><script>${setup}</script>
 <script type="module">
   import { createApp } from 'vue'
-  import { createPinia } from 'pinia'
-  import Runtimes from './screens/RuntimesScreen.vue'
+  import { createPinia, setActivePinia } from 'pinia'
+  import localForage from 'localforage'
   import { applyLanguagePayload } from '../lang/runtime.ts'
   import './styles/app.css'
   const messages = {}
@@ -120,7 +186,13 @@ try {
     messages[path.split('/').pop().replace('.json', '')] = await load()
   }
   applyLanguagePayload({ locale: 'en', fallbackLocale: 'en', messages, fallbackMessages: messages })
-  const app = createApp(Runtimes).use(createPinia())
+  const pinia = createPinia()
+  setActivePinia(pinia)
+  const { default: Runtimes } = await import('./screens/RuntimesScreen.vue')
+  await localForage.setItem('qtenvdev-java-projects', [
+    { id: 'java-project', path: '/fixture/Java project', comment: 'Java project from the existing project list' }
+  ])
+  const app = createApp(Runtimes).use(pinia)
   app.config.errorHandler = (error) => errors.push(error?.stack || String(error))
   app.mount('#app')
 </script>`
@@ -162,7 +234,7 @@ setTimeout(() => app.exit(2), 45000)`
   })
   assert.equal(result.code, 0, result.output)
   console.log(
-    'Runtime versions Electron UI passed: Python discovery, PATH update across reopening, live summary and custom folder rescan.'
+    'Runtime Electron UI passed: Python discovery and PATH updates, Java projects, Flutter diagnostics and command and project entry.'
   )
 } finally {
   await server.close()

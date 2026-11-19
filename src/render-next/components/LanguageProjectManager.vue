@@ -1,15 +1,26 @@
 <template>
-  <ForgeDialog title="Manage language projects" eyebrow="WEBSITES / PROJECTS" wide @close="emit('close')">
+  <ForgeDialog
+    title="Manage language projects"
+    :eyebrow="eyebrow ?? 'WEBSITES / PROJECTS'"
+    wide
+    @close="emit('close')"
+  >
     <div class="project-manager-controls">
       <label>
         Language
         <select v-model="language">
-          <option v-for="(label, kind) in workflowLabels" :key="kind" :value="kind">{{ label }}</option>
+          <option v-for="kind in availableLanguages" :key="kind" :value="kind">
+            {{ workflowLabels[kind] }}
+          </option>
         </select>
       </label>
-      <div class="detail-actions">
-        <button class="action-button" :aria-pressed="tab === 'saved'" @click="tab = 'saved'">Saved projects</button>
-        <button class="action-button" :aria-pressed="tab === 'create'" @click="tab = 'create'">Create from template</button>
+      <div v-if="createSurface" class="detail-actions">
+        <button class="action-button" :aria-pressed="tab === 'saved'" @click="tab = 'saved'"
+          >Saved projects</button
+        >
+        <button class="action-button" :aria-pressed="tab === 'create'" @click="tab = 'create'"
+          >Create from template</button
+        >
       </div>
     </div>
     <p v-if="runtimeWarning" class="forge-alert" role="status">{{ runtimeWarning }}</p>
@@ -20,15 +31,11 @@
             <button
               type="button"
               class="project-ide-action"
-              :disabled="projectWorkflowController.isOpeningEditor(row.path, projectEditor)"
-              @click.stop="projectWorkflowController.openInEditor(row.path, projectEditor)"
+              :disabled="projectWorkflowController.isOpeningEditor(row.path, projectEditor.id)"
+              @click.stop="projectWorkflowController.openInEditor(row.path, projectEditor.id)"
             >
-              <yb-icon
-                :svg="projectEditor === 'PyCharm' ? import('@/svg/pycharm.svg?raw') : import('@/svg/goland.svg?raw')"
-                width="13"
-                height="13"
-              />
-              <span>{{ I18nT('nodejs.openIN') }} {{ projectEditor }}</span>
+              <yb-icon :svg="projectEditor.icon()" width="13" height="13" />
+              <span>{{ I18nT('nodejs.openIN') }} {{ projectEditor.label }}</span>
             </button>
           </li>
         </template>
@@ -38,58 +45,117 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onBeforeUnmount, ref, watch } from 'vue'
-import { I18nT } from '@lang/index'
-import ForgeDialog from './ForgeDialog.vue'
-import { provideLegacyToolContext } from '../tools/provideLegacyToolContext'
-import { projectWorkflowController, workflowLabels, type ProjectEditor, type WorkflowKind } from '../state/projectWorkflowController'
+  import { computed, defineAsyncComponent, onBeforeUnmount, ref, watch, type Component } from 'vue'
+  import { I18nT } from '@lang/index'
+  import ForgeDialog from './ForgeDialog.vue'
+  import { provideLegacyToolContext } from '../tools/provideLegacyToolContext'
+  import {
+    projectWorkflowController,
+    visibleWorkflowKinds,
+    workflowLabels,
+    type ProjectEditor,
+    type WorkflowKind
+  } from '../state/projectWorkflowController'
 
-const props = defineProps<{ initialLanguage: WorkflowKind }>()
-const emit = defineEmits<{ close: []; scaffoldWebsite: [project: { dir: string; rewrite: string }] }>()
-provideLegacyToolContext({ poperFix: true, detachedClass: 'pqt-language-project-surface' })
+  const props = defineProps<{ initialLanguage: WorkflowKind; eyebrow?: string }>()
+  const emit = defineEmits<{
+    close: []
+    scaffoldWebsite: [project: { dir: string; rewrite: string }]
+  }>()
+  provideLegacyToolContext({ poperFix: true, detachedClass: 'pqt-language-project-surface' })
 
-const language = ref<WorkflowKind>(props.initialLanguage)
-const tab = ref<'saved' | 'create'>('saved')
-const projectEditor = computed<ProjectEditor | undefined>(() => {
-  if (tab.value !== 'saved') return undefined
-  if (language.value === 'python') return 'PyCharm'
-  if (language.value === 'golang') return 'GoLand'
-  return undefined
-})
-const runtimeWarning = ref('')
-let generation = 0
-const projects = defineAsyncComponent(() => import('@/components/LanguageProjects/index.vue'))
-const nodeProjects = defineAsyncComponent(() => import('@/components/Nodejs/projects/index.vue'))
-const scaffolds = {
-  php: defineAsyncComponent(() => import('@/components/PHP/CreateProject.vue')),
-  node: defineAsyncComponent(() => import('@/components/Nodejs/CreateProject.vue')),
-  python: defineAsyncComponent(() => import('@/components/Python/CreateProject.vue')),
-  golang: defineAsyncComponent(() => import('@/components/GoLang/CreateProject.vue'))
-}
-const surface = computed(() =>
-  tab.value === 'create' ? scaffolds[language.value] : language.value === 'node' ? nodeProjects : projects
-)
-const viewProps = computed(() => {
-  if (tab.value === 'saved' && language.value !== 'node') {
-    return { typeFlag: language.value, title: workflowLabels[language.value] }
+  const language = ref<WorkflowKind>(props.initialLanguage)
+  const availableLanguages = computed(visibleWorkflowKinds)
+  const tab = ref<'saved' | 'create'>('saved')
+  const editors: Partial<
+    Record<
+      WorkflowKind,
+      { id: ProjectEditor; label: string; icon: () => Promise<{ default: string }> }
+    >
+  > = {
+    python: { id: 'PyCharm', label: 'PyCharm', icon: () => import('@/svg/pycharm.svg?raw') },
+    golang: { id: 'GoLand', label: 'GoLand', icon: () => import('@/svg/goland.svg?raw') },
+    java: { id: 'IntelliJ', label: 'IntelliJ IDEA', icon: () => import('@/svg/idea.svg?raw') },
+    rust: { id: 'RustRover', label: 'RustRover', icon: () => import('@/svg/rustrover.svg?raw') },
+    ruby: { id: 'RubyMine', label: 'RubyMine', icon: () => import('@/svg/rubymine.svg?raw') },
+    dotnet: { id: 'VSCode', label: 'VS Code', icon: () => import('@/svg/vscode.svg?raw') }
   }
-  if (tab.value === 'create' && language.value === 'php') {
-    return { websiteEditor: 'parent', onScaffoldWebsite: (project: { dir: string; rewrite: string }) => emit('scaffoldWebsite', project) }
+  const projectEditor = computed(() =>
+    tab.value === 'saved' ? editors[language.value] : undefined
+  )
+  const runtimeWarning = ref('')
+  let generation = 0
+  const projects = defineAsyncComponent(() => import('@/components/LanguageProjects/index.vue'))
+  const nodeProjects = defineAsyncComponent(() => import('@/components/Nodejs/projects/index.vue'))
+  const flutterProjects = defineAsyncComponent(() => import('@/components/Flutter/Projects.vue'))
+  const scaffolds: Partial<Record<WorkflowKind, Component>> = {
+    php: defineAsyncComponent(() => import('@/components/PHP/CreateProject.vue')),
+    node: defineAsyncComponent(() => import('@/components/Nodejs/CreateProject.vue')),
+    python: defineAsyncComponent(() => import('@/components/Python/CreateProject.vue')),
+    golang: defineAsyncComponent(() => import('@/components/GoLang/CreateProject.vue'))
   }
-  return {}
-})
-watch(language, async (kind) => {
-  const current = ++generation
-  runtimeWarning.value = ''
-  const available = await projectWorkflowController.loadRuntime(kind).catch(() => false)
-  if (!available && current === generation) runtimeWarning.value = 'Installed ' + workflowLabels[kind] + ' versions could not be refreshed.'
-}, { immediate: true })
-onBeforeUnmount(() => { generation++ })
+  const createSurface = computed(() => scaffolds[language.value])
+  const surface = computed(() => {
+    const kind = language.value
+    if (tab.value === 'create' && createSurface.value) return createSurface.value
+    if (kind === 'node') return nodeProjects
+    if (kind === 'flutter') return flutterProjects
+    return projects
+  })
+  const viewProps = computed(() => {
+    if (surface.value === projects) {
+      return { typeFlag: language.value, title: workflowLabels[language.value] }
+    }
+    if (tab.value === 'create' && language.value === 'php') {
+      return {
+        websiteEditor: 'parent',
+        onScaffoldWebsite: (project: { dir: string; rewrite: string }) =>
+          emit('scaffoldWebsite', project)
+      }
+    }
+    return {}
+  })
+  watch(
+    language,
+    async (kind) => {
+      if (!scaffolds[kind]) tab.value = 'saved'
+      const current = ++generation
+      runtimeWarning.value = ''
+      const available = await projectWorkflowController.loadRuntime(kind).catch(() => false)
+      if (!available && current === generation)
+        runtimeWarning.value =
+          'Installed ' + workflowLabels[kind] + ' versions could not be refreshed.'
+    },
+    { immediate: true }
+  )
+  onBeforeUnmount(() => {
+    generation++
+  })
 </script>
 
 <style scoped>
-.project-manager-controls, .project-manager-controls label { display: flex; align-items: center; gap: 10px; }
-.project-manager-controls { justify-content: space-between; margin-bottom: 12px; }
-.project-manager-controls select { color: var(--pqt-text); background: var(--pqt-canvas); border: 1px solid var(--pqt-border); border-radius: 6px; padding: 6px; }
-.project-ide-action { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
+  .project-manager-controls,
+  .project-manager-controls label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .project-manager-controls {
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .project-manager-controls select {
+    color: var(--pqt-text);
+    background: var(--pqt-canvas);
+    border: 1px solid var(--pqt-border);
+    border-radius: 6px;
+    padding: 6px;
+  }
+  .project-ide-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+  }
 </style>

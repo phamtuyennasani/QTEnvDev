@@ -1,6 +1,6 @@
 <template>
   <section class="project-workflows panel">
-    <div class="panel-heading"><div><h2>Language projects</h2></div><div class="detail-actions"><button class="action-button" :disabled="controller.loading || controller.busy" @click="controller.load()">{{ controller.loading ? 'Refreshing…' : 'Refresh' }}</button><button class="action-button action-button--primary" :disabled="controller.busy" @click="managedLanguage = 'php'">Manage projects</button></div></div>
+    <div class="panel-heading"><div><h2>Language projects</h2></div><div class="detail-actions"><button class="action-button" :disabled="controller.loading || controller.busy" @click="controller.load()">{{ controller.loading ? 'Refreshing…' : 'Refresh' }}</button><button class="action-button action-button--primary" :disabled="controller.busy || !firstLanguage" @click="managedLanguage = firstLanguage">Manage projects</button></div></div>
     <p v-if="controller.error" class="forge-alert forge-alert--error" role="alert">{{ controller.error }}</p>
     <div v-if="!controller.projects.length && !controller.loading && !controller.error" class="empty-copy">No saved language projects.</div>
     <div v-for="project in controller.projects" :key="project.id" class="workflow-row">
@@ -12,10 +12,11 @@
   </section>
 </template>
 <script setup lang="ts">
-import { defineAsyncComponent, onMounted, ref } from 'vue'
-import { projectWorkflowController as controller, workflowLabels, type WorkflowKind } from '../state/projectWorkflowController'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
+import { projectWorkflowController as controller, visibleWorkflowKinds, workflowLabels, type WorkflowKind } from '../state/projectWorkflowController'
 const LanguageProjectManager = defineAsyncComponent(() => import('./LanguageProjectManager.vue'))
 const managedLanguage = ref<WorkflowKind>()
+const firstLanguage = computed(() => visibleWorkflowKinds()[0])
 const emit = defineEmits<{ scaffoldWebsite: [project: { dir: string; rewrite: string }] }>()
 const openScaffoldWebsite = (project: { dir: string; rewrite: string }) => {
   managedLanguage.value = undefined

@@ -2,6 +2,7 @@ import { computed, reactive } from 'vue'
 import { ServiceActionStore } from '@/components/ServiceManager/EXT/store'
 import { installedRuntime, refreshRuntime, runtimeModuleFlags } from '../adapters/runtimeAdapter'
 import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
+import { isWorkflowKind, projectWorkflowController } from './projectWorkflowController'
 
 const runtimeCatalog = [
   { name: 'PHP', family: 'Language runtime' },
@@ -18,6 +19,8 @@ const runtimeCatalog = [
   { name: 'Perl', family: 'Language runtime' },
   { name: 'Zig', family: 'Compiler toolchain' },
   { name: 'Flutter', family: 'SDK runtime' },
+  { name: 'Swoole CLI', family: 'PHP runtime' },
+  { name: 'RoadRunner', family: 'PHP application server' },
   { name: 'Gradle', family: 'Build toolchain' }
 ]
 
@@ -27,12 +30,13 @@ const visibleCatalog = computed(() =>
 )
 const visibleRuntimes = computed(() =>
   visibleCatalog.value.map((runtime) => {
-    const item = installedRuntime(runtimeModuleFlags[runtime.name])
+    const flag = runtimeModuleFlags[runtime.name]
+    const item = installedRuntime(flag)
     return {
       ...runtime,
       version: item?.version || '—',
       path: item?.path || 'Not detected',
-      projects: 0,
+      projects: isWorkflowKind(flag) ? projectWorkflowController.count(flag) : undefined,
       state: item ? 'active' : 'available'
     }
   })

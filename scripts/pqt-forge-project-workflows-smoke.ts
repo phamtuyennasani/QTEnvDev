@@ -9,7 +9,7 @@ const panel = readFileSync(join(root, 'src/render-next/components/ProjectWorkflo
 const websites = readFileSync(join(root, 'src/render-next/screens/WebsitesScreen.vue'), 'utf8')
 for (const source of [controller, panel, websites]) assert.ok(source.length > 0)
 assert.ok(controller.includes('reactiveBind(new ProjectWorkflowController())'))
-assert.ok(controller.includes('ProjectSetup(kind)'))
+assert.ok(controller.includes('ProjectSetup(kind, { initializeDirectories: false })'))
 assert.ok(controller.includes("node: 'Node.js'"))
 assert.ok(panel.includes('<LanguageProjectManager'))
 assert.ok(controller.includes('private actionFlights = new Map'))
@@ -30,6 +30,44 @@ const reads: string[] = []
 const writes: Array<[string, string]> = []
 const notices: string[] = []
 const reveals: string[] = []
+const projectLoads: string[] = []
+const javaProject = { id: 'saved-java', path: '/fixture/Java project' }
+const javaSource = {
+  project: [javaProject],
+  fetched: false,
+  async fetchProject() {
+    this.fetched = true
+  }
+}
+const dotnetSource = { project: [], fetched: false, async fetchProject() {} }
+const { projectWorkflowController: workflows } = await loadIsolated(
+  join(root, 'src/render-next/state/projectWorkflowController.ts'),
+  {
+    '@/util/Index': { reactiveBind: <T>(value: T) => value },
+    '@/util/NodeFn': {},
+    '@/util/Project': {},
+    '@/components/LanguageProjects/setup': {
+      ProjectSetup: (kind: string, options: { initializeDirectories: boolean }) => {
+        assert.equal(options.initializeDirectories, false)
+        projectLoads.push(kind)
+        return kind === 'java' ? javaSource : dotnetSource
+      }
+    },
+    '@/components/LanguageProjects/ports': {},
+    '@/store/brew': {},
+    '../moduleVisibility/visibility': {
+      isBuiltinModuleVisible: (kind: string) => ['java', 'dotnet'].includes(kind)
+    },
+    './app': {}
+  }
+)
+assert.equal(await workflows.load(), false)
+assert.deepEqual(projectLoads.sort(), ['dotnet', 'java'])
+assert.match(workflows.error, /Could not load projects for \.NET/)
+assert.equal(workflows.count('java'), 1)
+assert.equal(workflows.count('dotnet'), undefined)
+assert.equal(workflows.projects[0].item, javaProject)
+
 const { vhostTemplateController: templates } = await loadIsolated(
   join(root, 'src/render-next/state/vhostTemplateController.ts'),
   {
