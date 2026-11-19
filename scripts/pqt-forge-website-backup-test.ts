@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import type { AppHost } from '../src/shared/app'
 import { fetchHostList, saveHostList } from '../src/fork/module/Host/HostFile'
+import * as NginxRewriteTemplates from '../src/fork/module/Host/NginxRewriteTemplates'
 import { parkSubdirectories } from '../src/fork/module/Host/ParkSubdirectories'
 import * as Transaction from '../src/fork/module/Host/Transaction'
 import {
@@ -75,6 +76,7 @@ async function verifyRegularWrites() {
         saveHostList: (list: AppHost[]) => (failCommit ? noWrite() : saveHostList(list))
       },
       './WebsiteBackup': {},
+      './NginxRewriteTemplates': NginxRewriteTemplates,
       './ParkSubdirectories': { parkSubdirectories },
       '../Tomcat/Site': {},
       '@shared/utils': { isWindows: () => false, isMacOS: () => false },
