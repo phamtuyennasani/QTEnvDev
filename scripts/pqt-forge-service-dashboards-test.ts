@@ -54,10 +54,19 @@ const reads: string[] = []
 const notices: string[] = []
 let read = async () => '{"ports":{"http":48500}}'
 let completeShell: (result: { code: 0 | 1 }) => void
-const { serviceDashboardController: controller } = await loadIsolated(
+const temporalOpening = { value: true }
+const { serviceDashboardController: controller, serviceDashboardLabel } = await loadIsolated(
   'src/render-next/serviceDashboards/controller.ts',
   {
     '@/store/brew': { BrewStore: () => ({ module: () => moduleItem }) },
+    '@/components/Temporal/UiController': {
+      opening: temporalOpening,
+      openingLabel: 'Downloading Temporal UI (50%)',
+      open: async (report: (text: string) => void) => {
+        report('Temporal fixture notice')
+        return false
+      }
+    },
     '@/util/path-browserify': posix,
     '@/util/NodeFn': {
       fs: {
@@ -80,6 +89,13 @@ const { serviceDashboardController: controller } = await loadIsolated(
   },
   { window: { Server: { BaseDir: '/fixture' } } }
 )
+assert.equal(serviceDashboardLabel('temporal'), 'Open Temporal UI')
+assert.equal(controller.isOpening('temporal'), true)
+assert.equal(controller.openingLabel('temporal'), 'Downloading Temporal UI (50%)')
+assert.equal(await controller.open('temporal'), false)
+assert.equal(notices.pop(), 'Temporal fixture notice')
+temporalOpening.value = false
+assert.equal(controller.isOpening('temporal'), false)
 let completeRead!: (data: string) => void
 read = () =>
   new Promise<string>((resolve) => {

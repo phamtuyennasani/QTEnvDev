@@ -11,11 +11,13 @@
           <el-button
             class="button temporal-ui-button"
             link
-            :disabled="uiState === 'loading'"
-            :style="{ color: uiState === 'error' ? '#f56c6c' : '#01cc74' }"
-            @click.stop="openTemporalUi"
+            :disabled="openingUi"
+            style="color: #01cc74"
+            :aria-label="temporalUiController.openingLabel ?? 'Open Temporal UI'"
+            :title="temporalUiController.openingLabel ?? 'Open Temporal UI'"
+            @click.stop="temporalUiController.open()"
           >
-            <el-icon v-if="uiState === 'loading'" class="is-loading">
+            <el-icon v-if="openingUi" class="is-loading">
               <Loading />
             </el-icon>
             <yb-icon
@@ -48,13 +50,10 @@
   import Manager from '../VersionManager/index.vue'
   import { AppModuleSetup } from '@/core/Module'
   import { I18nT } from '@lang/index'
-  import { fs, shell } from '@/util/NodeFn'
-  import { computed, ref } from 'vue'
+  import { computed } from 'vue'
   import { Loading } from '@element-plus/icons-vue'
-  import { join } from '@/util/path-browserify'
-  import IPC from '@/util/IPC'
-  import { MessageError } from '@/util/Element'
   import { BrewStore } from '@/store/brew'
+  import temporalUiController from './UiController'
 
   const { tab, checkVersion } = AppModuleSetup('temporal')
   const tabs = [
@@ -66,90 +65,8 @@
   checkVersion()
 
   const brewStore = BrewStore()
-  const uiState = ref<'idle' | 'loading' | 'error'>('idle')
-  const currentVersion = computed(() => brewStore.currentVersion('temporal'))
+  const openingUi = temporalUiController.opening
   const isRunning = computed(() => brewStore.module('temporal').installed.some((item) => item.run))
-
-  const invokeTemporal = (...args: any[]) => {
-    return new Promise<any>((resolve) => {
-      IPC.send('app-fork:temporal', ...args).then((key: string, res: any) => {
-        if (res?.code === 200) {
-          return
-        }
-        IPC.off(key)
-        resolve(res)
-      })
-    })
-  }
-
-  const forkErrorMessage = (value: unknown, fallback: string) => {
-    if (typeof value === 'string' && value.trim()) {
-      return value
-    }
-    if (value instanceof Error && value.message) {
-      return value.message
-    }
-    if (value && typeof value === 'object') {
-      const error = value as Record<string, unknown>
-      const message = error.message ?? error.msg ?? error.error
-      if (typeof message === 'string' && message.trim()) {
-        return message
-      }
-    }
-    return fallback
-  }
-
-  const ensureUiInstalled = async () => {
-    const info = await invokeTemporal('uiServerInfo')
-    if (info?.code !== 0) {
-      throw new Error(forkErrorMessage(info?.msg, I18nT('fork.downloadFileFail')))
-    }
-    if (info?.data?.installed) {
-      return
-    }
-    const latest = await invokeTemporal('fetchUiLatest')
-    const row = latest?.code === 0 ? latest.data : null
-    if (!row?.url) {
-      throw new Error(forkErrorMessage(latest?.msg, I18nT('fork.downloadFileFail')))
-    }
-    const installed = await invokeTemporal('installUiLatest', JSON.parse(JSON.stringify(row)))
-    if (installed?.code !== 0) {
-      throw new Error(forkErrorMessage(installed?.msg, I18nT('fork.downloadFileFail')))
-    }
-  }
-
-  const openURL = async () => {
-    let port = '8233'
-    const confFile = join(window.Server.BaseDir!, 'temporal/config/temporal-ui.yaml')
-    if (await fs.existsSync(confFile)) {
-      const content = await fs.readFile(confFile)
-      const line = content.split('\n').find((item: string) => item.trim().startsWith('port:'))
-      port = line?.split(':').pop()?.trim() || port
-    }
-    await shell.openExternal(`http://127.0.0.1:${port}/`)
-  }
-
-  const openTemporalUi = async () => {
-    if (uiState.value === 'loading' || !currentVersion.value) {
-      return
-    }
-    uiState.value = 'loading'
-    try {
-      await ensureUiInstalled()
-      const started = await invokeTemporal(
-        'startUiServer',
-        JSON.parse(JSON.stringify(currentVersion.value))
-      )
-      if (started?.code !== 0) {
-        throw new Error(forkErrorMessage(started?.msg, I18nT('fork.startFail')))
-      }
-      await openURL()
-      uiState.value = 'idle'
-    } catch (error) {
-      uiState.value = 'error'
-      MessageError(forkErrorMessage(error, I18nT('base.fail')))
-    }
-  }
 </script>
 
 <style lang="scss" scoped>

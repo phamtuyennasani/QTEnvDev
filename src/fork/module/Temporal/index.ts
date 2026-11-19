@@ -1,6 +1,7 @@
 import { basename, join } from 'path'
 import { existsSync, readdirSync } from 'fs'
 import axios from 'axios'
+import YAML from 'yamljs'
 import { Base } from '../Base'
 import type { OnlineVersionItem, SoftInstalled } from '@shared/app'
 import {
@@ -38,6 +39,23 @@ import {
 
 const TEMPORAL_UI_RELEASE_LATEST_URL =
   'https://api.github.com/repos/temporalio/ui-server/releases/latest'
+
+type TemporalUiRelease = {
+  version: string
+  url: string
+  appDir: string
+  bin: string
+  zip: string
+  downloaded: boolean
+  installed: boolean
+  name: string
+}
+
+type TemporalUiStartResult = {
+  running: boolean
+  'APP-Service-Start-PID': string
+  'APP-Service-Start-Item'?: SoftInstalled
+}
 
 function temporalUIAssetName(tag: string): string {
   const version = tag.replace(/^v/, '')
@@ -163,8 +181,54 @@ class Temporal extends Base {
     })
   }
 
+  private async requireRunningServer(version: SoftInstalled) {
+    if (!version?.bin || !version.version) {
+      throw new Error('Start Temporal Server before opening Temporal UI.')
+    }
+    const processes = await fetchStopProcessListLocal()
+    const ownsParent = (pid: string) =>
+      ProcessOwnedPidsByPid(pid, processes, [version.bin]).length > 0
+    if (!ownsParent(version.pid ?? '') && !ownsParent(await this.readPidFromFile())) {
+      throw new Error('Start Temporal Server before opening Temporal UI.')
+    }
+  }
+
+  openUiServer(version: SoftInstalled) {
+    return new ForkPromise<TemporalUiStartResult & { url: string }>(
+      async (resolve, _reject, on) => {
+        await this.requireRunningServer(version)
+        const needsInstall = !existsSync(this.uiBin())
+        if (needsInstall) {
+          const release = await this.fetchUiLatest()
+          if (!release?.url) throw new Error('A compatible Temporal UI release was not found.')
+          if (!(await this.installUiLatest(release).on(on)) || !existsSync(this.uiBin())) {
+            throw new Error('Temporal UI could not be installed.')
+          }
+        }
+        const configFile = await this.initUiConfig().on(on)
+        const config = YAML.parse(await readFile(configFile, 'utf-8'))
+        const rawPort: unknown = config?.port
+        const portText =
+          typeof rawPort === 'number' || typeof rawPort === 'string' ? String(rawPort) : ''
+        const port = rawPort === undefined ? 8233 : Number(portText)
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+          throw new Error('The Temporal UI configuration contains an invalid port.')
+        }
+
+        // The parent can exit on its own while the companion is being downloaded.
+        if (needsInstall) await this.requireRunningServer(version)
+        const started = await this.startUiServer(version).on(on)
+        const pid = Number(started['APP-Service-Start-PID'])
+        if (!Number.isSafeInteger(pid) || pid < 1) {
+          throw new Error('Temporal UI did not report a running process.')
+        }
+        resolve({ ...started, url: 'http://127.0.0.1:' + port + '/' })
+      }
+    )
+  }
+
   startUiServer(version: SoftInstalled) {
-    return new ForkPromise(async (resolve, reject, on) => {
+    return new ForkPromise<TemporalUiStartResult>(async (resolve, reject, on) => {
       try {
         if (await this.isUiServerRunning()) {
           // 复用已存在的面板时也登记 PID，让独立打开的 UI 能参加统一退出清理。
@@ -286,7 +350,9 @@ class Temporal extends Base {
 
   /** UI 可独立打开，其停止请求仍由模块执行，不影响服务父实例的登记。 */
   companionStopArgs(command: string, pid: string, args: any[]): any[] | undefined {
-    if (command === 'startUiServer') return [{ ...args[0], pid }, { uiOnly: true }]
+    if (command === 'startUiServer' || command === 'openUiServer') {
+      return [{ ...args[0], pid }, { uiOnly: true }]
+    }
     return undefined
   }
 
@@ -460,7 +526,7 @@ class Temporal extends Base {
   }
 
   fetchUiLatest() {
-    return new ForkPromise(async (resolve) => {
+    return new ForkPromise<TemporalUiRelease | null>(async (resolve) => {
       try {
         const release = await axios.get(TEMPORAL_UI_RELEASE_LATEST_URL, {
           timeout: 30000,
@@ -497,7 +563,7 @@ class Temporal extends Base {
     })
   }
 
-  installUiLatest(row: any) {
+  installUiLatest(row: TemporalUiRelease) {
     return this.installSoft(row)
   }
 

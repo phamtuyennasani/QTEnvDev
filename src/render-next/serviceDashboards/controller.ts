@@ -4,8 +4,10 @@ import { fs, shell } from '@/util/NodeFn'
 import { join } from '@/util/path-browserify'
 import { showNotice } from '../state/app'
 import { dashboardPolicy, dashboardUrl } from './endpoints'
+import temporalUiController from '@/components/Temporal/UiController'
 
 export function serviceDashboardLabel(flag?: string) {
+  if (flag === 'temporal') return 'Open Temporal UI'
   return dashboardPolicy(flag)?.label
 }
 
@@ -24,10 +26,15 @@ const opening = reactive(new Set<string>())
 
 export const serviceDashboardController = {
   isOpening(flag?: string) {
+    if (flag === 'temporal') return temporalUiController.opening.value
     return Boolean(flag && opening.has(flag))
+  },
+  openingLabel(flag?: string) {
+    return flag === 'temporal' ? temporalUiController.openingLabel : undefined
   },
 
   async open(flag?: string) {
+    if (flag === 'temporal') return temporalUiController.open(showNotice)
     const policy = dashboardPolicy(flag)
     if (!flag || !policy || opening.has(flag)) return false
     opening.add(flag)
