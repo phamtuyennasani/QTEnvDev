@@ -15,3 +15,14 @@ export async function readLogTail(path: string): Promise<string> {
     await file.close()
   }
 }
+
+export async function clearExistingLog(path: string): Promise<void> {
+  if (!(await stat(path)).isFile()) throw new Error('The log path is not a regular file.')
+  const file = await open(path, constants.O_WRONLY | (constants.O_NONBLOCK ?? 0))
+  try {
+    if (!(await file.stat()).isFile()) throw new Error('The log path is not a regular file.')
+    await file.truncate(0)
+  } finally {
+    await file.close()
+  }
+}

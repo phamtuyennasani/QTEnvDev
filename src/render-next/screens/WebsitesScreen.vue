@@ -85,7 +85,7 @@
           <div
             ><span>Runtime</span><b>{{ selectedProject.runtime }}</b></div
           >
-          <div
+          <div v-if="!isDirectProjectSite(selectedProject.host)"
             ><span>HTTPS</span><b>{{ sslLabel(selectedProject.host) }}</b></div
           >
           <div
@@ -123,10 +123,12 @@
         <div class="website-secondary-actions"
           ><button class="text-button" @click="projectController.reveal(selectedProject.path)"
             >Show root folder ↗</button
-          ><button class="text-button" @click="logsProject = selectedProject"
-            >Host log files ↗</button
-          ><button class="text-button" @click="vhostsProject = selectedProject"
-            >Vhost / rewrite files ↗</button
+          ><template v-if="!isDirectProjectSite(selectedProject.host)"
+            ><button class="text-button" @click="logsProject = selectedProject"
+              >Host log files ↗</button
+            ><button class="text-button" @click="vhostsProject = selectedProject"
+              >Vhost / rewrite files ↗</button
+            ></template
           ><button
             class="text-button website-danger"
             :disabled="busy"

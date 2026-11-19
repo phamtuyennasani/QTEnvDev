@@ -191,6 +191,23 @@ assert.equal(
   'http://127.0.0.1:3111/'
 )
 assert.equal(websiteLinks({ ...preserved, type: 'node', projectPort: undefined }).length, 0)
+for (const type of ['node', 'go', 'python', 'java'] as const) {
+  const direct = {
+    ...preserved,
+    type,
+    subType: type === 'java' ? ('springboot' as const) : undefined,
+    projectPort: 3111,
+    startCommand: 'fixture command',
+    useSSL: true,
+    autoSSL: false,
+    port: { ...host.port, nginx: 0 },
+    reverseProxy: [{ path: 'legacy', url: 'legacy' }]
+  }
+  assert.deepEqual(normalizeWebsite(direct), JSON.parse(JSON.stringify(direct)))
+  assert.equal(projectFromHost(direct).ssl, false)
+  assert.throws(() => normalizeWebsite({ ...direct, projectPort: 65536 }), /Project port/)
+  assert.throws(() => normalizeWebsite({ ...direct, name: 'app.test:8080' }), /Project runtime port/)
+}
 assert(
   websiteLinks({ ...preserved, alias: 'api.app.test\nuser@elsewhere.test' }).some(
     (link) => link.url === 'http://api.app.test:8088/'

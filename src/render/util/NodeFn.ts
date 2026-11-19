@@ -267,6 +267,7 @@ const strictReadFileRequest = createIPCCall<[string, boolean], string | FileIPCF
   true
 )
 const readLogTailRequest = createIPCCall<[string], string | FileIPCFailure>('fs', 'readLogTail')
+const clearLogRequest = createIPCCall<[string], true | FileIPCFailure>('fs', 'clearLog')
 
 const inspectVersionDirectory = createIPCCall<
   [VersionDeleteTarget],
@@ -314,6 +315,10 @@ export const fs = {
     const response = await readLogTailRequest(path)
     if (typeof response !== 'string') return throwFileIPCFailure(response)
     return response
+  },
+  async clearLog(path: string): Promise<void> {
+    const response = await clearLogRequest(path)
+    if (response !== true) return throwFileIPCFailure(response)
   },
   async writeFile(path: string, data: string): Promise<void> {
     const response = await writeFileRequest(path, data)

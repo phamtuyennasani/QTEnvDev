@@ -57,7 +57,7 @@
       <div></div>
       <div class="detail-actions">
         <button class="action-button" @click="close">Close</button>
-        <button v-if="kind === 'log'" class="action-button action-button--danger" :disabled="!controller.selected || controller.saving" @click="pendingClear = controller.selected?.path">Clear log</button>
+        <button v-if="kind === 'log'" class="action-button action-button--danger" :disabled="!controller.canClearLog" @click="pendingClear = controller.selected?.path">Clear log</button>
         <template v-if="kind === 'config' && controller.selected && !controller.selected.readOnly">
           <button class="action-button action-button--primary" :disabled="!controller.canSave" @click="save">{{ controller.saving && !controller.restarting ? 'Saving…' : 'Save configuration' }}</button>
           <button

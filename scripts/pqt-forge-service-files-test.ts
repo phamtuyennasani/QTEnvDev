@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { readLogTail } from '../src/main/core/readLogTail'
+import { clearExistingLog, readLogTail } from '../src/main/core/readLogTail'
 import { launchFirstEditor, windowsEditorCandidates } from '../src/fork/module/Tool/openEditor'
 import { loadIsolated } from './helpers/load-isolated'
 
@@ -30,6 +30,12 @@ try {
   assert(!tail.includes('discarded'))
   assert(tail.endsWith('\nend'))
   await assert.rejects(readLogTail(root), /regular file/)
+  await clearExistingLog(path)
+  assert.equal(await readFile(path, 'utf8'), '')
+  await rm(path)
+  await assert.rejects(clearExistingLog(path), { code: 'ENOENT' })
+  await assert.rejects(readFile(path), { code: 'ENOENT' })
+  await assert.rejects(clearExistingLog(root), /regular file/)
 
   // A temporary Node program stands in for a desktop editor. The launcher
   // must pass the complete path as one argument, even with spaces and &.
@@ -84,6 +90,10 @@ const serviceAdapter = await loadIsolated('src/render-next/adapters/serviceAdapt
 let finishImport!: (result: { canceled: boolean; filePaths: string[] }) => void
 let finishExport!: (result: { canceled: boolean; filePath?: string }) => void
 let finishLaunch!: (result: string | true) => void
+const fixtureLogs = new Map([['/service.log', 'existing log'], ['/new.log', 'new view']])
+const logClears: string[] = []
+let clearLogOperation: () => Promise<void> = async () => {}
+const missingLog = () => Object.assign(new Error('Fixture log is missing'), { code: 'ENOENT' })
 const { ServiceFilesController } = await loadIsolated('src/render-next/state/serviceFilesController.ts', {
   '@/util/IPC': {
     send: (_channel: string, method: string) => {
@@ -106,6 +116,17 @@ const { ServiceFilesController } = await loadIsolated('src/render-next/state/ser
       realpath: async (file: string) => file === '/alias' ? '/second' : file,
       stat: async (file: string) => ({ size: file === '/oversize' ? 5 * 1024 * 1024 + 1 : 120, isFile: file !== '/directory' }),
       existsSync: async (file: string) => file !== '/missing',
+      readLogTail: async (file: string) => {
+        const log = fixtureLogs.get(file)
+        if (log === undefined) throw missingLog()
+        return log
+      },
+      clearLog: async (file: string) => {
+        logClears.push(file)
+        await clearLogOperation()
+        if (!fixtureLogs.has(file)) throw missingLog()
+        fixtureLogs.set(file, '')
+      },
       readFileStrict: async (file: string) => {
         if (file === '/default') return 'default configuration'
         if (file === '/import') return 'imported configuration'
@@ -134,6 +155,32 @@ const { ServiceFilesController } = await loadIsolated('src/render-next/state/ser
   './app': { showNotice: (message: string) => notices.push(message) }
 })
 const editor = new ServiceFilesController()
+const logEditor = new ServiceFilesController()
+const oldLog = { name: 'Service', path: '/service.log', kind: 'log' as const }
+const newLog = { name: 'New', path: '/new.log', kind: 'log' as const }
+await logEditor.openProvided(async () => [{ ...oldLog, path: '/missing.log' }])
+assert.equal(logEditor.canClearLog, false)
+assert.equal(await logEditor.clearLog(), false)
+assert.deepEqual(logClears, [])
+await logEditor.select(oldLog)
+assert.equal(logEditor.canClearLog, true)
+assert.equal(await logEditor.clearLog(), true)
+assert.equal(logEditor.content, '')
+fixtureLogs.delete(oldLog.path)
+assert.equal(await logEditor.clearLog(), false)
+assert.equal(logEditor.canClearLog, false)
+assert.match(logEditor.error, /log is missing/)
+fixtureLogs.set(oldLog.path, 'recreated log')
+await logEditor.readSelected()
+let finishLogClear!: () => void
+clearLogOperation = () => new Promise((resolve) => { finishLogClear = resolve })
+const pendingLogClear = logEditor.clearLog()
+assert.equal(await logEditor.clearLog(), false)
+await logEditor.openProvided(async () => [newLog])
+finishLogClear()
+assert.equal(await pendingLogClear, true)
+assert.equal(logEditor.content, 'new view')
+assert.deepEqual(logClears, [oldLog.path, oldLog.path, oldLog.path])
 const read = editor.select({ name: 'Old', path: '/first', kind: 'config' })
 await editor.select({ name: 'New', path: '/second', kind: 'config' })
 finishFirst('stale')

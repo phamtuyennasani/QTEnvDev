@@ -1,13 +1,17 @@
 <template>
   <ForgeDialog
     :title="original ? 'Configure website' : 'Create website'"
-    description="Save a local host and generate web server configuration."
+    :description="
+      directProject
+        ? 'Save the endpoint for a local runtime project.'
+        : 'Save a local host and generate web server configuration.'
+    "
     eyebrow="WORKSPACE / WEBSITES"
     wide
     @close="emit('close')"
   >
     <form id="website-editor" class="website-form" @submit.prevent="submit">
-      <nav class="website-editor-tabs" aria-label="Website settings"
+      <nav v-if="!directProject" class="website-editor-tabs" aria-label="Website settings"
         ><button
           v-for="item in tabs"
           :key="item"
@@ -56,7 +60,7 @@
             ><option value="java">Java Spring Boot</option></select
           ></label
         >
-        <label v-if="!form.type || form.type === 'php'"
+        <label v-if="!directProject"
           >PHP version<select v-model="form.phpVersion" @change="setPhp"
             ><option :value="undefined">Static website · no PHP</option
             ><option
@@ -75,11 +79,12 @@
               type="number"
               min="1"
               max="65535"
+              required
               placeholder="3000" /></label
           ><label
-            >Start command<input v-model="form.startCommand" placeholder="npm run dev" /></label
+            >Start command<input v-model="form.startCommand" /></label
         ></template>
-        <label v-if="!form.type || form.type === 'php'" class="website-toggle">
+        <label v-if="!directProject" class="website-toggle">
           <span>
             <b>Create websites from subdirectories</b>
             <small>For example, the blog folder in app.test becomes blog.app.test.</small>
@@ -153,18 +158,14 @@
           ></template
         >
       </template>
-      <template v-else>
-        <NginxRewriteField
-          v-if="!form.type || form.type === 'php'"
-          v-model="form.nginx.rewrite"
-          :disabled="busy"
-        />
+      <template v-else-if="tab === 'Routing'">
+        <NginxRewriteField v-model="form.nginx.rewrite" :disabled="busy" />
         <div class="website-section-heading"
           ><b>Reverse proxies</b
           ><button
             type="button"
             class="text-button"
-            @click="form.reverseProxy?.push({ path: '/', url: 'http://127.0.0.1:3000' })"
+            @click="addProxy"
             >Add proxy</button
           ></div
         >
@@ -203,6 +204,7 @@
   import LocalCertificateHelp from './LocalCertificateHelp.vue'
   import NginxRewriteField from './NginxRewriteField.vue'
   import { computed, ref } from 'vue'
+  import { isDirectProjectSite } from '@shared/siteRuntime'
   import { BrewStore } from '@/store/brew'
   import ForgeDialog from '../components/ForgeDialog.vue'
   import { projectController } from '../state/projectController'
@@ -218,7 +220,7 @@
     form.value.root = props.scaffold.dir
     form.value.nginx.rewrite = props.scaffold.rewrite
   }
-  form.value.reverseProxy ||= []
+  const directProject = computed(() => isDirectProjectSite(form.value))
   const tabs = ['General', 'Ports', 'SSL', 'Routing'] as const
   const tab = ref<(typeof tabs)[number]>('General')
   const includeSubdirectories = ref(false)
@@ -235,8 +237,7 @@
     { label: 'Nginx', flag: 'nginx', ssl: 'nginx_ssl' },
     { label: 'Apache', flag: 'apache', ssl: 'apache_ssl' },
     { label: 'Caddy', flag: 'caddy', ssl: 'caddy_ssl' },
-    { label: 'FrankenPHP', flag: 'frankenphp', ssl: 'frankenphp_ssl' },
-    { label: 'Tomcat', flag: 'tomcat', ssl: 'tomcat_ssl' }
+    { label: 'FrankenPHP', flag: 'frankenphp', ssl: 'frankenphp_ssl' }
   ] as const
   const choose = async (field: 'root' | 'cert' | 'key') => {
     const path = await projectController.choosePath(
@@ -256,6 +257,10 @@
   const setRuntime = () => {
     includeSubdirectories.value = false
     form.value.subType = form.value.type === 'java' ? 'springboot' : undefined
+  }
+  const addProxy = () => {
+    const proxies = (form.value.reverseProxy ??= [])
+    proxies.push({ path: '/', url: 'http://127.0.0.1:3000' })
   }
   const submit = async () => {
     if (await projectController.save(form.value, props.original, includeSubdirectories.value))

@@ -9,7 +9,7 @@ import { execPromise } from '@shared/child-process'
 import { type FSWatcher, rm, stat, existsSync, watch, createReadStream, constants } from 'node:fs'
 import { join } from 'node:path'
 import { readdir, access as fsAccess } from 'node:fs/promises'
-import { readLogTail } from './readLogTail'
+import { clearExistingLog, readLogTail } from './readLogTail'
 import Helper from '../../fork/Helper'
 import { AppHelperError } from '@shared/WindowsHelperState'
 import { resolve as PathResolve } from 'path'
@@ -717,7 +717,27 @@ X-GNOME-Autostart-enabled=true`
     try {
       send(await readLogTail(pathFixedToUnix(path)))
     } catch (error) {
-      send({ code: 1, msg: error instanceof Error ? error.message : String(error) })
+      send({
+        code: 1,
+        msg: error instanceof Error ? error.message : String(error),
+        errorCode: (error as NodeJS.ErrnoException)?.code
+      })
+    }
+  }
+
+  async fs_clearLog(command: string, key: string, path: string) {
+    const send = (data: unknown) => this.mainWindow?.webContents.send('command', command, key, data)
+    try {
+      const file = pathFixedToUnix(path)
+      if (!isWindows()) assertGenericUnixFileWrite(file)
+      await clearExistingLog(file)
+      send(true)
+    } catch (error) {
+      send({
+        code: 1,
+        msg: error instanceof Error ? error.message : String(error),
+        errorCode: (error as NodeJS.ErrnoException)?.code
+      })
     }
   }
 

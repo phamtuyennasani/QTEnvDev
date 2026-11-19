@@ -65,6 +65,9 @@ export class ServiceFilesController {
   get canRestore() {
     return this.selected?.kind === 'config' && !this.selected.readOnly && this.missing
   }
+  get canClearLog() {
+    return this.selected?.kind === 'log' && !this.saving && this.loadedContent !== undefined
+  }
 
   async openProvided(provider: () => Promise<ServiceFile[]>, preferExisting = false, configurationTarget?: ConfigurationTarget) {
     this.clear()
@@ -137,7 +140,7 @@ export class ServiceFilesController {
       const raw = await (file.kind === 'log' ? fs.readLogTail(file.path) : fs.readFileStrict(file.path))
       if (!current()) return
       this.content = raw
-      if (file.kind === 'config') this.loadedContent = raw
+      this.loadedContent = raw
     } catch (error) {
       if (current()) {
         this.missing = (error as NodeJS.ErrnoException)?.code === 'ENOENT'
@@ -207,13 +210,31 @@ export class ServiceFilesController {
   }
   async clearLog() {
     const file = this.selected
-    if (!file || file.kind !== 'log' || this.saving) return false
+    if (!file || !this.canClearLog) return false
     this.readGeneration++
     const generation = this.generation
-    this.saving = true; this.error = ''
-    try { await fs.writeFile(file.path, ''); if (generation === this.generation) this.content = ''; return true }
-    catch (error) { if (generation === this.generation) this.error = packageError(error); return false }
-    finally { this.saving = false }
+    this.saving = true
+    this.error = ''
+    try {
+      await fs.clearLog(file.path)
+      if (generation === this.generation) {
+        this.content = ''
+        this.loadedContent = ''
+      }
+      return true
+    } catch (error) {
+      if (generation === this.generation) {
+        if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') {
+          this.content = ''
+          this.loadedContent = undefined
+        }
+        this.error = packageError(error)
+      }
+      return false
+    } finally {
+      this.saving = false
+      if (generation !== this.generation && this.selected) await this.readSelected()
+    }
   }
   async reveal(file = this.selected) { if (!file) return; try { await shell.showItemInFolder(file.path) } catch (error) { this.error = packageError(error) } }
 

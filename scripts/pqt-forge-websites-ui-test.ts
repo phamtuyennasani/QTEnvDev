@@ -135,6 +135,10 @@ const bootstrap = String.raw`
         }
         if (method === 'prepareNginxRewriteTemplateDirectory') return success('C:/fixture/NginxRewriteTemplate')
         if (method === 'handleHost') {
+          if (second === 'edit' && first.id === 10 && third.id === first.id) {
+            window.websiteHosts = websiteHosts.map((host) => host.id === first.id ? first : host)
+            return success(snapshot())
+          }
           if (second !== 'park' || first.name !== 'alpha.fixture.test' || third.id !== first.id) return failure('Unexpected park request')
           websiteHosts.push({ ...first, id: 5, name: 'blog.alpha.fixture.test', root: first.root + '/blog' })
           return success({ ...snapshot(), parked: { count: 1, warnings: ['Skipped another folder'] } })
@@ -199,10 +203,10 @@ const bootstrap = String.raw`
           return reply({ canceled: false, filePaths: [second?.filters?.[0]?.name === 'Website backup' ? 'C:/fixture-export/website-backup.json' : 'C:/fixture/laravel'] })
         }
         if (method === 'fs') {
-          if (first === 'existsSync') return reply(second in websiteFiles || second === 'C:/fixture/webapps' || second === 'C:/fixture/vhost/logs')
+          if (first === 'existsSync') return reply(second in websiteFiles || ['C:/fixture/webapps', 'C:/fixture/vhost/logs', 'C:/fixture/direct'].includes(second))
           if (first === 'stat') {
             if (second === 'C:/fixture-import/custom.vhost') return reply({ size: 19, isFile: true })
-            return reply({ isDirectory: second === 'C:/fixture/webapps' })
+            return reply({ isDirectory: ['C:/fixture/webapps', 'C:/fixture/direct'].includes(second) })
           }
           if (first === 'subdir') return reply(second === 'C:/fixture/webapps' ? ['ROOT', 'console'] : [])
           if (first === 'readdir') {
@@ -214,6 +218,11 @@ const bootstrap = String.raw`
               return reply({ code: 1, msg: 'Fixture template access denied', errorCode: 'EACCES' })
             }
             return reply(websiteFiles[second] ?? { code: 1, msg: 'Fixture file missing', errorCode: 'ENOENT' })
+          }
+          if (first === 'clearLog') {
+            if (!(second in websiteFiles)) return reply({ code: 1, msg: 'Fixture log missing', errorCode: 'ENOENT' })
+            websiteFiles[second] = ''
+            return reply(true)
           }
           if (first === 'writeFile') {
             if (second !== vhost && second !== 'C:/fixture/VhostTemplate/nginx.vhost' && second !== 'C:/fixture-export/nginx-custom.vhost') return reply({ code: 1, msg: 'Unexpected fixture write path' })
@@ -468,6 +477,19 @@ const checks = String.raw`(async () => {
   await click('Host log files ↗')
   await wait(() => modal()?.querySelector('pre')?.textContent.includes('fixture Tomcat access log'), 'Tomcat log preview')
   assert(modal().querySelectorAll('.service-file-item').length === 1, 'Tomcat logs should exclude sibling hosts and backups')
+  const clearDialog = () => [...document.querySelectorAll('[role=dialog]')]
+    .find((item) => item.querySelector('h2')?.textContent === 'Clear this log?')
+  const logClears = () => requests('App-Node-FN', 'fs').filter((entry) => entry[2] === 'clearLog')
+  await click('Clear log')
+  await wait(clearDialog, 'log clear confirmation')
+  button('Cancel', clearDialog()).click()
+  await wait(() => !clearDialog(), 'cancel log clear')
+  assert(logClears().length === 0, 'Cancel must preserve the log')
+  await click('Clear log')
+  await wait(clearDialog, 'confirm clearing the Tomcat log')
+  button('Clear log', clearDialog()).click()
+  await wait(() => logClears().length === 1 && button('Clear log') && !button('Clear log').disabled && !modal()?.querySelector('pre')?.textContent.includes('fixture Tomcat access log'), 'cleared log preview')
+  assert(logClears()[0][3] === 'C:/fixture/vhost/logs/java.fixture.test-tomcat_access_log.2026-11-19.log', 'Clear must target only the selected log')
   await click('Close')
 
   await click('Remove website')
@@ -602,6 +624,42 @@ const checks = String.raw`(async () => {
   await wait(() => document.querySelector('.project-list-panel')?.innerText.includes('blog.alpha.fixture.test') &&
     document.body.innerText.includes('Skipped another folder'), 'park added site and warning')
   assert(requests('app-fork:host', 'handleHost').length === 1, 'Park must send a single mutation')
+  await select('alpha.fixture.test')
+  await click('Host log files ↗')
+  await wait(() => modal()?.innerText.includes('Fixture file missing'), 'missing website log')
+  assert(button('Clear log').disabled && logClears().length === 1, 'A missing log must not allow clearing')
+  await click('Close')
+
+  await click('＋ New website')
+  const runtime = () => [...modal().querySelectorAll('select')].find((item) => item.closest('label')?.textContent.includes('Site runtime'))
+  await wait(runtime, 'website runtime selector')
+  for (const type of ['node', 'python', 'go', 'java']) {
+    runtime().value = type
+    runtime().dispatchEvent(new Event('change', { bubbles: true }))
+    await wait(() => field('Project runtime port') && field('Start command') && !button('Ports') && !button('SSL') && !button('Routing'), type + ' direct project settings')
+  }
+  runtime().value = 'php'
+  runtime().dispatchEvent(new Event('change', { bubbles: true }))
+  await wait(() => button('Ports') && button('SSL') && button('Routing') && !field('Start command'), 'web server settings restored for PHP')
+  await click('Close')
+
+  window.websiteHosts.push({
+    ...websiteHosts[0], id: 10, type: 'node', name: 'direct.fixture.test', root: 'C:/fixture/direct',
+    projectPort: 4173, startCommand: 'npm run dev', useSSL: true, autoSSL: false,
+    ssl: { cert: 'old.crt', key: 'old.key' }, reverseProxy: [{ path: '/old', url: 'http://127.0.0.1:8080' }]
+  })
+  await click('Refresh')
+  await select('direct.fixture.test')
+  assert(!button('Host log files ↗') && !button('Vhost / rewrite files ↗'), 'Direct projects must not offer generated files')
+  assert(document.querySelector('.project-facts').innerText.includes('http://127.0.0.1:4173/'), 'Direct endpoint must use the project port')
+  await click('Configure')
+  await wait(() => field('Project runtime port')?.value === '4173' && field('Start command')?.value === 'npm run dev', 'saved direct project settings')
+  input(field('Project runtime port'), '5173')
+  input(field('Start command'), 'npm start')
+  await click('Save website')
+  await wait(() => !modal() && document.querySelector('.project-facts').innerText.includes('http://127.0.0.1:5173/'), 'save direct project changes')
+  const saved = requests('app-fork:host', 'handleHost').at(-1)[2]
+  assert(saved.projectPort === 5173 && saved.startCommand === 'npm start' && saved.ssl.cert === 'old.crt' && saved.reverseProxy[0].path === '/old', 'Editing a direct project must preserve its old web server fields')
 })()`
 
 try {

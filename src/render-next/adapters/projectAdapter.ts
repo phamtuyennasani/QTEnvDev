@@ -12,7 +12,7 @@ import {
 } from '../websites/types'
 import { showNotice } from '../state/app'
 import { registerLifecycle } from './lifecycleAdapter'
-import { isTomcatSite } from '@shared/siteRuntime'
+import { isDirectProjectSite, isTomcatSite } from '@shared/siteRuntime'
 import tomcatSiteController from '@/components/Host/Tomcat/TomcatSiteController'
 import { cloneTomcatSiteHost, rendererTomcatNameError } from '@/components/Host/Tomcat/site'
 import { TomcatSetup } from '@/components/Tomcat/setup'
@@ -112,7 +112,7 @@ export const websiteDependencies: WebsiteDependencies = {
     if (!(await fs.existsSync(host.root))) throw new Error('The website root does not exist.')
     const stat = (await fs.stat(host.root)) as unknown as { isDirectory?: boolean }
     if (stat?.isDirectory !== true) throw new Error('Choose a directory as the website root.')
-    if (host.useSSL && !host.autoSSL)
+    if (!isDirectProjectSite(host) && host.useSSL && !host.autoSSL)
       for (const file of [host.ssl.cert, host.ssl.key])
         if (!(await fs.existsSync(file))) throw new Error('SSL file does not exist: ' + file)
   },

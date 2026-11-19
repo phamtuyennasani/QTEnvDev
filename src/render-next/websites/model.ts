@@ -33,6 +33,7 @@ export function newWebsite(): WebsiteHost {
 }
 export function normalizeWebsite(input: Readonly<WebsiteHost>): WebsiteHost {
   const host = cloneHost(input)
+  const directProject = isDirectProjectSite(host)
   const raw = host.name.trim()
   const url = new URL(raw.includes('://') ? raw : 'http://' + raw)
   if (
@@ -46,8 +47,13 @@ export function normalizeWebsite(input: Readonly<WebsiteHost>): WebsiteHost {
   ) {
     throw new Error('Enter a hostname such as app.test, without a path or credentials.')
   }
-  if (url.port)
-    throw new Error('Set listening ports in the Ports section, separately from the hostname.')
+  if (url.port) {
+    throw new Error(
+      directProject
+        ? 'Set the port in Project runtime port, separately from the hostname.'
+        : 'Set listening ports in the Ports section, separately from the hostname.'
+    )
+  }
   host.name = url.hostname.toLowerCase()
   host.alias = (host.alias || '')
     .split(/[\s,]+/)
@@ -70,14 +76,16 @@ export function normalizeWebsite(input: Readonly<WebsiteHost>): WebsiteHost {
     .join('\n')
   host.root = host.root.trim()
   if (!host.root) throw new Error('Choose the website root directory.')
-  if (
-    isDirectProjectSite(host) &&
-    (!Number.isInteger(host.projectPort) ||
+  if (directProject) {
+    if (
+      !Number.isInteger(host.projectPort) ||
       !host.projectPort ||
       host.projectPort < 1 ||
-      host.projectPort > 65535)
-  ) {
-    throw new Error('Project port must be an integer from 1 to 65535.')
+      host.projectPort > 65535
+    ) {
+      throw new Error('Project port must be an integer from 1 to 65535.')
+    }
+    return host
   }
   for (const [name, port] of Object.entries(host.port)) {
     if (name.endsWith('_ssl') && !host.useSSL) continue
@@ -101,7 +109,7 @@ export const projectFromHost = (host: WebsiteHost): ProjectItem => ({
   name: host.projectName?.trim() || host.name,
   domain: host.name,
   path: host.root,
-  ssl: host.useSSL,
+  ssl: !isDirectProjectSite(host) && host.useSSL,
   runtime: host.phpVersionFull
     ? 'PHP ' + host.phpVersionFull
     : host.phpVersion
