@@ -40,10 +40,18 @@ const javaSource = {
   }
 }
 const dotnetSource = { project: [], fetched: false, async fetchProject() {} }
+let piniaReady = false
 const { projectWorkflowController: workflows } = await loadIsolated(
   join(root, 'src/render-next/state/projectWorkflowController.ts'),
   {
-    '@/util/Index': { reactiveBind: <T>(value: T) => value },
+    '@/util/Index': {
+      reactiveBind: <T extends object>(value: T) => {
+        for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(value))) {
+          Reflect.get(value, key)
+        }
+        return value
+      }
+    },
     '@/util/NodeFn': {},
     '@/util/Project': {},
     '@/components/LanguageProjects/setup': {
@@ -56,17 +64,21 @@ const { projectWorkflowController: workflows } = await loadIsolated(
     '@/components/LanguageProjects/ports': {},
     '@/store/brew': {},
     '../moduleVisibility/visibility': {
-      isBuiltinModuleVisible: (kind: string) => ['java', 'dotnet'].includes(kind)
+      isBuiltinModuleVisible: (kind: string) => {
+        assert.equal(piniaReady, true, 'visibility must wait for Pinia initialization')
+        return ['java', 'dotnet'].includes(kind)
+      }
     },
     './app': {}
   }
 )
+piniaReady = true
 assert.equal(await workflows.load(), false)
 assert.deepEqual(projectLoads.sort(), ['dotnet', 'java'])
 assert.match(workflows.error, /Could not load projects for \.NET/)
 assert.equal(workflows.count('java'), 1)
 assert.equal(workflows.count('dotnet'), undefined)
-assert.equal(workflows.projects[0].item, javaProject)
+assert.equal(workflows.listProjects()[0].item, javaProject)
 
 const { vhostTemplateController: templates } = await loadIsolated(
   join(root, 'src/render-next/state/vhostTemplateController.ts'),

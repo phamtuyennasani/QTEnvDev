@@ -200,7 +200,7 @@ try {
     `<!doctype html><div id="app"></div><script>${setup}</script>
 <script type="module">
   import { createApp } from 'vue'
-  import { createPinia, setActivePinia } from 'pinia'
+  import { createPinia } from 'pinia'
   import localForage from 'localforage'
   import { applyLanguagePayload } from '../lang/runtime.ts'
   import './styles/app.css'
@@ -209,13 +209,11 @@ try {
     messages[path.split('/').pop().replace('.json', '')] = await load()
   }
   applyLanguagePayload({ locale: 'en', fallbackLocale: 'en', messages, fallbackMessages: messages })
-  const pinia = createPinia()
-  setActivePinia(pinia)
   const { default: Runtimes } = await import('./screens/RuntimesScreen.vue')
   await localForage.setItem('qtenvdev-java-projects', [
     { id: 'java-project', path: '/fixture/Java project', comment: 'Java project from the existing project list' }
   ])
-  const app = createApp(Runtimes).use(pinia)
+  const app = createApp(Runtimes).use(createPinia())
   app.config.errorHandler = (error) => errors.push(error?.stack || String(error))
   app.mount('#app')
 </script>`

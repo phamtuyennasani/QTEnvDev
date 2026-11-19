@@ -48,7 +48,7 @@ class ProjectWorkflowController {
   private actionFlights = new Map<string, Promise<boolean>>()
   private editorFlights = new Set<string>()
 
-  get projects(): WorkflowProject[] {
+  listProjects(): WorkflowProject[] {
     return visibleWorkflowKinds().flatMap((kind) =>
       (this.sources[kind]?.project ?? []).map((item) => ({ id: kind + ':' + item.id, kind, item }))
     )
