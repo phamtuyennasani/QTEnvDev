@@ -6,7 +6,7 @@ import CloudflareTunnelStore from '@/core/CloudflareTunnel/CloudflareTunnelStore
 import { I18nT } from '@lang/index'
 
 export const AsideSetup = () => {
-  CloudflareTunnelStore.init()
+  void CloudflareTunnelStore.init().catch((error) => MessageError(String(error)))
   const appStore = AppStore()
 
   const currentPage = computed(() => {

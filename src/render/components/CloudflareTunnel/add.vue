@@ -144,7 +144,7 @@
         if (v.length < 24) {
           return
         }
-        IPC.send('app-fork:cloudflare-tunnel', 'fetchAllZone', {
+        IPC.sendSensitive('app-fork:cloudflare-tunnel', 'fetchAllZone', {
           apiToken: v
         }).then((key: string, res: any) => {
           IPC.off(key)

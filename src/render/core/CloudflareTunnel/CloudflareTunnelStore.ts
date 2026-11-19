@@ -7,21 +7,27 @@ const storeKey = 'qtenvdev-cloudflare-tunnel-store'
 class CloudflareTunnelStore {
   items: CloudflareTunnel[] = []
   inited: boolean = false
+  loadError = ''
+  private loading?: Promise<void>
 
-  init() {
-    if (this.inited) return
-    this.inited = true
-    StorageGetAsync<CloudflareTunnel[]>(storeKey)
-      .then((res: CloudflareTunnel[]) => {
-        if (res) {
-          console.log('CloudflareTunnelStore init res:', res)
-          for (const item of res) {
-            const obj = reactiveBind(new CloudflareTunnel(item))
-            this.items.push(obj)
-          }
-        }
+  init(): Promise<void> {
+    if (this.inited) return Promise.resolve()
+    if (this.loading) return this.loading
+    this.loadError = ''
+    this.loading = StorageGetAsync<CloudflareTunnel[]>(storeKey)
+      .then((saved) => {
+        const items = (saved ?? []).map((item) => reactiveBind(new CloudflareTunnel(item)))
+        this.items.push(...items)
+        this.inited = true
       })
-      .catch()
+      .catch((error) => {
+        this.loadError = error instanceof Error ? error.message : String(error)
+        throw error
+      })
+      .finally(() => {
+        this.loading = undefined
+      })
+    return this.loading
   }
 
   save() {

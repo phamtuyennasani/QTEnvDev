@@ -51,7 +51,11 @@ class BuiltinModuleVisibilityController {
       if (!(await canSetModuleVisibility(flag, visible))) return false
       if (!visible) {
         if (flag === 'dns' || flag === 'ftp-srv') await stopWorkspaceService(flag)
-        else if (module.isService) await stopInstalledService(flag)
+        else if (flag === 'cloudflare-tunnel') {
+          const { changeCloudflareTunnels } = await import('../cloudflareTunnel/lifecycle')
+          const result = await changeCloudflareTunnels('stop')
+          if (result !== true) throw new Error(result)
+        } else if (module.isService) await stopInstalledService(flag)
       }
       const store = AppStore()
       const previous = store.config.setup.common.showItem[flag]

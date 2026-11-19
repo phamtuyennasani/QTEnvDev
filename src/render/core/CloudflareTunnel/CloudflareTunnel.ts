@@ -43,7 +43,10 @@ export class CloudflareTunnel {
     return forkTerminalRequest(
       'app-fork:cloudflare-tunnel',
       ['fetchTunnel', JSON.parse(snapshot)],
-      I18nT('setup.windowsPrivilege.timeout')
+      I18nT('setup.windowsPrivilege.timeout'),
+      undefined,
+      undefined,
+      true
     ).then((res: any) => {
       if (res?.code === 0 && res?.data?.tunnelId && res?.data?.tunnelToken) {
         this.tunnelId = res.data.tunnelId
@@ -89,7 +92,10 @@ export class CloudflareTunnel {
     return forkTerminalRequest(
       'app-fork:cloudflare-tunnel',
       [command, JSON.parse(snapshot)],
-      I18nT('setup.windowsPrivilege.timeout')
+      I18nT('setup.windowsPrivilege.timeout'),
+      undefined,
+      undefined,
+      true
     )
       .then((res: any) => {
         noteServiceStatusRevision('cloudflare-tunnel', res?.serviceStatusRevision)
