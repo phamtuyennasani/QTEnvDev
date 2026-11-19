@@ -39,6 +39,7 @@
     },
     set(v) {
       MySQLManage.backupDir[props.item.bin] = v
+      MySQLManage.save()
     }
   })
 

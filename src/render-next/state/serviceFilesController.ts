@@ -50,7 +50,7 @@ export class ServiceFilesController {
     }
   }
 
-  async open(name: string, version: unknown, kind: 'config' | 'log' = 'log') {
+  async open(name: string, version: unknown, kind: 'config' | 'log' = 'log', onlyName?: string) {
     const flag = serviceModuleFlags[name]
     if (!flag) { this.error = 'This service does not expose a migrated file provider.'; return false }
     const generation = ++this.generation
@@ -71,6 +71,7 @@ export class ServiceFilesController {
       if (generation !== this.generation) return false
       const list = Array.isArray(data) ? data : []
       this.files = list.filter((item): item is { name: string; path: string; exists?: boolean } => Boolean(item && typeof item.name === 'string' && typeof item.path === 'string')).map((item) => ({ ...item, kind }))
+      if (onlyName) this.files = this.files.filter((item) => item.name === onlyName)
       this.selected = this.files.find((item) => item.exists !== false) || this.files[0]
       if (this.selected) await this.readSelected(generation)
       return true

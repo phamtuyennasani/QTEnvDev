@@ -8,30 +8,40 @@
         <div class="detail-status"><span class="status-dot" :class="'status-dot--' + selectedDatabase.state"></span><b>{{ busy ? 'Working…' : selectedDatabase.state }}</b></div>
         <div class="database-facts"><div><span>Endpoint</span><code>{{ selectedDatabase.port ? 'localhost:' + selectedDatabase.port : 'Not reported' }}</code></div><div><span>Connections / storage</span><b>Not measured</b></div></div>
         <div class="detail-actions"><button class="action-button action-button--primary" :disabled="busy || !service || selectedDatabase.version === '—'" @click="run(selectedDatabase.state === 'running' ? 'Restart' : 'Start')">{{ selectedDatabase.state === 'running' ? 'Restart' : 'Start' }}</button><button class="action-button" :disabled="busy || selectedDatabase.state !== 'running'" @click="run('Stop')">Stop</button></div>
-        <div class="detail-actions"><button class="action-button" @click="openFiles('config')">Configuration</button><button class="action-button" @click="openFiles('log')">Logs</button><button v-for="tool in adminTools" :key="tool.id" class="action-button" :disabled="adminController.isOpening(tool.id)" @click="adminController.open(tool.id)">{{ adminController.isOpening(tool.id) ? 'Opening…' : tool.label }}</button></div>
+        <div class="detail-actions"><button class="action-button" @click="openFiles('config')">Configuration</button><button class="action-button" @click="openFiles('log')">Logs</button><button v-if="manageEngine" class="action-button" @click="openFiles('log', 'slow')">Slow query log</button><button v-for="tool in adminTools" :key="tool.id" class="action-button" :disabled="adminController.isOpening(tool.id)" @click="adminController.open(tool.id)">{{ adminController.isOpening(tool.id) ? 'Opening…' : tool.label }}</button></div>
+        <button v-if="manageEngine" class="action-button" :disabled="busy || opening || Boolean(active) || selectedDatabase.version === '—'" @click="databaseManageController.open(manageEngine)">{{ opening ? 'Opening…' : 'Manage databases' }}</button>
+        <button v-if="manageEngine === 'mysql'" class="action-button" :disabled="!groupsAvailable" @click="groupsOpen = true">MySQL instance groups</button>
         <DatabaseToolsPanel :name="selectedDatabase.name" />
         <PackageBrowser v-if="selectedFlag" ref="packageBrowser" :key="selectedFlag" :flag="selectedFlag" :title="selectedDatabase.name" />
       </article>
     </div>
-    <ServiceFilesDialog v-if="selectedDatabase" v-model="filesOpen" :name="selectedDatabase.name" :version="selectedDatabase.version" :kind="fileKind" />
+    <ServiceFilesDialog v-if="selectedDatabase" v-model="filesOpen" :name="selectedDatabase.name" :version="selectedDatabase.version" :kind="fileKind" :only-file="onlyFile" />
+    <MySQLGroupsPanel v-if="groupsOpen" @close="groupsOpen = false" />
   </section>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { databaseController } from '../state/databaseController'
 import { serviceController } from '../state/serviceController'
 import PackageBrowser from '../components/PackageBrowser.vue'
 import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
 import { databaseAdminController } from '../state/databaseAdminController'
 import DatabaseToolsPanel from '../components/DatabaseToolsPanel.vue'
+import { databaseManageController } from '../state/databaseManageController'
 const packageBrowser = ref<InstanceType<typeof PackageBrowser>>()
 const selectedDatabase = computed(() => databaseController.selected.database)
 const flags: Record<string, string> = { MySQL: 'mysql', MariaDB: 'mariadb', PostgreSQL: 'postgresql', Redis: 'redis', MongoDB: 'mongodb', ClickHouse: 'clickhouse', Neo4j: 'neo4j', Elasticsearch: 'elasticsearch', Qdrant: 'qdrant' }
 const selectedFlag = computed(() => selectedDatabase.value ? flags[selectedDatabase.value.name] : undefined)
+const manageEngine = computed(() => selectedFlag.value === 'mysql' || selectedFlag.value === 'mariadb' ? selectedFlag.value : undefined)
+const { active, opening } = databaseManageController
 const service = computed(() => serviceController.services.find((item) => item.name === selectedDatabase.value?.name))
 const busy = computed(() => service.value?.state === 'busy')
+const MySQLGroupsPanel = defineAsyncComponent(() => import('../components/MySQLGroupsPanel.vue'))
+const groupsAvailable = computed(() => Boolean(window.QTEnvDevNodeAPI && window.Server?.DataDirectoryReady && window.Server.MysqlDir))
+const groupsOpen = ref(false)
 const filesOpen = ref(false); const fileKind = ref<'config' | 'log'>('log')
-const openFiles = (kind: 'config' | 'log') => { fileKind.value = kind; filesOpen.value = true }
+const onlyFile = ref<string>()
+const openFiles = (kind: 'config' | 'log', file?: string) => { fileKind.value = kind; onlyFile.value = file; filesOpen.value = true }
 const adminController = databaseAdminController
 const adminTools = computed(() => selectedDatabase.value ? adminController.actions.filter((tool) => tool.database === selectedDatabase.value?.name) : [])
 const run = async (action: 'Start' | 'Stop' | 'Restart') => { if (service.value) { await serviceController.run(service.value, action); await databaseController.refresh() } }

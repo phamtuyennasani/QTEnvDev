@@ -116,21 +116,20 @@
   import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
   import { clipboard } from '@/util/NodeFn'
   import { MessageSuccess } from '@/util/Element'
-  import { AsyncComponentShow } from '@/util/AsyncComponent'
+  import { useAsyncComponentShow } from '@/util/AsyncComponent'
 
   const props = defineProps<{
     item: ModuleInstalledItem
   }>()
 
+  const openDialog = useAsyncComponentShow()
   const list = computed(() => {
-    return MySQLManage.databaseRaw.map((d) => {
-      console.log('d: ', d)
+    return (MySQLManage.databaseRaw[props.item.bin] ?? []).map((d) => {
       const saved = MySQLManage.databaseSaved?.[props.item.bin] ?? []
       const findSave = saved.find((s) => s.database === d.name && d.users.includes(s.user))
       const user = findSave?.user ?? d?.users?.[0] ?? 'root'
       const password =
         MySQLManage.userPassword?.[props.item.bin]?.[user] ?? (user === 'root' ? 'root' : '')
-      console.log('user: ', user, password)
       return {
         database: d.name,
         user,
@@ -159,7 +158,6 @@
   }
 
   const onMarkChange = (row: any) => {
-    console.log('onMarkChange', row)
     const find = MySQLManage.databaseSaved?.[props.item.bin]?.find(
       (f) => f.database === row.database
     )
@@ -182,7 +180,7 @@
 
   const showSetPassword = (flag: 'update' | 'reset', item: any) => {
     import('./setPassword.vue').then((res) => {
-      AsyncComponentShow(res.default, {
+      openDialog(res.default, {
         item: props.item,
         user: item.user,
         showUpdateBtn: flag === 'update',

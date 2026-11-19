@@ -19,6 +19,8 @@ const state: State = {
 // 组 PID 是一次进程运行身份，不持久化进 Pinia/配置；应用重启后由 fork 的组 PID 文件恢复。
 const groupPids = new WeakMap<object, string>()
 let initFlight: Promise<void> | undefined
+let catalogWrite: Promise<void> | undefined
+let lastInstances: Array<{ bin?: string; pid?: string }> | undefined
 const groupFlights = new WeakMap<
   object,
   { action: 'start' | 'stop'; promise: Promise<true | string> }
@@ -53,6 +55,7 @@ export const MysqlStore = defineStore('mysqlGroup', {
   actions: {
     /** MCP/退出登记同样包含组实例；只按组自己的配置键同步，不能用共用 mysqld.exe 匹配。 */
     syncServiceStatus(instances: Array<{ bin?: string; pid?: string }>) {
+      lastInstances = instances
       const pathKey = (value: string) => {
         const normalized = value.replace(/\\/g, '/')
         return window.Server.isWindows ? normalized.toLowerCase() : normalized
@@ -86,6 +89,7 @@ export const MysqlStore = defineStore('mysqlGroup', {
           this.all.push(...jsonArr)
         }
         this.inited = true
+        if (lastInstances) this.syncServiceStatus(lastInstances)
       })()
       initFlight = flight
       try {
@@ -94,8 +98,8 @@ export const MysqlStore = defineStore('mysqlGroup', {
         if (initFlight === flight) initFlight = undefined
       }
     },
-    async save() {
-      const json = JSON.parse(JSON.stringify(this.all))
+    async save(items?: MysqlGroupItem[]) {
+      const json = JSON.parse(JSON.stringify(items ?? this.all))
       json.forEach((j: any) => {
         delete j?.version?.fetching
         delete j?.version?.running
@@ -104,6 +108,45 @@ export const MysqlStore = defineStore('mysqlGroup', {
       await fs.mkdirp(groupDir)
       const file = join(groupDir, 'group.json')
       await fs.writeFile(file, JSON.stringify(json))
+    },
+    async updateGroup(next: MysqlGroupItem): Promise<{ warning?: string }> {
+      if (catalogWrite) throw new Error('A MySQL instance group change is already running.')
+      let warning: string | undefined
+      catalogWrite = Promise.resolve().then(async () => {
+        const previous = this.all.find((item) => item.id === next.id)
+        if (this.all.some((item) => item.id !== next.id && Number(item.port) === Number(next.port))) {
+          throw new Error('Another MySQL instance group uses this port.')
+        }
+        const restart = previous?.version.running === true
+        if (previous) {
+          const result = await this.stop(previous)
+          if (result !== true) throw new Error(result)
+        }
+        const catalog = previous
+          ? this.all.map((item) => item === previous ? next : item)
+          : [...this.all, next]
+        await this.save(catalog)
+        this.all.splice(0, this.all.length, ...catalog)
+        const saved = this.all.find((item) => item.id === next.id)!
+        saved.version.running = false
+        if (restart) {
+          const result = await this.start(saved)
+          if (result !== true) warning = result
+        }
+      })
+      try { await catalogWrite } finally { catalogWrite = undefined }
+      return { warning }
+    },
+    async removeGroup(item: MysqlGroupItem) {
+      if (catalogWrite) throw new Error('A MySQL instance group change is already running.')
+      catalogWrite = Promise.resolve().then(async () => {
+        const result = await this.stop(item)
+        if (result !== true) throw new Error(result)
+        const catalog = this.all.filter((entry) => entry !== item)
+        await this.save(catalog)
+        this.all.splice(0, this.all.length, ...catalog)
+      })
+      try { await catalogWrite } finally { catalogWrite = undefined }
     },
     start(item: MysqlGroupItem): Promise<true | string> {
       return runGroupFlight(item, 'start', async () => {

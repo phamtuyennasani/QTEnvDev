@@ -4,14 +4,20 @@
     size="85%"
     :destroy-on-close="true"
     :with-header="false"
+    :aria-label="item.typeFlag === 'mysql' ? 'Manage MySQL' : 'Manage MariaDB'"
     @closed="closedFn"
   >
     <div class="host-vhost">
       <div class="nav pl-3 pr-5">
-        <div class="left" @click="show = false">
+        <button
+          type="button"
+          class="left"
+          aria-label="Close database management"
+          @click="show = false"
+        >
           <yb-icon :svg="import('@/svg/delete.svg?raw')" class="top-back-icon" />
           <span class="ml-3 truncate">{{ item.version }} - {{ item.path }}</span>
-        </div>
+        </button>
       </div>
       <div v-loading="backuping" class="main-wapper p-3">
         <el-card class="h-full version-manager">
@@ -102,9 +108,9 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, onUnmounted, watch, ref } from 'vue'
+  import { computed, watch, ref } from 'vue'
   import { I18nT } from '@lang/index'
-  import { AsyncComponentSetup, AsyncComponentShow } from '@/util/AsyncComponent'
+  import { AsyncComponentSetup, useAsyncComponentShow } from '@/util/AsyncComponent'
   import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
   import { MySQLManage } from '@/components/Mysql/Manage/manage'
   import { BrewStore } from '@/store/brew'
@@ -115,7 +121,9 @@
 
   const props = defineProps<{
     item: ModuleInstalledItem
+    openAdmin?: () => Promise<boolean>
   }>()
+  const openDialog = useAsyncComponentShow()
 
   const databasevm = ref()
 
@@ -144,9 +152,8 @@
   }
 
   const showRootPassword = () => {
-    console.log('showRootPassword item: ', props.item)
     import('./setPassword.vue').then((res) => {
-      AsyncComponentShow(res.default, {
+      openDialog(res.default, {
         item: props.item,
         user: 'root',
         showUpdateBtn: true,
@@ -157,7 +164,7 @@
 
   const showAddDatabase = () => {
     import('./addDatabase.vue').then((res) => {
-      AsyncComponentShow(res.default, {
+      openDialog(res.default, {
         item: props.item
       }).then()
     })
@@ -165,7 +172,7 @@
 
   const showBackupDirSet = () => {
     import('./setBackupDir.vue').then((res) => {
-      AsyncComponentShow(res.default, {
+      openDialog(res.default, {
         item: props.item
       }).then()
     })
@@ -197,6 +204,10 @@
   const appStore = AppStore()
 
   const toPhpMyAdmin = () => {
+    if (props.openAdmin) {
+      void props.openAdmin()
+      return
+    }
     const toOpenHost = (item: AppHost) => {
       const host = item.name
       const nginxRunning = brewStore.module('nginx').installed.find((i) => i.run)
@@ -234,7 +245,7 @@
       return
     }
 
-    AsyncComponentShow(PhpMyAdminVM).then(async (res) => {
+    openDialog(PhpMyAdminVM).then(async (res) => {
       if (res) {
         await appStore.initHost()
         handleWriteHosts().then().catch()
@@ -243,10 +254,6 @@
       }
     })
   }
-
-  onUnmounted(() => {
-    MySQLManage.databaseRaw.splice(0)
-  })
 
   defineExpose({
     show,

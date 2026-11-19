@@ -138,18 +138,14 @@
     if (running.value) {
       return
     }
+    running.value = true
     try {
       // 验证表单
       await formRef.value.validate()
-      running.value = true
-      MySQLManage.addDatabase(props.item, form.value)
-        .then(() => {
-          show.value = false
-        })
-        .catch(() => {
-          running.value = false
-        })
+      if (await MySQLManage.addDatabase(props.item, form.value)) show.value = false
     } catch {
+      // Element Plus renders field validation errors in the form.
+    } finally {
       running.value = false
     }
   }

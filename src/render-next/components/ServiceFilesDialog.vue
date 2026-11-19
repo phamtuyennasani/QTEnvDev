@@ -30,6 +30,7 @@ const props = defineProps<{
   version?: string
   kind: 'config' | 'log'
   modelValue: boolean
+  onlyFile?: string
   owner?: Pick<ServiceFilesController, keyof ServiceFilesController>
   provider?: () => Promise<ServiceFile[]>
   afterSave?: (file: ServiceFile) => Promise<string[]>
@@ -38,7 +39,7 @@ const controller = props.owner ?? serviceFilesController
 const emit = defineEmits<{ 'update:modelValue': [boolean] }>()
 const pendingClear = ref<string>()
 const open = computed(() => props.modelValue)
-const title = computed(() => `${props.name} ${props.kind === 'config' ? 'configuration' : 'logs'}`)
+const title = computed(() => `${props.name} ${props.kind === 'config' ? 'configuration' : props.onlyFile === 'slow' ? 'slow query log' : 'logs'}`)
 const description = computed(() => props.kind === 'config' ? 'Choose a configuration file.' : 'Choose a log file to read or reveal.')
 const close = () => emit('update:modelValue', false)
 const save = async () => { if (await controller.save(props.afterSave) && !props.afterSave) close() }
@@ -50,7 +51,7 @@ const clearLog = async () => {
 watch(() => props.modelValue, (visible, previous) => {
   if (visible) {
     if (props.provider) void controller.openProvided(props.provider)
-    else void controller.open(props.name, props.version, props.kind)
+    else void controller.open(props.name, props.version, props.kind, props.onlyFile)
   } else if (previous) {
     pendingClear.value = undefined
     controller.clear()

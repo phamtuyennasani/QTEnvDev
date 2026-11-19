@@ -3,7 +3,7 @@ import localForage from 'localforage'
 import { MessageError, MessageSuccess, MessageWarning } from '@/util/Element'
 import { I18nT } from '@lang/index'
 import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
-import IPC from '@/util/IPC'
+import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
 import { BrewStore } from '@/store/brew'
 import { waitTime } from '@/util/Index'
 import { dialog, shell } from '@/util/NodeFn'
@@ -27,7 +27,7 @@ type MySQLManageType = {
   backupDir: Record<string, string>
   updating: Record<string, boolean>
   backuping: Record<string, boolean>
-  databaseRaw: MySQLDatabaseItem[]
+  databaseRaw: Record<string, MySQLDatabaseItem[]>
   databaseSaved: Record<string, MySQLDatabaseSavedItem[]>
   init: (flag: 'mysql' | 'mariadb') => void
   ready: (flag: 'mysql' | 'mariadb') => Promise<void>
@@ -40,21 +40,51 @@ type MySQLManageType = {
 
 const MySQLManageKey = 'qtenvdev-mysql-manage-key'
 let settingsLoad: Promise<void> | undefined
+const fetching = new Map<string, Promise<MySQLDatabaseItem[]>>()
+const creating = new Set<string>()
+
+const request = async (
+  item: ModuleInstalledItem,
+  action: string,
+  args: unknown[] = [],
+  timeout = 60_000
+) => {
+  const reply = await forkTerminalRequest(
+    'app-fork:' + item.typeFlag,
+    [action, JSON.parse(JSON.stringify(item)), ...args],
+    'The database operation did not report a result. Check its state before retrying.',
+    timeout,
+    undefined,
+    true
+  )
+  if (reply.code !== 0) throw new Error(reply.msg || I18nT('base.fail'))
+  return reply.data
+}
+
+const ensureStarted = async (item: ModuleInstalledItem) => {
+  if (item.run) return
+  const started = await item.start()
+  if (started !== true) throw new Error(typeof started === 'string' ? started : I18nT('base.fail'))
+  await waitTime(1000)
+}
 
 const MySQLManage = reactive<MySQLManageType>({
   userPassword: {},
   backupDir: {},
   updating: {},
   backuping: {},
-  databaseRaw: [],
+  databaseRaw: {},
   databaseSaved: {},
   inited: false,
   init(flag: 'mysql' | 'mariadb') {
-    void this.ready(flag).catch((error) => console.error('Could not load database settings:', error))
+    void this.ready(flag).catch((error) =>
+      console.error('Could not load database settings:', error)
+    )
   },
   async ready(flag: 'mysql' | 'mariadb') {
     if (!this.inited) {
-      settingsLoad ??= localForage.getItem<Partial<MySQLManageType>>(MySQLManageKey)
+      settingsLoad ??= localForage
+        .getItem<Partial<MySQLManageType>>(MySQLManageKey)
         .then((saved) => {
           if (saved) {
             this.userPassword = saved.userPassword ?? {}
@@ -63,7 +93,9 @@ const MySQLManage = reactive<MySQLManageType>({
           }
           this.inited = true
         })
-        .finally(() => { settingsLoad = undefined })
+        .finally(() => {
+          settingsLoad = undefined
+        })
       await settingsLoad
     }
     for (const item of BrewStore().module(flag).installed) {
@@ -78,202 +110,153 @@ const MySQLManage = reactive<MySQLManageType>({
     delete data.inited
     localForage.setItem(MySQLManageKey, data).catch()
   },
-  backupDatabase(item: ModuleInstalledItem, databases: string[]) {
-    return new Promise<boolean>(async (resolve, reject) => {
-      if (this.backuping?.[item.bin] || databases.length === 0) {
-        return resolve(false)
-      }
+  async backupDatabase(item: ModuleInstalledItem, databases: string[]) {
+    if (this.backuping[item.bin] || !databases.length) return false
+    const selected = [...databases]
+    this.backuping[item.bin] = true
+    try {
       let saveDir = this.backupDir?.[item.bin]
       if (!saveDir) {
         const { canceled, filePaths } = await dialog.showOpenDialog({
           properties: ['openDirectory', 'createDirectory', 'showHiddenFiles']
         })
-        if (canceled) {
-          return reject(new Error('user canceled'))
-        }
+        if (canceled || !filePaths[0]) return false
         saveDir = filePaths[0]
       }
-      this.backuping[item.bin] = true
-
-      if (!item.run) {
-        const res = await item.start()
-        if (typeof res === 'string') {
-          MessageError(res)
-          delete this.backuping[item.bin]
-          return reject(new Error(res))
-        }
-      }
-      await waitTime(1000)
-
-      IPC.send(
-        `app-fork:${item.typeFlag}`,
-        'backupDatabase',
-        JSON.parse(JSON.stringify(item)),
-        JSON.parse(JSON.stringify(databases)),
-        saveDir
-      ).then((key: string, res: any) => {
-        IPC.off(key)
-        delete this.backuping[item.bin]
-        if (res?.code === 0) {
-          if (res?.data?.length === 0) {
-            MessageSuccess(I18nT('base.success'))
-          } else {
-            MessageWarning(res?.data?.join('\n') ?? '')
-          }
-          shell.openPath(saveDir)
-          return
-        }
-        MessageError(res?.msg ?? I18nT('base.fail'))
-        resolve(false)
-      })
-    })
-  },
-  passwordChange(item: ModuleInstalledItem, user: string, password: string): Promise<boolean> {
-    return new Promise<boolean>(async (resolve) => {
-      if (this.updating?.[item.bin]) {
-        return resolve(false)
-      }
-      if (!password) {
-        MessageError(I18nT('mysql.passwordNoEmpty'))
-        return resolve(false)
-      }
-      const regex = /['"，。？！；：“”‘’（）【】《》￥&\u4e00-\u9fa5]+/g
-      if (regex.test(password)) {
-        MessageError(I18nT('mysql.passwordFormatError'))
-        return resolve(false)
-      }
-      this.updating[item.bin] = true
+      await ensureStarted(item)
+      const errors = await request(item, 'backupDatabase', [selected, saveDir], 30 * 60_000)
+      if (!Array.isArray(errors)) throw new Error(I18nT('base.fail'))
+      if (errors.length) MessageWarning(errors.join('\n'))
+      else MessageSuccess(I18nT('base.success'))
       try {
-        await item.stop()
-      } catch {}
+        const folderError = await shell.openPath(saveDir)
+        if (folderError) MessageWarning(folderError)
+      } catch (error) {
+        MessageWarning(error instanceof Error ? error.message : String(error))
+      }
+      return errors.length === 0
+    } catch (error) {
+      MessageError(error instanceof Error ? error.message : String(error))
+      return false
+    } finally {
+      delete this.backuping[item.bin]
+    }
+  },
+  async passwordChange(item: ModuleInstalledItem, user: string, password: string) {
+    if (this.updating[item.bin]) return false
+    if (!password || /['"，。？！；：“”‘’（）【】《》￥&\u4e00-\u9fa5]+/.test(password)) {
+      MessageError(I18nT(password ? 'mysql.passwordFormatError' : 'mysql.passwordNoEmpty'))
+      return false
+    }
+    this.updating[item.bin] = true
+    try {
+      const stopped = await item.stop()
+      if (stopped !== true)
+        throw new Error(typeof stopped === 'string' ? stopped : I18nT('base.fail'))
       await waitTime(1500)
-      IPC.send(
-        `app-fork:${item.typeFlag}`,
-        'passwordChange',
-        JSON.parse(JSON.stringify(item)),
-        user,
-        password
-      ).then((key: string, res: any) => {
-        IPC.off(key)
-        delete this.updating?.[item.bin]
-        if (res?.code === 0) {
-          if (user === 'root') {
-            item.rootPassword = password
-          }
-          if (!this.userPassword?.[item.bin]) {
-            this.userPassword[item.bin] = reactive({})
-          }
-          this.userPassword[item.bin][user] = password
-          this.save()
-          MessageSuccess(I18nT('base.success'))
-          item
-            .start()
-            .then((res) => {
-              if (typeof res === 'string') {
-                MessageError(res)
-              }
-            })
-            .catch()
-          resolve(true)
-          return
-        }
-        MessageError(res?.msg ?? I18nT('base.fail'))
-        resolve(false)
-      })
-    })
+      await request(item, 'passwordChange', [user, password])
+      if (user === 'root') item.rootPassword = password
+      this.userPassword[item.bin] ??= {}
+      this.userPassword[item.bin][user] = password
+      this.save()
+      MessageSuccess(I18nT('base.success'))
+      try {
+        await ensureStarted(item)
+      } catch (error) {
+        MessageWarning(error instanceof Error ? error.message : String(error))
+      }
+      return true
+    } catch (error) {
+      MessageError(error instanceof Error ? error.message : String(error))
+      return false
+    } finally {
+      delete this.updating[item.bin]
+    }
   },
   fetchDatabase(item: ModuleInstalledItem): Promise<MySQLDatabaseItem[]> {
-    return new Promise<MySQLDatabaseItem[]>((resolve) => {
-      IPC.send(
-        `app-fork:${item.typeFlag}`,
-        'getDatabasesWithUsers',
-        JSON.parse(JSON.stringify(item))
-      ).then((key: string, res: any) => {
-        IPC.off(key)
-        if (res?.code === 0) {
-          console.log('fetchDatabase: ', res?.data)
-          this.databaseRaw = reactive(res?.data?.list ?? [])
-          const allUser: any = res?.data?.allUsers ?? []
-          const users = allUser.map((u: any) => u.User)
-          const userPassword = this.userPassword?.[item.bin]
-          let changed = false
-          if (userPassword && users.length) {
-            for (const u in userPassword) {
-              if (!users.includes(u)) {
-                changed = true
-                delete userPassword[u]
-              }
+    const pending = fetching.get(item.bin)
+    if (pending) return pending
+    const flight = request(item, 'getDatabasesWithUsers')
+      .then((data) => {
+        if (!Array.isArray(data?.list) || !Array.isArray(data?.allUsers))
+          throw new Error(I18nT('base.fail'))
+        this.databaseRaw[item.bin] = data.list
+        const allUser: any[] = data.allUsers
+        const users = allUser.map((u: any) => u.User)
+        const userPassword = this.userPassword?.[item.bin]
+        let changed = false
+        if (userPassword && users.length) {
+          for (const u in userPassword) {
+            if (!users.includes(u)) {
+              changed = true
+              delete userPassword[u]
             }
           }
-          const saved = this.databaseSaved?.[item.bin]
-          if (saved && users.length) {
-            this.databaseSaved[item.bin] = saved.filter((d) => {
-              const find = this.databaseRaw.some((r) => d.database === r.name)
-              if (!find) {
-                changed = true
-              }
-              return find
-            })
-          }
-          if (changed) {
-            this.save()
-          }
-          resolve(res?.data)
-          return
         }
-        MessageError(res?.msg ?? I18nT('base.fail'))
-        resolve({} as any)
-      })
-    })
-  },
-  addDatabase(item: ModuleInstalledItem, data: any) {
-    return new Promise(async (resolve, reject) => {
-      if (!item.run) {
-        const res = await item.start()
-        if (typeof res === 'string') {
-          MessageError(res)
-          return reject(new Error(res))
+        const saved = this.databaseSaved?.[item.bin]
+        if (saved && users.length) {
+          this.databaseSaved[item.bin] = saved.filter((d) => {
+            const find = this.databaseRaw[item.bin].some((r) => d.database === r.name)
+            if (!find) {
+              changed = true
+            }
+            return find
+          })
         }
-      }
-      await waitTime(1000)
-      IPC.send(
-        `app-fork:${item.typeFlag}`,
-        'addDatabase',
-        JSON.parse(JSON.stringify(item)),
-        JSON.parse(JSON.stringify(data))
-      ).then((key: string, res: any) => {
-        IPC.off(key)
-        if (res?.code === 0) {
-          let saved = this.databaseSaved?.[item.bin]
-          if (!saved) {
-            this.databaseSaved[item.bin] = reactive([])
-            saved = this.databaseSaved[item.bin]
-          }
-          saved.unshift(
-            reactive({
-              database: data.database,
-              user: data.user,
-              mark: ''
-            })
-          )
-
-          let userPassword = this.userPassword?.[item.bin]
-          if (!userPassword) {
-            this.userPassword[item.bin] = reactive({})
-            userPassword = this.userPassword[item.bin]
-          }
-          userPassword[data.user] = data.password
-
+        if (changed) {
           this.save()
-          this.fetchDatabase(item).catch()
-          MessageSuccess(I18nT('base.success'))
-          resolve(true)
-          return
         }
-        MessageError(res?.msg ?? I18nT('base.fail'))
-        reject(new Error(I18nT('base.fail')))
+        return this.databaseRaw[item.bin]
       })
-    })
+      .catch((error) => {
+        MessageError(error instanceof Error ? error.message : String(error))
+        return this.databaseRaw[item.bin] ?? []
+      })
+      .finally(() => fetching.delete(item.bin))
+    fetching.set(item.bin, flight)
+    return flight
+  },
+  async addDatabase(
+    item: ModuleInstalledItem,
+    data: { database: string; user: string; charset: string; password: string }
+  ) {
+    if (creating.has(item.bin)) return false
+    creating.add(item.bin)
+    const snapshot = { ...data }
+    try {
+      await ensureStarted(item)
+      await request(item, 'addDatabase', [snapshot])
+      let saved = this.databaseSaved?.[item.bin]
+      if (!saved) {
+        this.databaseSaved[item.bin] = reactive([])
+        saved = this.databaseSaved[item.bin]
+      }
+      saved.unshift(
+        reactive({
+          database: snapshot.database,
+          user: snapshot.user,
+          mark: ''
+        })
+      )
+
+      let userPassword = this.userPassword?.[item.bin]
+      if (!userPassword) {
+        this.userPassword[item.bin] = reactive({})
+        userPassword = this.userPassword[item.bin]
+      }
+      userPassword[snapshot.user] = snapshot.password
+
+      this.save()
+      MessageSuccess(I18nT('base.success'))
+      await fetching.get(item.bin)
+      await this.fetchDatabase(item)
+      return true
+    } catch (error) {
+      MessageError(error instanceof Error ? error.message : String(error))
+      return false
+    } finally {
+      creating.delete(item.bin)
+    }
   }
 })
 
