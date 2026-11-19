@@ -16,7 +16,7 @@ assert.match(nextSource('websites/WebsiteController.ts'), /WebsiteOutcomeUnknown
 for (const file of [
   'screens/WebsitesScreen.vue', 'websites/WebsiteEditor.vue', 'websites/TomcatWebsiteEditor.vue',
   'websites/WebsiteFilesDialog.vue', 'components/ServiceFilesDialog.vue',
-  'websites/NginxRewriteField.vue',
+  'websites/NginxRewriteField.vue', 'components/LanguageProjectManager.vue',
   'screens/DatabasesScreen.vue', 'screens/CronScreen.vue', 'components/HomebrewPackagePanel.vue',
   'screens/HttpServeScreen.vue', 'components/SdkmanPackagePanel.vue', 'components/MacPortsPackagePanel.vue',
   'custom-modules/CustomModulesSettings.vue', 'components/VhostTemplatePanel.vue'
@@ -37,6 +37,7 @@ assert.match(nextSource('websites/WebsiteFilesDialog.vue'), /websiteFileControll
 assert.match(nextSource('state/serviceFilesController.ts'), /Project\.openPath\(/)
 assert.match(nextSource('components/VhostTemplatePanel.vue'), /vhostTemplateController as controller/)
 assert.match(nextSource('websites/rewriteTemplatesController.ts'), /forkTerminalRequest\(/)
+assert.match(nextSource('components/LanguageProjectManager.vue'), /projectWorkflowController\.openInEditor\(/)
 assert.match(nextSource('screens/DatabasesScreen.vue'), /serviceController\.run/)
 assert.match(nextSource('screens/DatabasesScreen.vue'), /database\?\.state === 'running'/)
 assert.match(nextSource('state/databaseAdminController.ts'), /await dbGatePanel\.open\(\)/)

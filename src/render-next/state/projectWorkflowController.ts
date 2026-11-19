@@ -1,5 +1,6 @@
 import { reactiveBind } from '@/util/Index'
 import { shell } from '@/util/NodeFn'
+import { Project } from '@/util/Project'
 import { ProjectSetup } from '@/components/LanguageProjects/setup'
 import type { ProjectItem } from '@/components/LanguageProjects/ProjectItem'
 import { BrewStore } from '@/store/brew'
@@ -9,6 +10,7 @@ import { showNotice } from './app'
 export const workflowLabels = { php: 'PHP', node: 'Node.js', python: 'Python', golang: 'Go' } as const
 export type WorkflowKind = keyof typeof workflowLabels
 export type WorkflowProject = { id: string; kind: WorkflowKind; item: ProjectItem }
+export type ProjectEditor = 'PyCharm' | 'GoLand'
 
 /** Renderer-lifetime owner for language project discovery and process actions. */
 class ProjectWorkflowController {
@@ -18,6 +20,7 @@ class ProjectWorkflowController {
   error = ''
   private loadFlight?: Promise<boolean>
   private actionFlights = new Map<string, Promise<boolean>>()
+  private editorFlights = new Set<string>()
 
   get projects(): WorkflowProject[] {
     return (Object.keys(workflowLabels) as WorkflowKind[]).flatMap((kind) =>
@@ -76,6 +79,24 @@ class ProjectWorkflowController {
     if (!file?.path) { this.error = 'This project has no configured ' + kind + ' file.'; showNotice(this.error); return }
     await this.reveal(file.path)
   }
+  isOpeningEditor(path: string, editor: ProjectEditor) {
+    return this.editorFlights.has(editor + ':' + path)
+  }
+
+  async openInEditor(path: string, editor: ProjectEditor) {
+    if (this.isOpeningEditor(path, editor)) return false
+    const key = editor + ':' + path
+    this.editorFlights.add(key)
+    try {
+      const result = await Project.openPath(path, editor, false)
+      if (result === true) return true
+      showNotice(result)
+      return false
+    } finally {
+      this.editorFlights.delete(key)
+    }
+  }
+
   async open(path: string): Promise<void> { try { await shell.openPath(path) } catch (error) { this.error = error instanceof Error ? error.message : String(error); showNotice(this.error) } }
 }
 
