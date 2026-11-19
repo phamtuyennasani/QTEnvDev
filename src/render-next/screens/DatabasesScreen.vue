@@ -24,7 +24,10 @@
         <div class="detail-top"><div><p class="eyebrow">DATABASE DETAIL</p><h2>{{ selectedDatabase.name }}</h2><p class="detail-kind">{{ selectedDatabase.engine }} · <code>{{ selectedDatabase.version }}</code></p></div><i class="large-status-dot" :class="'status-dot--' + selectedDatabase.state"></i></div>
         <div class="detail-status"><span class="status-dot" :class="'status-dot--' + selectedDatabase.state"></span><b>{{ busy ? 'Working…' : selectedDatabase.state }}</b></div>
         <div v-if="connection?.port" class="database-facts">
-          <div><span>Configured endpoint</span><code>{{ connection.host }}:{{ connection.port }}</code></div>
+          <div>
+            <span>{{ connection.host === '—' ? 'Configured port' : 'Configured endpoint' }}</span>
+            <code>{{ connection.host === '—' ? connection.port : `${connection.host}:${connection.port}` }}</code>
+          </div>
         </div>
         <div class="detail-actions"><button class="action-button action-button--primary" :disabled="busy || !service || selectedDatabase.version === '—'" @click="run(selectedDatabase.state === 'running' ? 'Restart' : 'Start')">{{ selectedDatabase.state === 'running' ? 'Restart' : 'Start' }}</button><button class="action-button" :disabled="busy || selectedDatabase.state !== 'running'" @click="run('Stop')">Stop</button></div>
         <div class="detail-actions"><button class="action-button" @click="openFiles('config')">Configuration</button><button class="action-button" @click="openFiles('log')">Logs</button><button v-if="manageEngine" class="action-button" @click="openFiles('log', 'slow')">Slow query log</button><button v-for="tool in adminTools" :key="tool.id" class="action-button" :disabled="adminController.isOpening(tool.id)" @click="adminController.open(tool.id, manageEngine)">{{ adminController.isOpening(tool.id) ? 'Opening…' : tool.label }}</button></div>

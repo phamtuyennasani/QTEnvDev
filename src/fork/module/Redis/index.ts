@@ -1,4 +1,4 @@
-import { dirname, join } from 'path'
+import { dirname, isAbsolute, join } from 'path'
 import { existsSync } from 'fs'
 import { Base } from '../Base'
 import { I18nT } from '@lang/runtime'
@@ -52,6 +52,32 @@ class Redis extends Base {
     const v = version?.version?.split('.')?.[0] ?? ''
     if (!v) return []
     return [{ name: 'main', path: join(global.Server.RedisDir!, `redis-${v}.conf`) }]
+  }
+
+  async databaseConnectionEndpoint(version: SoftInstalled) {
+    if (!/^\d+(?:\.|$)/.test(version?.version ?? '')) {
+      throw new Error('Select an installed Redis version.')
+    }
+    const { path } = this.getConfigFiles(version)[0]
+    const content = await readFile(path, 'utf8').catch((error) => {
+      if (error?.code !== 'ENOENT') throw error
+      return undefined
+    })
+    if (content === undefined || /^\s*include[ \t]+\S/im.test(content)) return {}
+    const setting = (name: string) => {
+      const matches = [...content.matchAll(new RegExp(`^[ \\t]*${name}[ \\t]+(.+)$`, 'gim'))]
+      return matches.at(-1)?.[1].trim().replace(/^("|')(.*)\1$/, '$2')
+    }
+    const port = Number(setting('port') ?? 6379)
+    const bind = setting('bind')?.split(/\s+/)
+    const local =
+      !bind || bind.some((entry) => ['127.0.0.1', 'localhost', '0.0.0.0', '*'].includes(entry))
+    const dataDirectory = setting('dir')
+    return {
+      host: local ? '127.0.0.1' : undefined,
+      port: Number.isInteger(port) && port >= 1 && port <= 65535 ? port : undefined,
+      dataDirectory: dataDirectory && isAbsolute(dataDirectory) ? dataDirectory : undefined
+    }
   }
 
   getLogFiles(version?: SoftInstalled) {

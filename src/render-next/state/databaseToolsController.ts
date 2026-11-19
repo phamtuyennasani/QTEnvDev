@@ -2,7 +2,7 @@ import { reactiveBind } from '@/util/Index'
 import { shell } from '@/util/NodeFn'
 import { MySQLManage, type MySQLDatabaseItem } from '@/components/Mysql/Manage/manage'
 import { forkTerminalRequest } from '@/util/ForkTerminalRequest'
-import { databaseVersion } from '../adapters/databaseAdapter'
+import { databaseModuleFlags, databaseVersion } from '../adapters/databaseAdapter'
 import { showNotice } from './app'
 
 export type DatabaseConnection = {
@@ -27,7 +27,8 @@ class DatabaseToolsController {
 
   load(name: string): Promise<boolean> {
     const item = databaseVersion(name)
-    const flag = name === 'MySQL' ? 'mysql' : name === 'MariaDB' ? 'mariadb' : undefined
+    const flag = databaseModuleFlags[name]
+    const sql = flag === 'mysql' ? 'mysql' : flag === 'mariadb' ? 'mariadb' : undefined
     const target = item?.bin && item.version ? { bin: item.bin, version: item.version } : undefined
     const running = item?.run === true
     const key = JSON.stringify([name, target, running])
@@ -39,19 +40,27 @@ class DatabaseToolsController {
       name,
       ...target,
       host: '—',
-      user: flag && target ? 'root' : '—',
+      user: sql && target ? 'root' : '—',
       password: '—'
     }
     const snapshot = running ? JSON.parse(JSON.stringify(item)) : undefined
     const current = () => this.flight?.request === request
     const request: Promise<boolean> = Promise.resolve()
       .then(async () => {
-        if (!flag || !target) return true
+        if (!target || (!sql && flag !== 'redis' && flag !== 'mongodb' && flag !== 'postgresql')) {
+          return true
+        }
         const channel = `app-fork:${flag}`
         const endpoint = async () => {
+          const args: unknown[] = ['databaseConnectionEndpoint', target]
+          if (flag === 'postgresql') {
+            const { postgreSqlDataDirectory } = await import('@/components/PostgreSql/lifecycle')
+            args.push(await postgreSqlDataDirectory(target))
+          }
+          if (!current()) return
           const result = await forkTerminalRequest(
             channel,
-            ['databaseConnectionEndpoint', target],
+            args,
             'The configured endpoint query timed out.',
             60_000,
             undefined,
@@ -60,17 +69,19 @@ class DatabaseToolsController {
           if (result.code !== 0)
             throw new Error(result.msg || 'The configured endpoint is unavailable.')
           if (!current() || !this.connection) return
-          const { port, dataDirectory } = result.data ?? {}
+          const { host, port, dataDirectory } = result.data ?? {}
           if (Number.isInteger(port) && port > 0 && port <= 65535) {
-            this.connection.host = '127.0.0.1'
             this.connection.port = port
+            if (typeof host === 'string' && host) this.connection.host = host
+            else if (sql) this.connection.host = '127.0.0.1'
           }
           if (typeof dataDirectory === 'string' && dataDirectory) {
             this.connection.dataDirectory = dataDirectory
           }
         }
         const accounts = async () => {
-          await MySQLManage.ready(flag)
+          if (!sql) return
+          await MySQLManage.ready(sql)
           if (!current() || !this.connection) return
           const saved = MySQLManage.userPassword[target.bin]?.root
           this.connection.password = saved ?? '—'

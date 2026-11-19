@@ -1,4 +1,4 @@
-import { join, dirname, win32 } from 'path'
+import { join, dirname, isAbsolute, win32 } from 'path'
 import { existsSync, readdirSync } from 'fs'
 import { Base } from '../Base'
 import { I18nT } from '@lang/runtime'
@@ -153,7 +153,37 @@ class Manager extends Base {
     const versionTop = version?.version?.split('.')?.shift() ?? ''
     if (!versionTop) return []
     const dbPath = dataDirectory ?? join(global.Server.PostgreSqlDir!, `postgresql${versionTop}`)
-    return [{ name: 'main', path: join(dbPath, 'postgresql.conf') }]
+    return [
+      { name: 'main', path: join(dbPath, 'postgresql.conf') },
+      { name: 'pg_hba.conf', path: join(dbPath, 'pg_hba.conf') },
+      { name: 'pg_ident.conf', path: join(dbPath, 'pg_ident.conf') }
+    ]
+  }
+
+  async databaseConnectionEndpoint(version: SoftInstalled, dataDirectory: string) {
+    if (!/^\d+(?:\.|$)/.test(version?.version ?? '') || !isAbsolute(dataDirectory ?? '')) {
+      throw new Error('Select an installed PostgreSQL version and data directory.')
+    }
+    const { path } = this.getConfigFiles(version, dataDirectory)[0]
+    const optionalConfig = (file: string) =>
+      readFile(file, 'utf8').catch((error) => {
+        if (error?.code !== 'ENOENT') throw error
+        return undefined
+      })
+    const [main, overrides] = await Promise.all([
+      optionalConfig(path),
+      optionalConfig(join(dataDirectory, 'postgresql.auto.conf'))
+    ])
+    if (main === undefined) return { dataDirectory }
+    const combined = `${main}\n${overrides ?? ''}`
+    if (/^[ \t]*include(?:_if_exists|_dir)?\b/im.test(combined)) return { dataDirectory }
+    const activePorts = [...combined.matchAll(/^[ \t]*port(?:[ \t]*=[ \t]*|[ \t]+)([^\r\n#]*)/gim)]
+    const setting = activePorts.at(-1)?.[1].trim().replace(/^("|')(\d+)\1$/, '$2')
+    const port = Number(setting ?? 5432)
+    return {
+      dataDirectory,
+      port: Number.isInteger(port) && port >= 1 && port <= 65535 ? port : undefined
+    }
   }
 
   getLogFiles(version?: SoftInstalled, dataDirectory?: string) {

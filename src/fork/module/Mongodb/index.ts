@@ -1,4 +1,4 @@
-import { join, dirname } from 'node:path'
+import { join, dirname, isAbsolute } from 'node:path'
 import { existsSync } from 'node:fs'
 import { Base } from '../Base'
 import { I18nT } from '@lang/runtime'
@@ -58,6 +58,38 @@ class Manager extends Base {
     const v = version?.version?.split('.')?.slice(0, 2)?.join('.') ?? ''
     if (!v) return []
     return [{ name: 'main', path: join(global.Server.MongoDBDir!, `mongodb-${v}.conf`) }]
+  }
+
+  async databaseConnectionEndpoint(version: SoftInstalled) {
+    if (!/^\d+\.\d+(?:\.|$)/.test(version?.version ?? '')) {
+      throw new Error('Select an installed MongoDB version.')
+    }
+    const { path } = this.getConfigFiles(version)[0]
+    const content = await readFile(path, 'utf8').catch((error) => {
+      if (error?.code !== 'ENOENT') throw error
+      return undefined
+    })
+    if (content === undefined) return {}
+    let config
+    try {
+      config = YAML.parse(content)
+    } catch {
+      throw new Error('Could not parse the MongoDB configuration.')
+    }
+    const port = config?.net?.port ?? 27017
+    const bind = config?.net?.bindIp
+    const local =
+      config?.net?.bindIpAll === true ||
+      bind === undefined ||
+      (typeof bind === 'string' &&
+        bind.split(',').some((entry) => ['127.0.0.1', 'localhost', '0.0.0.0'].includes(entry.trim())))
+    const dataDirectory = config?.storage?.dbPath
+    return {
+      host: local ? '127.0.0.1' : undefined,
+      port: Number.isInteger(port) && port >= 1 && port <= 65535 ? port : undefined,
+      dataDirectory:
+        typeof dataDirectory === 'string' && isAbsolute(dataDirectory) ? dataDirectory : undefined
+    }
   }
 
   getLogFiles(version?: SoftInstalled) {

@@ -1,4 +1,11 @@
 import assert from 'node:assert/strict'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import mongodb from '../src/fork/module/Mongodb'
+import postgresql from '../src/fork/module/Postgresql'
+import redis from '../src/fork/module/Redis'
+import type { SoftInstalled } from '../src/shared/app'
 import { loadIsolated } from './helpers/load-isolated'
 
 type FixtureVersion = { bin: string; version: string; run: boolean; rootPassword?: string }
@@ -22,7 +29,10 @@ const { databaseToolsController: controller } = await loadIsolated(
       forkTerminalRequest: (channel: string, args: any[]) =>
         new Promise<Reply>((done) => calls.push({ channel, args, done }))
     },
-    '../adapters/databaseAdapter': { databaseVersion: () => selected },
+    '../adapters/databaseAdapter': {
+      databaseVersion: () => selected,
+      databaseModuleFlags: { MySQL: 'mysql', MariaDB: 'mariadb', MongoDB: 'mongodb' }
+    },
     './app': { showNotice: (text: string) => notices.push(text) }
   }
 )
@@ -67,6 +77,68 @@ assert.equal(controller.loading, false)
 assert.equal(controller.error, 'Could not query accounts')
 assert.deepEqual(notices, ['Could not query accounts'])
 
+selected = sql('fixture-D', '8.0.1', true)
+const mongo = controller.load('MongoDB')
+await tick()
+assert.equal(calls.length, 6, 'a non-SQL engine only reads connection metadata')
+assert.equal(calls[5].channel, 'app-fork:mongodb')
+calls[5].done({ code: 0, data: { port: 27018, dataDirectory: '/fixture/D' } })
+assert.equal(await mongo, true)
+assert.equal(controller.connection.port, 27018)
+assert.equal(controller.connection.host, '—')
+assert.equal(controller.connection.user, '—')
+
+const root = await mkdtemp(join(tmpdir(), 'pqt-forge-database-config-'))
+const previousServer = global.Server
+const version = (value: string) => ({ version: value }) as SoftInstalled
+const path = root.replaceAll('\\', '/')
+try {
+  global.Server = { MongoDBDir: root, RedisDir: root, PostgreSqlDir: root } as typeof global.Server
+  assert.deepEqual(await mongodb.databaseConnectionEndpoint(version('8.0.1')), {})
+  await writeFile(
+    join(root, 'mongodb-8.0.conf'),
+    `storage:\n  dbPath: '${path}'\nnet:\n  port: 27019\n  bindIp: 127.0.0.1\n`
+  )
+  assert.deepEqual(await mongodb.databaseConnectionEndpoint(version('8.0.1')), {
+    dataDirectory: path,
+    host: '127.0.0.1',
+    port: 27019
+  })
+
+  const redisConfig = join(root, 'redis-7.conf')
+  await writeFile(
+    redisConfig,
+    `port 6380\nport 6381\ndir "${path}"\nrequirepass local-fixture-secret\n`
+  )
+  assert.deepEqual(await redis.databaseConnectionEndpoint(version('7.4.0')), {
+    dataDirectory: path,
+    host: '127.0.0.1',
+    port: 6381
+  })
+  await writeFile(redisConfig, `port 0\ndir "${path}"\n`)
+  assert.equal((await redis.databaseConnectionEndpoint(version('7.4.0'))).port, undefined)
+  await writeFile(redisConfig, 'port 6381\ninclude other.conf\n')
+  assert.deepEqual(await redis.databaseConnectionEndpoint(version('7.4.0')), {})
+
+  const postgres = version('17.1.0')
+  assert.deepEqual(await postgresql.databaseConnectionEndpoint(postgres, root), {
+    dataDirectory: root
+  })
+  await writeFile(join(root, 'postgresql.conf'), "# port = 5432\nport = 5433\nport = '5434'\n")
+  assert.equal((await postgresql.databaseConnectionEndpoint(postgres, root)).port, 5434)
+  await writeFile(join(root, 'postgresql.auto.conf'), "port = '5435'\n")
+  assert.equal((await postgresql.databaseConnectionEndpoint(postgres, root)).port, 5435)
+  await writeFile(join(root, 'postgresql.conf'), "include_dir = 'conf.d'\n")
+  assert.equal((await postgresql.databaseConnectionEndpoint(postgres, root)).port, undefined)
+  assert.deepEqual(
+    postgresql.getConfigFiles(postgres, root).map(({ path }) => path),
+    [join(root, 'postgresql.conf'), join(root, 'pg_hba.conf'), join(root, 'pg_ident.conf')]
+  )
+} finally {
+  global.Server = previousServer
+  await rm(root, { recursive: true, force: true })
+}
+
 console.log(
-  'Forge database details passed: binary snapshots, hydration, stopped configuration, stale replies, partial failures.'
+  'Forge database details passed: binary snapshots, SQL partial failures, and saved MongoDB, Redis and PostgreSQL configuration.'
 )
