@@ -1,16 +1,17 @@
 import { join } from 'path'
-import { existsSync } from 'fs'
 import { Base } from '../Base'
 import { getUpgradeCatalog, inspectUpgrade, getBrewIdentity, formulaName } from './UpgradeCatalog'
 import { BrewPackageRunner } from './BrewPackageRunner'
 import type { BrewFormulaSnapshot, BrewPackageAction } from './UpgradeTypes'
 import EnvSync from '@shared/EnvSync'
-import { execPromiseWithEnv, spawnPromiseWithEnv, copyFile, unlink, chmod } from '../../Fn'
+import { execPromiseWithEnv, spawnPromiseWithEnv } from '../../Fn'
+import { identifyHomebrewMirror, isHomebrewMirror } from '@shared/homebrewMirrors'
 import { ForkPromise } from '@shared/ForkPromise'
 import type { SoftInstalled } from '@shared/app'
 
 class Brew extends Base {
   private packageRunner = new BrewPackageRunner()
+  private changingMirror = false
   constructor() {
     super()
   }
@@ -87,24 +88,15 @@ class Brew extends Base {
   currentSrc() {
     return new ForkPromise(async (resolve, reject) => {
       try {
-        const src = (
-          await spawnPromiseWithEnv('git', ['remote', '-v'], {
-            cwd: global.Server.BrewHome
-          })
-        ).stdout
-        let value = 'default'
-        if (src.includes('tsinghua.edu.cn')) {
-          value = 'tsinghua'
-        } else if (src.includes('bfsu.edu.cn')) {
-          value = 'bfsu'
-        } else if (src.includes('cloud.tencent.com')) {
-          value = 'tencent'
-        } else if (src.includes('aliyun.com')) {
-          value = 'aliyun'
-        } else if (src.includes('ustc.edu.cn')) {
-          value = 'ustc'
-        }
-        resolve(value)
+        const brewHome = global.Server.BrewHome
+        if (!brewHome) throw new Error('Homebrew is unavailable.')
+        const { stdout: origin } = await spawnPromiseWithEnv(
+          'git',
+          [`--git-dir=${join(brewHome, '.git')}`, 'remote', 'get-url', 'origin'],
+          { cwd: brewHome, shell: false }
+        )
+        if (!origin) throw new Error('Homebrew has no configured Git origin.')
+        resolve(identifyHomebrewMirror(origin))
       } catch (e) {
         reject(e)
       }
@@ -113,20 +105,36 @@ class Brew extends Base {
 
   changeSrc(srcFlag: string) {
     return new ForkPromise(async (resolve, reject) => {
+      if (this.changingMirror) {
+        reject(new Error('A Homebrew mirror change is already running.'))
+        return
+      }
+      if (!isHomebrewMirror(srcFlag)) {
+        reject(new Error('Select a supported Homebrew mirror.'))
+        return
+      }
+      const brewHome = global.Server.BrewHome
+      if (process.platform !== 'darwin' || !brewHome) {
+        reject(new Error('Homebrew mirror switching requires Homebrew on macOS.'))
+        return
+      }
+      this.changingMirror = true
       try {
         const sh = join(global.Server.Static!, 'sh/brew-src.sh')
-        const copyfile = join(global.Server.Cache!, 'brew-src.sh')
-        if (existsSync(copyfile)) {
-          await unlink(copyfile)
-        }
-        await copyFile(sh, copyfile)
-        await chmod(copyfile, '0777')
-        await execPromiseWithEnv(`source brew-src.sh ${srcFlag} ${global.Server.BrewHome}`, {
-          cwd: global.Server.Cache
+        const result = await spawnPromiseWithEnv('/bin/zsh', ['-f', sh, srcFlag, brewHome], {
+          cwd: brewHome,
+          shell: false
         })
+        if (!result.stdout.split(/\r?\n/).includes('QTENVDEV_BREW_MIRROR_APPLIED')) {
+          throw new Error('Homebrew mirror changes could not be confirmed.')
+        }
         resolve(true)
       } catch (e) {
         reject(e)
+      } finally {
+        this.changingMirror = false
+        // A partial write can also change the environment read from the profiles.
+        void EnvSync.clean()
       }
     })
   }

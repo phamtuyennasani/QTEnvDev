@@ -1,8 +1,9 @@
 #!/bin/zsh
 # For Chinese users only. Do not edit.
+set -e
 srcFlag=$1
 brewHome=$2
-case $srcFlag in
+case "$srcFlag" in
 "default")
 echo "
     你选择了默认源
@@ -85,47 +86,51 @@ echo "
   HOMEBREW_API_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles/api
   HOMEBREW_PIP_INDEX_URL=https://mirrors.bfsu.edu.cn/pypi/web/simple/
 ;;
+*)
+  print -u2 'Unsupported Homebrew mirror.'
+  exit 1
+;;
 esac
 
-sed -i "" '/export HOMEBREW_BOTTLE_DOMAIN/d' ~/.zshrc
-sed -i "" '/export HOMEBREW_BOTTLE_DOMAIN/d' ~/.bash_profile
-if [ $srcFlag != "default" ]; then
-  echo "export HOMEBREW_BOTTLE_DOMAIN=$USER_HOMEBREW_BOTTLE_DOMAIN" >> ~/.zshrc
-  source ~/.zshrc
-  echo "export HOMEBREW_BOTTLE_DOMAIN=$USER_HOMEBREW_BOTTLE_DOMAIN" >> ~/.bash_profile
-  source ~/.bash_profile
+git --git-dir="$brewHome/.git" remote set-url origin "$USER_BREW_GIT"
+core="$brewHome/Library/Taps/homebrew/homebrew-core"
+cask="$brewHome/Library/Taps/homebrew/homebrew-cask"
+failed=0
+if [ -d "$core" ] && ! git --git-dir="$core/.git" remote set-url origin "$USER_CORE_GIT"; then
+  printf '%s\n' 'Could not update the homebrew-core origin.' >&2
+  failed=1
+fi
+if [ -d "$cask" ] && ! git --git-dir="$cask/.git" remote set-url origin "$USER_CASK_GIT"; then
+  printf '%s\n' 'Could not update the homebrew-cask origin.' >&2
+  failed=1
 fi
 
-sed -i "" '/export HOMEBREW_API_DOMAIN/d' ~/.zshrc
-sed -i "" '/export HOMEBREW_API_DOMAIN/d' ~/.bash_profile
-if [ $srcFlag != "default" ]; then
-  echo "export HOMEBREW_API_DOMAIN=$HOMEBREW_API_DOMAIN" >> ~/.zshrc
-  source ~/.zshrc
-  echo "export HOMEBREW_API_DOMAIN=$HOMEBREW_API_DOMAIN" >> ~/.bash_profile
-  source ~/.bash_profile
-fi
+update_profile() {
+  local profile="$1" last_char
+  if [ -f "$profile" ]; then
+    sed -i "" -e '/^export HOMEBREW_BOTTLE_DOMAIN=/d' \
+      -e '/^export HOMEBREW_API_DOMAIN=/d' \
+      -e '/^export HOMEBREW_PIP_INDEX_URL=/d' "$profile" || return 1
+  fi
+  if [ "$srcFlag" != "default" ]; then
+    if [ -s "$profile" ]; then
+      last_char=$(tail -c 1 "$profile") || return 1
+      if [ -n "$last_char" ]; then
+        printf '\n' >> "$profile" || return 1
+      fi
+    fi
+    printf '%s\n' "export HOMEBREW_BOTTLE_DOMAIN=$USER_HOMEBREW_BOTTLE_DOMAIN" \
+      "export HOMEBREW_API_DOMAIN=$HOMEBREW_API_DOMAIN" \
+      "export HOMEBREW_PIP_INDEX_URL=$HOMEBREW_PIP_INDEX_URL" >> "$profile" || return 1
+  fi
+}
 
-sed -i "" '/export HOMEBREW_PIP_INDEX_URL/d' ~/.zshrc
-sed -i "" '/export HOMEBREW_PIP_INDEX_URL/d' ~/.bash_profile
-if [ $srcFlag != "default" ]; then
-  echo "export HOMEBREW_PIP_INDEX_URL=$HOMEBREW_PIP_INDEX_URL" >> ~/.zshrc
-  source ~/.zshrc
-  echo "export HOMEBREW_PIP_INDEX_URL=$HOMEBREW_PIP_INDEX_URL" >> ~/.bash_profile
-  source ~/.bash_profile
-fi
+for profile in "$HOME/.zshrc" "$HOME/.bash_profile"; do
+  if ! update_profile "$profile"; then
+    printf 'Could not update the shell profile %s.\n' "${profile##*/}" >&2
+    failed=1
+  fi
+done
 
-if cd "$brewHome"; then
- git remote set-url origin $USER_BREW_GIT
-fi
-
-if cd "$brewHome/Library/Taps/homebrew/homebrew-core"; then
- git remote set-url origin $USER_CORE_GIT
-fi
-
-if cd "$brewHome/Library/Taps/homebrew/homebrew-cask"; then
- git remote set-url origin $USER_CASK_GIT
-fi
-
-source ~/.bash_profile
-source ~/.zshrc
-echo "brew源更新成功"
+[ "$failed" -eq 0 ] || exit 1
+printf '%s\n' 'QTENVDEV_BREW_MIRROR_APPLIED'
