@@ -85,14 +85,24 @@ export type CustomerModuleItem = {
 
 const APPCustomerModuleCateKey = 'qtenvdev-customer-module-cate'
 const APPCustomerModuleKey = 'qtenvdev-customer-module'
+let customerModulesLoad: Promise<void> | undefined
+
+export const createCustomerModule = (item: CustomerModuleItem): ModuleCustomer => {
+  const module = reactive(new ModuleCustomer(item))
+  module.onExecStart = module.onExecStart.bind(module)
+  module.start = module.start.bind(module)
+  module.stop = module.stop.bind(module)
+  module.watchShowHide = module.watchShowHide.bind(module)
+  return module as ModuleCustomer
+}
 
 export const AppCustomerModule: {
   index: number
   moduleCate: CustomerModuleCateItem[]
   module: ModuleCustomer[]
-  init: () => void
-  saveModuleCate: () => void
-  saveModule: () => Promise<any>
+  init: () => Promise<void>
+  saveModuleCate: (categories?: readonly CustomerModuleCateItem[]) => Promise<unknown>
+  saveModule: (modules?: readonly CustomerModuleItem[]) => Promise<unknown>
   addModuleCate: (item: CustomerModuleCateItem) => void
   delModuleCate: (item: CustomerModuleCateItem) => void
   currentModule?: ModuleCustomer
@@ -102,49 +112,29 @@ export const AppCustomerModule: {
   moduleCate: [],
   module: [],
   init() {
-    localForage
-      .getItem(APPCustomerModuleCateKey)
-      .then((res: CustomerModuleCateItem[]) => {
-        if (res) {
-          AppCustomerModule.moduleCate = reactive(res)
-        }
-      })
-      .catch()
-    localForage
-      .getItem(APPCustomerModuleKey)
-      .then((res: CustomerModuleItem[]) => {
-        if (res) {
-          const list = reactive(
-            res.map((r) => {
-              const module = reactive(new ModuleCustomer(r))
-              module.onExecStart = module.onExecStart.bind(module)
-              module.start = module.start.bind(module)
-              module.stop = module.stop.bind(module)
-              module.watchShowHide = module.watchShowHide.bind(module)
-              module.watchShowHide()
-              return module
-            })
-          )
-          AppCustomerModule.module = reactive(list)
-        }
-      })
-      .catch()
+    customerModulesLoad ??= Promise.all([
+      localForage.getItem<CustomerModuleCateItem[]>(APPCustomerModuleCateKey),
+      localForage.getItem<CustomerModuleItem[]>(APPCustomerModuleKey)
+    ]).then(([categories, definitions]) => {
+      const modules = (definitions ?? []).map(createCustomerModule)
+      modules.forEach((module) => module.watchShowHide())
+      AppCustomerModule.moduleCate = categories ?? []
+      AppCustomerModule.module = modules
+    }).catch((error) => {
+      customerModulesLoad = undefined
+      throw error
+    })
+    return customerModulesLoad
   },
-  saveModuleCate() {
-    localForage
-      .setItem(APPCustomerModuleCateKey, JSON.parse(JSON.stringify(AppCustomerModule.moduleCate)))
-      .then()
-      .catch()
+  saveModuleCate(categories: readonly CustomerModuleCateItem[] = AppCustomerModule.moduleCate) {
+    return localForage.setItem(APPCustomerModuleCateKey, JSON.parse(JSON.stringify(categories)))
   },
-  saveModule() {
-    return localForage.setItem(
-      APPCustomerModuleKey,
-      JSON.parse(JSON.stringify(AppCustomerModule.module))
-    )
+  saveModule(modules: readonly CustomerModuleItem[] = AppCustomerModule.module) {
+    return localForage.setItem(APPCustomerModuleKey, JSON.parse(JSON.stringify(modules)))
   },
   addModuleCate(item: CustomerModuleCateItem) {
     AppCustomerModule.moduleCate.unshift(item)
-    AppCustomerModule.saveModuleCate()
+    AppCustomerModule.saveModuleCate().catch(console.error)
   },
   delModuleCate(item: CustomerModuleCateItem) {
     const service = AppCustomerModule.module.filter((f) => f.moduleType !== item.moduleType)
@@ -153,7 +143,7 @@ export const AppCustomerModule: {
     if (findIndex >= 0) {
       AppCustomerModule.moduleCate.splice(findIndex, 1)
     }
-    AppCustomerModule.saveModuleCate()
+    AppCustomerModule.saveModuleCate().catch(console.error)
     AppCustomerModule.saveModule().then().catch()
   }
 })

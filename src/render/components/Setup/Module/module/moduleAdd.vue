@@ -4,14 +4,16 @@
     v-model="show"
     size="500px"
     :close-on-click-modal="false"
+    :close-on-press-escape="!running"
+    :modal-class="saveDraft ? 'pqt-established-tool pqt-established-detached-tool dark' : undefined"
     :destroy-on-close="true"
     class="host-edit-drawer"
     :with-header="false"
-    @closed="closedFn"
+    @closed="handleClosed"
   >
     <div class="host-edit">
       <div class="nav pl-3 pr-5">
-        <div class="left" @click="show = false">
+        <div class="left" @click="!running && (show = false)">
           <yb-icon :svg="import('@/svg/delete.svg?raw')" class="top-back-icon" />
           <span class="ml-3">{{
             isEdit ? I18nT('common.action.edit') : I18nT('common.action.add')
@@ -25,12 +27,21 @@
       <el-scrollbar class="flex-1">
         <div class="main-wapper p-3">
           <div class="main p-5">
+            <el-alert v-if="saveError" :title="saveError" type="error" :closable="false" />
+            <p v-if="saveDraft && isEdit" class="mb-3">Saving stops active commands before replacing the definition.</p>
             <input
               v-model.trim="item.label"
               type="text"
               :class="'input' + (errs['label'] ? ' error' : '')"
               :placeholder="I18nT('setup.moduleName')"
             />
+            <label v-if="groups" class="mt-3 inline-flex items-center gap-2">
+              Category
+              <el-select v-model="item.moduleType" class="min-w-40">
+                <el-option label="Ungrouped" value="" />
+                <el-option v-for="group in groups" :key="group.id" :label="group.label" :value="group.moduleType" />
+              </el-select>
+            </label>
             <div class="flex items-center justify-between mt-6">
               <span class="text-[15px] font-bold">{{ I18nT('setup.moduleIcon') }}</span>
               <div class="inline-flex items-center">
@@ -61,14 +72,15 @@
           <div class="plant-title flex items-center justify-between">
             <span>{{ I18nT('setup.moduleExecItem') }}</span>
             <template v-if="isLock">
-              <el-tooltip placement="left" :content="I18nT('setup.module.licenseTips')">
+              <small v-if="saveDraft">{{ I18nT('setup.module.licenseTips') }}</small>
+              <el-tooltip v-else placement="left" :content="I18nT('setup.module.licenseTips')">
                 <el-button link @click="toLicense">
                   <Lock class="w-[17px] h-[17px]" />
                 </el-button>
               </el-tooltip>
             </template>
             <template v-else>
-              <el-button link :icon="Plus" @click.stop="addExecItem(undefined)"></el-button>
+              <el-button link :icon="Plus" :aria-label="I18nT('setup.module.command') + ': ' + I18nT('common.action.add')" @click.stop="addExecItem(undefined)"></el-button>
             </template>
           </div>
           <div class="main p-5 flex flex-col gap-3">
@@ -203,25 +215,35 @@
 <script lang="ts" setup>
   import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
   import { I18nT } from '@lang/index'
-  import { AsyncComponentSetup, AsyncComponentShow } from '@/util/AsyncComponent'
+  import { AsyncComponentSetup, useAsyncComponentShow } from '@/util/AsyncComponent'
   import { merge } from 'lodash-es'
   import { Close, Delete, Edit, FolderOpened, Lock, Plus } from '@element-plus/icons-vue'
   import { uuid } from '@/util/Index'
   import { ModuleCustomerExecItem, ModuleDefaultIcon } from '@/core/ModuleCustomer'
-  import { AppCustomerModule, type CustomerModuleItem } from '@/core/Module'
+  import { AppCustomerModule, type CustomerModuleCateItem, type CustomerModuleItem } from '@/core/Module'
   import { getExtractedSVG } from 'svg-inline-loader'
   import Base from '@/core/Base'
   import { SetupStore } from '@/components/Setup/store'
   import Router from '@/router'
   import { AppStore } from '@/store/app'
   import { dialog, fs } from '@/util/NodeFn'
+  import DOMPurify from 'dompurify'
 
   const { show, onClosed, onSubmit, closedFn, callback } = AsyncComponentSetup()
+  const showDialog = useAsyncComponentShow()
 
   const props = defineProps<{
     isEdit: boolean
     edit: any
+    groups?: CustomerModuleCateItem[]
+    saveDraft?: (draft: CustomerModuleItem) => Promise<boolean>
+    saveError?: string
   }>()
+  const emit = defineEmits<{ dismiss: [] }>()
+  const handleClosed = () => {
+    closedFn()
+    emit('dismiss')
+  }
   const iconKey = ref(uuid())
   const running = ref(false)
   const item = ref<CustomerModuleItem>({
@@ -242,6 +264,9 @@
     icon: false
   })
   merge(item.value, props.edit)
+  if (props.saveDraft) {
+    item.value.icon = DOMPurify.sanitize(item.value.icon, { USE_PROFILES: { svg: true } }) || ModuleDefaultIcon
+  }
 
   watch(
     item,
@@ -304,7 +329,10 @@
               'xmlns:xlink'
             ]
           }
-          item.value.icon = getExtractedSVG(svg, config)
+          const icon = getExtractedSVG(svg, config)
+          item.value.icon = props.saveDraft
+            ? DOMPurify.sanitize(icon, { USE_PROFILES: { svg: true } }) || ModuleDefaultIcon
+            : icon
           iconKey.value = uuid()
         })
       })
@@ -315,13 +343,9 @@
     iconKey.value = uuid()
   }
 
-  let EditVM: any
-  import('./moduleExecItemAdd.vue').then((res) => {
-    EditVM = res.default
-  })
-
-  const addExecItem = (i: any) => {
-    AsyncComponentShow(EditVM, {
+  const addExecItem = async (i: any) => {
+    const { default: editor } = await import('./moduleExecItemAdd.vue')
+    showDialog(editor, {
       isEdit: !!i,
       edit: i
     }).then((res: any) => {
@@ -337,7 +361,7 @@
       if (!i) {
         item.value.item.push(save)
       } else {
-        const find = AppCustomerModule.module
+        const find = !props.saveDraft && AppCustomerModule.module
           .map((m) => m.item)
           .flat()
           .find((f) => f.id === i.id)
@@ -359,7 +383,7 @@
     })
       .then(() => {
         const i = item.value.item[index]
-        const find = AppCustomerModule.module
+        const find = !props.saveDraft && AppCustomerModule.module
           .map((m) => m.item)
           .flat()
           .find((f) => f.id === i.id)
@@ -414,13 +438,20 @@
       })
   }
 
-  const doSave = () => {
-    if (!checkItem()) {
+  const doSave = async () => {
+    if (running.value || !checkItem()) return
+    const snapshot = JSON.parse(JSON.stringify(item.value))
+    if (!props.saveDraft) {
+      callback(snapshot)
+      show.value = false
       return
     }
-    console.log('item.value: ', item.value)
-    callback(JSON.parse(JSON.stringify(item.value)))
-    show.value = false
+    running.value = true
+    try {
+      if (await props.saveDraft(snapshot)) show.value = false
+    } finally {
+      running.value = false
+    }
   }
 
   const appStore = AppStore()

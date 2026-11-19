@@ -21,10 +21,26 @@ const emit = defineEmits<{ 'update:open':[boolean]; saved:[] }>()
 const loading=ref(false), saving=ref(false), candidates=ref<StartupGroupCandidateData[]>([]), selected=ref(new Set<string>())
 const draft=ref<StartupGroupDraft>({name:'',description:'',color:'#20d4c8',continueOnFailure:false,items:[]})
 const close=()=>emit('update:open',false)
-const label=(item:StartupGroupItem)=>item.type==='service-version'?`${item.module} · ${item.versionBin}`:`${item.module} · ${item.projectPath}`
+const label = (item: StartupGroupItem) => {
+  const candidate = candidates.value.find(entry => entry.key === StartupGroup.itemKey(item))
+  if (candidate?.allowMultiple !== undefined) return candidate.label
+  if (item.type === 'service-version') return StartupGroupManager.getMemberDisplayTitle(item)
+  return `${item.module} · ${item.projectPath}`
+}
 const load=async()=>{ loading.value=true; try { candidates.value=await StartupGroupManager.runtime.listCandidates(); const items=props.group?.items??[]; draft.value={name:props.group?.name??'',description:props.group?.description??'',color:props.group?.color??'#20d4c8',continueOnFailure:!!props.group?.continueOnFailure,items:items.map((x:StartupGroupItem)=>({...x}))}; selected.value=new Set(draft.value.items.map(StartupGroup.itemKey)) } finally { loading.value=false } }
 watch(()=>props.open,(v)=>{if(v) void load()})
-const toggle=(candidate:StartupGroupCandidateData)=>{ const next=new Set(selected.value); if(next.has(candidate.key)){next.delete(candidate.key); draft.value.items=draft.value.items.filter(x=>StartupGroup.itemKey(x)!==candidate.key)} else {next.add(candidate.key); draft.value.items.push({...candidate.item})}; selected.value=next }
+const toggle = (candidate: StartupGroupCandidateData) => {
+  const key = candidate.key
+  if (selected.value.has(key)) {
+    draft.value.items = draft.value.items.filter(item => StartupGroup.itemKey(item) !== key)
+  } else {
+    if (candidate.allowMultiple === false) {
+      draft.value.items = draft.value.items.filter(item => item.module !== candidate.item.module)
+    }
+    draft.value.items.push({ ...candidate.item })
+  }
+  selected.value = new Set(draft.value.items.map(StartupGroup.itemKey))
+}
 const move=(i:number,d:number)=>{const j=i+d;if(j<0||j>=draft.value.items.length)return;const a=draft.value.items[i];draft.value.items.splice(i,1);draft.value.items.splice(j,0,a)}
 const save=async()=>{if(!draft.value.name.trim())return;saving.value=true;try{if(props.group) await StartupGroupManager.store.update(props.group.id,draft.value);else await StartupGroupManager.store.add(draft.value);emit('saved');close()}catch(e){alert(e instanceof Error?e.message:String(e))}finally{saving.value=false}}
 </script>

@@ -22,6 +22,7 @@ class StartupGroupServiceAdapter implements StartupGroupAdapter {
     const target = await this.runtime.installedTarget(item)
     if (!target) return 'invalid' as const
     if (target.running) return 'executing' as const
+    if (target.startOutcomeUnknown) throw new Error('The previous start could not be confirmed.')
     return target.run ? ('running' as const) : ('stopped' as const)
   }
   async start(item: StartupGroupItem, interactive = true) {
@@ -120,7 +121,7 @@ export class StartupGroupRuntime {
 
   async listCandidates(): Promise<StartupGroupCandidateData[]> {
     const candidates: StartupGroupCandidateData[] = []
-    const modules = this.dependencies.getModules()
+    const modules = await this.dependencies.getModules()
     const serviceModules = modules.filter(
       (module) => module.isService && module.moduleType !== 'language'
     )
@@ -145,9 +146,10 @@ export class StartupGroupRuntime {
           moduleLabel: label,
           moduleType: module.moduleType ?? 'other',
           displayName: target.version || target.bin,
-          displayPath: target.path,
+          displayPath: target.displayPath ?? target.path,
           item,
-          port: target.port
+          port: target.port,
+          allowMultiple: module.allowMultiple
         })
       }
     }

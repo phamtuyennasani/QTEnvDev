@@ -93,6 +93,8 @@ export type StartupGroupInstalledTarget = {
   enable: boolean
   run: boolean
   running: boolean
+  startOutcomeUnknown?: boolean
+  displayPath?: string
   port?: number
   start(interactive?: boolean): Promise<string | boolean>
   stop(interactive?: boolean): Promise<string | boolean>
@@ -118,11 +120,12 @@ export type StartupGroupRuntimeModule = {
   moduleType?: AllAppModuleType
   label?: string | (() => string)
   isService?: boolean
+  allowMultiple?: boolean
 }
 
 export type StartupGroupRuntimeDependencies = {
   createId(): string
-  getModules(): StartupGroupRuntimeModule[]
+  getModules(): StartupGroupRuntimeModule[] | Promise<StartupGroupRuntimeModule[]>
   getInstalled(module: AllAppModule): Promise<StartupGroupInstalledTarget[]>
   getProjects(module: AllAppModule): Promise<StartupGroupProjectTarget[]>
   pathExists(path: string): Promise<boolean>
@@ -137,6 +140,7 @@ export type StartupGroupCandidateData = {
   displayPath: string
   item: StartupGroupItem
   port?: number
+  allowMultiple?: boolean
 }
 
 export type StartupGroupCandidateWarning = 'same-module' | 'same-port'

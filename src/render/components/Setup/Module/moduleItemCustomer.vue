@@ -123,7 +123,7 @@
         const find = AppCustomerModule.moduleCate.find((f) => f.id === item.id)
         if (find) {
           find.label = value
-          AppCustomerModule.saveModuleCate()
+          AppCustomerModule.saveModuleCate().catch(console.error)
         }
       })
       .catch()

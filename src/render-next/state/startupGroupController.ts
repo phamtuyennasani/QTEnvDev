@@ -36,4 +36,4 @@ const mutate = async (action: () => Promise<unknown>) => {
 const remove = (id: string) => mutate(() => StartupGroupManager.store.remove(id))
 const setDefault = (id?: string) => mutate(() => StartupGroupManager.store.setDefault(id))
 const reorder = (ids: string[]) => mutate(() => StartupGroupManager.store.reorder(ids))
-export const startupGroupController = { state, groups, defaultGroup, ready: computed(() => state.ready), loading: computed(() => state.loading || StartupGroupManager.loading), busy: computed(() => StartupGroupManager.busy), error: computed(() => state.error), init, run, runDefault, isRunning, isExecuting, remove, setDefault, reorder }
+export const startupGroupController = { state, groups, defaultGroup, ready: computed(() => state.ready), loading: computed(() => state.loading || StartupGroupManager.loading), busy: computed(() => StartupGroupManager.busy), error: computed(() => state.error), init, run, runDefault, isRunning, isExecuting, remove, setDefault, reorder, memberModuleLabel: StartupGroupManager.getMemberModuleLabel, memberTitle: StartupGroupManager.getMemberTitle, memberState: StartupGroupManager.getMemberState }

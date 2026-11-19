@@ -1,5 +1,6 @@
 import { ProjectSetup } from '@/components/LanguageProjects/setup'
 import { AppModules } from '@/core/App'
+import { AppCustomerModule } from '@/core/Module'
 import type { AllAppModule } from '@/core/type'
 import { BrewStore } from '@/store/brew'
 import { reactiveBind, uuid } from '@/util/Index'
@@ -7,6 +8,7 @@ import { fs } from '@/util/NodeFn'
 import { StorageGetAsync, StorageSetAsync } from '@/util/Storage'
 import { StartupGroup } from './StartupGroup'
 import { StartupGroupCandidate } from './StartupGroupCandidate'
+import { customStartupModuleLabel, customStartupTargets, isCustomStartupModule, listCustomStartupModules } from './StartupGroupCustomServices'
 import { StartupGroupRuntime } from './StartupGroupRuntime'
 import { StartupGroupStore } from './StartupGroupStore'
 import type {
@@ -68,6 +70,7 @@ export class StartupGroupManagerService {
     if (!resolved) return 'invalid'
     if (resolved.type === 'service-version') {
       if (resolved.target.running) return 'executing'
+      if (resolved.target.startOutcomeUnknown) return 'invalid'
       return resolved.target.run ? 'running' : 'stopped'
     }
     if (resolved.target.state.running) return 'executing'
@@ -106,6 +109,7 @@ export class StartupGroupManagerService {
 
   getMemberPath(item: StartupGroupItem) {
     const resolved = this.resolveMember(item)
+    if (isCustomStartupModule(item.module)) return ''
     if (resolved?.type === 'service-version') return resolved.target.path
     if (resolved?.type === 'language-project') return resolved.target.path
     return item.type === 'service-version' ? item.versionPath : item.projectPath
@@ -176,8 +180,15 @@ const platformModules = () => {
 const runtime = reactiveBind(
   new StartupGroupRuntime({
     createId: uuid,
-    getModules: platformModules,
+    getModules: async () => {
+      await AppCustomerModule.init().catch((error) => console.error('Could not load custom service candidates.', error))
+      return [...platformModules(), ...listCustomStartupModules()]
+    },
     getInstalled: async (module: AllAppModule) => {
+      if (isCustomStartupModule(module)) {
+        await AppCustomerModule.init()
+        return customStartupTargets(module)
+      }
       const manager = BrewStore().module(module)
       await manager.fetchInstalled()
       return manager.installed
@@ -202,10 +213,15 @@ const candidate = reactiveBind(new StartupGroupCandidate(uuid))
 
 export const StartupGroupManager = reactiveBind(
   new StartupGroupManagerService(store, runtime, candidate, {
-    getInstalled: (module: AllAppModule) => BrewStore().module(module).installed,
-    fetchInstalled: (module: AllAppModule) => BrewStore().module(module).fetchInstalled(),
+    getInstalled: (module: AllAppModule) => isCustomStartupModule(module)
+      ? customStartupTargets(module)
+      : BrewStore().module(module).installed,
+    fetchInstalled: (module: AllAppModule) => isCustomStartupModule(module)
+      ? AppCustomerModule.init()
+      : BrewStore().module(module).fetchInstalled(),
     getProjectSource: (module: AllAppModule) => ProjectSetup(module),
     getModuleLabel: (module: AllAppModule) => {
+      if (isCustomStartupModule(module)) return customStartupModuleLabel(module) ?? 'Custom service'
       const label = AppModules.find((item) => item.typeFlag === module)?.label
       return typeof label === 'function' ? label() : label
     }

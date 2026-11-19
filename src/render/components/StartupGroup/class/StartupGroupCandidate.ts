@@ -16,7 +16,7 @@ export class StartupGroupCandidate {
   }
 
   allowsMultiple(candidate: StartupGroupCandidateData) {
-    return candidate.item.type === 'language-project' || candidate.item.module === 'php-fpm'
+    return candidate.allowMultiple ?? (candidate.item.type === 'language-project' || candidate.item.module === 'php-fpm')
   }
 
   updateSelection(

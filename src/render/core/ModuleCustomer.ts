@@ -1,5 +1,5 @@
 import type { CustomerModuleExecItem, CustomerModuleItem } from '@/core/Module'
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, toRaw, watch } from 'vue'
 import { MessageError, MessageSuccess } from '@/util/Element'
 import { AppCustomerModule } from '@/core/Module'
 import { ElMessageBox } from 'element-plus'
@@ -24,6 +24,7 @@ const ModuleDefaultIcon = `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="htt
 // 运行中的 Promise 留在模块局部，不成为自定义服务对象的可枚举字段并混入 IPC JSON。
 const stopOperations = new WeakMap<object, Promise<boolean | string>>()
 const startOperations = new WeakMap<object, Promise<boolean | string>>()
+const editingModules = new WeakSet<ModuleCustomer>()
 
 async function stopAfterStart(
   item: ModuleCustomerExecItem,
@@ -42,6 +43,9 @@ function stopInternal(
   interactive: boolean
 ): Promise<boolean | string> {
   return new Promise<boolean | string>((resolve) => {
+    if (item.startOutcomeUnknown) {
+      return resolve('The previous start could not be confirmed. Restart the application before changing this command.')
+    }
     if (!item.run) {
       return resolve(true)
     }
@@ -93,6 +97,7 @@ class ModuleCustomerExecItem implements CustomerModuleExecItem {
   running = false
   run = false
   pid = ''
+  startOutcomeUnknown = false
 
   declare private module?: ModuleCustomer
   // 自定义独占服务的版本切换也保留后台/交互意图，不走默认可弹窗 stop。
@@ -109,6 +114,7 @@ class ModuleCustomerExecItem implements CustomerModuleExecItem {
     this.running = false
     this.run = false
     this.pid = ''
+    this.startOutcomeUnknown = false
   }
 
   /** 自定义服务停止同样保留进度与失败时的 PID，禁止取消 UAC 后误报已停止。 */
@@ -133,6 +139,9 @@ class ModuleCustomerExecItem implements CustomerModuleExecItem {
 
   /** 自定义版本保留原单次启动防重，权限意图作为原生命周期参数传递。 */
   start(interactive = true): Promise<boolean | string> {
+    if (this.module && editingModules.has(toRaw(this.module))) {
+      return Promise.resolve('The custom service definition is being changed.')
+    }
     const current = startOperations.get(this)
     if (current) return current
     const task = async () => {
@@ -158,6 +167,9 @@ class ModuleCustomerExecItem implements CustomerModuleExecItem {
 
   _startInternal(interactive: boolean): Promise<boolean | string> {
     return new Promise(async (resolve) => {
+      if (this.startOutcomeUnknown) {
+        return resolve('The previous start could not be confirmed. Restart the application before retrying.')
+      }
       if (this.run && this.pid) {
         return resolve(true)
       }
@@ -209,6 +221,7 @@ class ModuleCustomerExecItem implements CustomerModuleExecItem {
                 if (!isPositiveHostPid(pid)) {
                   this.run = false
                   this.pid = ''
+                  this.startOutcomeUnknown = true
                   resolve(I18nT('base.fail'))
                   return
                 }
@@ -229,7 +242,8 @@ class ModuleCustomerExecItem implements CustomerModuleExecItem {
           .catch((error) => {
             finishPending()
             this.running = false
-            // 超时/发送异常不是失败终态；保留先前 PID 与状态供重试和退出清理使用。
+            this.startOutcomeUnknown = true
+            // A missing terminal reply leaves execution unconfirmed, so it cannot be replayed.
             resolve(error instanceof Error ? error.message : String(error))
           })
       }
@@ -278,6 +292,7 @@ class ModuleCustomerExecItem implements CustomerModuleExecItem {
               doRun(true)
             } else {
               done()
+              this.running = false
               resolve('User Cancel Action')
             }
           }
@@ -344,6 +359,20 @@ class ModuleCustomer implements CustomerModuleItem {
       list.push(execItem)
     }
     this.item = reactive(list)
+  }
+
+  async changeDefinition<T>(change: () => Promise<T>): Promise<T> {
+    const module = toRaw(this)
+    if (editingModules.has(module)) throw new Error('The custom service definition is being changed.')
+    if (this.item.some((item) => item.running || startOperations.has(item) || stopOperations.has(item))) {
+      throw new Error('Wait for the current custom command operation before changing its definition.')
+    }
+    editingModules.add(module)
+    try {
+      return await change()
+    } finally {
+      editingModules.delete(module)
+    }
   }
 
   startSingleFlight(start: () => Promise<boolean | string>): Promise<boolean | string> {

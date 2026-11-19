@@ -32,7 +32,7 @@ IPC.on('APP-Ready-To-Show').then((key: string, res: any) => {
     GlobalIPCOn.inited = true
     const store = AppStore()
     store.envIndex += 1
-    AppCustomerModule.init()
+    AppCustomerModule.init().catch(console.error)
     store
       .initConfig()
       .then(async () => {
