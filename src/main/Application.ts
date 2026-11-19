@@ -46,7 +46,6 @@ import { LanguageCoordinator } from './core/LanguageCoordinator'
 import type { LanguageChanged } from '@shared/LanguageProtocol'
 import {
   capturerRuntime,
-  httpServerRuntime,
   nodePtyRuntime,
   oauthRuntime,
   siteSuckerRuntime
@@ -826,7 +825,7 @@ export default class Application extends EventEmitter {
           (async () => {
             try {
               await timeServiceStopBoundary('quit.http-stop', quitData, () =>
-                httpServerRuntime.peek()?.stopAll()
+                this.ipcHandler.stopHttpServe()
               )
             } catch (e) {
               console.log('HttpServer.stopAll e: ', e)

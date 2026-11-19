@@ -282,7 +282,7 @@ export const AppStore = defineStore('app', {
         resolve(true)
       })
     },
-    saveConfig() {
+    saveConfig(includeHttpServe = false) {
       return new Promise((resolve) => {
         const server = JSON.parse(JSON.stringify(this.config.server))
         Object.values(server).forEach((item: any) => {
@@ -297,7 +297,7 @@ export const AppStore = defineStore('app', {
             server,
             password: this.config.password,
             setup,
-            httpServe: this.httpServe
+            ...(includeHttpServe ? { httpServe: this.httpServe } : {})
           })
         )
         IPC.send('application:save-preference', args).then((key: string) => {

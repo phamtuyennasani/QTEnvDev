@@ -186,7 +186,7 @@
           return
         }
         this.httpServe.unshift(path)
-        AppStore().saveConfig()
+        AppStore().saveConfig(true)
         this.$nextTick().then(() => {
           let item = this.service[path]
           if (!item) {
@@ -235,7 +235,7 @@
             const index = this.httpServe.indexOf(path)
             if (index >= 0) {
               store.httpServe.splice(this.httpServe.indexOf(path), 1)
-              store.saveConfig()
+              store.saveConfig(true)
             }
           })
           .catch(() => {})

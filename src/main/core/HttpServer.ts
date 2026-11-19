@@ -4,17 +4,42 @@ import ServeHandler from 'serve-handler'
 import Http from 'http'
 import { getAllLocalIPAddresses } from '@shared/network'
 import type { AddressInfo } from 'node:net'
+import { stat } from 'node:fs/promises'
+import { isAbsolute } from 'node:path'
+
+export async function verifyHttpServeFolder(path: unknown): Promise<string> {
+  if (typeof path === 'string' && isAbsolute(path) && (await stat(path)).isDirectory()) return path
+  throw new Error('Choose an existing folder to serve.')
+}
 
 class HttpServer {
-  httpServes: { [k: string]: StaticHttpServe } = {}
+  private readonly servers = new Map<string, StaticHttpServe>()
+  private readonly pending = new Map<string, Promise<unknown>>()
+
+  verifyFolder(path: string) {
+    return verifyHttpServeFolder(path)
+  }
+
+  private sequence<T>(path: string, execute: () => Promise<T>) {
+    const result = (this.pending.get(path) ?? Promise.resolve()).catch(() => {}).then(execute)
+    this.pending.set(path, result)
+    const release = () => {
+      if (this.pending.get(path) === result) this.pending.delete(path)
+    }
+    void result.then(release, release)
+    return result
+  }
+
+  async snapshot() {
+    while (this.pending.size) await Promise.allSettled(this.pending.values())
+    return Array.from(this.servers, ([path, { port, host }]) => ({ path, port, host }))
+  }
 
   start(path: string) {
-    return new Promise((resolve) => {
-      const httpServe = this.httpServes[path]
-      if (httpServe) {
-        httpServe.server.close()
-        delete this.httpServes[path]
-      }
+    return this.sequence(path, async () => {
+      const existing = this.servers.get(path)
+      if (existing) return { path, port: existing.port, host: existing.host }
+      await verifyHttpServeFolder(path)
       const server = Http.createServer((request: IncomingMessage, response: ServerResponse) => {
         response.setHeader('Access-Control-Allow-Origin', '*')
         response.setHeader('Access-Control-Allow-Headers', '*')
@@ -23,51 +48,50 @@ class HttpServer {
           public: path
         })
       })
-      server.listen(0, () => {
-        const addressInfo: AddressInfo = server.address() as any
-        const port = addressInfo.port
-        const host = [`http://localhost:${port}/`]
-        // 获取所有可用IP，优先显示物理网卡IP
-        const ipList = getAllLocalIPAddresses()
-        // 优先添加非虚拟网卡的IP
-        const physicalIps = ipList.filter((item) => !item.isVirtual)
-        if (physicalIps.length > 0) {
-          physicalIps.forEach((item) => {
-            host.push(`http://${item.ip}:${port}/`)
-          })
-        } else if (ipList.length > 0) {
-          // 如果没有物理网卡IP，添加第一个可用IP
-          host.push(`http://${ipList[0].ip}:${port}/`)
-        }
-        this.httpServes[path] = {
-          server,
-          port,
-          host
-        }
-        resolve({
-          path,
-          port,
-          host
+      const addresses = getAllLocalIPAddresses()
+      const physical = addresses.filter((item) => !item.isVirtual)
+      const advertised = physical.length ? physical : addresses.slice(0, 1)
+      await new Promise<void>((resolve, reject) => {
+        server.once('error', reject)
+        server.listen(0, () => {
+          server.off('error', reject)
+          resolve()
         })
       })
+      const { port } = server.address() as AddressInfo
+      const host = [
+        `http://localhost:${port}/`,
+        ...advertised.map(({ ip }) => `http://${ip}:${port}/`)
+      ]
+      this.servers.set(path, { server, port, host })
+      return { path, port, host }
     })
   }
 
   stop(path: string) {
-    return new Promise((resolve) => {
-      const httpServe1 = this.httpServes[path]
-      console.log('httpServe1: ', httpServe1)
-      if (httpServe1) {
-        httpServe1.server.close()
-        delete this.httpServes[path]
-      }
-      resolve(path)
+    return this.sequence(path, async () => {
+      const item = this.servers.get(path)
+      if (!item) return path
+      await new Promise<void>((resolve, reject) => {
+        item.server.close((error) => {
+          if (error && (error as NodeJS.ErrnoException).code !== 'ERR_SERVER_NOT_RUNNING')
+            reject(error)
+          else resolve()
+        })
+        item.server.closeAllConnections()
+      })
+      this.servers.delete(path)
+      return path
     })
   }
 
   async stopAll() {
-    const paths = Object.keys(this.httpServes)
-    await Promise.all(paths.map((path) => this.stop(path)))
+    const paths = new Set([...this.servers.keys(), ...this.pending.keys()])
+    const results = await Promise.allSettled(Array.from(paths, (path) => this.stop(path)))
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    )
+    if (failures.length) throw new AggregateError(failures, 'Some HTTP servers could not stop.')
   }
 }
 

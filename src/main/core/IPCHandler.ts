@@ -69,6 +69,7 @@ export default class IPCHandler extends EventEmitter {
   private capturerStarting = false
   private siteSuckerEpoch = 0
   private siteSuckerStarting = false
+  private httpServeRequests: Promise<void> = Promise.resolve()
 
   constructor(dependencies: IPCHandlerDependencies) {
     super()
@@ -611,6 +612,9 @@ export default class IPCHandler extends EventEmitter {
       case 'app-http-serve-stop':
         this.handleHttpServeStop(command, key, args)
         break
+      case 'app-http-serve-manage':
+        this.handleHttpServeManage(command, key, args)
+        break
 
       // 屏幕捕获
       case 'Capturer:doCapturer':
@@ -981,9 +985,61 @@ export default class IPCHandler extends EventEmitter {
       this.sendToMainWindow(command, key, { path: args[0] })
       return
     }
-    httpServer.stop(args[0]).then((res) => {
-      this.sendToMainWindow(command, key, { path: res })
+    httpServer.stop(args[0])
+      .then((path) => this.sendToMainWindow(command, key, { path }))
+      .catch((error) => this.sendRuntimeError(command, key, error))
+  }
+
+  async stopHttpServe() {
+    await this.httpServeRequests
+    await httpServerRuntime.peek()?.stopAll()
+  }
+
+  private handleHttpServeManage(command: string, key: string, [action, candidate]: unknown[]) {
+    const request = this.httpServeRequests.then(async () => {
+      const readFolders = () => this.deps.configManager.getConfig('httpServe', []) as string[]
+      const saveFolders = (folders: string[]) => this.deps.configManager.setConfig('httpServe', folders)
+      if (action === 'list') {
+        const active = (await httpServerRuntime.peek()?.snapshot()) ?? []
+        return { folders: readFolders(), active }
+      }
+      if (action !== 'add' && action !== 'remove' && action !== 'start' && action !== 'stop') {
+        throw new Error('Invalid HTTP Serve action.')
+      }
+      if (typeof candidate !== 'string' || !candidate) throw new Error('A folder is required.')
+      const saved = readFolders()
+      if (action === 'add') {
+        if (saved.includes(candidate)) return {}
+        const runtime = await httpServerRuntime.load()
+        await runtime.verifyFolder(candidate)
+        saveFolders([candidate, ...saved])
+        try {
+          await runtime.start(candidate)
+          return {}
+        } catch (error) {
+          return { warning: 'Folder saved. HTTP Serve could not start: ' + String(error) }
+        }
+      }
+      if (action === 'start') {
+        if (!saved.includes(candidate)) throw new Error('This folder is no longer saved.')
+        await (await httpServerRuntime.load()).start(candidate)
+      } else {
+        await httpServerRuntime.peek()?.stop(candidate)
+        if (action === 'remove' && saved.includes(candidate)) {
+          try {
+            saveFolders(saved.filter((folder) => folder !== candidate))
+          } catch (error) {
+            throw new Error('Server stopped, but the folder could not be removed: ' + String(error))
+          }
+        }
+      }
+      return {}
     })
+    this.httpServeRequests = request.then(() => {}, () => {})
+    void request.then(
+      (data) => this.sendToMainWindow(command, key, { code: 0, data }),
+      (error) => this.sendRuntimeError(command, key, error)
+    )
   }
 
   // ===== 屏幕捕获 =====
