@@ -280,6 +280,7 @@ try {
     applyLanguagePayload({ locale: 'en', fallbackLocale: 'en', messages, fallbackMessages: messages })
     const app = createApp(AppNext).use(createPinia())
     AppStore().config.setup.common.showItem.mysql = false
+    AppStore().config.setup.common.showItem.n8n = true
     await localForage.setItem('qtenvdev-consul-storage-dir', {
       '/fixture/consul-app/consul': '/legacy/consul',
       '/fixture/another/consul': '/legacy/other-version'
@@ -326,8 +327,12 @@ try {
       throw new Error('Timed out: ' + label)
     }
     const click = async (label, selector) => {
-      await wait(() => exact(label, selector) && !exact(label, selector).disabled, label)
-      exact(label, selector).click()
+      await wait(() => {
+        const button = exact(label, selector)
+        if (!button || button.disabled) return false
+        button.click()
+        return true
+      }, label)
     }
     await wait(() => document.querySelector('.nav-item'), 'shell')
     ;[...document.querySelectorAll('.nav-item')].find(button => button.textContent.includes('Services')).click()
@@ -417,6 +422,7 @@ try {
     ), 'Tomcat Start uses saved base')
     await wait(() => exact('Stop') && !exact('Stop').disabled, 'Tomcat running')
     await click('Stop')
+    await wait(() => serviceRow('N8N'), 'n8n in Services')
     serviceRow('N8N').click()
     await click('Manage n8n users')
     const n8nDialog = () => document.querySelector('.forge-dialog')
@@ -478,9 +484,19 @@ try {
       if (flag === 'clickhouse') {
         await wait(() => document.querySelectorAll('.service-file-item').length === 2, 'ClickHouse configuration files')
         document.querySelectorAll('.service-file-item')[1].click()
+        await wait(() => document.querySelector('.service-file-item.selected span')?.textContent === 'users' &&
+          exact('Initialize configuration', '[role=dialog] button'), 'ClickHouse users configuration ready')
       }
       await click('Initialize configuration', '[role=dialog] button')
       await wait(() => exact('Initializing…', '[role=dialog] button')?.disabled && window.databaseInitializers.some(request => request[0] === flag), name + ' initialization in progress')
+      if (flag === 'clickhouse') {
+        await click('Close', '[role=dialog] button')
+        await click('Configuration')
+        await wait(() => document.querySelectorAll('.service-file-item').length === 2, 'ClickHouse files after reopening')
+        document.querySelectorAll('.service-file-item')[1].click()
+        await wait(() => document.querySelector('.service-file-item.selected span')?.textContent === 'users' &&
+          exact('Initializing…', '[role=dialog] button')?.disabled, 'ClickHouse initialization stays active after reopening')
+      }
       window.finishDatabaseConfig()
       await wait(() => document.querySelector('.service-file-editor textarea')?.value === contents && document.querySelector('.service-file-editor [role=status]')?.textContent.includes('created'), name + ' initialized configuration')
       const requests = window.databaseInitializers.filter(request => request[0] === flag)
@@ -496,10 +512,10 @@ try {
     const javaOption = () => [...document.querySelectorAll('.el-select-dropdown__item')].find(item => item.textContent.includes('Java 17'))
     await wait(() => javaInput(), 'Neo4j Java picker')
     javaInput().click()
-    await wait(() => javaOption(), 'compatible Java versions')
+    await wait(() => javaInput()?.getAttribute('aria-expanded') === 'true' && javaOption(), 'compatible Java versions')
     if ([...document.querySelectorAll('.el-select-dropdown__item')].some(item => item.textContent.includes('Java 25'))) throw new Error('Neo4j offered incompatible Java 25')
     javaOption().click()
-    await wait(() => document.querySelector('.installed-versions-surface .el-select__selected-item')?.textContent.includes('Java 17'), 'saved Neo4j Java binding')
+    await wait(() => document.querySelector('.installed-versions-surface .el-select__placeholder')?.textContent.includes('Java 17'), 'saved Neo4j Java binding')
     document.querySelector('.forge-close').click()
     await click('Start')
     await wait(() => window.neo4jStarts.length === 1, 'Neo4j start with saved Java')
@@ -607,7 +623,7 @@ try {
     document.querySelector('.package-close').click()
     await click('+ Add runtime')
     await wait(() => document.querySelector('.package-toolbar select')?.value === 'php', 'ordinary package entry selects PHP again')
-  })()`
+  })().catch(error => { throw new Error(error?.stack || String(error)) })`
   const entry = join(directory, 'main.cjs')
   await writeFile(
     entry,
@@ -642,7 +658,7 @@ try {
   })
   assert.equal(result.code, 0, result.output)
   console.log(
-    'Services Electron UI passed: installed versions, module visibility, Redis configuration, database admin gates, tunnel lifecycle, HTTP Serve, Podman, runtime managers, Git diagnostics and Composer.'
+    'Services Electron UI passed: installed versions, module visibility, Redis and database configuration, Neo4j Java binding, database admin gates, tunnel lifecycle, HTTP Serve, Podman, runtime managers, Git diagnostics and Composer.'
   )
 } finally {
   await vite.close()

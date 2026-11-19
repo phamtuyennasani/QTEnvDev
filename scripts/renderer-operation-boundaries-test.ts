@@ -518,6 +518,7 @@ assert.match(
 await import('./pqt-forge-temporal-dashboard-test')
 await import('./pqt-forge-database-details-test')
 await import('./pqt-forge-n8n-users-test')
+await import('./pqt-forge-web-server-settings-test')
 const fileInfoPage = readFileSync(join(componentsDir, 'Tools/FileInfo/Index.vue'), 'utf8')
 assert.match(fileInfoPage, /from ['"]\.\/Controller['"]/)
 assert.doesNotMatch(fileInfoPage, /fs\.(?:stat|md5|sha1|sha256|sha512|sha384)\(/)

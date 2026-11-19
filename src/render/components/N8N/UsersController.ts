@@ -25,7 +25,10 @@ type MutationArgs = {
 }
 
 const unknownWrite = 'n8n did not report the result. Verify the change in n8n before retrying in another session.'
-const errorText = (error: unknown) => error instanceof Error ? error.message : String(error)
+const errorText = (error: unknown) =>
+  error && typeof error === 'object' && 'message' in error
+    ? String(error.message)
+    : String(error)
 
 async function request(
   action: string,

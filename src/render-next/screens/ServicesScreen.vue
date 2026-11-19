@@ -59,7 +59,12 @@
         </template>
       </article>
     </div>
-    <ServiceFilesDialog v-if="selectedService" v-model="filesOpen" :name="selectedService.name" :version="selectedService.version" :kind="fileKind" />
+    <ServiceFilesDialog v-if="selectedService" v-model="filesOpen" :name="selectedService.name" :version="selectedService.version" :kind="fileKind">
+      <template v-if="webServer || envService" #configuration="{ content, readOnly, update }">
+        <WebServerConfiguration v-if="webServer" :engine="webServer" :content="content" :read-only="readOnly" @update="update" />
+        <EnvServiceConfiguration v-else-if="envService" :engine="envService" :content="content" :read-only="readOnly" @update="update" />
+      </template>
+    </ServiceFilesDialog>
     <InstalledVersionsDialog
       v-if="versionsOpen && installedFlag && selectedService"
       :key="installedFlag"
@@ -78,6 +83,9 @@ import { serviceController, type ServiceState } from '../state/serviceController
 import { navigateNext, showNotice } from '../state/app'
 import PackageBrowser from '../components/PackageBrowser.vue'
 import ServiceFilesDialog from '../components/ServiceFilesDialog.vue'
+import WebServerConfiguration from '../serviceConfiguration/WebServerConfiguration.vue'
+import EnvServiceConfiguration from '../serviceConfiguration/EnvServiceConfiguration.vue'
+import type { WebServer } from '../serviceConfiguration/webServerDirectives'
 import { packageFlagForName } from '../packages/catalog'
 import { startupGroupController } from '../state/startupGroupController'
 import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
@@ -96,6 +104,12 @@ const notify = (message: string) => showNotice(message)
 const startGroup = async () => { if (startupGroupController.defaultGroup.value) { await startupGroupController.runDefault(); return } const result = await serviceController.runGroup(); notify(result.completed + ' services started; ' + result.failed + ' failed') }
 const selectedFlag = computed(() => selectedService.value ? packageFlagForName(selectedService.value.name) : undefined)
 const moduleFlag = computed(() => selectedService.value && serviceModuleFlags[selectedService.value.name])
+const webServer = computed<WebServer | undefined>(() =>
+  moduleFlag.value === 'apache' ? 'apache' : moduleFlag.value === 'nginx' ? 'nginx' : undefined
+)
+const envService = computed(() =>
+  moduleFlag.value === 'n8n' ? 'n8n' : moduleFlag.value === 'mailpit' ? 'mailpit' : undefined
+)
 const directoryFlag = computed(() => {
   const flag = moduleFlag.value
   return flag && isServiceDirectoryFlag(flag) ? flag : undefined
