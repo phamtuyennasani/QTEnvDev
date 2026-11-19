@@ -2,7 +2,7 @@ import { computed, reactive } from 'vue'
 import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
 import { databaseModuleFlags, refreshDatabase } from '../adapters/databaseAdapter'
 
-export type DatabaseItem = { name: string; engine: string; version: string; port?: number; state: 'running' | 'stopped' | 'not-installed' | 'warning' | 'unknown' | 'unavailable'; storage: string; connections?: number }
+export type DatabaseItem = { name: string; engine: string; version: string; state: 'running' | 'stopped' | 'not-installed' | 'warning' | 'unknown' | 'unavailable'; storage: string; connections?: number }
 const databases = reactive<DatabaseItem[]>(Object.keys(databaseModuleFlags).map((name) => ({ name, engine: 'Database module', version: '—', state: 'unknown', storage: '—' })))
 const visibleDatabases = computed(() => databases.filter((database) => isBuiltinModuleVisible(databaseModuleFlags[database.name])))
 const selected = reactive<{ database?: DatabaseItem }>({ database: databases[0] })

@@ -120,7 +120,10 @@ try {
     }
 
     const selected = { bin, path: basedir, version, rootPassword } as SoftInstalled
-    assert.deepEqual(await backend.databaseConnectionEndpoint(selected), { port })
+    assert.deepEqual(await backend.databaseConnectionEndpoint(selected), {
+      port,
+      dataDirectory: datadir.replaceAll('\\', '/')
+    })
     assert.deepEqual(
       await backend.addDatabase(selected, {
         database,

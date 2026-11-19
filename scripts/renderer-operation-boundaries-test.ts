@@ -251,6 +251,9 @@ assert.match(
 )
 assert.match(serviceActionStoreSource, /ServiceActionStore\.fetchPathing = false/)
 
+assert.doesNotMatch(nextSource('screens/RuntimesScreen.vue'), /IPC\.send|updatePath\(|fetchInstalled\(/)
+assert.doesNotMatch(nextSource('serviceVersions/InstalledVersionsDialog.vue'), /IPC\.send|updatePath\(/)
+
 const versionDeleteDialog = readFileSync(
   join(componentsDir, 'ServiceManager/delDialog.vue'),
   'utf8'
@@ -492,6 +495,7 @@ await import('./pqt-forge-cron-controller-test')
 await import('./pqt-forge-git-environment-test')
 await import('./pqt-forge-mysql-companion-test')
 await import('./pqt-forge-postgresql-directory-test')
+await import('./pqt-forge-database-details-test')
 const fileInfoPage = readFileSync(join(componentsDir, 'Tools/FileInfo/Index.vue'), 'utf8')
 assert.match(fileInfoPage, /from ['"]\.\/Controller['"]/)
 assert.doesNotMatch(fileInfoPage, /fs\.(?:stat|md5|sha1|sha256|sha512|sha384)\(/)

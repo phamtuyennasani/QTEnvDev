@@ -1146,7 +1146,12 @@ sql-mode=NO_ENGINE_SUBSTITUTION`
     const series = version.version?.split('.').slice(0, 2).join('.') ?? ''
     if (!/^\d+\.\d+$/.test(series)) throw new Error('Select an installed MySQL version.')
     const content = await readFile(join(global.Server.MysqlDir!, `my-${series}.cnf`), 'utf8')
-    return { port: getMysqlPort(iniParse(content)) }
+    const config = iniParse(content)
+    const directory = config?.mysqld?.datadir
+    return {
+      port: getMysqlPort(config),
+      dataDirectory: typeof directory === 'string' && isAbsolute(directory) ? directory : undefined
+    }
   }
 
   getDatabasesWithUsers(version: SoftInstalled) {

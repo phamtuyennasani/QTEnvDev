@@ -1092,7 +1092,12 @@ datadir=${dataDir}`
     const series = version.version?.split('.').slice(0, 2).join('.') ?? ''
     if (!/^\d+\.\d+$/.test(series)) throw new Error('Select an installed MariaDB version.')
     const content = await readFile(join(global.Server.MariaDBDir!, `my-${series}.cnf`), 'utf8')
-    return { port: getMariaDBPort(iniParse(content)) }
+    const config = iniParse(content)
+    const directory = getMariaDBConfigValue(getMariaDBServerConfig(config), ['datadir'])
+    return {
+      port: getMariaDBPort(config),
+      dataDirectory: isAbsolute(directory) ? directory : undefined
+    }
   }
 
   getDatabasesWithUsers(version: SoftInstalled) {

@@ -25,11 +25,12 @@
 </template>
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import type { SoftInstalled } from '@shared/app'
 import ForgeDialog from './ForgeDialog.vue'
 import { serviceFilesController, type ServiceFilesController, type ServiceFile } from '../state/serviceFilesController'
 const props = defineProps<{
   name: string
-  version?: string
+  version?: string | SoftInstalled
   kind: 'config' | 'log'
   modelValue: boolean
   onlyFile?: string

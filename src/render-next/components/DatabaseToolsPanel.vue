@@ -7,9 +7,17 @@
   </section>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { databaseVersion } from '../adapters/databaseAdapter'
 import { databaseToolsController as controller } from '../state/databaseToolsController'
 const props = defineProps<{ name: string }>(); const name = computed(() => props.name); const password = ref(''); const canChangePassword = computed(() => props.name === 'MySQL' || props.name === 'MariaDB')
 const changePassword = async () => { if (await controller.changePassword(password.value)) password.value = '' }
-onMounted(() => { void controller.load(name.value) }); watch(name, (value) => { password.value = ''; void controller.load(value) })
+watch(
+  () => {
+    const item = databaseVersion(name.value)
+    return JSON.stringify([name.value, item?.bin, item?.version, item?.run])
+  },
+  () => { password.value = ''; void controller.load(name.value) },
+  { immediate: true }
+)
 </script>
