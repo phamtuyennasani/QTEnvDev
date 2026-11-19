@@ -21,9 +21,10 @@ const bootstrap = String.raw`
 const bootstrapCase = location.search === '?bootstrap'
 const portsCase = location.search === '?ports'
 const databaseCase = location.search === '?database'
+const directCase = location.search === '?direct'
 const mac = location.search === '?mac' || bootstrapCase || portsCase
 window.Server = {
-  isMacOS: mac, isWindows: !mac, BaseDir: '/fixture/', AppDir: '/fixture/', DataDirectoryReady: databaseCase,
+  isMacOS: mac, isWindows: !mac, BaseDir: '/fixture/', AppDir: '/fixture/', DataDirectoryReady: databaseCase || directCase,
   Static: "/Applications/Env's Dev.app/Contents/Resources/app.asar/dist/electron/static",
   MysqlDir: databaseCase ? 'C:/fixture/mysql/data' : undefined,
   MariaDBDir: databaseCase ? 'C:/fixture/mariadb/data' : undefined,
@@ -37,6 +38,10 @@ let portInstalled = false
 let phpMyAdminCreated = false
 const phpMyAdminHost = { name: 'phpmyadmin.test', type: 'php', isAppPHPMyAdmin: true, useSSL: true, port: { nginx_ssl: 4443 } }
 const createdDatabases = {}
+window.flutterFixtureUrls = {
+  stable: 'https://example.test/stable/flutter.zip',
+  beta: 'https://example.test/beta/flutter.zip?target=windows&arch=x64'
+}
 const fixtureVersion = (flag) => ({
   bin: 'C:/fixture/' + flag + '/bin/mysqld.exe', path: 'C:/fixture/' + flag, version: flag === 'mysql' ? '8.4.1' : '11.4.2',
   typeFlag: flag, num: flag === 'mysql' ? 80401 : 110402, enable: true, run: true, running: false
@@ -86,15 +91,20 @@ window.QTEnvDevNodeAPI = {
     } else if (channel === 'App-Node-FN' && action === 'nativeTheme') {
       send(true)
     } else if (channel === 'App-Node-FN' && action === 'clipboard' && first === 'writeText') {
-      send(true)
+      send(!window.failFixtureCopy)
+    } else if (directCase && channel === 'app-fork:flutter' && action === 'fetchAllOnlineVersion') {
+      success([
+        { version: '3.38.2', channel: 'stable', url: flutterFixtureUrls.stable, bin: '/fixture/flutter/stable/flutter.bat', appDir: '/fixture/flutter/stable' },
+        { version: '3.39.0-0.1.pre', channel: 'beta', url: flutterFixtureUrls.beta, bin: '/fixture/flutter/beta/flutter.bat', appDir: '/fixture/flutter/beta' }
+      ])
     } else if (channel === 'app-refresh-macos-homebrew') {
       window.finishDiscovery = (ok) => {
         window.finishDiscovery = undefined
         if (ok) success({ bin: '/opt/homebrew/bin/brew', cellar: '/opt/homebrew/Cellar' })
         else send({ code: 1, msg: 'Homebrew detection unavailable' })
       }
-    } else if (databaseCase && channel === 'app-fork:version' && action === 'allInstalledVersions') {
-      success(Object.fromEntries(first.map((flag) => [flag, ['mysql', 'mariadb', 'nginx', 'php'].includes(flag) ? [fixtureVersion(flag)] : []])))
+    } else if ((databaseCase || directCase) && channel === 'app-fork:version' && action === 'allInstalledVersions') {
+      success(Object.fromEntries(first.map((flag) => [flag, databaseCase && ['mysql', 'mariadb', 'nginx', 'php'].includes(flag) ? [fixtureVersion(flag)] : []])))
     } else if (databaseCase && action === 'databaseConnectionEndpoint') {
       const flag = channel.slice('app-fork:'.length)
       if (first?.bin !== fixtureVersion(flag).bin || first?.rootPassword) throw new Error('Incorrect phpMyAdmin database version snapshot')
@@ -596,6 +606,48 @@ const terminalErrorCheck = `(async () => {
   await new Promise((done) => setTimeout(done, 80))
   if (window.projectErrors.length) throw new Error(window.projectErrors.join(' '))
 })()`
+const directChecks = String.raw`(async () => {
+  const button = (label) => [...document.querySelectorAll('.package-launcher, .package-dialog button')]
+    .find((item) => item.textContent.trim() === label || item.getAttribute('aria-label') === label)
+  const wait = async (read, label) => {
+    for (let i = 0; i < 400; ++i) {
+      if (window.projectErrors.length) throw new Error(window.projectErrors.join('\n'))
+      const found = read()
+      if (found) return found
+      await new Promise((done) => setTimeout(done, 25))
+    }
+    throw new Error(label + ' · ' + document.body.innerText)
+  }
+  const rows = () => [...document.querySelectorAll('.package-row .package-version b')].map((row) => row.textContent)
+  const copies = () => calls.filter(([channel, area, method]) =>
+    channel === 'App-Node-FN' && area === 'clipboard' && method === 'writeText')
+  const notice = () => document.querySelector('#fixture-notice').textContent
+  ;(await wait(() => button('Manage packages'), 'Package library launcher')).click()
+  const select = await wait(() => document.querySelector('.package-toolbar select'), 'Package selector')
+  if (button('Stable') || button('Beta')) throw new Error('Flutter release filters appeared for PHP')
+  select.value = 'flutter'
+  select.dispatchEvent(new Event('change', { bubbles: true }))
+  await wait(() => rows().join() === '3.38.2', 'Stable-only rows')
+  if (button('Stable').getAttribute('aria-pressed') !== 'true') throw new Error('Stable is not selected')
+  button('Beta').click()
+  await wait(() => rows().join() === '3.39.0-0.1.pre', 'Beta-only rows')
+  const query = document.querySelector('.package-search input')
+  query.value = '3.38'
+  query.dispatchEvent(new Event('input', { bubbles: true }))
+  await wait(() => document.querySelector('.package-table').textContent.includes('No versions match'), 'Combined channel and text filter')
+  query.value = ''
+  query.dispatchEvent(new Event('input', { bubbles: true }))
+  ;(await wait(() => button('Copy download URL'), 'Copy selected release URL')).click()
+  await wait(() => notice() === 'Download URL copied.', 'Clipboard confirmation')
+  if (copies().length !== 1 || copies()[0][3] !== flutterFixtureUrls.beta) throw new Error('Copied the wrong release URL or wrote it more than once')
+  if (calls.some(([, method]) => method === 'installSoft')) throw new Error('Copy started a download')
+  window.failFixtureCopy = true
+  button('Copy download URL').click()
+  await wait(() => notice() === 'The clipboard did not confirm the copy.', 'Clipboard failure notice')
+  if (calls.filter(([channel, method]) => channel === 'app-fork:flutter' && method === 'fetchAllOnlineVersion').length !== 1) {
+    throw new Error('Changing channels refetched the package list')
+  }
+})()`
 
 try {
   await writeFile(
@@ -606,6 +658,7 @@ try {
   import { createPinia } from 'pinia'
   import IPC from '../render/util/IPC.ts'
   import PackageBrowser from './components/PackageBrowser.vue'
+  import { nextAppState } from './state/app'
   import './styles/app.css'
   import './styles/websites.css'
   window.Server = reactive(window.Server)
@@ -634,7 +687,10 @@ try {
     component = (await import('./components/ProjectWorkflowPanel.vue')).default
     }
   }
-  const app = createApp({ render: () => h(component, component === PackageBrowser ? { flag: 'php' } : undefined) }).use(createPinia())
+  const app = createApp({ render: () => [
+    h(component, component === PackageBrowser ? { flag: 'php' } : undefined),
+    location.search === '?direct' ? h('output', { id: 'fixture-notice' }, nextAppState.toast) : null
+  ] }).use(createPinia())
   app.config.errorHandler = (error) => projectErrors.push(error?.stack || String(error))
   app.mount('#app')
 </script>`
@@ -657,6 +713,8 @@ app.whenReady().then(async () => {
     await win.loadURL(${JSON.stringify(url)} + query)
     await win.webContents.executeJavaScript(${JSON.stringify(checks)})
   }
+  await win.loadURL(${JSON.stringify(url)} + '?direct')
+  await win.webContents.executeJavaScript(${JSON.stringify(directChecks)})
   await win.loadURL(${JSON.stringify(url)} + '?bootstrap')
   await win.webContents.executeJavaScript(${JSON.stringify(bootstrapChecks)})
   await win.webContents.executeJavaScript(${JSON.stringify(terminalErrorCheck)})
@@ -689,6 +747,7 @@ setTimeout(() => app.exit(2), 120000)`
   console.log(
     'Homebrew Electron UI passed: source routing, bootstrap setup/exit failures, cancellation, progress across reopen, discovery retry, package lifecycle, tap recovery and Windows gating.'
   )
+  console.log('Direct package UI passed: Flutter channel filters, exact download URL and clipboard results.')
   console.log('MacPorts Electron UI passed: supported-module gating, safe command routing, confirmation, duplicate protection, stop during setup, reopen, terminal exit, and refresh failure.')
   console.log('Database management Electron UI passed: engine selection, create across close, backup completion, selected-version phpMyAdmin opening, bounded slow logs, and MySQL instance group lifecycle and removal.')
   console.log(

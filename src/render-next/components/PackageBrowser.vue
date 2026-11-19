@@ -130,14 +130,28 @@
             ><button :class="{ active: tab === 'available' }" @click="tab = 'available'"
               >Available
               <span>{{
-                catalog.loading && !catalog.versions.length ? '…' : catalog.versions.length
+                catalog.loading && !availableVersions.length ? '…' : availableVersions.length
               }}</span></button
             ><button :class="{ active: tab === 'installed' }" @click="tab = 'installed'"
               >Installed
               <span>{{
                 catalog.loading && !catalog.installed.length ? '…' : catalog.installed.length
               }}</span></button
-            ></div
+            ><div
+              v-if="selectedFlag === 'flutter' && tab === 'available'"
+              class="package-flutter-channels"
+              role="group"
+              aria-label="Flutter release channel"
+            >
+              <button
+                v-for="channel in flutterChannels"
+                :key="channel.value"
+                :class="{ active: flutterChannel === channel.value }"
+                :aria-pressed="flutterChannel === channel.value"
+                @click="flutterChannel = channel.value"
+                >{{ channel.label }}</button
+              >
+            </div></div
           >
           <div v-if="catalog.error" class="package-alert package-alert--error" role="alert"
             >{{ catalog.error }}
@@ -175,7 +189,9 @@
                 ? 'No versions match your search.'
                 : tab === 'installed'
                   ? 'No installed versions detected.'
-                  : 'No direct-download versions are available for this platform.'
+                  : selectedFlag === 'flutter'
+                    ? 'No Flutter ' + flutterChannel + ' releases are available for this platform.'
+                    : 'No direct-download versions are available for this platform.'
             }}</p>
             <div v-for="pkg in rows" :key="packageKey(pkg)" class="package-row"
               ><div class="package-version"
@@ -185,19 +201,28 @@
                   }}<span v-if="pkg.downloaded"> · download cached</span></small
                 ></div
               ><span class="package-tag">{{ pkg.installed ? 'Installed' : 'Available' }}</span
-              ><button
-                v-if="pkg.installed"
-                class="action-button"
-                :disabled="busy"
-                @click="askRemove(pkg)"
-                >Remove</button
-              ><button
-                v-else
-                class="action-button action-button--primary"
-                :disabled="busy"
-                @click="packageController.install(pkg)"
-                >{{ isActive(pkg) ? 'Installing…' : 'Install' }}</button
-              ></div
+              ><div class="package-row-actions">
+                <button
+                  v-if="tab === 'available' && pkg.url"
+                  class="action-button"
+                  @click="copyDownloadUrl(pkg.url)"
+                  >Copy download URL</button
+                >
+                <button
+                  v-if="pkg.installed"
+                  class="action-button"
+                  :disabled="busy"
+                  @click="askRemove(pkg)"
+                  >Remove</button
+                >
+                <button
+                  v-else
+                  class="action-button action-button--primary"
+                  :disabled="busy"
+                  @click="packageController.install(pkg)"
+                  >{{ isActive(pkg) ? 'Installing…' : 'Install' }}</button
+                >
+              </div></div
             >
           </div>
           <footer class="package-footer"
@@ -249,6 +274,7 @@
 <script setup lang="ts">
   import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
   import { FORCE_DELETE_CONFIRMATION, type ManagedVersionDirectory } from '@shared/VersionDelete'
+  import { clipboard } from '@/util/NodeFn'
   import { packageController } from '../state/packageController'
   import { packageModules, packageModule } from '../packages/catalog'
   import { packageKey, packageError, type PackageVersion } from '../packages/types'
@@ -263,6 +289,7 @@
   import MacPortsPackagePanel from './MacPortsPackagePanel.vue'
   import SdkmanPackagePanel from './SdkmanPackagePanel.vue'
   import { sdkmanPackages } from '../state/sdkmanPackagesController'
+  import { showNotice } from '../state/app'
   const props = defineProps<{ flag?: string; title?: string }>()
   const modules = packageModules
   const groups = ['Runtimes', 'Services', 'Databases', 'Utilities'] as const
@@ -275,6 +302,11 @@
   }
   defineExpose({ show })
   const query = ref('')
+  const flutterChannels = [
+    { label: 'Stable', value: 'stable' },
+    { label: 'Beta', value: 'beta' }
+  ] as const
+  const flutterChannel = ref<'stable' | 'beta'>('stable')
   const tab = ref<'available' | 'installed'>('available')
   const source = ref<'direct' | 'brew' | 'macports' | 'sdkman'>('direct')
   const dialog = ref<HTMLElement>()
@@ -314,11 +346,26 @@
       operation.value?.typeFlag === (props.flag || selectedFlag.value) &&
       operation.value?.status === 'running'
   )
+  const availableVersions = computed(() =>
+    selectedFlag.value === 'flutter'
+      ? catalog.value.versions.filter((item) => item.channel === flutterChannel.value)
+      : catalog.value.versions
+  )
   const rows = computed(() =>
-    (tab.value === 'installed' ? catalog.value.installed : catalog.value.versions).filter((item) =>
+    (tab.value === 'installed' ? catalog.value.installed : availableVersions.value).filter((item) =>
       (item.version + ' ' + (item.channel || '')).toLowerCase().includes(query.value.toLowerCase())
     )
   )
+  const copyDownloadUrl = async (url: string) => {
+    try {
+      const copied: unknown = await clipboard.writeText(url)
+      showNotice(
+        copied === true ? 'Download URL copied.' : 'The clipboard did not confirm the copy.'
+      )
+    } catch {
+      showNotice('The download URL could not be copied.')
+    }
+  }
   const isActive = (item: PackageVersion) =>
     operation.value?.key === packageKey(item) && operation.value?.status === 'running'
   const reload = (fresh = false) =>
@@ -544,6 +591,11 @@
     padding: 0 22px 10px;
     border-bottom: 1px solid var(--pqt-border);
   }
+  .package-flutter-channels {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+  }
   .package-tabs button {
     padding: 7px 10px;
     border: 1px solid transparent;
@@ -583,6 +635,12 @@
     align-items: center;
     padding: 10px 0;
     border-top: 1px solid var(--pqt-border);
+  }
+  .package-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
   }
   .package-version b,
   .package-version small {
