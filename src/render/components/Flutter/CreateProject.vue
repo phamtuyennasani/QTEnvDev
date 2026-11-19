@@ -18,7 +18,7 @@
         <el-button
           type="primary"
           :loading="creating"
-          :disabled="creating || !form.name || !form.outputDir"
+          :disabled="controller.write.unknown || creating || !form.name || !form.outputDir"
           @click="doCreate"
         >
           {{ I18nT('flutter.create') }}
@@ -292,14 +292,10 @@
 <script lang="ts" setup>
   import { reactive, ref, computed } from 'vue'
   import { I18nT } from '@lang/index'
-  import IPC from '@/util/IPC'
-  import { MessageError, MessageSuccess } from '@/util/Element'
+  import { MessageError } from '@/util/Element'
+  import { flutterProjects as controller } from './ProjectController'
   import { dialog } from '@/util/NodeFn'
   import { BrewStore } from '@/store/brew'
-  import { AppStore } from '@/store/app'
-  import { ProjectSetup } from '@/components/LanguageProjects/setup'
-  import { reactiveBind } from '@/util/Index'
-  import { ProjectItem } from '@/components/LanguageProjects/ProjectItem'
 
   const props = defineProps<{ modelValue: boolean }>()
   const emit = defineEmits<{
@@ -312,7 +308,6 @@
     set: (v) => emit('update:modelValue', v)
   })
 
-  const appStore = AppStore()
   const brewStore = BrewStore()
 
   const installedVersions = computed(() =>
@@ -367,8 +362,8 @@
   const packageResults = ref<Array<{ name: string; latest: string; description: string }>>([])
 
   const errs = reactive({ name: '', outputDir: '' })
-  const creating = ref(false)
-  const output = ref('')
+  const creating = computed(() => controller.write.running)
+  const output = computed(() => controller.write.output)
 
   const templateDescriptions = computed<Record<string, string>>(() => ({
     app: I18nT('flutter.templateAppDesc'),
@@ -400,17 +395,7 @@
     }
   }
 
-  const sendFlutter = (fn: string, ...args: any[]) =>
-    new Promise<any>((resolve) => {
-      IPC.send('app-fork:flutter', fn, ...args).then((key: string, res: any) => {
-        IPC.off(key)
-        if (res?.code === 0) {
-          resolve(res?.data ?? {})
-          return
-        }
-        resolve({ ok: false, message: res?.msg ?? 'IPC error' })
-      })
-    })
+  const sendFlutter = controller.read
 
   const searchPackages = async () => {
     const q = packageSearch.value.trim()
@@ -472,10 +457,6 @@
       return
     }
 
-    creating.value = true
-    output.value = `${I18nT('flutter.creatingProject')} "${form.name}"…\n${'─'.repeat(48)}\n`
-
-    const setup = JSON.parse(JSON.stringify(appStore.config.setup))
     const extraConfig = {
       projectName: form.name,
       orgName: form.orgName,
@@ -491,66 +472,22 @@
       flutterBin: form.flutterBin
     }
 
-    IPC.send(
-      'app-fork:flutter',
-      'flutterCreateProject',
-      form.name,
-      form.outputDir,
-      form.template,
-      form.orgName,
-      form.flutterBin,
-      setup,
-      extraConfig
-    ).then((key: string, res: any) => {
-      IPC.off(key)
-      creating.value = false
-
-      if (res?.code !== 0) {
-        MessageError(res?.msg ?? 'IPC error')
-        output.value += res?.msg ?? 'IPC error'
-        return
-      }
-
-      const data = res?.data ?? {}
-      output.value += data?.output ?? ''
-
-      if (!data?.ok) {
-        MessageError(data?.message ?? I18nT('flutter.flutterCreateFailed'))
-        return
-      }
-
-      MessageSuccess(data?.message ?? I18nT('flutter.projectCreated'))
-
-      if (form.addToProjects && data?.projectPath) {
-        const projectStore = ProjectSetup('flutter')
-        const selectedVersion = installedVersions.value.find((v) => v.bin === form.flutterBin)
-        const newItem = reactiveBind(
-          new ProjectItem({
-            path: data.projectPath,
-            comment: form.name,
-            binBin: form.flutterBin || '',
-            binVersion: selectedVersion?.version ?? '',
-            binPath: selectedVersion?.path ?? '',
-            isService: false,
-            typeFlag: 'flutter'
-          })
-        )
-        projectStore.project.unshift(newItem)
-        projectStore.saveProject()
-        projectStore.setDirEnv(newItem).catch()
-        if (!projectStore.allDirs.includes(data.projectPath)) {
-          projectStore.allDirs.push(data.projectPath)
-          projectStore.saveDirs().then(() => projectStore.initDirs())
-        }
-      }
-
-      emit('created', data?.projectPath ?? '')
-      show.value = false
+    const data = await controller.create({
+      name: form.name,
+      outputDir: form.outputDir,
+      template: form.template,
+      orgName: form.orgName,
+      flutterBin: form.flutterBin,
+      addToProjects: form.addToProjects,
+      payload: extraConfig
     })
+    if (data?.ok && show.value) {
+      emit('created', data.projectPath ?? '')
+      show.value = false
+    }
   }
 
   const closedFn = () => {
-    output.value = ''
     errs.name = ''
     errs.outputDir = ''
     packageSearch.value = ''

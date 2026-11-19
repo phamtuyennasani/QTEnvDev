@@ -41,6 +41,7 @@
             <p>{{ I18nT('flutter.androidSdkAfterInstall') }}</p>
           </el-alert>
 
+          <p v-for="error in errors" :key="error" role="alert">{{ error }}</p>
           <el-descriptions :column="1" border class="mb-4" size="small">
             <el-descriptions-item label="ANDROID_HOME">{{
               env.ANDROID_HOME || '-'
@@ -54,13 +55,26 @@
           </el-descriptions>
 
           <div class="mb-4 flex flex-wrap gap-2">
-            <el-button size="small" :loading="fixing" @click="runAutoFix('set-sdk-env')"
+            <el-button
+              size="small"
+              :loading="fixing"
+              :disabled="controller.fix.unknown"
+              @click="runAutoFix('set-sdk-env')"
               >Fix SDK Env</el-button
             >
-            <el-button size="small" :loading="fixing" @click="runAutoFix('add-platform-tools-path')"
+            <el-button
+              size="small"
+              :loading="fixing"
+              :disabled="controller.fix.unknown"
+              @click="runAutoFix('add-platform-tools-path')"
               >Fix PATH (platform-tools)</el-button
             >
-            <el-button size="small" type="primary" :loading="fixing" @click="runAutoFix('all')"
+            <el-button
+              size="small"
+              type="primary"
+              :loading="fixing"
+              :disabled="controller.fix.unknown"
+              @click="runAutoFix('all')"
               >Run All Auto-fix</el-button
             >
             <el-button size="small" :disabled="!sdkDir" @click="openSdkDir"
@@ -152,7 +166,11 @@
                         <el-button
                           size="small"
                           link
-                          :disabled="scope.row.id === targetDevice"
+                          :disabled="
+                            scope.row.id === targetDevice ||
+                            controller.deviceChange.running ||
+                            controller.deviceChange.unknown
+                          "
                           @click="runDeviceAction('set-target', scope.row)"
                           >Set as Target</el-button
                         >
@@ -160,6 +178,9 @@
                           size="small"
                           link
                           type="warning"
+                          :disabled="
+                            controller.deviceChange.running || controller.deviceChange.unknown
+                          "
                           @click="runDeviceAction('disconnect', scope.row)"
                           >Disconnect</el-button
                         >
@@ -236,7 +257,7 @@
                 </el-table>
                 <el-input
                   v-if="doctorRaw"
-                  v-model="doctorRaw"
+                  :model-value="doctorRaw"
                   type="textarea"
                   :rows="8"
                   readonly
@@ -273,18 +294,21 @@
                     size="small"
                     type="primary"
                     :loading="quickRunning"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runQuickAction('run')"
                     >flutter run</el-button
                   >
                   <el-button
                     size="small"
                     :loading="quickRunning"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runQuickAction('build-apk')"
                     >flutter build apk</el-button
                   >
                   <el-button
                     size="small"
                     :loading="quickRunning"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runQuickAction('build-appbundle')"
                     >flutter build appbundle</el-button
                   >
@@ -307,105 +331,58 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, reactive, ref } from 'vue'
-  import IPC from '@/util/IPC'
+  import { computed, ref, onMounted } from 'vue'
   import { MessageError, MessageSuccess } from '@/util/Element'
   import { clipboard, dialog, shell } from '@/util/NodeFn'
   import { I18nT } from '@lang/index'
   import { ElMessageBox } from 'element-plus'
-  import { AppStore } from '@/store/app'
-
-  type CheckItem = {
-    key: string
-    label: string
-    ok: boolean
-    value: string
-    hint: string
-  }
-
-  const loading = ref(false)
-  const devicesLoading = ref(false)
-  const doctorLoading = ref(false)
-  const fixing = ref(false)
-
-  const adbPath = ref('')
-  const flutterBin = ref('')
-  const doctorMessage = ref('')
-  const sdkDir = ref('')
-  const targetDevice = ref('')
-  const projectDir = ref('')
-  const quickRunning = ref(false)
-  const quickLog = ref('')
-
-  type DeviceItem = {
-    id: string
-    status: string
-    meta: string
-  }
-
-  const devicesSummary = reactive({
-    total: 0,
-    online: 0,
-    offline: 0,
-    unauthorized: 0,
-    other: 0
-  })
-
-  const devices = ref<DeviceItem[]>([])
+  import { flutterWorkbench as controller } from './WorkbenchController'
 
   type DoctorStatus = 'ok' | 'warning' | 'error' | 'unknown'
-
-  type DoctorItem = {
-    status: DoctorStatus
-    title: string
-    details: string[]
-  }
-
-  const doctorItems = ref<DoctorItem[]>([])
-  const doctorRaw = ref('')
-
-  const doctorSummary = reactive({
-    total: 0,
-    ok: 0,
-    warning: 0,
-    error: 0,
-    unknown: 0
-  })
-
-  const env = reactive({
-    ANDROID_HOME: '',
-    ANDROID_SDK_ROOT: '',
-    JAVA_HOME: ''
-  })
-
-  const summary = reactive({
-    passed: 0,
-    total: 0,
-    failed: 0
-  })
-
-  const checks = ref<CheckItem[]>([])
-  const appStore = AppStore()
-
+  const loading = computed(() => controller.readiness.loading)
+  const devicesLoading = computed(() => controller.devices.loading)
+  const doctorLoading = computed(() => controller.doctor.loading)
+  const fixing = computed(() => controller.fix.running)
+  const errors = computed(() =>
+    [controller.doctor.error, controller.readiness.error, controller.devices.error].filter(Boolean)
+  )
+  const adbPath = computed(() => controller.devices.data.adbPath)
+  const flutterBin = computed(() => controller.doctor.data.flutterBin)
+  const doctorMessage = computed(() => controller.doctor.data.message)
+  const checks = computed(() => controller.readiness.data.checks)
+  const sdkDir = computed(
+    () => checks.value.find((item) => item.key === 'sdk' && item.ok)?.value ?? ''
+  )
+  const targetDevice = computed(() => controller.devices.data.targetDevice)
+  const projectDir = ref('')
+  const quickRunning = computed(() => controller.command.running)
+  const quickLog = computed(() => controller.command.output)
+  const devices = computed(() => controller.devices.data.devices)
+  const devicesSummary = computed(() => controller.devices.data.summary)
+  const doctorItems = computed(() => controller.doctor.data.items)
+  const doctorRaw = computed(() => controller.doctor.data.raw)
+  const doctorSummary = computed(() => controller.doctor.data.summary)
+  const env = computed(() => controller.readiness.data.env)
+  const summary = computed(() => controller.readiness.data.summary)
   const summaryText = computed(() => {
-    if (!summary.total) {
+    if (!summary.value.total) {
       return 'No data yet'
     }
-    return `${summary.passed}/${summary.total} ready`
+    return `${summary.value.passed}/${summary.value.total} ready`
   })
 
   const devicesSummaryText = computed(() => {
-    if (!devicesSummary.total) {
+    if (!devicesSummary.value.total) {
       return 'No devices'
     }
-    return `${devicesSummary.online}/${devicesSummary.total} online`
+    return `${devicesSummary.value.online}/${devicesSummary.value.total} online`
   })
 
   const doctorSummaryText = computed(() => {
-    if (!doctorSummary.total) {
+    if (!doctorSummary.value.total) {
       return 'No checks'
     }
-    return `${doctorSummary.ok}/${doctorSummary.total} ok, ${doctorSummary.warning} warning, ${doctorSummary.error} error`
+    return `${doctorSummary.value.ok}/${doctorSummary.value.total} ok, ${doctorSummary.value.warning} warning, ${doctorSummary.value.error} error`
   })
 
   const doctorDisplayItems = computed(() => {
@@ -448,136 +425,27 @@
     return 'info'
   }
 
-  const fetchReadiness = () => {
-    if (loading.value) {
+  const fetchReadiness = () => controller.fetchReadiness()
+  const fetchDevices = () => controller.fetchDevices()
+  const fetchDoctor = () => controller.fetchDoctor()
+  const runDeviceAction = async (
+    action: 'set-target' | 'disconnect' | 'info',
+    row: { id: string }
+  ) => {
+    if (action !== 'info') {
+      await controller.runDeviceAction(action, row.id)
       return
     }
-    loading.value = true
-    IPC.send('app-fork:flutter', 'androidReadiness').then((key: string, res: any) => {
-      IPC.off(key)
-      loading.value = false
-      if (res?.code !== 0) {
-        MessageError(res?.msg ?? 'Failed to read Android toolchain status')
-        return
-      }
-      const data = res?.data ?? {}
-      env.ANDROID_HOME = data?.env?.ANDROID_HOME ?? ''
-      env.ANDROID_SDK_ROOT = data?.env?.ANDROID_SDK_ROOT ?? ''
-      env.JAVA_HOME = data?.env?.JAVA_HOME ?? ''
-
-      summary.passed = Number(data?.summary?.passed ?? 0)
-      summary.total = Number(data?.summary?.total ?? 0)
-      summary.failed = Number(data?.summary?.failed ?? 0)
-
-      checks.value = Array.isArray(data?.checks) ? data.checks : []
-      const sdkItem = checks.value.find((c) => c.key === 'sdk')
-      sdkDir.value = sdkItem?.ok ? sdkItem.value : ''
-    })
+    if (controller.deviceInfo.loading) return
+    await controller.deviceInfo.refresh('androidDeviceAction', ['info', row.id])
+    if (controller.deviceInfo.error) return MessageError(controller.deviceInfo.error)
+    const data = controller.deviceInfo.data
+    await ElMessageBox.alert(
+      'State: ' + data.state + '\n\n' + data.details,
+      'Device Info - ' + row.id,
+      { confirmButtonText: 'OK' }
+    ).catch(() => {})
   }
-
-  const fetchDevices = () => {
-    if (devicesLoading.value) {
-      return
-    }
-    devicesLoading.value = true
-    IPC.send('app-fork:flutter', 'androidDevices').then((key: string, res: any) => {
-      IPC.off(key)
-      devicesLoading.value = false
-      if (res?.code !== 0) {
-        MessageError(res?.msg ?? 'Failed to read Android devices')
-        return
-      }
-      const data = res?.data ?? {}
-      adbPath.value = data?.adbPath ?? ''
-      targetDevice.value = data?.targetDevice ?? ''
-      devices.value = Array.isArray(data?.devices) ? data.devices : []
-
-      devicesSummary.total = Number(data?.summary?.total ?? 0)
-      devicesSummary.online = Number(data?.summary?.online ?? 0)
-      devicesSummary.offline = Number(data?.summary?.offline ?? 0)
-      devicesSummary.unauthorized = Number(data?.summary?.unauthorized ?? 0)
-      devicesSummary.other = Number(data?.summary?.other ?? 0)
-    })
-  }
-
-  const runDeviceAction = (action: 'set-target' | 'disconnect' | 'info', row: DeviceItem) => {
-    const id = row?.id ?? ''
-    if (!id) {
-      return
-    }
-
-    IPC.send('app-fork:flutter', 'androidDeviceAction', action, id).then(
-      (key: string, res: any) => {
-        IPC.off(key)
-        if (res?.code !== 0) {
-          MessageError(res?.msg ?? 'Device action failed')
-          return
-        }
-
-        const data = res?.data ?? {}
-        const ok = !!data?.ok
-        const msg = `${data?.message ?? ''}`.trim()
-        if (!ok) {
-          MessageError(msg || 'Device action failed')
-          return
-        }
-
-        if (data?.targetDevice) {
-          targetDevice.value = data.targetDevice
-        }
-
-        if (action === 'info') {
-          const state = `${data?.state ?? '-'}`
-          const details = `${data?.details ?? '-'}`
-          const content = `State: ${state}\n\n${details}`
-          ElMessageBox.alert(content, `Device Info - ${id}`, {
-            confirmButtonText: 'OK'
-          })
-        } else {
-          MessageSuccess(msg || 'Device action completed')
-          fetchDevices()
-        }
-      }
-    )
-  }
-
-  const fetchDoctor = () => {
-    if (doctorLoading.value) {
-      return
-    }
-    doctorLoading.value = true
-    const timeout = setTimeout(() => {
-      if (doctorLoading.value) {
-        doctorLoading.value = false
-        MessageError('Flutter doctor request timed out')
-      }
-    }, 45000)
-
-    IPC.send(
-      'app-fork:flutter',
-      'flutterDoctor',
-      JSON.parse(JSON.stringify(appStore.config.setup))
-    ).then((key: string, res: any) => {
-      IPC.off(key)
-      clearTimeout(timeout)
-      doctorLoading.value = false
-      if (res?.code !== 0) {
-        MessageError(res?.msg ?? 'Failed to run flutter doctor')
-        return
-      }
-      const data = res?.data ?? {}
-      flutterBin.value = data?.flutterBin ?? ''
-      doctorMessage.value = data?.message ?? ''
-      doctorItems.value = Array.isArray(data?.items) ? data.items : []
-      doctorRaw.value = data?.raw ?? ''
-      doctorSummary.total = Number(data?.summary?.total ?? 0)
-      doctorSummary.ok = Number(data?.summary?.ok ?? 0)
-      doctorSummary.warning = Number(data?.summary?.warning ?? 0)
-      doctorSummary.error = Number(data?.summary?.error ?? 0)
-      doctorSummary.unknown = Number(data?.summary?.unknown ?? 0)
-    })
-  }
-
   const copyDoctorReport = () => {
     if (!doctorRaw.value) {
       return
@@ -595,43 +463,7 @@
     })
   }
 
-  const runAutoFix = (action: 'set-sdk-env' | 'add-platform-tools-path' | 'all') => {
-    if (fixing.value) {
-      return
-    }
-
-    fixing.value = true
-    IPC.send('app-fork:flutter', 'androidAutoFix', action).then((key: string, res: any) => {
-      IPC.off(key)
-      fixing.value = false
-      if (res?.code !== 0) {
-        MessageError(res?.msg ?? 'Android auto-fix failed')
-        return
-      }
-
-      const data = res?.data ?? {}
-      const ok = !!data?.ok
-      const baseMsg =
-        data?.message ?? (ok ? 'Auto-fix completed' : 'Auto-fix completed with issues')
-      if (ok) {
-        MessageSuccess(baseMsg)
-      } else {
-        const detail = Array.isArray(data?.results)
-          ? data.results
-              .filter((r: any) => !r?.ok)
-              .map((r: any) => r?.message)
-              .filter((s: string) => !!s)
-              .join('; ')
-          : ''
-        MessageError(detail ? `${baseMsg}: ${detail}` : baseMsg)
-      }
-
-      fetchReadiness()
-      fetchDevices()
-      fetchDoctor()
-    })
-  }
-
+  const runAutoFix = (action: string) => controller.runAutoFix(action)
   const chooseProjectDir = async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ['openDirectory', 'createDirectory', 'showHiddenFiles']
@@ -650,42 +482,10 @@
     })
   }
 
-  const runQuickAction = (action: 'run' | 'build-apk' | 'build-appbundle') => {
-    if (!projectDir.value) {
-      MessageError('Please select Flutter project directory first')
-      return
-    }
-    if (quickRunning.value) {
-      return
-    }
-
-    quickRunning.value = true
-    quickLog.value = `Running ${action}...\n`
-    IPC.send('app-fork:flutter', 'flutterQuickAction', action, projectDir.value).then(
-      (key: string, res: any) => {
-        IPC.off(key)
-        quickRunning.value = false
-        if (res?.code !== 0) {
-          quickLog.value += `${res?.msg ?? 'Command failed'}\n`
-          MessageError(res?.msg ?? 'Command failed')
-          return
-        }
-
-        const data = res?.data ?? {}
-        const output = `${data?.output ?? ''}`
-        quickLog.value = output || `${data?.message ?? ''}`
-        if (data?.ok) {
-          MessageSuccess(data?.message ?? 'Command completed')
-        } else {
-          MessageError(data?.message ?? 'Command failed')
-        }
-      }
-    )
-  }
-
-  fetchReadiness()
-  fetchDevices()
-  fetchDoctor()
+  const runQuickAction = (action: string) => controller.runQuickAction(action, projectDir.value)
+  onMounted(() => {
+    void Promise.allSettled([fetchReadiness(), fetchDevices(), fetchDoctor()])
+  })
 </script>
 
 <style scoped>

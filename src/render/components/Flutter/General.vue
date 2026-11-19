@@ -1,5 +1,6 @@
 <template>
   <div class="flutter-general">
+    <p v-for="error in errors" :key="error" role="alert">{{ error }}</p>
     <!-- ─── Status Bar ──────────────────────────────────────── -->
     <div class="fg-status-bar">
       <div
@@ -223,11 +224,17 @@
                     size="small"
                     type="primary"
                     :loading="running"
+                    :disabled="controller.command.unknown"
                     @click="runCmd('upgrade', '')"
                   >
                     flutter upgrade
                   </el-button>
-                  <el-button size="small" :loading="running" @click="runCmd('channel-list', '')">
+                  <el-button
+                    size="small"
+                    :loading="running"
+                    :disabled="controller.command.unknown"
+                    @click="runCmd('channel-list', '')"
+                  >
                     List channels
                   </el-button>
                 </div>
@@ -236,18 +243,21 @@
                   <el-button
                     size="small"
                     :loading="running"
+                    :disabled="controller.command.unknown"
                     @click="runCmd('channel-switch', 'stable')"
                     >stable</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
+                    :disabled="controller.command.unknown"
                     @click="runCmd('channel-switch', 'beta')"
                     >beta</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
+                    :disabled="controller.command.unknown"
                     @click="runCmd('channel-switch', 'master')"
                     >master</el-button
                   >
@@ -276,28 +286,28 @@
                     size="small"
                     type="primary"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('pub-get', projectDir)"
                     >pub get</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('pub-upgrade', projectDir)"
                     >pub upgrade</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('pub-outdated', projectDir)"
                     >pub outdated</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('pub-deps', projectDir)"
                     >pub deps</el-button
                   >
@@ -325,7 +335,7 @@
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('build-apk', projectDir)"
                     >APK debug</el-button
                   >
@@ -333,28 +343,28 @@
                     size="small"
                     type="primary"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('build-apk-release', projectDir)"
                     >APK release</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('build-web', projectDir)"
                     >Web</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('build-windows', projectDir)"
                     >Windows</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('clean', projectDir)"
                     >Clean</el-button
                   >
@@ -382,21 +392,21 @@
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('analyze', projectDir)"
                     >flutter analyze</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('test', projectDir)"
                     >flutter test</el-button
                   >
                   <el-button
                     size="small"
                     :loading="running"
-                    :disabled="!projectDir"
+                    :disabled="controller.command.unknown || !projectDir"
                     @click="runCmd('format', projectDir)"
                     >dart format</el-button
                   >
@@ -413,6 +423,7 @@
                     size="small"
                     type="primary"
                     :loading="running"
+                    :disabled="controller.command.unknown"
                     @click="runCmd('doctor', '')"
                   >
                     flutter doctor -v
@@ -436,9 +447,13 @@
               <el-button link size="small" :disabled="!output" @click="copyOutput">{{
                 I18nT('common.action.copy')
               }}</el-button>
-              <el-button link size="small" :disabled="!output" @click="output = ''">{{
-                I18nT('common.action.clear')
-              }}</el-button>
+              <el-button
+                link
+                size="small"
+                :disabled="!output || running"
+                @click="controller.command.output = ''"
+                >{{ I18nT('common.action.clear') }}</el-button
+              >
             </div>
           </div>
           <pre ref="consolePre" class="fg-console-pre">{{ output || I18nT('flutter.ready') }}</pre>
@@ -449,58 +464,39 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, nextTick, reactive, ref } from 'vue'
-  import IPC from '@/util/IPC'
-  import { MessageError, MessageSuccess } from '@/util/Element'
+  import { computed, nextTick, onMounted, ref, watch } from 'vue'
+  import { MessageSuccess } from '@/util/Element'
   import { I18nT } from '@lang/index'
   import { dialog, clipboard } from '@/util/NodeFn'
-  import { AppStore } from '@/store/app'
+  import { flutterWorkbench as controller } from './WorkbenchController'
 
-  const appStore = AppStore()
-
-  // ── SDK info ──────────────────────────────────────────────
-  const sdkLoading = ref(false)
-  const sdkInfo = reactive({
-    ok: false,
-    flutterBin: '',
-    source: '',
-    searchDirs: [] as string[],
-    flutterVersion: '',
-    dartVersion: '',
-    channel: '',
-    engineRevision: '',
-    buildDate: '',
-    raw: ''
-  })
-
-  // ── Doctor snapshot ───────────────────────────────────────
-  const doctorLoading = ref(false)
-  const doctorItems = ref<Array<{ status: string; title: string }>>([])
-
-  // ── Android / Env ─────────────────────────────────────────
-  const envVars = reactive({
-    ANDROID_HOME: '',
-    ANDROID_SDK_ROOT: '',
-    JAVA_HOME: '',
-    FLUTTER_ROOT: ''
-  })
-  const androidPassed = ref(0)
-  const androidTotal = ref(0)
-  const devicesOnline = ref(0)
-  const devicesTotal = ref(0)
-
-  // ── Commands ──────────────────────────────────────────────
-  const running = ref(false)
-  const activeCmd = ref('')
-  const output = ref('')
+  const sdkLoading = computed(() => controller.sdk.loading)
+  const sdkInfo = computed(() => controller.sdk.data)
+  const doctorLoading = computed(() => controller.doctor.loading)
+  const doctorItems = computed(() => controller.doctor.data.items)
+  const envVars = computed(() => ({ ...controller.readiness.data.env, FLUTTER_ROOT: '' }))
+  const androidPassed = computed(() => controller.readiness.data.summary.passed)
+  const androidTotal = computed(() => controller.readiness.data.summary.total)
+  const devicesOnline = computed(() => controller.devices.data.summary.online)
+  const devicesTotal = computed(() => controller.devices.data.summary.total)
+  const running = computed(() => controller.command.running)
+  const activeCmd = computed(() => controller.command.action)
+  const output = computed(() => controller.command.output)
+  const errors = computed(() =>
+    [
+      controller.sdk.error,
+      controller.doctor.error,
+      controller.readiness.error,
+      controller.devices.error
+    ].filter(Boolean)
+  )
   const showSearchDirs = ref(false)
   const projectDir = ref('')
   const cmdTab = ref('sdk')
   const consolePre = ref<HTMLElement | null>(null)
 
-  // ── Computed ──────────────────────────────────────────────
   const channelTagType = computed(() => {
-    const c = sdkInfo.channel
+    const c = sdkInfo.value.channel
     if (c === 'stable') return 'success'
     if (c === 'beta') return 'warning'
     if (c === 'master' || c === 'main') return 'danger'
@@ -508,7 +504,7 @@
   })
 
   const sourceLabel = computed(() => {
-    switch (sdkInfo.source) {
+    switch (sdkInfo.value.source) {
       case 'path':
         return I18nT('flutter.sourcePath')
       case 'default':
@@ -526,21 +522,25 @@
     {
       key: 'flutter',
       label: 'Flutter',
-      value: sdkInfo.flutterVersion || (sdkLoading.value ? 'Loading…' : 'Not found'),
-      ok: sdkInfo.flutterVersion ? true : false
+      value: sdkInfo.value.flutterVersion || (sdkLoading.value ? 'Loading…' : 'Not found'),
+      ok: sdkInfo.value.flutterVersion ? true : false
     },
     {
       key: 'dart',
       label: 'Dart',
-      value: sdkInfo.dartVersion || (sdkLoading.value ? 'Loading…' : 'Not found'),
-      ok: sdkInfo.dartVersion ? true : false
+      value: sdkInfo.value.dartVersion || (sdkLoading.value ? 'Loading…' : 'Not found'),
+      ok: sdkInfo.value.dartVersion ? true : false
     },
     {
       key: 'channel',
       label: 'Channel',
-      value: sdkInfo.channel || '—',
+      value: sdkInfo.value.channel || '—',
       ok:
-        sdkInfo.channel === 'stable' ? true : sdkInfo.channel ? (null as unknown as boolean) : false
+        sdkInfo.value.channel === 'stable'
+          ? true
+          : sdkInfo.value.channel
+            ? (null as unknown as boolean)
+            : false
     },
     {
       key: 'android',
@@ -569,115 +569,17 @@
   ])
 
   // ── IPC helper ────────────────────────────────────────────
-  const sendFlutter = (fn: string, ...args: any[]) =>
-    new Promise<any>((resolve) => {
-      IPC.send('app-fork:flutter', fn, ...args).then((key: string, res: any) => {
-        IPC.off(key)
-        resolve(res)
-      })
-    })
 
-  // ── Loaders ───────────────────────────────────────────────
-  const loadSdkInfo = async () => {
-    if (sdkLoading.value) return
-    sdkLoading.value = true
+  const loadSdkInfo = () => {
     showSearchDirs.value = false
-    const setup = JSON.parse(JSON.stringify(appStore.config.setup))
-    const res = await sendFlutter('flutterSdkInfo', setup)
-    sdkLoading.value = false
-    if (res?.code === 0) {
-      Object.assign(sdkInfo, res.data ?? {})
-    }
+    return controller.loadSdkInfo()
   }
-
-  const loadDoctor = async () => {
-    if (doctorLoading.value) return
-    doctorLoading.value = true
-    const setup = JSON.parse(JSON.stringify(appStore.config.setup))
-    const res = await sendFlutter('flutterDoctor', setup)
-    doctorLoading.value = false
-    if (res?.code === 0) {
-      doctorItems.value = res.data?.items ?? []
-    }
-  }
-
-  const loadAndroid = async () => {
-    const [rRes, dRes] = await Promise.all([
-      sendFlutter('androidReadiness'),
-      sendFlutter('androidDevices')
-    ])
-    if (rRes?.code === 0) {
-      const s = rRes.data?.summary ?? {}
-      androidPassed.value = Number(s.passed ?? 0)
-      androidTotal.value = Number(s.total ?? 0)
-      const env = rRes.data?.env ?? {}
-      envVars.ANDROID_HOME = env.ANDROID_HOME ?? ''
-      envVars.ANDROID_SDK_ROOT = env.ANDROID_SDK_ROOT ?? ''
-      envVars.JAVA_HOME = env.JAVA_HOME ?? ''
-      envVars.FLUTTER_ROOT = ''
-    }
-    if (dRes?.code === 0) {
-      const s = dRes.data?.summary ?? {}
-      devicesOnline.value = Number(s.online ?? 0)
-      devicesTotal.value = Number(s.total ?? 0)
-    }
-  }
-
-  // ── Commands ──────────────────────────────────────────────
-  type AdvancedAction =
-    | 'doctor'
-    | 'upgrade'
-    | 'channel-list'
-    | 'channel-switch'
-    | 'pub-get'
-    | 'pub-upgrade'
-    | 'pub-outdated'
-    | 'pub-deps'
-    | 'clean'
-    | 'analyze'
-    | 'test'
-    | 'format'
-    | 'build-apk'
-    | 'build-apk-release'
-    | 'build-web'
-    | 'build-windows'
-
-  const runCmd = async (action: AdvancedAction, arg: string) => {
-    if (running.value) return
-    running.value = true
-    activeCmd.value = action
-    output.value = `$ flutter ${action}${arg ? `  (${arg})` : ''}\n${'─'.repeat(48)}\n`
-
-    const setup = JSON.parse(JSON.stringify(appStore.config.setup))
-    const res = await sendFlutter('flutterAdvancedAction', action, arg, setup)
-
-    running.value = false
-    activeCmd.value = ''
-
-    if (res?.code !== 0) {
-      output.value += res?.msg ?? 'IPC error'
-      MessageError(res?.msg ?? 'IPC error')
-      return
-    }
-
-    const data = res?.data ?? {}
-    output.value += data?.output ?? data?.message ?? ''
-
+  const loadDoctor = () => controller.fetchDoctor()
+  const runCmd = (action: string, arg: string) => controller.runCommand(action, arg)
+  watch(output, async () => {
     await nextTick()
-    if (consolePre.value) {
-      consolePre.value.scrollTop = consolePre.value.scrollHeight
-    }
-
-    if (data?.ok) {
-      MessageSuccess(data?.message ?? 'Done')
-      if (action === 'upgrade' || action === 'channel-switch') {
-        loadSdkInfo()
-      }
-    } else {
-      MessageError(data?.message ?? 'Command failed')
-    }
-  }
-
+    if (consolePre.value) consolePre.value.scrollTop = consolePre.value.scrollHeight
+  })
   const chooseDir = async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ['openDirectory', 'createDirectory', 'showHiddenFiles']
@@ -694,13 +596,19 @@
   }
 
   const copySearchDirs = () => {
-    if (!sdkInfo.searchDirs.length) return
-    clipboard.writeText(sdkInfo.searchDirs.join('\n'))
+    if (!sdkInfo.value.searchDirs.length) return
+    clipboard.writeText(sdkInfo.value.searchDirs.join('\n'))
     MessageSuccess(I18nT('flutter.copiedToClipboard'))
   }
 
-  // ── Init ──────────────────────────────────────────────────
-  Promise.all([loadSdkInfo(), loadDoctor(), loadAndroid()])
+  onMounted(() => {
+    void Promise.allSettled([
+      loadSdkInfo(),
+      loadDoctor(),
+      controller.fetchReadiness(),
+      controller.fetchDevices()
+    ])
+  })
 </script>
 
 <style lang="scss" scoped>

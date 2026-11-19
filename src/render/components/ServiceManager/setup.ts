@@ -129,19 +129,13 @@ export const Setup = (typeFlag: AllAppModule) => {
     })
   }
 
-  let CustomPathVM: any
-  import('./customPath.vue').then((res) => {
-    CustomPathVM = res.default
-  })
-  const showCustomDir = () => {
-    AsyncComponentShow(CustomPathVM, {
-      flag: typeFlag
-    }).then((res) => {
-      if (res) {
-        console.log('showCustomDir chagned !!!')
-        resetData()
-      }
-    })
+  const showCustomDir = async () => {
+    try {
+      const { default: CustomPath } = await import('./customPath.vue')
+      if (await AsyncComponentShow(CustomPath, { flag: typeFlag })) resetData()
+    } catch (error) {
+      MessageError(error instanceof Error ? error.message : String(error))
+    }
   }
 
   let PhpMyAdminVM: any

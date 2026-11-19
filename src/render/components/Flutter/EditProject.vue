@@ -20,7 +20,7 @@
         <el-button
           type="primary"
           :loading="saving"
-          :disabled="saving || !projectPath"
+          :disabled="controller.write.unknown || saving || !projectPath"
           @click="doSave"
         >
           {{ I18nT('common.action.save') }}
@@ -272,12 +272,11 @@
 <script lang="ts" setup>
   import { computed, reactive, ref } from 'vue'
   import { I18nT } from '@lang/index'
-  import IPC from '@/util/IPC'
-  import { MessageError, MessageSuccess } from '@/util/Element'
+  import { flutterProjects as controller } from './ProjectController'
+  import { MessageError } from '@/util/Element'
   import { AppStore } from '@/store/app'
   import { dialog } from '@/util/NodeFn'
   import { BrewStore } from '@/store/brew'
-  import { ProjectSetup } from '@/components/LanguageProjects/setup'
 
   const props = defineProps<{ modelValue: boolean; projectPath: string }>()
   const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void }>()
@@ -297,8 +296,8 @@
   )
 
   const projectPath = ref('')
-  const output = ref('')
-  const saving = ref(false)
+  const output = computed(() => controller.write.output)
+  const saving = computed(() => controller.write.running)
   const loadingPackages = ref(false)
 
   const firebaseKeys = ['android', 'ios', 'web', 'windows', 'linux', 'macos']
@@ -348,17 +347,7 @@
   const packageResults = ref<Array<{ name: string; latest: string; description: string }>>([])
   const showPreview = ref(false)
 
-  const sendFlutter = (fn: string, ...args: any[]) =>
-    new Promise<any>((resolve) => {
-      IPC.send('app-fork:flutter', fn, ...args).then((key: string, res: any) => {
-        IPC.off(key)
-        if (res?.code === 0) {
-          resolve(res?.data ?? {})
-          return
-        }
-        resolve({ ok: false, message: res?.msg ?? 'IPC error' })
-      })
-    })
+  const sendFlutter = controller.read
 
   const sanitizeName = () => {
     form.projectName = form.projectName.replace(/[^a-z0-9_]/gi, '_').toLowerCase()
@@ -450,7 +439,6 @@
 
   const onOpened = async () => {
     projectPath.value = props.projectPath || ''
-    output.value = ''
     packageResults.value = []
     packageSearch.value = ''
     if (!projectPath.value) {
@@ -496,10 +484,6 @@
       return
     }
 
-    saving.value = true
-    output.value = `${I18nT('flutter.applyingSettings')}...\n`
-
-    const setup = JSON.parse(JSON.stringify(appStore.config.setup))
     const payload = {
       projectName: form.projectName,
       orgName: form.orgName,
@@ -515,36 +499,11 @@
       flutterBin: form.flutterBin
     }
 
-    try {
-      const res = await sendFlutter('flutterApplyProjectConfig', projectPath.value, payload, setup)
-      if (!res?.ok) {
-        MessageError(res?.message ?? I18nT('flutter.saveFailed'))
-        output.value += res?.message ?? I18nT('flutter.saveFailed')
-        return
-      }
-
-      output.value += `${res?.output ?? ''}`
-      if (Array.isArray(res?.warnings) && res.warnings.length) {
-        output.value += `\nWarnings:\n- ${res.warnings.join('\n- ')}`
-      }
-
-      outdated.value = Array.isArray(res?.outdated) ? res.outdated : outdated.value
-
-      const projectStore = ProjectSetup('flutter')
-      const find = projectStore.project.find((p) => p.path === projectPath.value)
-      if (find) {
-        const selectedVersion = installedVersions.value.find((v) => v.bin === form.flutterBin)
-        find.binBin = form.flutterBin || ''
-        find.binVersion = selectedVersion?.version ?? ''
-        find.binPath = selectedVersion?.path ?? ''
-        projectStore.saveProject()
-        projectStore.setDirEnv(find).catch()
-      }
-
-      MessageSuccess(I18nT('flutter.saveSuccess'))
+    const path = projectPath.value
+    const result = await controller.save(path, payload, form.flutterBin)
+    if (result?.ok && show.value && path === projectPath.value) {
+      outdated.value = Array.isArray(result.outdated) ? result.outdated : outdated.value
       show.value = false
-    } finally {
-      saving.value = false
     }
   }
 

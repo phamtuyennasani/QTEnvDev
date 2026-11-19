@@ -256,6 +256,11 @@ assert.match(serviceActionStoreSource, /ServiceActionStore\.fetchPathing = false
 assert.doesNotMatch(nextSource('screens/RuntimesScreen.vue'), /IPC\.send|updatePath\(|fetchInstalled\(/)
 assert.doesNotMatch(nextSource('serviceVersions/InstalledVersionsDialog.vue'), /IPC\.send|updatePath\(/)
 
+for (const view of ['General', 'AndroidToolchain', 'CreateProject', 'EditProject']) {
+  const source = readFileSync(join(componentsDir, `Flutter/${view}.vue`), 'utf8')
+  assert.doesNotMatch(source, /IPC\.send|forkTerminalRequest\(/)
+}
+
 const versionDeleteDialog = readFileSync(
   join(componentsDir, 'ServiceManager/delDialog.vue'),
   'utf8'
