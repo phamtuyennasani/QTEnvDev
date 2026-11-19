@@ -462,9 +462,14 @@ X-GNOME-Autostart-enabled=true`
     this?.mainWindow?.webContents.send('command', command, key, true)
   }
 
-  shell_openPath(command: string, key: string, path: string) {
-    shell.openPath(path).then().catch()
-    this?.mainWindow?.webContents.send('command', command, key, true)
+  async shell_openPath(command: string, key: string, path: string) {
+    let error: string
+    try {
+      error = await shell.openPath(path)
+    } catch (caught) {
+      error = caught instanceof Error ? caught.message : String(caught)
+    }
+    this.mainWindow?.webContents.send('command', command, key, error)
   }
 
   shell_openExternal(command: string, key: string, url: string) {

@@ -15,9 +15,11 @@ assert.match(nextSource('websites/WebsiteController.ts'), /private mutation\?: P
 assert.match(nextSource('websites/WebsiteController.ts'), /WebsiteOutcomeUnknown/)
 for (const file of [
   'screens/WebsitesScreen.vue', 'websites/WebsiteEditor.vue', 'websites/TomcatWebsiteEditor.vue',
+  'websites/WebsiteFilesDialog.vue', 'components/ServiceFilesDialog.vue',
+  'websites/NginxRewriteField.vue',
   'screens/DatabasesScreen.vue', 'screens/CronScreen.vue', 'components/HomebrewPackagePanel.vue',
   'screens/HttpServeScreen.vue', 'components/SdkmanPackagePanel.vue', 'components/MacPortsPackagePanel.vue',
-  'custom-modules/CustomModulesSettings.vue'
+  'custom-modules/CustomModulesSettings.vue', 'components/VhostTemplatePanel.vue'
 ]) {
   assert.doesNotMatch(nextSource(file), /IPC\.send|from ['"]@\/util\/IPC/)
 }
@@ -31,6 +33,10 @@ assert.match(nextSource('custom-modules/customModulesController.ts'), /reactiveB
 assert.match(nextSource('screens/CronScreen.vue'), /cronController as controller/)
 assert.match(nextSource('state/cronController.ts'), /forkTerminalRequest\(/)
 assert.match(nextSource('websites/TomcatWebsiteEditor.vue'), /projectController\.save\(/)
+assert.match(nextSource('websites/WebsiteFilesDialog.vue'), /websiteFileController\.openExternal\(/)
+assert.match(nextSource('state/serviceFilesController.ts'), /Project\.openPath\(/)
+assert.match(nextSource('components/VhostTemplatePanel.vue'), /vhostTemplateController as controller/)
+assert.match(nextSource('websites/rewriteTemplatesController.ts'), /forkTerminalRequest\(/)
 assert.match(nextSource('screens/DatabasesScreen.vue'), /serviceController\.run/)
 assert.match(nextSource('screens/DatabasesScreen.vue'), /database\?\.state === 'running'/)
 assert.match(nextSource('state/databaseAdminController.ts'), /await dbGatePanel\.open\(\)/)

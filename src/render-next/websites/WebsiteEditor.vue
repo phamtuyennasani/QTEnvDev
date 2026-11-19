@@ -154,15 +154,11 @@
         >
       </template>
       <template v-else>
-        <label v-if="!form.type || form.type === 'php'"
-          >Nginx rewrite<textarea
-            v-model="form.nginx.rewrite"
-            class="website-code"
-            rows="6"
-            placeholder="try_files $uri $uri/ /index.php?$query_string;"
-            spellcheck="false"
-          />
-        </label>
+        <NginxRewriteField
+          v-if="!form.type || form.type === 'php'"
+          v-model="form.nginx.rewrite"
+          :disabled="busy"
+        />
         <div class="website-section-heading"
           ><b>Reverse proxies</b
           ><button
@@ -205,6 +201,7 @@
 </template>
 <script setup lang="ts">
   import LocalCertificateHelp from './LocalCertificateHelp.vue'
+  import NginxRewriteField from './NginxRewriteField.vue'
   import { computed, ref } from 'vue'
   import { BrewStore } from '@/store/brew'
   import ForgeDialog from '../components/ForgeDialog.vue'
