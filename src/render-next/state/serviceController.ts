@@ -34,10 +34,11 @@ const runGroup = async () => {
   const pending = services.filter((service) => service.state !== 'running' && service.state !== 'busy')
   const results = []; for (const service of pending) results.push(await run(service, 'Start')); return { completed: results.filter(Boolean).length, failed: results.filter((item) => !item).length }
 }
-const refresh = async () => {
-  await Promise.all(services.map(async (service) => {
+const refresh = async (targets = services) => {
+  await Promise.all(targets.map(async (service) => {
     if (service.state === 'busy') return
     const snapshot = await readServiceSnapshot(service.name)
+    if (activeOperations.has(service)) return
     if (!snapshot.connected) { service.state = snapshot.reason === 'unavailable' ? 'unavailable' : 'unknown'; service.version = '—'; service.uptime = undefined; service.port = undefined; return }
     service.state = !snapshot.installed ? 'not-installed' : snapshot.running ? 'running' : 'stopped'
     service.version = snapshot.version || '—'
