@@ -1312,12 +1312,12 @@ datadir=${dataDir}`
         return reject(new Error(I18nT('mysql.saveDirError')))
       }
 
-      let bin = ''
-      if (isWindows()) {
-        bin = join(dirname(version.bin), 'mariadb-dump.exe')
-      } else {
-        bin = join(dirname(version.bin), 'mariadb-dump')
-      }
+      const directory = dirname(version.bin)
+      const extension = isWindows() ? '.exe' : ''
+      const currentDump = join(directory, 'mariadb-dump' + extension)
+      const legacyDump = join(directory, 'mysqldump' + extension)
+      const bin = existsSync(currentDump) ? currentDump : legacyDump
+      if (!existsSync(bin)) return reject(new Error('The selected MariaDB installation has no dump client.'))
 
       const v = version?.version?.split('.')?.slice(0, 2)?.join('.') ?? ''
       const m = join(global.Server.MariaDBDir!, `my-${v}.cnf`)

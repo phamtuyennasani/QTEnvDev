@@ -74,6 +74,7 @@
     "test:pqt-forge-native-apache": "tsx scripts/pqt-forge-native-apache-test.ts",
     "test:pqt-forge-native-nginx": "tsx scripts/pqt-forge-native-nginx-test.ts",
     "test:pqt-forge-native-caddy": "tsx scripts/pqt-forge-native-caddy-test.ts",
+    "test:pqt-forge-native-database": "tsx scripts/pqt-forge-native-database-test.ts",
     "test:pqt-forge-native-tomcat": "tsx scripts/pqt-forge-native-tomcat-test.ts",
     "test:pqt-forge-website-backup": "tsx scripts/pqt-forge-website-backup-test.ts",
     "test:pqt-forge-phase2": "tsx scripts/pqt-forge-phase2-smoke.ts",
