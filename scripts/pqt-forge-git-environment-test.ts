@@ -3,7 +3,12 @@ import { reactive } from 'vue'
 import { loadIsolated } from './helpers/load-isolated'
 
 class TerminalExitError extends Error {
-  constructor(message: string, public exitCode?: number) { super(message) }
+  constructor(
+    message: string,
+    public exitCode?: number
+  ) {
+    super(message)
+  }
 }
 
 const terminals: FakeTerminal[] = []
@@ -16,14 +21,33 @@ class FakeTerminal {
   stopped = 0
   released = 0
   destroyed = false
-  constructor() { terminals.push(this) }
-  async initialize() { this.ptyKey = 'fixture' }
-  async mount(element: object) { this.dom = element }
-  unmounted() { this.dom = undefined }
-  destroy() { this.destroyed = true; this.unmounted() }
-  releaseProcessOutput() { this.released++ }
-  send(...args: unknown[]) { this.request = args; return this.outcome.promise }
-  async stop() { this.stopped++; this.outcome.resolve(true) }
+  constructor() {
+    terminals.push(this)
+  }
+  async initialize() {
+    this.ptyKey = 'fixture'
+  }
+  async mount(element: object) {
+    this.dom = element
+  }
+  unmounted() {
+    this.dom = undefined
+  }
+  destroy() {
+    this.destroyed = true
+    this.unmounted()
+  }
+  releaseProcessOutput() {
+    this.released++
+  }
+  send(...args: unknown[]) {
+    this.request = args
+    return this.outcome.promise
+  }
+  async stop() {
+    this.stopped++
+    this.outcome.resolve(true)
+  }
 }
 
 const server = { isWindows: true, isMacOS: false, isLinux: false, BrewCellar: '', MacPorts: '' }
@@ -48,7 +72,9 @@ const { gitEnvironment: controller } = await loadIsolated(
         }
         assert.equal(command, 'check')
         if (diagnosticFails) throw new Error('SSH diagnostics unavailable')
-        return { items: [{ label: 'Git version', ok: true, value: 'git --version', message: '2.54.0' }] }
+        return {
+          items: [{ label: 'Git version', ok: true, value: 'git --version', message: '2.54.0' }]
+        }
       }
     }
   },
@@ -62,9 +88,13 @@ const failed = controller.start('winget')
 assert.equal(controller.start('winget'), failed)
 await finishTurn()
 const terminal = terminals[0]
-assert.deepEqual(JSON.parse(JSON.stringify(terminal.request)), [[
-  'winget.exe install --id Git.Git --exact --source winget --accept-source-agreements --accept-package-agreements'
-], 'direct', true])
+assert.deepEqual(JSON.parse(JSON.stringify(terminal.request)), [
+  [
+    'winget.exe install --id Git.Git --exact --source winget --accept-source-agreements --accept-package-agreements'
+  ],
+  'direct',
+  true
+])
 const firstView = {}
 const nextView = {}
 await controller.attach(firstView)
@@ -110,9 +140,22 @@ assert.equal(controller.phase, 'succeeded')
 assert.equal(controller.items.length, 1)
 
 // The Apple installer only opens the separate system dialog. It does not wait for Git.
-Object.assign(server, { isWindows: false, isMacOS: true, BrewCellar: '/opt/homebrew/Cellar', MacPorts: '/opt/local/bin/port' })
-assert.deepEqual(Array.from(controller.methods, ({id}: { id: string }) => id), ['xcode', 'brew', 'port'])
+Object.assign(server, {
+  isWindows: false,
+  isMacOS: true,
+  BrewCellar: '/opt/homebrew/Cellar',
+  MacPorts: '/opt/local/bin/port'
+})
+assert.deepEqual(
+  Array.from(controller.methods, ({ id }: { id: string }) => id),
+  ['xcode', 'brew', 'port']
+)
 Object.assign(server, { isMacOS: false, isLinux: true })
-assert.deepEqual(Array.from(controller.methods, ({id}: { id: string }) => id), ['system', 'brew'])
+assert.deepEqual(
+  Array.from(controller.methods, ({ id }: { id: string }) => id),
+  ['system', 'brew']
+)
 
-console.log('Git environment passed: detection, valid providers, detached terminal, process failure, cancellation and successful installation with failed discovery.')
+console.log(
+  'Git environment passed: detection, valid providers, detached terminal, process failure, cancellation and successful installation with failed discovery.'
+)

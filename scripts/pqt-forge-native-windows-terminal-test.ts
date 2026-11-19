@@ -11,7 +11,13 @@ if (process.platform !== 'win32') {
 const { default: nodePty } = await loadIsolated('src/main/core/NodePTY.ts', {
   '../utils': { uuid: randomUUID },
   '@shared/EnvSync': {
-    PowerShellPath: join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe'),
+    PowerShellPath: join(
+      process.env.SystemRoot ?? 'C:\\Windows',
+      'System32',
+      'WindowsPowerShell',
+      'v1.0',
+      'powershell.exe'
+    ),
     sync: async () => ({ ...process.env })
   },
   '@shared/utils': { isWindows: () => true, isMacOS: () => false, isLinux: () => false }
@@ -22,12 +28,24 @@ try {
     const expectedKey = `native-exit-${exitCode}`
     const terminal = await nodePty.initNodePty()
     const result = Promise.withResolvers<{ code: number; data: { exitCode: number } }>()
-    nodePty.onSendCommand((_command: string, key: string, payload: { code: number; data: { exitCode: number } }) => {
-      if (key === expectedKey) result.resolve(payload)
-    })
-    const timeout = setTimeout(() => result.reject(new Error('PowerShell never reported a native process exit.')), 15_000)
+    nodePty.onSendCommand(
+      (_command: string, key: string, payload: { code: number; data: { exitCode: number } }) => {
+        if (key === expectedKey) result.resolve(payload)
+      }
+    )
+    const timeout = setTimeout(
+      () => result.reject(new Error('PowerShell never reported a native process exit.')),
+      15_000
+    )
     try {
-      await nodePty.exec(terminal, [`cmd.exe /d /c exit ${exitCode}`], 'direct', 'NodePty:exec', expectedKey, true)
+      await nodePty.exec(
+        terminal,
+        [`cmd.exe /d /c exit ${exitCode}`],
+        'direct',
+        'NodePty:exec',
+        expectedKey,
+        true
+      )
       const reply = await result.promise
       assert.equal(reply.code, exitCode ? 1 : 0)
       assert.equal(reply.data.exitCode, exitCode)
@@ -36,7 +54,9 @@ try {
       clearTimeout(timeout)
     }
   }
-  console.log('Windows PowerShell PTY preserved native exit codes 0 and 23 and removed both terminal handles.')
+  console.log(
+    'Windows PowerShell PTY preserved native exit codes 0 and 23 and removed both terminal handles.'
+  )
 } finally {
   nodePty.exitAllPty()
 }

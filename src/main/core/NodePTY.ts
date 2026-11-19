@@ -176,6 +176,9 @@ class NodePTY {
       if (item?.pty?.pid) {
         process.kill(item?.pty?.pid)
       }
+    } catch {}
+    try {
+      // An exited shell can still have console handles owned by node-pty.
       item?.pty?.kill()
     } catch {}
     delete this.pty[key]
