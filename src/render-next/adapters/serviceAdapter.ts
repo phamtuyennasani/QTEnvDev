@@ -46,6 +46,18 @@ export const serviceModuleFlags: Record<string, AllAppModule> = {
 
 type Lifecycle = 'start' | 'stop' | 'restart'
 export type AdapterResult = { connected: boolean; result: string | boolean; warning?: string }
+export type ServiceVersionTarget = { bin: string; version: string }
+
+export function canRestartServiceVersion(name: string, target: ServiceVersionTarget, requireUniqueRunningVersion = false) {
+  const flag = serviceModuleFlags[name]
+  if (!flag || flag === 'cloudflare-tunnel' || !window.Server?.DataDirectoryReady) return false
+  const module = BrewStore().module(flag === 'php-fpm' ? 'php' : flag)
+  const item = module.installed.find((version) => version.bin === target.bin && version.version === target.version)
+  if (!item?.run || !item.pid || item.running) return false
+  if (module.isOnlyRunOne && (module.starting || module.installed.some((version) => version.running))) return false
+  if (requireUniqueRunningVersion && module.installed.some((version) => version.bin !== target.bin && version.version === target.version && version.run)) return false
+  return true
+}
 export function currentServiceVersion(name: string) {
   const flag = serviceModuleFlags[name]
   if (!flag) return undefined
@@ -73,21 +85,27 @@ export async function serviceFileContext(flag: AllAppModule, version?: SoftInsta
  * UI modules independent from legacy component instances while reusing the
  * established ModuleInstalledItem lifecycle when the host has initialized it.
  */
-export async function runServiceLifecycle(name: string, action: Lifecycle): Promise<AdapterResult> {
+export async function runServiceLifecycle(name: string, action: Lifecycle, restartTarget?: ServiceVersionTarget): Promise<AdapterResult> {
   const flag = serviceModuleFlags[name]
   if (!flag || !window.Server?.DataDirectoryReady) return { connected: false, result: 'The service is unavailable or the desktop connection is not ready.' }
   try {
     if (flag === 'cloudflare-tunnel') {
+      if (restartTarget) return { connected: true, result: 'This service has no restartable installed version.' }
       const { changeCloudflareTunnels } = await import('../cloudflareTunnel/lifecycle')
       return { connected: true, result: await changeCloudflareTunnels(action) }
     }
     const module = BrewStore().module(flag === 'php-fpm' ? 'php' : flag)
     if (!await module.fetchInstalled(false, { fresh: false })) throw new Error('Installed versions could not be refreshed.')
     await registerLifecycle(flag)
+    if (restartTarget && !canRestartServiceVersion(name, restartTarget)) {
+      return { connected: true, result: 'The selected installation is no longer running or is busy.' }
+    }
     const running = action !== 'start'
       ? module.installed.find((version) => version.run)
       : undefined
-    const item = running ?? BrewStore().currentVersion(flag) ?? module.installed[0]
+    const item = restartTarget
+      ? module.installed.find((version) => version.bin === restartTarget.bin && version.version === restartTarget.version)
+      : running ?? BrewStore().currentVersion(flag) ?? module.installed[0]
     if (!item) return { connected: true, result: 'No installed version. Open Manage packages to install one first.' }
     if (flag === 'mysql') {
       const { runMysqlServiceLifecycle } = await import('@/components/Mysql/serviceLifecycle')

@@ -62,11 +62,41 @@ let missingRead: string | Error = missingFile()
 const writes: Array<[string, string]> = []
 const launches: Array<[string, string]> = []
 const notices: string[] = []
+let onWrite: (() => void) | undefined
+let finishRestart!: (result: true | string) => void
+let restartRequests = 0
+const openedVersion = {
+  bin: '/fixture/apache-a/bin/httpd', version: '2.4.62', run: true, pid: '101', running: false,
+  restart: () => new Promise<true | string>((resolve) => { restartRequests++; finishRestart = resolve })
+}
+const otherVersion = {
+  bin: '/fixture/apache-b/bin/httpd', version: '2.4.62', run: true, pid: '102', running: false,
+  restart: () => assert.fail('Restart must not switch to the other binary')
+}
+let currentVersion = openedVersion
+const serviceAdapter = await loadIsolated('src/render-next/adapters/serviceAdapter.ts', {
+  '@/store/brew': { BrewStore: () => ({
+    module: () => ({ installed: [openedVersion, otherVersion], fetchInstalled: async () => true }),
+    currentVersion: () => currentVersion
+  }) },
+  './lifecycleAdapter': { registerLifecycle: async () => undefined }
+}, { window: { Server: { DataDirectoryReady: true } } })
 let finishImport!: (result: { canceled: boolean; filePaths: string[] }) => void
 let finishExport!: (result: { canceled: boolean; filePath?: string }) => void
 let finishLaunch!: (result: string | true) => void
 const { ServiceFilesController } = await loadIsolated('src/render-next/state/serviceFilesController.ts', {
-  '@/util/IPC': {},
+  '@/util/IPC': {
+    send: (_channel: string, method: string) => {
+      assert.equal(method, 'listConfigFiles')
+      const key = 'configuration-list'
+      return {
+        key,
+        then: (reply: (key: string, value: unknown) => void) =>
+          reply(key, { code: 0, data: [{ name: 'Main config', path: '/second', exists: true }] })
+      }
+    },
+    off: () => undefined
+  },
   '@/util/NodeFn': {
     dialog: {
       showOpenDialog: () => new Promise((resolve) => { finishImport = resolve }),
@@ -89,7 +119,7 @@ const { ServiceFilesController } = await loadIsolated('src/render-next/state/ser
         }
         return contents
       },
-      writeFile: async (file: string, data: string) => { writes.push([file, data]); contents = data }
+      writeFile: async (file: string, data: string) => { writes.push([file, data]); contents = data; onWrite?.() }
     },
     shell: {}
   },
@@ -100,7 +130,7 @@ const { ServiceFilesController } = await loadIsolated('src/render-next/state/ser
     }
   } },
   '../packages/types': { packageError: String },
-  '../adapters/serviceAdapter': {},
+  '../adapters/serviceAdapter': serviceAdapter,
   './app': { showNotice: (message: string) => notices.push(message) }
 })
 const editor = new ServiceFilesController()
@@ -245,4 +275,62 @@ await editor.select({ name: 'Different config', path: '/different', kind: 'confi
 finishImport({ canceled: false, filePaths: ['/import'] })
 assert.equal(await staleImport, false)
 assert.equal(editor.content, contents)
-console.log('Service files passed: bounded native tail, external editor lifecycle, stale reads, edit conflicts, and missing configuration restoration.')
+
+const openRestartConfig = () => editor.open('Apache', openedVersion, 'config', undefined, async (version: { bin: string }) => {
+  assert.equal(version.bin, openedVersion.bin)
+  return [configuration]
+})
+await editor.open('Apache', '2.4.62', 'config')
+assert.equal(editor.canRestart, false, 'a version string cannot distinguish two running binaries')
+otherVersion.run = false
+await editor.open('Apache', '2.4.62', 'config')
+assert.equal(editor.canRestart, true, 'a distinct running version comes from the same binary as the listed configuration')
+otherVersion.run = true
+await openRestartConfig()
+assert.equal(editor.canRestart, true)
+currentVersion = otherVersion
+editor.content = 'saved without restart'
+assert.equal(await editor.save(), true)
+assert.equal(restartRequests, 0)
+
+editor.content = 'saved before restart failed'
+const restart = editor.saveAndRestart()
+assert.equal(await editor.saveAndRestart(), false)
+await new Promise((resolve) => setImmediate(resolve))
+assert.equal(restartRequests, 1)
+assert.equal(editor.restarting, true)
+assert.equal(contents, 'saved before restart failed')
+assert.equal(editor.warning, 'Configuration saved.')
+finishRestart('The process failed to start.')
+assert.equal(await restart, true)
+assert.match(editor.warning, /Configuration saved.*Restart failed.*failed to start/)
+assert.equal(editor.canSave, false)
+
+openedVersion.running = true
+assert.equal(editor.canRestart, false)
+openedVersion.running = false
+openedVersion.pid = ''
+assert.equal(editor.canRestart, false)
+openedVersion.pid = '101'
+editor.content = 'saved after target stopped'
+onWrite = () => { openedVersion.run = false }
+assert.equal(await editor.saveAndRestart(), true)
+onWrite = undefined
+assert.equal(restartRequests, 1)
+assert.equal(editor.canRestart, false)
+assert.match(editor.warning, /Configuration saved.*no longer running/)
+
+openedVersion.run = true
+editor.content = 'saved before closing'
+const restartAfterClose = editor.saveAndRestart()
+await new Promise((resolve) => setImmediate(resolve))
+assert.equal(restartRequests, 2)
+editor.clear()
+await openRestartConfig()
+assert.equal(editor.restarting, true)
+finishRestart(true)
+assert.equal(await restartAfterClose, true)
+assert.equal(editor.restarting, false)
+assert.equal(editor.content, 'saved before closing')
+assert.equal(notices.at(-1), 'Configuration saved. Apache restarted.')
+console.log('Service files passed: bounded native tail, external editor lifecycle, edit conflicts, missing configuration restoration, and save with restart.')

@@ -49,7 +49,7 @@
       :version="selectedVersion"
       :kind="fileKind"
       :only-file="onlyFile"
-      :provider="redisConfiguration ? loadRedisConfiguration : undefined"
+      :provider="redisConfiguration ? redisConfigurationFiles : undefined"
       :initialize="configurationInitializer"
     >
       <template v-if="redisConfiguration || sqlConfiguration" #configuration="{ content, readOnly, update }">
@@ -129,7 +129,6 @@ const configurationInitializer = computed(() => {
   return undefined
 })
 const isWindows = computed(() => Boolean(window.Server?.isWindows))
-const loadRedisConfiguration = () => redisConfigurationFiles(selectedVersion.value?.version ?? '')
 const onlyFile = ref<string>()
 const openFiles = (kind: 'config' | 'log', file?: string) => { fileKind.value = kind; onlyFile.value = file; filesOpen.value = true }
 const adminController = databaseAdminController

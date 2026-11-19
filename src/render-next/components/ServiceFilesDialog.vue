@@ -53,7 +53,22 @@
         <p v-if="controller.warning" class="forge-alert" role="status">{{ controller.warning }}</p>
       </div>
     </div>
-    <template #footer><div></div><div class="detail-actions"><button class="action-button" @click="close">Close</button><button v-if="kind === 'log'" class="action-button action-button--danger" :disabled="!controller.selected || controller.saving" @click="pendingClear = controller.selected?.path">Clear log</button><button v-if="kind === 'config' && !controller.selected?.readOnly" class="action-button action-button--primary" :disabled="!controller.canSave" @click="save">{{ controller.saving ? 'Saving…' : 'Save configuration' }}</button></div></template>
+    <template #footer>
+      <div></div>
+      <div class="detail-actions">
+        <button class="action-button" @click="close">Close</button>
+        <button v-if="kind === 'log'" class="action-button action-button--danger" :disabled="!controller.selected || controller.saving" @click="pendingClear = controller.selected?.path">Clear log</button>
+        <template v-if="kind === 'config' && controller.selected && !controller.selected.readOnly">
+          <button class="action-button action-button--primary" :disabled="!controller.canSave" @click="save">{{ controller.saving && !controller.restarting ? 'Saving…' : 'Save configuration' }}</button>
+          <button
+            v-if="!afterSave && (controller.canRestart || controller.restarting)"
+            class="action-button"
+            :disabled="!controller.canSave || controller.restarting"
+            @click="controller.saveAndRestart()"
+          >{{ controller.restarting ? 'Restarting…' : 'Save and restart' }}</button>
+        </template>
+      </div>
+    </template>
   </ForgeDialog>
   <ForgeDialog v-if="open && pendingClear" title="Clear this log?" :description="pendingClear" @close="pendingClear = undefined">
     <template #footer><span>Existing log entries will be removed.</span><div class="detail-actions"><button class="action-button" @click="pendingClear = undefined">Cancel</button><button class="action-button action-button--danger" @click="clearLog">Clear log</button></div></template>
@@ -63,7 +78,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { SoftInstalled } from '@shared/app'
 import ForgeDialog from './ForgeDialog.vue'
-import { serviceFilesController, type ServiceFilesController, type ServiceFile, type ServiceFileEditor, type ServiceFileInitializer } from '../state/serviceFilesController'
+import { serviceFilesController, type ServiceFilesController, type ServiceFile, type ServiceFileEditor, type ServiceFileInitializer, type ServiceFileProvider } from '../state/serviceFilesController'
 const props = defineProps<{
   name: string
   version?: string | SoftInstalled
@@ -71,7 +86,7 @@ const props = defineProps<{
   modelValue: boolean
   onlyFile?: string
   owner?: Pick<ServiceFilesController, keyof ServiceFilesController>
-  provider?: () => Promise<ServiceFile[]>
+  provider?: ServiceFileProvider
   afterSave?: (file: ServiceFile) => Promise<string[]>
   initialize?: ServiceFileInitializer
 }>()
@@ -93,8 +108,8 @@ const clearLog = async () => {
 }
 watch(() => props.modelValue, (visible, previous) => {
   if (visible) {
-    if (props.provider) void controller.openProvided(props.provider)
-    else void controller.open(props.name, props.version, props.kind, props.onlyFile)
+    if (props.provider && !props.version) void controller.openProvided(props.provider)
+    else void controller.open(props.name, props.version, props.kind, props.onlyFile, props.provider)
   } else if (previous) {
     pendingClear.value = undefined
     controller.clear()
