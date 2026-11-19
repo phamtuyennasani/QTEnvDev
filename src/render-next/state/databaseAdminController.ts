@@ -11,17 +11,18 @@ import neo4jController from '@/components/Neo4j/controller'
 import type { ModuleInstalledItem } from '@/core/Module/ModuleInstalledItem'
 import { databaseController } from './databaseController'
 
-export type DatabaseAdminTool = 'pgadmin' | 'redis-commander' | 'dbgate' | 'ch-ui' | 'phpmyadmin' | 'neo4j-browser'
+export type DatabaseAdminTool = 'pgadmin' | 'redis-commander' | 'dbgate' | 'ch-ui' | 'phpmyadmin' | 'neo4j-browser' | 'qdrant-dashboard'
 export type DatabaseAdminAction = { id: DatabaseAdminTool; label: string; database: string }
 
 const actions: DatabaseAdminAction[] = [
   { id: 'pgadmin', label: 'Open pgAdmin 4', database: 'PostgreSQL' },
   { id: 'redis-commander', label: 'Open Redis Commander', database: 'Redis' },
   { id: 'dbgate', label: 'Open DbGate', database: 'MongoDB' },
-  { id: 'ch-ui', label: 'Open CH-UI', database: 'ClickHouse' }
-  ,{ id: 'phpmyadmin', label: 'Open phpMyAdmin', database: 'MySQL' }
-  ,{ id: 'phpmyadmin', label: 'Open phpMyAdmin', database: 'MariaDB' }
-  ,{ id: 'neo4j-browser', label: 'Open Neo4j Browser', database: 'Neo4j' }
+  { id: 'ch-ui', label: 'Open CH-UI', database: 'ClickHouse' },
+  { id: 'phpmyadmin', label: 'Open phpMyAdmin', database: 'MySQL' },
+  { id: 'phpmyadmin', label: 'Open phpMyAdmin', database: 'MariaDB' },
+  { id: 'neo4j-browser', label: 'Open Neo4j Browser', database: 'Neo4j' },
+  { id: 'qdrant-dashboard', label: 'Open Qdrant Dashboard', database: 'Qdrant' }
 ]
 type DatabaseEngine = 'mysql' | 'mariadb'
 const opening = reactive(new Set<DatabaseAdminTool>())
@@ -40,6 +41,15 @@ const open = async (id: DatabaseAdminTool, engine?: DatabaseEngine, version?: Mo
     else if (id === 'dbgate') return await dbGatePanel.open()
     else if (id === 'ch-ui') chUiPanel.open()
     else if (id === 'neo4j-browser') await neo4jController.openBrowser()
+    else if (id === 'qdrant-dashboard') {
+      const result = await forkTerminalRequest(
+        'App-Node-FN',
+        ['shell', 'openExternalChecked', 'http://127.0.0.1:6333/dashboard'],
+        'Opening the Qdrant dashboard timed out.',
+        20_000
+      )
+      if (result.code !== 0) throw new Error(result.msg || 'The Qdrant dashboard could not open.')
+    }
     else {
       phpMyAdminStatus.progress = undefined
       phpMyAdminStatus.message = ''

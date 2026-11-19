@@ -244,14 +244,17 @@ class Qdrant extends Base {
     })
   }
 
-  getConfigFiles(_version?: SoftInstalled): Array<{ name: string; path: string }> {
+  getConfigFiles(_version?: SoftInstalled) {
     if (!_version?.bin) {
       return []
     }
     const configDir = join(dirname(_version.bin), 'config')
     return [
-      { name: 'config.yaml', path: join(configDir, 'config.yaml') },
-      { name: 'config.default.yaml', path: join(configDir, 'config.default.yaml') }
+      {
+        name: 'config.yaml',
+        path: join(configDir, 'config.yaml'),
+        defaultPath: join(configDir, 'config.default.yaml')
+      }
     ]
   }
 

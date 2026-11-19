@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import mongodb from '../src/fork/module/Mongodb'
 import postgresql from '../src/fork/module/Postgresql'
+import qdrant from '../src/fork/module/Qdrant'
 import redis from '../src/fork/module/Redis'
 import type { SoftInstalled } from '../src/shared/app'
 import {
@@ -140,10 +141,74 @@ try {
     postgresql.getConfigFiles(postgres, root).map(({ path }) => path),
     [join(root, 'postgresql.conf'), join(root, 'pg_hba.conf'), join(root, 'pg_ident.conf')]
   )
+
+  const configDirectory = join(root, 'config')
+  const qdrantVersion = { bin: join(root, 'qdrant') } as SoftInstalled
+  await mkdir(configDirectory)
+  await writeFile(join(configDirectory, 'config.yaml'), 'service: {http_port: 6333}')
+  assert.deepEqual(await qdrant.listConfigFiles(qdrantVersion), [
+    {
+      name: 'config.yaml',
+      path: join(configDirectory, 'config.yaml'),
+      defaultPath: undefined,
+      exists: true
+    }
+  ])
+  await writeFile(join(configDirectory, 'config.default.yaml'), 'service: {http_port: 6333}')
+  assert.deepEqual(await qdrant.listConfigFiles(qdrantVersion), [
+    {
+      name: 'config.yaml',
+      path: join(configDirectory, 'config.yaml'),
+      defaultPath: join(configDirectory, 'config.default.yaml'),
+      exists: true
+    }
+  ])
 } finally {
   global.Server = previousServer
   await rm(root, { recursive: true, force: true })
 }
+
+const qdrantStatus = { name: 'Qdrant', state: 'stopped' }
+const dashboardRequests: typeof calls = []
+const dashboardNotices: string[] = []
+const { databaseAdminController: admin } = await loadIsolated(
+  'src/render-next/state/databaseAdminController.ts',
+  {
+    './app': { showNotice: (text: string) => dashboardNotices.push(text) },
+    '@/components/PostgreSql/PgAdminPanel': {},
+    '@/components/Redis/RedisCommanderPanel': {},
+    '@/components/MongoDB/DbGatePanel': {},
+    '@/components/ClickHouse/ChUiPanel': {},
+    '@/components/Neo4j/controller': {},
+    '@/store/app': {},
+    '@/store/brew': {},
+    './databaseController': { databaseController: { databases: [qdrantStatus] } },
+    '@/util/ForkTerminalRequest': {
+      forkTerminalRequest: (channel: string, args: any[]) =>
+        new Promise<Reply>((done) => dashboardRequests.push({ channel, args, done }))
+    }
+  }
+)
+assert.equal(await admin.open('qdrant-dashboard'), false)
+assert.equal(dashboardRequests.length, 0)
+qdrantStatus.state = 'running'
+const dashboard = admin.open('qdrant-dashboard')
+assert.equal(await admin.open('qdrant-dashboard'), false)
+assert.equal(admin.isOpening('qdrant-dashboard'), true)
+assert.equal(dashboardRequests.length, 1)
+assert.equal(dashboardRequests[0].channel, 'App-Node-FN')
+assert.deepEqual(Array.from(dashboardRequests[0].args), [
+  'shell',
+  'openExternalChecked',
+  'http://127.0.0.1:6333/dashboard'
+])
+dashboardRequests[0].done({ code: 1, msg: 'The browser did not open.' })
+assert.equal(await dashboard, false)
+assert.deepEqual(dashboardNotices, ['The browser did not open.'])
+assert.equal(admin.isOpening('qdrant-dashboard'), false)
+const retryDashboard = admin.open('qdrant-dashboard')
+dashboardRequests[1].done({ code: 0 })
+assert.equal(await retryDashboard, true)
 
 const port = sqlCommonFields[0]
 const originalIni =
@@ -262,5 +327,5 @@ assert.match(pgvectorController.message, /could not be verified/)
 assert.equal(pgvectorController.canInstall, false)
 
 console.log(
-  'Forge database details passed: selected versions, connection metadata, section-aware SQL edits, and pgvector lifecycle.'
+  'Forge database details passed: selected versions, connection metadata, Qdrant configuration and dashboard, section-aware SQL edits, and pgvector lifecycle.'
 )
