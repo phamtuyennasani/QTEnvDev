@@ -18,7 +18,7 @@
           :key="runtime.name"
           class="runtime-item"
           :class="{ selected: selectedRuntime?.name === runtime.name }"
-          @click="runtimeController.select(runtime)"
+          @click="runtimeController.select(runtime.name)"
           ><span class="runtime-primary"
             ><span class="runtime-mark">{{ runtime.name.slice(0, 1) }}</span
             ><span
@@ -47,6 +47,10 @@
           ><div
             ><span>Assigned projects</span><b>{{ selectedRuntime.projects }}</b></div
           ></div
+        ><div v-if="selectedFlag" class="detail-actions">
+          <button class="action-button" @click="versionsOpen = true"
+            >Installed versions</button
+          > </div
         ><div v-if="selectedRuntime.name === 'PHP'" class="runtime-tools"
           ><div class="php-projects"
             ><div class="detail-actions"
@@ -73,8 +77,7 @@
             ><button class="action-button" @click="phpConfigOpen = true">Edit php.ini</button
             ><button class="action-button" :disabled="!phpVersion" @click="extensionsOpen = true"
               >Manage extensions</button
-            ><button class="action-button" @click="composerOpen = true">Composer</button
-            ></div
+            ><button class="action-button" @click="composerOpen = true">Composer</button></div
           ><p v-if="php.state.error" class="forge-alert forge-alert--error">{{ php.state.error }}</p
           ><div class="runtime-facts"
             ><div
@@ -127,6 +130,14 @@
           :title="selectedRuntime.name" /></article></div
     ><RuntimeWorkflowDialog v-if="workflow" :workflow="workflow" @close="workflow = undefined" />
     <GitEnvironmentDialog v-if="gitOpen && gitVisible" @close="gitOpen = false" />
+    <InstalledVersionsDialog
+      v-if="versionsOpen && selectedFlag && selectedRuntime"
+      :key="selectedFlag"
+      :flag="selectedFlag"
+      :title="selectedRuntime.name"
+      runtime
+      @close="versionsOpen = false"
+    />
     <ComposerVersionsDialog
       v-if="composerOpen && selectedRuntime?.name === 'PHP'"
       @close="composerOpen = false"
@@ -143,6 +154,7 @@
   import { phpProjectsController } from '../state/phpProjectsController'
   import { phpController } from '../state/phpController'
   import { isBuiltinModuleVisible } from '../moduleVisibility/visibility'
+  import { runtimeModuleFlags } from '../adapters/runtimeAdapter'
   const RuntimeWorkflowDialog = defineAsyncComponent(
     () => import('../components/RuntimeWorkflowDialog.vue')
   )
@@ -152,12 +164,16 @@
   const ComposerVersionsDialog = defineAsyncComponent(
     () => import('../components/ComposerVersionsDialog.vue')
   )
+  const InstalledVersionsDialog = defineAsyncComponent(
+    () => import('../serviceVersions/InstalledVersionsDialog.vue')
+  )
   const gitVisible = computed(() => isBuiltinModuleVisible('git'))
   const gitOpen = ref(false)
   const workflow = ref<'node' | 'npm' | 'gvm'>()
   const supportsGvm = computed(() => Boolean(window.Server.isMacOS || window.Server.isLinux))
   const packageBrowser = ref<InstanceType<typeof PackageBrowser>>()
   const composerOpen = ref(false)
+  const versionsOpen = ref(false)
   const openComposerPackages = async () => {
     composerOpen.value = false
     await nextTick()
@@ -169,27 +185,12 @@
   const visibleRuntimes = runtimeController.visibleRuntimes
   const selectedRuntime = computed(() => {
     const runtimes = visibleRuntimes.value
-    return runtimes.find((runtime) => runtime === runtimeController.selected.runtime) ?? runtimes[0]
+    return (
+      runtimes.find((runtime) => runtime.name === runtimeController.selected.name) ?? runtimes[0]
+    )
   })
-  const flags: Record<string, string> = {
-    PHP: 'php',
-    'Node.js': 'node',
-    Python: 'python',
-    Go: 'golang',
-    Java: 'java',
-    Ruby: 'ruby',
-    Rust: 'rust',
-    Bun: 'bun',
-    Deno: 'deno',
-    '.NET': 'dotnet',
-    Erlang: 'erlang',
-    Perl: 'perl',
-    Zig: 'zig',
-    Flutter: 'flutter',
-    Gradle: 'gradle'
-  }
   const selectedFlag = computed(() =>
-    selectedRuntime.value ? flags[selectedRuntime.value.name] : undefined
+    selectedRuntime.value ? runtimeModuleFlags[selectedRuntime.value.name] : undefined
   )
   const php = phpController
   const phpVersion = computed(() => php.current())

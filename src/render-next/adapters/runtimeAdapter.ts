@@ -1,14 +1,38 @@
 import type { AllAppModule } from '@/core/type'
+import { AppStore } from '@/store/app'
 import { BrewStore } from '@/store/brew'
+import { ServiceActionStore } from '@/components/ServiceManager/EXT/store'
 
-export const runtimeModuleFlags: Record<string, AllAppModule> = { PHP: 'php', 'Node.js': 'node', Python: 'python', Go: 'golang', Java: 'java', Ruby: 'ruby', Rust: 'rust', Bun: 'bun', Deno: 'deno', '.NET': 'dotnet', Erlang: 'erlang', Perl: 'perl', Zig: 'zig', Flutter: 'flutter', Gradle: 'gradle' }
-export async function refreshRuntime(name: string): Promise<{ connected: boolean; installed: boolean; version?: string; path?: string }> {
-  const flag = runtimeModuleFlags[name]
-  if (!flag) return { connected: false, installed: false }
-  try {
-    const module = BrewStore().module(flag)
-    if (!await module.fetchInstalled(false, { fresh: false })) throw new Error('Installed versions could not be refreshed.')
-    const item = BrewStore().currentVersion(flag) ?? module.installed[0]
-    return { connected: true, installed: Boolean(item), version: item?.version ?? undefined, path: item?.path ?? undefined }
-  } catch { return { connected: false, installed: false } }
+export const runtimeModuleFlags: Record<string, AllAppModule> = {
+  PHP: 'php',
+  'Node.js': 'node',
+  Python: 'python',
+  Go: 'golang',
+  Java: 'java',
+  Ruby: 'ruby',
+  Rust: 'rust',
+  Bun: 'bun',
+  Deno: 'deno',
+  '.NET': 'dotnet',
+  Erlang: 'erlang',
+  Perl: 'perl',
+  Zig: 'zig',
+  Flutter: 'flutter',
+  Gradle: 'gradle'
+}
+
+export async function refreshRuntime(flag: AllAppModule) {
+  const store = BrewStore()
+  if (await store.module(flag).fetchInstalled()) store.currentVersion(flag)
+}
+
+export function installedRuntime(flag: AllAppModule) {
+  const installed = BrewStore().modules[flag]?.installed ?? []
+  const current = AppStore().config.server?.[flag]?.current
+  const pathVersion = flag === 'php' ? undefined : installed.find(ServiceActionStore.isInAppEnv)
+  return (
+    pathVersion ??
+    installed.find((item) => item.path === current?.path && item.version === current?.version) ??
+    installed[0]
+  )
 }

@@ -66,6 +66,7 @@
     "test:pqt-forge-homebrew-ui": "tsx scripts/pqt-forge-homebrew-ui-test.ts",
     "test:pqt-forge-sdkman": "tsx scripts/pqt-forge-sdkman-test.ts",
     "test:pqt-forge-php-extensions-ui": "tsx scripts/pqt-forge-php-extensions-ui-test.ts",
+    "test:pqt-forge-runtime-versions-ui": "tsx scripts/pqt-forge-runtime-versions-ui-test.ts",
     "test:pqt-forge-service-files": "tsx scripts/pqt-forge-service-files-test.ts",
     "test:pqt-forge-cron": "tsx scripts/pqt-forge-cron-controller-test.ts",
     "test:pqt-forge-websites-ui": "tsx scripts/pqt-forge-websites-ui-test.ts",

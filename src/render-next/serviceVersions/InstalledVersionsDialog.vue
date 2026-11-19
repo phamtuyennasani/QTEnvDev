@@ -1,11 +1,16 @@
 <template>
   <ForgeDialog :title="'Installed versions · ' + title" wide @close="$emit('close')">
     <div class="pqt-established-tool installed-versions-surface dark">
-      <PhpManager v-if="flag === 'php' && title === 'PHP'" :title="title" type-flag="php">
+      <RuntimeManager
+        v-if="runtime || (flag === 'php' && title === 'PHP')"
+        :title="title"
+        :type-flag="flag"
+        :fetch-data-when-create="runtime"
+      >
         <template #operation="{ row }">
-          <PhpVersionActions :item="row" />
+          <PhpVersionActions v-if="flag === 'php'" :item="row" />
         </template>
-      </PhpManager>
+      </RuntimeManager>
       <ServiceManager v-else :type-flag="flag" :title="title">
         <template #action="{ row }">
           <PhpVersionActions v-if="flag === 'php'" :item="row" />
@@ -23,7 +28,7 @@
   import ForgeDialog from '../components/ForgeDialog.vue'
   import { provideLegacyToolContext } from '../tools/provideLegacyToolContext'
 
-  const props = defineProps<{ flag: AllAppModule; title: string }>()
+  const props = defineProps<{ flag: AllAppModule; title: string; runtime?: boolean }>()
   defineEmits<{ close: [] }>()
 
   provideLegacyToolContext({ poperFix: true, detachedClass: 'pqt-installed-versions' })
@@ -38,7 +43,13 @@
         h('p', { role: 'alert' }, 'Could not open the installed versions. Close and try again.')
     }
   })
-  const PhpManager = defineAsyncComponent(() => import('@/components/ServiceManager/base.vue'))
+  const RuntimeManager = defineAsyncComponent({
+    loader: () => import('@/components/ServiceManager/base.vue'),
+    errorComponent: {
+      render: () =>
+        h('p', { role: 'alert' }, 'Could not open the installed versions. Close and try again.')
+    }
+  })
   const PhpVersionActions = defineAsyncComponent(
     () => import('@/components/PHP/VersionActions.vue')
   )
