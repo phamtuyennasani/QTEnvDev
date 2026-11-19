@@ -157,12 +157,21 @@ const checkMacPorts = (sendGlobalUpdate: () => void) => {
  * 检查 SDKMAN
  */
 const checkSdkman = (sendGlobalUpdate: () => void) => {
-  const uinfo = userInfo()
-  const sdkmanInit = join(uinfo.homedir, '.sdkman/bin/sdkman-init.sh')
+  const home = join(userInfo().homedir, '.sdkman')
+  const sdkmanInit = join(home, 'bin', 'sdkman-init.sh')
   if (existsSync(sdkmanInit)) {
-    global.Server.SdkmanHome = join(uinfo.homedir, '.sdkman')
+    global.Server.SdkmanHome = home
     sendGlobalUpdate()
+    return home
   }
+  return undefined
+}
+
+export const refreshSdkman = () => {
+  if (!isMacOS() && !isLinux()) throw new Error('SDKMAN requires macOS or Linux.')
+  const home = checkSdkman(() => {})
+  if (!home) throw new Error('SDKMAN could not be detected.')
+  return home
 }
 
 /**

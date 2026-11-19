@@ -4,6 +4,7 @@ import { ForkPromise } from '@shared/ForkPromise'
 import { execPromiseWithEnv, versionFixed } from '../../Fn'
 import { compareVersions } from '@shared/compare-versions'
 import { quotePosixShell } from '@shared/Gvm'
+import { sdkmanBash } from '@shared/Sdkman'
 import { isWindows } from '@shared/utils'
 import type { SoftInstalled } from '@shared/app'
 import { parseSdkmanJavaOutput, parseSdkmanVersionOutput } from './parser'
@@ -20,7 +21,7 @@ class Sdkman extends Base {
       const home = global.Server.SdkmanHome
       if (!home) throw new Error('SDKMAN was not found.')
       const init = quotePosixShell(join(home, 'bin/sdkman-init.sh'))
-      const command = 'bash -c ' + quotePosixShell('source ' + init + ' && sdk list ' + flag)
+      const command = sdkmanBash('source ' + init + ' && sdk list ' + flag, global.Server)
       const result = await execPromiseWithEnv(command, { timeout: 60_000 })
       if (flag === 'java') {
         resolve(parseSdkmanJavaOutput(result.stdout))

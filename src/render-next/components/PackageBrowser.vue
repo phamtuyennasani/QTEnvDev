@@ -47,11 +47,22 @@
             ><span>Search</span
             ><input
               v-model="query"
-              :placeholder="usingHomebrew ? 'Formula or version' : usingMacPorts ? 'Port or version' : 'Version or channel'"
+              :placeholder="
+                usingHomebrew
+                  ? 'Formula or version'
+                  : usingMacPorts
+                    ? 'Port or version'
+                    : 'Version or channel'
+              "
           /></label>
           <button
             class="action-button"
-            :disabled="loading || (usingHomebrew && !homebrewPackages.available) || (usingMacPorts && !macportsPackages.available)"
+            :disabled="
+              loading ||
+              (usingHomebrew && !homebrewPackages.available) ||
+              (usingMacPorts && !macportsPackages.available) ||
+              (usingSdkman && !sdkmanPackages.available)
+            "
             @click="reload(true)"
             >{{ loading ? 'Refreshing…' : 'Refresh' }}</button
           >
@@ -280,7 +291,9 @@
   const directBusy = computed(
     () => operation.value?.status === 'running' || operation.value?.status === 'unknown'
   )
-  const busy = computed(() => directBusy.value || homebrewPackages.busy || macportsPackages.busy || sdkmanPackages.busy)
+  const busy = computed(
+    () => directBusy.value || homebrewPackages.busy || macportsPackages.busy || sdkmanPackages.busy
+  )
   const hasHomebrew = computed(() => supportsHomebrew(selectedFlag.value, window.Server))
   const hasMacPorts = computed(() => supportsMacPorts(selectedFlag.value, window.Server))
   const hasSdkman = computed(() => supportsSdkman(selectedFlag.value, window.Server))
@@ -334,7 +347,11 @@
         selectedFlag.value = portWork.flag
         source.value = 'macports'
       }
-      if (hasSdkman.value && sdkmanPackages.busy) source.value = 'sdkman'
+      const sdkmanWork = sdkmanPackages.operation
+      if (sdkmanWork && (sdkmanPackages.busy || sdkmanPackages.discoveryError)) {
+        selectedFlag.value = sdkmanWork.flag
+        source.value = 'sdkman'
+      }
       await nextTick()
       dialog.value?.focus()
     } else {

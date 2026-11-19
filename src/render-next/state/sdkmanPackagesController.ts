@@ -1,8 +1,12 @@
 import { markRaw } from 'vue'
 import { BrewStore } from '@/store/brew'
 import { reactiveBind } from '@/util/Index'
+import IPC from '@/util/IPC'
+import { clipboard } from '@/util/NodeFn'
 import XTerm, { TerminalExitError } from '@/util/XTerm'
 import { quotePosixShell } from '@shared/Gvm'
+import { sdkmanBash } from '@shared/Sdkman'
+import { packageRequest } from '../packages/transport'
 import { packageError, type PackageVersion } from '../packages/types'
 import {
   fetchSdkmanVersions,
@@ -13,7 +17,8 @@ import {
 import { showNotice } from './app'
 
 type Catalog = { loading: boolean; loaded: boolean; error: string; rows: PackageVersion[] }
-type Action = 'install' | 'upgrade' | 'remove'
+type PackageAction = 'install' | 'upgrade' | 'remove'
+type Action = PackageAction | 'bootstrap'
 type Operation = {
   flag: SdkmanFlag
   identifier?: string
@@ -25,11 +30,17 @@ type Operation = {
 const starting = { install: 'Installing', upgrade: 'Upgrading', remove: 'Removing' }
 const completed = { install: 'installed', upgrade: 'upgrade finished', remove: 'removed' }
 const command = { install: 'install', upgrade: 'upgrade', remove: 'uninstall' }
+const installer = [
+  'set -e -o pipefail',
+  'unset SDKMAN_DIR',
+  `curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' https://get.sdkman.io | "$BASH"`
+].join('\n')
 
 export class SdkmanPackagesController {
   private catalogs: Partial<Record<SdkmanFlag, Catalog>> = {}
   operation?: Operation
   terminalError = ''
+  discoveryError = ''
   private terminal?: XTerm
   private loads = new Map<SdkmanFlag, Promise<Catalog>>()
   private mutation?: Promise<boolean>
@@ -78,7 +89,52 @@ export class SdkmanPackagesController {
   upgrade(flag: SdkmanFlag) {
     return this.start(flag, 'upgrade')
   }
-  private start(flag: SdkmanFlag, action: Action, identifier?: string): Promise<boolean> {
+
+  bootstrap(flag: SdkmanFlag): Promise<boolean> {
+    if (this.mutation && this.operation?.action === 'bootstrap') return this.mutation
+    if (
+      this.busy ||
+      this.available ||
+      this.discoveryError ||
+      !window.QTEnvDevNodeAPI ||
+      !supportsSdkman(flag, window.Server)
+    )
+      return Promise.resolve(false)
+    return this.launch(
+      {
+        flag,
+        action: 'bootstrap',
+        status: 'running',
+        message: 'Installing SDKMAN…',
+        warning: ''
+      },
+      'SDKMAN',
+      sdkmanBash(installer, window.Server, true)
+    )
+  }
+
+  retryDiscovery() {
+    const operation = this.operation
+    if (!operation || operation.action !== 'bootstrap' || !this.discoveryError || this.busy) return
+    return this.track(() => this.discover(operation))
+  }
+
+  async copyCommand(flag: SdkmanFlag, identifier: unknown) {
+    if (!this.available || !supportsSdkman(flag, window.Server) || !validSdkmanId(identifier))
+      return
+    const row = this.catalog(flag).rows.find((item) => item.identifier === identifier)
+    if (!row) return
+    try {
+      await clipboard.writeText(
+        `sdk ${row.installed ? 'uninstall' : 'install'} ${flag} ${identifier}`
+      )
+      showNotice('SDKMAN command copied.')
+    } catch (error) {
+      showNotice(packageError(error))
+    }
+  }
+
+  private start(flag: SdkmanFlag, action: PackageAction, identifier?: string): Promise<boolean> {
     if (this.mutation) {
       return this.operation?.flag === flag &&
         this.operation.action === action &&
@@ -102,33 +158,52 @@ export class SdkmanPackagesController {
       return Promise.resolve(false)
     const input = quotePosixShell(sdkmanHome.replace(/\/+$/, '') + '/bin/sdkman-init.sh')
     const sdk = ['sdk', command[action], flag, identifier].filter(Boolean).join(' ')
-    const invocation = 'exec /bin/bash -c ' + quotePosixShell('source ' + input + ' && ' + sdk)
+    const invocation = sdkmanBash('source ' + input + ' && ' + sdk, window.Server)
     const subject = identifier ? flag + ' ' + identifier : flag
-    this.operation = {
-      flag,
-      identifier,
-      action,
-      status: 'running',
-      message: starting[action] + ' ' + subject + '…',
-      warning: ''
-    }
-    const operation = this.operation
+    return this.launch(
+      {
+        flag,
+        identifier,
+        action,
+        status: 'running',
+        message: starting[action] + ' ' + subject + '…',
+        warning: ''
+      },
+      subject,
+      invocation
+    )
+  }
+
+  private track(work: () => Promise<boolean>) {
+    const flight = Promise.resolve()
+      .then(work)
+      .finally(() => {
+        this.mutation = undefined
+      })
+    this.mutation = flight
+    return flight
+  }
+
+  private launch(operation: Operation, subject: string, invocation: string) {
+    this.operation = operation
+    // Read back the reactive operation so progress remains visible after reopening the panel.
+    const current = this.operation
     this.terminalError = ''
     this.terminal?.destroy()
     const terminal = markRaw(new XTerm())
     this.terminal = terminal
-    const flight = this.run(terminal, operation, subject, invocation).finally(() => {
-      this.mutation = undefined
-    })
-    this.mutation = flight
-    return flight
+    return this.track(() => this.run(terminal, current, subject, invocation))
   }
+
   private async run(terminal: XTerm, operation: Operation, subject: string, invocation: string) {
     try {
       await terminal.initialize()
       await terminal.send([invocation], 'direct', true)
       operation.status = 'success'
-      operation.message = subject + ' ' + completed[operation.action] + '.'
+      operation.message =
+        operation.action === 'bootstrap'
+          ? 'SDKMAN installer finished.'
+          : subject + ' ' + completed[operation.action] + '.'
     } catch (error) {
       operation.status = 'failed'
       operation.message = packageError(error)
@@ -154,6 +229,11 @@ export class SdkmanPackagesController {
       console.error(error)
     }
     if (operation.status === 'unknown') return false
+    if (operation.action === 'bootstrap') {
+      if (operation.status !== 'success') return false
+      await this.discover(operation)
+      return true
+    }
     const flag = operation.flag
     await this.loads.get(flag)
     const catalog = await this.load(flag, true)
@@ -169,6 +249,24 @@ export class SdkmanPackagesController {
       }
     }
     return operation.status === 'success'
+  }
+
+  private async discover(operation: Operation) {
+    this.discoveryError = ''
+    operation.message = 'Checking for SDKMAN…'
+    try {
+      const home = await packageRequest(IPC, 'app-refresh-sdkman', [], { timeout: 15_000 })
+      if (typeof home !== 'string' || !home.startsWith('/') || /[\r\n\0]/.test(home))
+        throw new Error('SDKMAN could not be detected.')
+      window.Server.SdkmanHome = home
+    } catch (error) {
+      this.discoveryError = packageError(error)
+      operation.message = 'SDKMAN installer finished.'
+      return false
+    }
+    operation.message = 'SDKMAN is ready.'
+    await this.load(operation.flag, true)
+    return true
   }
 
   async attach(flag: SdkmanFlag, element: HTMLElement) {

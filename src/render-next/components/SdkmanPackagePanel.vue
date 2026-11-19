@@ -1,8 +1,28 @@
 <template>
   <section class="sdkman-panel" :aria-busy="catalog.loading">
-    <p v-if="!controller.available" class="forge-alert"
-      >Install SDKMAN on this computer to manage {{ label }} here.</p
-    >
+    <div v-if="!controller.available" class="forge-alert">
+      <template v-if="controller.discoveryError">
+        <p>{{ controller.discoveryError }}</p>
+        <button
+          class="action-button"
+          :disabled="controller.busy"
+          @click="controller.retryDiscovery()"
+          >Check for SDKMAN again</button
+        >
+      </template>
+      <template v-else>
+        <p
+          >Install SDKMAN to manage {{ label }} versions. On macOS, this installs Bash with Homebrew
+          if needed.</p
+        >
+        <button
+          class="action-button action-button--primary"
+          :disabled="otherSourceBusy || controller.busy"
+          @click="controller.bootstrap(flag)"
+          >Install SDKMAN</button
+        >
+      </template>
+    </div>
     <template v-else>
       <div class="sdkman-head">
         <span>{{ label }} versions managed by SDKMAN</span>
@@ -29,20 +49,25 @@
           ><small>{{ row.channel || row.identifier }}</small></div
         >
         <span>{{ row.installed ? 'Installed' : 'Available' }}</span>
-        <button
-          v-if="row.installed"
-          class="action-button"
-          :disabled="disabled"
-          @click="pending = String(row.identifier)"
-          >Remove</button
-        >
-        <button
-          v-else
-          class="action-button action-button--primary"
-          :disabled="disabled"
-          @click="controller.change(flag, 'install', String(row.identifier))"
-          >Install</button
-        >
+        <div class="sdkman-actions">
+          <button class="action-button" @click="controller.copyCommand(flag, row.identifier)"
+            >Copy command</button
+          >
+          <button
+            v-if="row.installed"
+            class="action-button"
+            :disabled="disabled"
+            @click="pending = String(row.identifier)"
+            >Remove</button
+          >
+          <button
+            v-else
+            class="action-button action-button--primary"
+            :disabled="disabled"
+            @click="controller.change(flag, 'install', String(row.identifier))"
+            >Install</button
+          >
+        </div>
       </div>
     </template>
     <div v-if="pending" class="forge-alert" role="alert">

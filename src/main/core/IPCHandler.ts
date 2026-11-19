@@ -37,7 +37,7 @@ import {
 import ServiceVersionManager from './ServiceVersionManager'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { CheckBrewOrPort, refreshMacOSHomebrew } from '../utils/CheckBrew'
+import { CheckBrewOrPort, refreshMacOSHomebrew, refreshSdkman } from '../utils/CheckBrew'
 import type { LanguageCoordinator } from './LanguageCoordinator'
 import {
   capturerRuntime,
@@ -603,6 +603,13 @@ export default class IPCHandler extends EventEmitter {
         refreshMacOSHomebrew()
           .then((data) => this.sendToMainWindow(command, key, { code: 0, data }))
           .catch((error) => this.sendRuntimeError(command, key, error))
+        break
+      case 'app-refresh-sdkman':
+        try {
+          this.sendToMainWindow(command, key, { code: 0, data: refreshSdkman() })
+        } catch (error) {
+          this.sendRuntimeError(command, key, error)
+        }
         break
 
       // HTTP 服务
